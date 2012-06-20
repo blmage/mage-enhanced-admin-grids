@@ -1,0 +1,129 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
+ *
+ * @category   BL
+ * @package    BL_CustomGrid
+ * @copyright  Copyright (c) 2011 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+-->
+<layout>
+    <default>
+        <reference name="head">
+            <action method="addCss"><css>bl/customgrid/styles.css</css></action>
+            <action method="addJs"><js>bl/customgrid/config.js</js></action>
+            <!-- Some needed elements from editor handle -->
+            <action method="addJs"><script>prototype/window.js</script></action>
+            <action method="addItem"><type>js_css</type><name>prototype/windows/themes/default.css</name></action>
+            <action method="addItem"><type>js_css</type><name>prototype/windows/themes/magento.css</name></action>
+        </reference>
+        
+        <reference name="before_body_end">
+            <block type="customgrid/column_renderer_collection_select" name="customgrid.column_collection_renderers_descriptions">
+                <action method="setTemplate"><template>bl/customgrid/column/renderer/collection/descriptions.phtml</template></action>
+            </block>
+        </reference>
+    </default>
+    
+    <customgrid_custom_grid_index>
+        <reference name="content">
+            <block type="customgrid/custom_grid" name="customgrid.custom_grid" />
+        </reference>
+    </customgrid_custom_grid_index>
+    
+    <customgrid_custom_grid_edit>
+        <reference name="content">
+            <block type="customgrid/widget_grid_columns_config" name="customgrid.custom_grid_columns_config">
+                <action method="setIsStandAlone"><flag>1</flag></action>
+            </block>
+        </reference>
+    </customgrid_custom_grid_edit>
+    
+    <customgrid_column_renderer_collection_index>
+        <block name="column_renderer_collection" type="customgrid/column_renderer_collection" output="toHtml" />
+    </customgrid_column_renderer_collection_index>
+    
+    <customgrid_column_renderer_collection_unknown>
+        <remove name="column_renderer_collection" />
+        <block type="adminhtml/template" name="column_renderer_collection.unknown" output="toHtml">
+            <action method="setTemplate"><template>bl/customgrid/column/renderer/collection/unknown.phtml</template></action>
+        </block>
+    </customgrid_column_renderer_collection_unknown>
+    
+    <customgrid_column_renderer_attribute_index>
+        <block name="column_renderer_attribute" type="customgrid/column_renderer_attribute" output="toHtml" />
+    </customgrid_column_renderer_attribute_index>
+    
+    <customgrid_column_renderer_attribute_unknown>
+        <remove name="column_renderer_attribute" />
+        <block type="adminhtml/template" name="column_renderer_attribute.unknown" output="toHtml">
+            <action method="setTemplate"><template>bl/customgrid/column/renderer/attribute/unknown.phtml</template></action>
+        </block>
+    </customgrid_column_renderer_attribute_unknown>
+    
+    <customgrid_options_source_index>
+        <reference name="content">
+            <block type="customgrid/options_source" name="customgrid.options_source" />
+        </reference>
+    </customgrid_options_source_index>
+    
+    <customgrid_options_source_new>
+        <reference name="content">
+            <block type="customgrid/options_source_edit" name="options_source_edit"></block>
+        </reference>
+        <reference name="left">
+            <block type="customgrid/options_source_edit_tabs" name="options_source_tabs"></block>
+        </reference>
+    </customgrid_options_source_new>
+    
+    <customgrid_options_source_edit>
+        <reference name="content">
+            <block type="customgrid/options_source_edit" name="options_source_edit"></block>
+        </reference>
+        <reference name="left">
+            <block type="customgrid/options_source_edit_tabs" name="options_source_tabs"></block>
+        </reference>
+    </customgrid_options_source_edit>
+    
+    <customgrid_options_source_custom_list>
+        <reference name="options_source_tabs">
+            <action method="addTab"><name>custom_list</name><block>customgrid/options_source_edit_tab_custom</block></action>
+        </reference>
+    </customgrid_options_source_custom_list>
+    
+    <customgrid_options_source_mage_model>
+        <reference name="options_source_tabs">
+            <action method="addTab"><name>mage_model</name><block>customgrid/options_source_edit_tab_model</block></action>
+        </reference>
+    </customgrid_options_source_mage_model>
+    
+    <custom_grid_editor_handle_editor>
+        <update handle="editor" />
+        <reference name="head">
+            <action method="setCanLoadExtJs"><flag>1</flag></action>
+            <action method="setCanLoadTinyMce"><flag>1</flag></action>
+        </reference>
+    </custom_grid_editor_handle_editor>
+
+    <custom_grid_editor_handle_product>
+        <reference name="js">
+            <block type="adminhtml/catalog_product_edit_js" template="catalog/product/js.phtml" name="catalog_product_js"></block>
+            <block type="core/template" name="catalog.wysiwyg.js" template="catalog/wysiwyg/js.phtml"/>
+        </reference>
+    </custom_grid_editor_handle_product>
+    
+    <customgrid_custom_grid_editor_edit>
+        <update handle="popup" />
+        <remove name="footer" />
+        <reference name="content">
+            <block type="customgrid/widget_grid_form_container" name="customgrid.grid_form_container" />
+        </reference>
+    </customgrid_custom_grid_editor_edit>
+</layout>

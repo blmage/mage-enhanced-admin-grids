@@ -1,0 +1,873 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
+ *
+ * @category   BL
+ * @package    BL_CustomGrid
+ * @copyright  Copyright (c) 2011 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+-->
+<customgrid>
+    <grid_types>
+        <permissions_role_users type="customgrid/grid_type_permissions_role_user" module="customgrid">
+            <name>Role Users</name>
+            <sort_order>5000</sort_order>
+        </permissions_role_users>
+        
+        <cms_page type="customgrid/grid_type_cms_page" module="customgrid">
+            <name>CMS Pages</name>
+            <sort_order>6000</sort_order>
+        </cms_page>
+        
+        <product type="customgrid/grid_type_product" module="customgrid">
+            <name>Product</name>
+            <sort_order>7000</sort_order>
+        </product>
+        
+        <customer type="customgrid/grid_type_customer" module="customgrid">
+            <name>Customer</name>
+            <sort_order>8000</sort_order>
+        </customer>
+        
+        <order_view_tab type="customgrid/grid_type_order_tab" module="customgrid">
+            <name>Order View Tab</name>
+            <sort_order>9000</sort_order>
+        </order_view_tab>
+        
+        <product_edit_tab type="customgrid/grid_type_product_tab" module="customgrid">
+            <name>Product Edit Tab</name>
+            <sort_order>10000</sort_order>
+        </product_edit_tab>
+        
+        <product_widget_chooser type="customgrid/grid_type_product_widget_chooser" module="customgrid">
+            <name>Product Widget Chooser</name>
+            <sort_order>10100</sort_order>
+        </product_widget_chooser>
+        
+        <customer_edit_tab type="customgrid/grid_type_customer_tab" module="customgrid">
+            <name>Customer Edit Tab</name>
+            <sort_order>11000</sort_order>
+        </customer_edit_tab>
+        
+        <other type="customgrid/grid_type_other" module="customgrid">
+            <name>Other</name>
+            <sort_order>12000</sort_order>
+        </other>
+    </grid_types>
+    
+    <column_renderers>
+        <collection>
+            <date type="customgrid/column_renderer_collection_date" module="customgrid">
+                <name>Date</name>
+                <description>Displays a formatted date</description>
+                <sort_order>1000</sort_order>
+                <config_window>
+                    <height>160</height>
+                </config_window>
+                <parameters>
+                    <format>
+                        <label>Display Format</label>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>customgrid/system_config_source_date_format</source_model>
+                        <sort_order>10</sort_order>
+                        <value>medium</value>
+                    </format>
+                </parameters>
+            </date>
+            
+            <datetime type="customgrid/column_renderer_collection_datetime" module="customgrid">
+                <name>Date + Time</name>
+                <description>Displays formatted date + time</description>
+                <sort_order>2000</sort_order>
+                <config_window>
+                    <height>180</height>
+                </config_window>
+                <parameters>
+                    <format>
+                        <label>Display Format</label>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>customgrid/system_config_source_date_format</source_model>
+                        <sort_order>10</sort_order>
+                        <value>medium</value>
+                    </format>
+                    <filter_time>
+                        <label>Allow Filtering On Time</label>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <sort_order>20</sort_order>
+                        <value>0</value>
+                    </filter_time>
+                </parameters>
+            </datetime>
+            
+            <number type="customgrid/column_renderer_collection_number" module="customgrid">
+                <name>Number</name>
+                <description>Displays a number</description>
+                <sort_order>3000</sort_order>
+                <config_window>
+                    <height>160</height>
+                </config_window>
+                <parameters>
+                    <show_number_sign>
+                        <label>Show Number Sign</label>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <sort_order>10</sort_order>
+                    </show_number_sign>
+                </parameters>
+            </number>
+            
+            <price type="customgrid/column_renderer_collection_price" module="customgrid">
+                <name>Price</name>
+                <description>Displays a price</description>
+                <sort_order>4000</sort_order>
+                <config_window>
+                    <height>500</height>
+                </config_window>
+                <parameters>
+                    <original_currency>
+                        <label>Original Currency</label>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>customgrid/column_renderer_collection_source_currency</source_model>
+                        <sort_order>10</sort_order>
+                    </original_currency>
+                    <original_currency_column_type>
+                        <label>Column Type</label>
+                        <description><![CDATA[If no currency is found with choosen column, then base currency will be used]]></description>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>
+                            <model>customgrid/grid</model>
+                            <method>getColumnOrigins</method>
+                        </source_model>
+                        <sort_order>20</sort_order>
+                        <depends>
+                            <original_currency>
+                                <value>column_currency</value>
+                            </original_currency>
+                        </depends>
+                    </original_currency_column_type>
+                    <original_currency_column>
+                        <label>Column ID</label>
+                        <visible>1</visible>
+                        <type>text</type>
+                        <sort_order>30</sort_order>
+                        <depends>
+                            <original_currency>
+                                <value>column_currency</value>
+                            </original_currency>
+                            <original_currency_column_type>
+                                <values>
+                                    <value1>grid</value1>
+                                    <value2>collection</value2>
+                                </values>
+                            </original_currency_column_type>
+                        </depends>
+                    </original_currency_column>
+                    <original_currency_column_attribute_code>
+                        <label>Column Attribute Code</label>
+                        <visible>1</visible>
+                        <type>text</type>
+                        <sort_order>30</sort_order>
+                        <depends>
+                            <original_currency>
+                                <value>column_currency</value>
+                            </original_currency>
+                            <original_currency_column_type>
+                                <value>attribute</value>
+                            </original_currency_column_type>
+                        </depends>
+                    </original_currency_column_attribute_code>
+                    <original_currency_column_position>
+                        <label>Column Position</label>
+                        <description><![CDATA[Indicate here the position of the column among all ones sharing the same attribute code. If given position does not exist or is empty, then the first corresponding column will be used]]></description>
+                        <visible>1</visible>
+                        <type>text</type>
+                        <sort_order>40</sort_order>
+                        <value>1</value>
+                        <depends>
+                            <original_currency>
+                                <value>column_currency</value>
+                            </original_currency>
+                            <original_currency_column_type>
+                                <value>attribute</value>
+                            </original_currency_column_type>
+                        </depends>
+                    </original_currency_column_position>
+                    <display_currency>
+                        <label>Display Currency</label>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>customgrid/column_renderer_collection_source_currency</source_model>
+                        <sort_order>50</sort_order>
+                    </display_currency>
+                    <display_currency_column_type>
+                        <label>Column Type</label>
+                        <description><![CDATA[If no currency is found with choosen column, then base currency will be used]]></description>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>
+                            <model>customgrid/grid</model>
+                            <method>getColumnOrigins</method>
+                        </source_model>
+                        <sort_order>60</sort_order>
+                        <depends>
+                            <display_currency>
+                                <value>column_currency</value>
+                            </display_currency>
+                        </depends>
+                    </display_currency_column_type>
+                    <display_currency_column>
+                        <label>Column ID</label>
+                        <visible>1</visible>
+                        <type>text</type>
+                        <sort_order>70</sort_order>
+                        <depends>
+                            <display_currency>
+                                <value>column_currency</value>
+                            </display_currency>
+                            <display_currency_column_type>
+                                <values>
+                                    <value1>grid</value1>
+                                    <value2>collection</value2>
+                                </values>
+                            </display_currency_column_type>
+                        </depends>
+                    </display_currency_column>
+                    <display_currency_column_attribute_code>
+                        <label>Column Attribute Code</label>
+                        <visible>1</visible>
+                        <type>text</type>
+                        <sort_order>70</sort_order>
+                        <depends>
+                            <display_currency>
+                                <value>column_currency</value>
+                            </display_currency>
+                            <display_currency_column_type>
+                                <value>attribute</value>
+                            </display_currency_column_type>
+                        </depends>
+                    </display_currency_column_attribute_code>
+                    <display_currency_column_position>
+                        <label>Column Position</label>
+                        <description><![CDATA[Indicate here the position of the column among all ones sharing the same attribute code. If given position does not exist or is empty, then the first corresponding column will be used]]></description>
+                        <visible>1</visible>
+                        <type>text</type>
+                        <sort_order>80</sort_order>
+                        <value>1</value>
+                        <depends>
+                            <display_currency>
+                                <value>column_currency</value>
+                            </display_currency>
+                            <display_currency_column_type>
+                                <value>attribute</value>
+                            </display_currency_column_type>
+                        </depends>
+                    </display_currency_column_position>
+                    <apply_rates>
+                        <label>Apply Rates For Display</label>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <sort_order>90</sort_order>
+                        <value>0</value>
+                    </apply_rates>
+                </parameters>
+            </price>
+            
+            <ip type="customgrid/column_renderer_collection_ip" module="customgrid">
+                <name>IP Address</name>
+                <description>Displays an IP address</description>
+                <sort_order>5000</sort_order>
+            </ip>
+            
+            <store type="customgrid/column_renderer_collection_store" module="customgrid">
+                <name>Store View</name>
+                <description>Displays a store view</description>
+                <sort_order>6000</sort_order>
+            </store>
+            
+            <options type="customgrid/column_renderer_collection_options" module="customgrid">
+                <name>Options</name>
+                <description>Displays a value from an options source</description>
+                <sort_order>7000</sort_order>
+                <config_window>
+                    <height>420</height>
+                </config_window>
+                <parameters>
+                    <boolean_filter>
+                        <label>With/Without Filter</label>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <sort_order>10</sort_order>
+                    </boolean_filter>
+                    <source_id>
+                        <label>Options Source</label>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>customgrid/system_config_source_options_source</source_model>
+                        <sort_order>20</sort_order>
+                    </source_id>
+                    <show_missing>
+                        <label>Show Missing Option Values</label>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <sort_order>30</sort_order>
+                    </show_missing>
+                    <display_full_path>
+                        <label>Display Full Path</label>
+                        <description><![CDATA[For sources with multiple levels of options, display labels of all levels, and not just last one]]></description>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <sort_order>40</sort_order>
+                    </display_full_path>
+                    <options_separator>
+                        <label>Options Separator</label>
+                        <visible>1</visible>
+                        <type>text</type>
+                        <value><![CDATA[ - ]]></value>
+                        <sort_order>50</sort_order>
+                        <depends>
+                            <display_full_path>
+                                <value>1</value>
+                            </display_full_path>
+                        </depends>
+                    </options_separator>
+                    <imploded_values>
+                        <label>Merged Values</label>
+                        <description><![CDATA[Choose "Yes" if the field contains multiple values separated by a given string]]></description>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <sort_order>60</sort_order>
+                    </imploded_values>
+                    <imploded_separator>
+                        <label>Values Separator</label>
+                        <description><![CDATA[If no value is set, "," will be used]]></description>
+                        <visible>1</visible>
+                        <type>text</type>
+                        <value><![CDATA[,]]></value>
+                        <sort_order>70</sort_order>
+                        <depends>
+                            <imploded_values>
+                                <value>1</value>
+                            </imploded_values>
+                        </depends>
+                    </imploded_separator>
+                </parameters>
+            </options>
+            
+            <text type="customgrid/column_renderer_collection_text" module="customgrid">
+                <name>Text</name>
+                <description>Displays a text</description>
+                <sort_order>8000</sort_order>
+                <config_window>
+                    <height>370</height>
+                </config_window>
+                <parameters>
+                    <truncate>
+                        <label>Truncate text</label>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>customgrid/system_config_source_truncate_type</source_model>
+                        <sort_order>10</sort_order>
+                        <value>no</value>
+                    </truncate>
+                    <truncate_at>
+                        <label>Truncate at n-th character</label>
+                        <visible>1</visible>
+                        <type>text</type>
+                        <sort_order>20</sort_order>
+                        <depends>
+                            <truncate>
+                                <values>
+                                    <value1>text</value1>
+                                    <value2>html</value2>
+                                </values>
+                            </truncate>
+                        </depends>
+                    </truncate_at>
+                    <truncate_ending>
+                        <label>Truncate ending string</label>
+                        <visible>1</visible>
+                        <type>text</type>
+                        <sort_order>30</sort_order>
+                        <depends>
+                            <truncate>
+                                <values>
+                                    <value1>text</value1>
+                                    <value2>html</value2>
+                                </values>
+                            </truncate>
+                        </depends>
+                    </truncate_ending>
+                    <truncate_exact>
+                        <label>Truncate without breaking words</label>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <sort_order>40</sort_order>
+                        <depends>
+                            <truncate>
+                                <values>
+                                    <value1>text</value1>
+                                    <value2>html</value2>
+                                </values>
+                            </truncate>
+                        </depends>
+                    </truncate_exact>
+                    <escape_html>
+                        <label>Escape HTML</label>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <sort_order>50</sort_order>
+                        <value>0</value>
+                    </escape_html>
+                    <nl2br>
+                        <label>Apply PHP function nl2br()</label>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <sort_order>60</sort_order>
+                        <value>0</value>
+                    </nl2br>
+                    <parse_tags>
+                        <label>Parse CMS Tags</label>
+                        <description><![CDATA[Unless you know there is a difference, you can consider that blocks and pages templates processors are the same]]></description>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>customgrid/system_config_source_tags_parsing_mode</source_model>
+                        <sort_order>70</sort_order>
+                        <value>0</value>
+                    </parse_tags>
+                </parameters>
+            </text>
+        </collection>
+        
+        <attribute>
+            <options type="customgrid/column_renderer_attribute_options" module="customgrid">
+                <name>Options</name>
+                <sort_order>5000</sort_order>
+                <config_window>
+                    <height>390</height>
+                </config_window>
+                <parameters>
+                    <boolean_filter>
+                        <label>With/Without Filter</label>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <sort_order>10</sort_order>
+                    </boolean_filter>
+                    <default_source_id>
+                        <label>Default Options Source</label>
+                        <description><![CDATA[This options source will be used if no options are found for choosen attribute]]></description>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>customgrid/system_config_source_options_source</source_model>
+                        <sort_order>20</sort_order>
+                    </default_source_id>
+                    <force_default_source>
+                        <label>Force use of default options source</label>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <sort_order>30</sort_order>
+                    </force_default_source>
+                    <show_missing>
+                        <label>Show Missing Option Values</label>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <sort_order>40</sort_order>
+                    </show_missing>
+                    <display_full_path>
+                        <label>Display Full Path</label>
+                        <description><![CDATA[For sources with multiple levels of options, display labels of all levels, and not just last one]]></description>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <sort_order>50</sort_order>
+                    </display_full_path>
+                    <options_separator>
+                        <label>Options Separator</label>
+                        <visible>1</visible>
+                        <type>text</type>
+                        <value><![CDATA[ - ]]></value>
+                        <sort_order>60</sort_order>
+                        <depends>
+                            <display_full_path>
+                                <value>1</value>
+                            </display_full_path>
+                        </depends>
+                    </options_separator>
+                </parameters>
+            </options>
+            
+            <product_image type="customgrid/column_renderer_attribute_product_image" module="customgrid">
+                <name>Product Image</name>
+                <sort_order>6000</sort_order>
+                <config_window>
+                    <height>510</height>
+                </config_window>
+                <parameters>
+                    <display_images>
+                        <label>Display Images</label>
+                        <description><![CDATA[If you choose "No", only images names will be displayed]]></description>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <sort_order>10</sort_order>
+                        <value>1</value>
+                    </display_images>
+                    <display_images_urls>
+                        <label>Display Complete Images URLs</label>
+                        <description><![CDATA[Images URLs are used as images titles, or as result if images are not displayed or on results export. If you choose "No", only the images paths within the media/catalog directory will be displayed.]]></description>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <sort_order>20</sort_order>
+                        <value>1</value>
+                    </display_images_urls>
+                    <image_width>
+                        <label>Image Width</label>
+                        <description><![CDATA[If you specify an image width, then you should indicate an image height too]]></description>
+                        <visible>1</visible>
+                        <type>text</type>
+                        <sort_order>30</sort_order>
+                    </image_width>
+                    <image_height>
+                        <label>Image Height</label>
+                        <description><![CDATA[If you specify an image height, then you should indicate an image width too]]></description>
+                        <visible>1</visible>
+                        <type>text</type>
+                        <sort_order>40</sort_order>
+                    </image_height>
+                    <browser_resize_only>
+                        <label>Browser Resize Only</label>
+                        <description><![CDATA[Used when image dimensions are specified.<br />If you choose "Yes", the original full-size images will be used and resized, when needed, by your web browser only (regarding images URLs, only the original ones will likewise be displayed in all cases)]]></description>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <sort_order>50</sort_order>
+                        <value>0</value>
+                    </browser_resize_only>
+                    <filter_on_name>
+                        <label>Filter images on name</label>
+                        <description><![CDATA[If you choose "No", filter will apply on images existence]]></description>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <sort_order>60</sort_order>
+                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <value>1</value>
+                    </filter_on_name>
+                </parameters>
+            </product_image>
+            
+            <price type="customgrid/column_renderer_attribute_price" module="customgrid">
+                <name>Price</name>
+                <description>Displays a price</description>
+                <sort_order>7000</sort_order>
+                <config_window>
+                    <height>500</height>
+                </config_window>
+                <parameters>
+                    <original_currency>
+                        <label>Original Currency</label>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>customgrid/column_renderer_collection_source_currency</source_model>
+                        <sort_order>10</sort_order>
+                    </original_currency>
+                    <original_currency_column_type>
+                        <label>Column Type</label>
+                        <description><![CDATA[If no currency is found with choosen column, then base currency will be used]]></description>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>
+                            <model>customgrid/grid</model>
+                            <method>getColumnOrigins</method>
+                        </source_model>
+                        <sort_order>20</sort_order>
+                        <depends>
+                            <original_currency>
+                                <value>column_currency</value>
+                            </original_currency>
+                        </depends>
+                    </original_currency_column_type>
+                    <original_currency_column>
+                        <label>Column ID</label>
+                        <visible>1</visible>
+                        <type>text</type>
+                        <sort_order>30</sort_order>
+                        <depends>
+                            <original_currency>
+                                <value>column_currency</value>
+                            </original_currency>
+                            <original_currency_column_type>
+                                <values>
+                                    <value1>grid</value1>
+                                    <value2>collection</value2>
+                                </values>
+                            </original_currency_column_type>
+                        </depends>
+                    </original_currency_column>
+                    <original_currency_column_attribute_code>
+                        <label>Column Attribute Code</label>
+                        <visible>1</visible>
+                        <type>text</type>
+                        <sort_order>30</sort_order>
+                        <depends>
+                            <original_currency>
+                                <value>column_currency</value>
+                            </original_currency>
+                            <original_currency_column_type>
+                                <value>attribute</value>
+                            </original_currency_column_type>
+                        </depends>
+                    </original_currency_column_attribute_code>
+                    <original_currency_column_position>
+                        <label>Column Position</label>
+                        <description><![CDATA[Indicate here the position of the column among all ones sharing the same attribute code. If given position does not exist or is empty, then the first corresponding column will be used]]></description>
+                        <visible>1</visible>
+                        <type>text</type>
+                        <sort_order>40</sort_order>
+                        <value>1</value>
+                        <depends>
+                            <original_currency>
+                                <value>column_currency</value>
+                            </original_currency>
+                            <original_currency_column_type>
+                                <value>attribute</value>
+                            </original_currency_column_type>
+                        </depends>
+                    </original_currency_column_position>
+                    <display_currency>
+                        <label>Display Currency</label>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>customgrid/column_renderer_collection_source_currency</source_model>
+                        <sort_order>50</sort_order>
+                    </display_currency>
+                    <display_currency_column_type>
+                        <label>Column Type</label>
+                        <description><![CDATA[If no currency is found with choosen column, then base currency will be used]]></description>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>
+                            <model>customgrid/grid</model>
+                            <method>getColumnOrigins</method>
+                        </source_model>
+                        <sort_order>60</sort_order>
+                        <depends>
+                            <display_currency>
+                                <value>column_currency</value>
+                            </display_currency>
+                        </depends>
+                    </display_currency_column_type>
+                    <display_currency_column>
+                        <label>Column ID</label>
+                        <visible>1</visible>
+                        <type>text</type>
+                        <sort_order>70</sort_order>
+                        <depends>
+                            <display_currency>
+                                <value>column_currency</value>
+                            </display_currency>
+                            <display_currency_column_type>
+                                <values>
+                                    <value1>grid</value1>
+                                    <value2>collection</value2>
+                                </values>
+                            </display_currency_column_type>
+                        </depends>
+                    </display_currency_column>
+                    <display_currency_column_attribute_code>
+                        <label>Column Attribute Code</label>
+                        <visible>1</visible>
+                        <type>text</type>
+                        <sort_order>70</sort_order>
+                        <depends>
+                            <display_currency>
+                                <value>column_currency</value>
+                            </display_currency>
+                            <display_currency_column_type>
+                                <value>attribute</value>
+                            </display_currency_column_type>
+                        </depends>
+                    </display_currency_column_attribute_code>
+                    <display_currency_column_position>
+                        <label>Column Position</label>
+                        <description><![CDATA[Indicate here the position of the column among all ones sharing the same attribute code. If given position does not exist or is empty, then the first corresponding column will be used]]></description>
+                        <visible>1</visible>
+                        <type>text</type>
+                        <sort_order>80</sort_order>
+                        <value>1</value>
+                        <depends>
+                            <display_currency>
+                                <value>column_currency</value>
+                            </display_currency>
+                            <display_currency_column_type>
+                                <value>attribute</value>
+                            </display_currency_column_type>
+                        </depends>
+                    </display_currency_column_position>
+                    <apply_rates>
+                        <label>Apply Rates For Display</label>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <sort_order>90</sort_order>
+                        <value>0</value>
+                    </apply_rates>
+                </parameters>
+            </price>
+            
+            <datetime type="customgrid/column_renderer_attribute_datetime" module="customgrid">
+                <name>Date / Date + Time</name>
+                <sort_order>8000</sort_order>
+                <config_window>
+                    <height>200</height>
+                </config_window>
+                <parameters>
+                    <format>
+                        <label>Display Format</label>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>customgrid/system_config_source_date_format</source_model>
+                        <sort_order>10</sort_order>
+                        <value>medium</value>
+                    </format>
+                    <filter_time>
+                        <label>Allow Filtering On Time</label>
+                        <description><![CDATA[Only for columns with time values]]></description>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <sort_order>20</sort_order>
+                        <value>0</value>
+                    </filter_time>
+                </parameters>
+            </datetime>
+            
+            <number type="customgrid/column_renderer_attribute_number" module="customgrid">
+                <name>Number</name>
+                <sort_order>9000</sort_order>
+                <config_window>
+                    <height>160</height>
+                </config_window>
+                <parameters>
+                    <show_number_sign>
+                        <label>Show Number Sign</label>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <sort_order>10</sort_order>
+                    </show_number_sign>
+                </parameters>
+            </number>
+            
+            <text type="customgrid/column_renderer_attribute_text" module="customgrid">
+                <name>Text</name>
+                <sort_order>10000</sort_order>
+                <config_window>
+                    <height>370</height>
+                </config_window>
+                <parameters>
+                    <truncate>
+                        <label>Truncate text</label>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>customgrid/system_config_source_truncate_type</source_model>
+                        <sort_order>10</sort_order>
+                        <value>no</value>
+                    </truncate>
+                    <truncate_at>
+                        <label>Truncate at n-th character</label>
+                        <visible>1</visible>
+                        <type>text</type>
+                        <sort_order>20</sort_order>
+                        <depends>
+                            <truncate>
+                                <values>
+                                    <value1>text</value1>
+                                    <value2>html</value2>
+                                </values>
+                            </truncate>
+                        </depends>
+                    </truncate_at>
+                    <truncate_ending>
+                        <label>Truncate ending string</label>
+                        <visible>1</visible>
+                        <type>text</type>
+                        <sort_order>30</sort_order>
+                        <depends>
+                            <truncate>
+                                <values>
+                                    <value1>text</value1>
+                                    <value2>html</value2>
+                                </values>
+                            </truncate>
+                        </depends>
+                    </truncate_ending>
+                    <truncate_exact>
+                        <label>Truncate without breaking words</label>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <sort_order>40</sort_order>
+                        <depends>
+                            <truncate>
+                                <values>
+                                    <value1>text</value1>
+                                    <value2>html</value2>
+                                </values>
+                            </truncate>
+                        </depends>
+                    </truncate_exact>
+                    <escape_html>
+                        <label>Escape HTML</label>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <sort_order>50</sort_order>
+                        <value>0</value>
+                    </escape_html>
+                    <nl2br>
+                        <label>Apply PHP function nl2br()</label>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <sort_order>60</sort_order>
+                        <value>0</value>
+                    </nl2br>
+                    <parse_tags>
+                        <label>Parse CMS Tags</label>
+                        <description><![CDATA[Unless you know there is a difference, you can consider that blocks and pages templates processors are the same]]></description>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>customgrid/system_config_source_tags_parsing_mode</source_model>
+                        <sort_order>70</sort_order>
+                        <value>0</value>
+                    </parse_tags>
+                </parameters>
+            </text>
+        </attribute>
+    </column_renderers>
+</customgrid>

@@ -1,0 +1,98 @@
+<?php
+/**
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
+ *
+ * @category   BL
+ * @package    BL_CustomGrid
+ * @copyright  Copyright (c) 2011 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+?>
+<?php $_htmlId     = $this->getElement()->getHtmlId() ?>
+<?php $_htmlClass  = $this->getElement()->getClass() ?>
+<?php $_htmlName   = $this->getElement()->getName() ?>
+<tr>
+    <td class="label"><?php echo $this->getElement()->getLabel() ?></td>
+    <td colspan="10" class="grid">
+    <table cellspacing="0" class="data border" id="custom_options_table">
+        <col />
+        <col />
+        <col width="1" />
+        <thead>
+            <tr class="headings">
+                <th><?php echo $this->__('Value') ?></th>
+                <th><?php echo $this->__('Label') ?></th>
+                <th class="last"><?php echo $this->__('Action') ?></th>
+            </tr>
+        </thead>
+        <tbody id="<?php echo $_htmlId ?>_container"></tbody>
+        <tfoot>
+            <tr>
+                <td colspan="3" class="a-right"><?php echo $this->getAddButtonHtml() ?></td>
+            </tr>
+        </tfoot>
+    </table>
+
+<script type="text/javascript">
+//<![CDATA[
+var customOptionsSourceRowTemplate = '<tr>'
+    + '<td class="first"><input class="<?php echo $_htmlClass ?> required-entry" type="text" name="<?php echo $_htmlName ?>[{{index}}][value]" value="{{value}}" id="custom_options_row_{{index}}_value" /></td>'   
+    + '<td><input class="<?php echo $_htmlClass ?> required-entry" type="text" name="<?php echo $_htmlName ?>[{{index}}][label]" value="{{label}}" id="custom_options_row_{{index}}_label" /></td>'
+    + '<td class="last"><input type="hidden" name="<?php echo $_htmlName ?>[{{index}}][option_id]" value="{{option_id}}" id="custom_options_row_{{index}}_option_id" />'
+    + '<input type="hidden" name="<?php echo $_htmlName ?>[{{index}}][delete]" class="delete" value="" id="custom_options_row_{{index}}_delete" />'
+    + '<button title="<?php echo $this->jsQuoteEscape($this->__('Delete Option')) ?>" type="button" class="scalable delete icon-btn delete-product-option" id="custom_options_row_{{index}}_delete_button" onclick="return customOptionsSourceControl.deleteItem(event);">'
+    + '<span><?php echo $this->jsQuoteEscape($this->__('Delete')) ?></span></button></td>'
+    + '</tr>';
+
+var customOptionsSourceControl = {
+    template: new Template(customOptionsSourceRowTemplate, new RegExp('(^|.|\\r|\\n)({{\\s*(\\w+)\\s*}})', '')),
+    itemsCount: 0,
+    addItem : function () {
+        var data = {
+            optionId: '',
+            value: '',
+            label: '',
+            index: this.itemsCount++
+        };
+        
+        if(arguments.length >= 2) {
+            data.optionId = arguments[0];
+            data.value    = arguments[1];
+            data.label    = arguments[2];
+        }
+        
+        Element.insert($('<?php echo $_htmlId ?>_container'), {
+            bottom : this.template.evaluate(data)
+        });
+        
+        $('custom_options_row_' + data.index + '_option_id').value = data.optionId;
+        $('custom_options_row_' + data.index + '_value').value     = data.value;
+        $('custom_options_row_' + data.index + '_label').value     = data.label;
+        
+        $('<?php echo $_htmlId ?>_container').select('input', 'select').each(function(el){ 
+            Event.observe(el, 'change', el.setHasChanges.bind(el)); 
+        });
+    },
+    deleteItem: function(event) {
+        var tr = Event.findElement(event, 'tr');
+        if (tr) {
+            Element.select(tr, '.delete').each(function(elem){ elem.value='1' });
+            Element.select(tr, ['input', 'select']).each(function(elem){ elem.hide() });
+            Element.hide(tr);
+            Element.addClassName(tr, 'no-display template');
+        }
+        return false;
+    }
+};
+<?php foreach ($this->getValues() as $_item): ?>
+customOptionsSourceControl.addItem('<?php echo $_item['option_id'] ?>', '<?php echo $this->jsQuoteEscape($_item['value']) ?>', '<?php echo $this->jsQuoteEscape($_item['label']) ?>');
+<?php endforeach; ?>
+//]]>
+</script>
+    </td>
+</tr>

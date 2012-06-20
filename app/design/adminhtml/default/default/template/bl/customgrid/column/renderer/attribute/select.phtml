@@ -1,0 +1,27 @@
+<?php
+/**
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
+ *
+ * @category   BL
+ * @package    BL_CustomGrid
+ * @copyright  Copyright (c) 2011 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+?>
+<div class="nobr">
+    <select name="<?php echo $this->getSelectName() ?>" id="<?php echo $this->getSelectId() ?>" class="<?php echo $this->getSelectClassNames() ?>">
+    <?php foreach ($this->_getAttributes() as $_attribute): ?>
+        <option value="<?php echo $this->htmlEscape($_attribute->getAttributeCode()) ?>"<?php if ($this->getAttributeCode() == $_attribute->getAttributeCode()): ?> selected="selected"<?php endif ?>><?php echo $this->htmlEscape($_attribute->getAttributeCode()) ?></option>
+    <?php endforeach ?>
+    </select><?php if ($this->getParamsTargetId() != ''): ?>&nbsp;<span class="blcg-attribute-config-button" id="<?php echo $this->getHtmlId() ?>-config-button" title="<?php echo $this->__('Configuration') ?>" style="display: none;"></span><?php endif ?>
+</div>
+<?php if ($this->getParamsTargetId() != ''): ?>
+    <script type="text/javascript">    
+        var <?php echo $this->getJsObjectName() ?> = new blcg.Attribute.Select('<?php echo $this->getSelectId() ?>', <?php echo $this->getAttributesJsonConfig() ?>, <?php echo $this->getRenderersJsonConfig() ?>, '<?php echo $this->getHtmlId() ?>-config-button', '<?php echo $this->getParamsTargetId() ?>', '<?php echo $this->helper('adminhtml')->getUrl('customgrid/column_renderer_attribute/index') ?>', <?php echo $this->getEditableJsonConfig() ?>);
+    </script>
+<?php endif ?>

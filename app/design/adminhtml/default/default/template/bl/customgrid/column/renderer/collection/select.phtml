@@ -1,0 +1,53 @@
+<?php
+/**
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
+ *
+ * @category   BL
+ * @package    BL_CustomGrid
+ * @copyright  Copyright (c) 2011 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+?>
+<?php if ($this->getIsForcedRenderer()): ?>
+    <?php if ($_renderer = $this->_getAvailableRenderer($this->getRendererCode())): ?>
+        <div class="blcg-custom-grid-forced-renderer">
+            <input type="hidden" name="<?php echo $this->getSelectName() ?>" id="<?php echo $this->getSelectId() ?>" value="<?php echo $this->htmlEscape($_renderer['code']) ?>" />
+            <?php echo $this->htmlEscape($_renderer['name']) ?>
+            <?php if ($this->getParamsTargetId() != ''): ?>
+                <span class="blcg-collection-renderers-config-button" id="<?php echo $this->getHtmlId() ?>-config-button" title="<?php echo $this->__('Configuration') ?>" style="display:none;"></span>
+            <?php endif ?>
+            <span class="blcg-collection-renderers-help-button" onclick="blcgDisplayCollectionRenderersHelp();" title="<?php echo $this->__('Help') ?>"></span>
+        </div>
+        <script type="text/javascript">
+        //<![CDATA[
+            var <?php echo $this->getJsObjectName() ?> = new blcg.CollectionRenderer.Select('<?php echo $this->getSelectId() ?>', <?php echo $this->getRenderersJsonConfig(false, $this->getRendererCode()) ?>, '<?php echo $this->getHtmlId() ?>-config-button', '<?php echo $this->getParamsTargetId() ?>', '<?php echo $this->helper('adminhtml')->getUrl('customgrid/column_renderer_collection/index') ?>');
+        //]]>
+        </script>
+    <?php else: ?>
+        <span class="nobr"><?php echo $this->htmlEscape($this->getForcedRendererLabel()) ?></span>
+    <?php endif ?>
+<?php else: ?>
+    <div class="nobr">    
+        <select name="<?php echo $this->getSelectName() ?>" id="<?php echo $this->getSelectId() ?>" class="<?php echo $this->getSelectClassNames() ?>">
+        <?php foreach ($this->_getAvailableRenderers(true) as $_renderer): ?>
+            <option value="<?php echo $this->htmlEscape($_renderer['code']) ?>"<?php if ($this->getRendererCode() == $_renderer['code']): ?> selected="selected"<?php endif ?>><?php echo $this->htmlEscape($_renderer['name']) ?></option>
+        <?php endforeach ?>
+        </select>
+        <?php if ($this->getParamsTargetId() != ''): ?>
+            <span class="blcg-collection-renderers-config-button" id="<?php echo $this->getHtmlId() ?>-config-button" title="<?php echo $this->__('Configuration') ?>" style="display: none;"></span>
+        <?php endif ?>
+        <span class="blcg-collection-renderers-help-button" onclick="blcgDisplayCollectionRenderersHelp();" title="<?php echo $this->__('Help') ?>"></span>
+    </div>
+    <?php if ($this->getParamsTargetId() != ''): ?>
+        <script type="text/javascript">
+        //<![CDATA[
+            var <?php echo $this->getJsObjectName() ?> = new blcg.CollectionRenderer.Select('<?php echo $this->getSelectId() ?>', <?php echo $this->getRenderersJsonConfig() ?>, '<?php echo $this->getHtmlId() ?>-config-button', '<?php echo $this->getParamsTargetId() ?>', '<?php echo $this->helper('adminhtml')->getUrl('customgrid/column_renderer_collection/index') ?>');
+        //]]>
+        </script>
+    <?php endif ?>
+<?php endif ?>

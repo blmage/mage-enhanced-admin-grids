@@ -1,0 +1,138 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
+ *
+ * @category   BL
+ * @package    BL_CustomGrid
+ * @copyright  Copyright (c) 2011 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+-->
+<config>
+    <events>
+        <controller_action_predispatch>
+            <observers>
+                <bl_customgrid>
+                    <type>singleton</type>
+                    <class>customgrid/observer</class>
+                    <method>onControllerActionPreDispatch</method>
+                </bl_customgrid>
+            </observers>
+        </controller_action_predispatch>
+        <core_block_abstract_to_html_before>
+            <observers>
+                <bl_customgrid>
+                    <type>singleton</type>
+                    <class>customgrid/observer</class>
+                    <method>beforeBlockToHtml</method>
+                </bl_customgrid>
+            </observers>
+        </core_block_abstract_to_html_before>
+    </events>
+    <translate>
+        <modules>
+            <customgrid>
+                <files>
+                    <default>BL_CustomGrid.csv</default>
+                </files>
+            </customgrid>
+        </modules>
+    </translate>
+    <layout>
+        <updates>
+            <customgrid>
+                <file>bl/customgrid.xml</file>
+            </customgrid>
+        </updates>
+    </layout>
+    <acl>
+        <resources>
+            <all>
+                <title>Allow Everything</title>
+            </all>
+            <admin>
+                <children>
+                    <system>
+                        <children>
+                            <customgrid translate="title" module="customgrid">
+                                <title>Custom Grids</title>
+                                <children>
+                                    <customization translate="title" module="customgrid">
+                                        <title>Grids Customization</title>
+                                        <sort_order>10</sort_order>
+                                    </customization>
+                                    <editor translate="title" module="customgrid">
+                                        <title>Columns Editor</title>
+                                        <sort_order>20</sort_order>
+                                        <children>
+                                            <choose_columns translate="title" module="customgrid">
+                                                <title>Choose Editable Columns</title>
+                                                <sort_order>10</sort_order>
+                                            </choose_columns>
+                                            <edit_columns translate="title" module="customgrid">
+                                                <title>Edit Columns Values</title>
+                                                <sort_order>20</sort_order>
+                                            </edit_columns>
+                                        </children>
+                                    </editor>
+                                    <grids translate="title" module="customgrid">
+                                        <title>Manage Custom Grids</title>
+                                        <sort_order>30</sort_order>
+                                    </grids>
+                                    <options_source translate="title" module="customgrid">
+                                        <title>Manage Options Source</title>
+                                        <sort_order>40</sort_order>
+                                    </options_source>
+                                    <setup translate="title" module="customgrid">
+                                        <title>Setup</title>
+                                        <sort_order>50</sort_order>
+                                    </setup>
+                                </children>
+                            </customgrid>
+                            <config>
+                                <children>
+                                    <customgrid translate="title" module="customgrid">
+                                        <title>Custom Grids Configuration</title>
+                                    </customgrid>
+                                </children>
+                            </config>
+                        </children>
+                    </system>
+                </children>
+            </admin>
+        </resources>
+    </acl>
+    <menu>
+        <system>
+            <children>
+                <customgrid translate="title" module="customgrid">
+                    <title>Custom Grids</title>
+                    <sort_order>15</sort_order>
+                    <children>
+                        <grids translate="title" module="customgrid">
+                            <title>List</title>
+                            <sort_order>10</sort_order>
+                            <action>customgrid/custom_grid/index</action>
+                        </grids>
+                        <options_source translate="title" module="customgrid">
+                            <title>Manage Options Source</title>
+                            <sort_order>20</sort_order>
+                            <action>customgrid/options_source/index</action>
+                        </options_source>
+                        <setup translate="title" module="customgrid">
+                            <title>Setup</title>
+                            <sort_order>30</sort_order>
+                            <action>adminhtml/system_config/edit/section/customgrid/</action>
+                        </setup>
+                    </children>
+                </customgrid>
+            </children>
+        </system>
+    </menu>
+</config>
