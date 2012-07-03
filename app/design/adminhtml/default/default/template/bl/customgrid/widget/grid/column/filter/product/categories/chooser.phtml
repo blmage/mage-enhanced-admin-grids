@@ -1,0 +1,175 @@
+<?php
+/**
+ * Magento
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/afl-3.0.php
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@magentocommerce.com so we can send you a copy immediately.
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade Magento to newer
+ * versions in the future. If you wish to customize Magento for your
+ * needs please refer to http://www.magentocommerce.com for more information.
+ *
+ * @category    design
+ * @package     default_default
+ * @copyright   Copyright (c) 2010 Magento Inc. (http://www.magentocommerce.com)
+ * @license     http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/**
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
+ *
+ * @category   BL
+ * @package    BL_CustomGrid
+ * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+?>
+<p class="form-buttons blcg-filter-form-buttons">
+    <?php echo $this->getApplyButtonHtml() ?>
+</p>
+<div class="entry-edit">
+    <div class="entry-edit-head">
+        <h4 class="icon-head head-edit-form fieldset-legend"><?php echo $this->__('Categories') ?></h4>
+    </div>
+    <fieldset>
+        <input type="hidden" name="category_ids" id="blcg_filtered_categories" value="<?php echo $this->getIdsString() ?>" />
+        <div id="blcg-filtered-categories" class="tree"></div>
+    </fieldset>
+</div>
+<?php if($this->getRootNode() && $this->getRootNode()->hasChildren()): ?>
+<script type="text/javascript">
+Ext.EventManager.onDocumentReady(function(){
+    var blcgCategoryLoader = new Ext.tree.TreeLoader({
+       dataUrl: '<?php echo $this->getLoadTreeUrl()?>'
+    });
+    
+    blcgCategoryLoader.createNode = function(config)
+    {
+        config.uiProvider = Ext.tree.CheckboxNodeUI;
+        var node;
+        if (config.children && !config.children.length) {
+            delete(config.children);
+            node = new Ext.tree.AsyncTreeNode(config);
+        } else {
+            node = new Ext.tree.TreeNode(config);
+        }
+        return node;
+    };
+    
+    blcgCategoryLoader.on('beforeload', function(treeLoader, node){
+        treeLoader.baseParams.category = node.attributes.id;
+    });
+    
+    blcgCategoryLoader.on('load', function(treeLoader, node, config){
+        varienWindowOnload();
+    });
+    
+    var tree = new Ext.tree.TreePanel('blcg-filtered-categories', {
+        animate: true,
+        loader: blcgCategoryLoader,
+        enableDD: false,
+        containerScroll: true,
+        rootUIProvider: Ext.tree.CheckboxNodeUI,
+        selModel: new Ext.tree.CheckNodeMultiSelectionModel(),
+        rootVisible: '<?php echo $this->getRootNode()->getIsVisible() ?>'
+    });
+    
+    tree.on('check', function(node) {
+        if(node.attributes.checked) {
+            blcgCategoryAdd(node.id);
+        } else {
+            blcgCategoryRemove(node.id);
+        }
+        varienElementMethods.setHasChanges(node.getUI().checkbox);
+    }, tree);
+    
+    var root = new Ext.tree.TreeNode({
+        text: '<?php echo $this->jsQuoteEscape($this->getRootNode()->getName()) ?>',
+        draggable: false,
+        checked: '<?php echo $this->getRootNode()->getChecked() ?>',
+        id: '<?php echo $this->getRootNode()->getId() ?>',
+        disabled: <?php echo ($this->getRootNode()->getDisabled() ? 'true' : 'false') ?>,
+        uiProvider: Ext.tree.CheckboxNodeUI
+    });
+    
+    tree.setRootNode(root);
+    blcgBuildCategoryTree(root, <?php echo $this->getTreeJson() ?>);
+    tree.addListener('click', blcgCategoryClick.createDelegate(this));
+    tree.render();
+    root.expand();
+});
+
+function blcgBuildCategoryTree(parent, config){
+    if (!config) {
+        return null;
+    }
+    if (parent && config && config.length){
+        for (var i = 0; i < config.length; i++){
+            config[i].uiProvider = Ext.tree.CheckboxNodeUI;
+            var node;
+            var _node = Object.clone(config[i]);
+            if (_node.children && !_node.children.length) {
+                delete(_node.children);
+                node = new Ext.tree.AsyncTreeNode(_node);
+            } else {
+                node = new Ext.tree.TreeNode(config[i]);
+            }
+            parent.appendChild(node);
+            node.loader = node.getOwnerTree().loader;
+            if(config[i].children){
+                blcgBuildCategoryTree(node, config[i].children);
+            }
+        }
+    }
+}
+
+function blcgCategoryClick(node, e)
+{
+    if (node.disabled) {
+        return;
+    }
+    node.getUI().check(!node.getUI().checked());
+    varienElementMethods.setHasChanges(Event.element(e), e);
+};
+
+function blcgCategoryAdd(id)
+{
+    var ids = $('blcg_filtered_categories').value.split(',');
+    ids.push(id);
+    $('blcg_filtered_categories').value = ids.join(',');
+}
+
+function blcgCategoryRemove(id)
+{
+    var ids = $('blcg_filtered_categories').value.split(',');
+    while (-1 != ids.indexOf(id)) {
+        ids.splice(ids.indexOf(id), 1);
+    }
+    $('blcg_filtered_categories').value = ids.join(',');
+}
+<?php if ($this->getJsObject() != ''): ?>
+function blcgApplyCategories()
+{
+    if (typeof(parent.<?php echo $this->getJsObject() ?>) != 'undefined') {
+        parent.<?php echo $this->getJsObject() ?>.applyChoice($('blcg_filtered_categories').value);
+    } else {
+        alert('<?php echo $this->jsQuoteEscape($this->__('Can\'t apply choice : JS object can\'t be found')) ?>');
+    }
+}
+<?php endif ?>
+</script>
+<?php endif ?>

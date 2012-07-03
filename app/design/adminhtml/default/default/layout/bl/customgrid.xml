@@ -10,7 +10,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2011 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 -->
@@ -40,9 +40,10 @@
     
     <customgrid_custom_grid_edit>
         <reference name="content">
-            <block type="customgrid/widget_grid_columns_config" name="customgrid.custom_grid_columns_config">
-                <action method="setIsStandAlone"><flag>1</flag></action>
-            </block>
+            <block type="customgrid/custom_grid_edit" name="custom_grid_edit" />
+        </reference>
+        <reference name="left">
+            <block type="customgrid/custom_grid_edit_tabs" name="custom_grid_tabs" />
         </reference>
     </customgrid_custom_grid_edit>
     
@@ -68,6 +69,17 @@
         </block>
     </customgrid_column_renderer_attribute_unknown>
     
+    <customgrid_custom_column_config_index>
+        <block name="custom_column_config" type="customgrid/custom_column_config" output="toHtml" />
+    </customgrid_custom_column_config_index>
+    
+    <customgrid_custom_column_config_unknown>
+        <remove name="column_renderer_attribute" />
+        <block type="adminhtml/template" name="custom_column_config.unknown" output="toHtml">
+            <action method="setTemplate"><template>bl/customgrid/custom/column/config/unknown.phtml</template></action>
+        </block>
+    </customgrid_custom_column_config_unknown>
+    
     <customgrid_options_source_index>
         <reference name="content">
             <block type="customgrid/options_source" name="customgrid.options_source" />
@@ -76,19 +88,19 @@
     
     <customgrid_options_source_new>
         <reference name="content">
-            <block type="customgrid/options_source_edit" name="options_source_edit"></block>
+            <block type="customgrid/options_source_edit" name="options_source_edit" />
         </reference>
         <reference name="left">
-            <block type="customgrid/options_source_edit_tabs" name="options_source_tabs"></block>
+            <block type="customgrid/options_source_edit_tabs" name="options_source_tabs" />
         </reference>
     </customgrid_options_source_new>
     
     <customgrid_options_source_edit>
         <reference name="content">
-            <block type="customgrid/options_source_edit" name="options_source_edit"></block>
+            <block type="customgrid/options_source_edit" name="options_source_edit" />
         </reference>
         <reference name="left">
-            <block type="customgrid/options_source_edit_tabs" name="options_source_tabs"></block>
+            <block type="customgrid/options_source_edit_tabs" name="options_source_tabs" />
         </reference>
     </customgrid_options_source_edit>
     
@@ -111,10 +123,10 @@
             <action method="setCanLoadTinyMce"><flag>1</flag></action>
         </reference>
     </custom_grid_editor_handle_editor>
-
+    
     <custom_grid_editor_handle_product>
         <reference name="js">
-            <block type="adminhtml/catalog_product_edit_js" template="catalog/product/js.phtml" name="catalog_product_js"></block>
+            <block type="adminhtml/catalog_product_edit_js" template="catalog/product/js.phtml" name="catalog_product_js" />
             <block type="core/template" name="catalog.wysiwyg.js" template="catalog/wysiwyg/js.phtml"/>
         </reference>
     </custom_grid_editor_handle_product>
@@ -126,4 +138,15 @@
             <block type="customgrid/widget_grid_form_container" name="customgrid.grid_form_container" />
         </reference>
     </customgrid_custom_grid_editor_edit>
+    
+    <customgrid_custom_grid_column_filter_categories>
+        <update handle="popup" />
+        <remove name="footer" />
+        <reference name="head">
+            <action method="setCanLoadExtJs"><flag>1</flag></action>
+        </reference>
+        <reference name="content">
+            <block type="customgrid/widget_grid_column_filter_product_categories_chooser" name="customgrid.filter.categories.chooser" />
+        </reference>
+    </customgrid_custom_grid_column_filter_categories>
 </layout>

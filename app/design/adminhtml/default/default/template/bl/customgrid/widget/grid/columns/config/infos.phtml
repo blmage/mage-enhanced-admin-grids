@@ -1,0 +1,35 @@
+<?php
+/**
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
+ *
+ * @category   BL
+ * @package    BL_CustomGrid
+ * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+?>
+<div id="<?php echo $this->getHtmlId() ?>-grid-infos"  class="blcg-custom-grid-config-additional-container first"<?php if (!$this->getStartDisplayed()): ?> style="display:none;"<?php endif ?>>
+    <div class="blcg-custom-grid-config-additional-part">
+        <div class="blcg-custom-grid-config-additional-part-label">
+            <?php echo $this->__('Grid Informations:') ?>
+        </div>
+        <div class="blcg-custom-grid-config-additional-part-content">
+            <table class="blcg-grid-infos-table">
+                <?php foreach ($this->getGridInformations() as $_infos): ?>
+                <tr>
+                    <th><?php echo $_infos['label'] ?> :</th><td><?php echo $_infos['value'] ?></td>
+                </tr>
+                <?php endforeach ?>
+                <?php if ($this->getIsNewModel()): ?>
+                    <th colspan="2" class="a-center"><em><?php echo $this->__('Discovery Mode') ?></em></th>
+                <?php endif ?>
+            </table>
+        </div>
+    </div>
+    <div class="blcg-clearer"></div>
+</div>

@@ -18,34 +18,35 @@
     <p class="content-buttons form-buttons">
         <?php echo $this->getBackButtonHtml() ?>
         <?php echo $this->getCancelButtonHtml() ?>
-        <?php if($this->getOptionsSourceId()): ?>
-            <?php echo $this->getDeleteButtonHtml() ?>
-        <?php endif; ?>
-        <?php if($this->getOptionsSourceType()): ?>
-            <?php echo $this->getSaveButtonHtml() ?>
-            <?php echo $this->getSaveAndEditButtonHtml() ?>
-        <?php endif; ?>
+        <?php echo $this->getDeleteButtonHtml() ?>
+        <?php echo $this->getSaveButtonHtml() ?>
+        <?php echo $this->getSaveAndEditButtonHtml() ?>
     </p>
 </div>
-<form action="<?php echo $this->getSaveUrl() ?>" method="post" id="options_source_edit_form" enctype="multipart/form-data">
+<form action="<?php echo $this->getSaveUrl() ?>" method="post" id="custom_grid_edit_form" enctype="multipart/form-data">
     <?php echo $this->getBlockHtml('formkey')?>
+    <div>
+        <input type="hidden" value="<?php echo $this->getCustomGridId() ?>" name="grid_id" />
+        <input type="hidden" value="<?php echo $this->getRefererInputValue() ?>" name="<?php echo $this->getRefererInputName() ?>" id="blcg_grid_edit_form_referer_input" />
+    </div>
     <div style="display: none;"></div>
 </form>
 <script type="text/javascript">
 //<![CDATA[
-    var optionsSourceTemplateSyntax = /(^|.|\r|\n)({{(\w+)}})/;
-    var optionsSourceForm = new varienForm('options_source_edit_form');
+    var customGridTemplateSyntax = /(^|.|\r|\n)({{(\w+)}})/;
+    var customGridForm = new varienForm('custom_grid_edit_form');
     
     function saveAndContinueEdit(urlTemplate)
     {
-        var template = new Template(urlTemplate, optionsSourceTemplateSyntax);
-        var url = template.evaluate({tab_id: options_source_info_tabsJsTabs.activeTab.id});
-        optionsSourceForm.submit(url);
+        var template = new Template(urlTemplate, customGridTemplateSyntax);
+        var url = template.evaluate({tab_id: custom_grid_info_tabsJsTabs.activeTab.id});
+        $('blcg_grid_edit_form_referer_input').remove();
+        customGridForm.submit(url);
     }
     
     function setSettings(urlTemplate, typeElement)
     {
-        var template = new Template(urlTemplate, optionsSourceTemplateSyntax);
+        var template = new Template(urlTemplate, customGridTemplateSyntax);
         setLocation(template.evaluate({type: $F(typeElement)}));
     }
     
@@ -53,8 +54,8 @@
         var objName = '<?php echo $this->getSelectedTabId() ?>';
         if (objName) {
             obj = $(objName);
-            options_source_info_tabsJsTabs.setSkipDisplayFirstTab();
-            options_source_info_tabsJsTabs.showTabContent(obj);
+            custom_grid_info_tabsJsTabs.setSkipDisplayFirstTab();
+            custom_grid_info_tabsJsTabs.showTabContent(obj);
         }
     });
 //]]>

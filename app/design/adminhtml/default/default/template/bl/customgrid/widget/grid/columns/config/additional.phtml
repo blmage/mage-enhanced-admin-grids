@@ -1,0 +1,272 @@
+<?php
+/**
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
+ *
+ * @category   BL
+ * @package    BL_CustomGrid
+ * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+?>
+<?php $_gridModel = $this->getGridModel() ?>
+<div id="<?php echo $this->getHtmlId() ?>-additional" class="blcg-custom-grid-config-additional-container"<?php if (!$this->getStartDisplayed()): ?> style="display:none;"<?php endif ?>>
+    
+    <?php // @todo (this is an example of possible layout) ?>
+    <?php /* ?>
+        <div class="blcg-custom-grid-config-additional-part blcg-custom-grid-config-additional-profiles" id="<?php echo $this->getHtmlId() ?>-additional-profiles">
+            <div class="blcg-custom-grid-config-additional-part-label">
+                <?php echo $this->__('Profiles:') ?>
+            </div>
+            <div class="blcg-custom-grid-config-additional-part-content">
+                <label><?php echo $this->__('Available Profiles:') ?></label>
+                <select>
+                </select>
+                <div class="blcg-custom-grid-config-profiles-actions">
+                    <button>Apply</button>
+                    <button>Make Default</button>
+                    <button>Save</button>
+                </div>
+                <label><?php echo $this->__('Create a New Profile:') ?></label>
+                <input type="text" />
+                <div class="blcg-custom-grid-config-profiles-actions">
+                    <button>Save</button>
+                </div>
+            </div>
+        </div>
+    <?php */ ?>
+    
+    <?php if ($this->canDisplayDefaultParamsBlocks()): ?>
+        <div class="blcg-custom-grid-config-additional-part blcg-custom-grid-config-additional-save-params" id="<?php echo $this->getHtmlId() ?>-additional-save">
+            <div class="blcg-custom-grid-config-additional-part-label">
+                <?php echo $this->__('Save As Custom Default Grid Parameters:') ?>
+            </div>
+            <div class="blcg-custom-grid-config-additional-part-content">
+                <ul>
+                    <li>
+                        <input type="checkbox" value="<?php echo $this->getGridPageNumber() ?>" name="grid_default_params[page]" id="<?php echo $this->getHtmlId() ?>-grid-default-page-number" />
+                        <label for="<?php echo $this->getHtmlId() ?>-grid-default-page-number"><?php echo $this->__('Page Number') ?></label>
+                    </li>
+                    <li>
+                        <input type="checkbox" value="<?php echo $this->getGridPageSize() ?>" name="grid_default_params[limit]" id="<?php echo $this->getHtmlId() ?>-grid-default-page-size" />
+                        <label for="<?php echo $this->getHtmlId() ?>-grid-default-page-size"><?php echo $this->__('Page Size') ?></label>
+                    </li>
+                    <li>
+                        <input type="checkbox" value="<?php echo $this->getGridSort() ?>" name="grid_default_params[sort]" id="<?php echo $this->getHtmlId() ?>-grid-default-sort" />
+                        <label for="<?php echo $this->getHtmlId() ?>-grid-default-sort"><?php echo $this->__('Sort') ?></label>
+                    </li>
+                    <li>
+                        <input type="checkbox" value="<?php echo $this->getGridSortDirection() ?>" name="grid_default_params[dir]" id="<?php echo $this->getHtmlId() ?>-grid-default-dir" />
+                        <label for="<?php echo $this->getHtmlId() ?>-grid-default-dir"><?php echo $this->__('Sort Direction') ?></label>
+                    </li>
+                    <li>
+                        <input type="checkbox" value="<?php echo $this->getGridFilters() ?>" name="grid_default_params[filter]" id="<?php echo $this->getHtmlId() ?>-grid-default-filter" />
+                        <label for="<?php echo $this->getHtmlId() ?>-grid-default-filter"><?php echo $this->__('Filters') ?></label>
+                    </li>
+                </ul>
+                <div class="blcg-custom-grid-config-additional-part-actions">
+                    <?php echo $this->getDefaultParametersActionButtonHtml($this->getHtmlId().'-additional-save') ?>
+                </div>
+            </div>
+        </div>
+        <div class="blcg-custom-grid-config-additional-part blcg-custom-grid-config-additional-delete-params" id="<?php echo $this->getHtmlId() ?>-additional-remove">
+            <div class="blcg-custom-grid-config-additional-part-label">
+                <?php echo $this->__('Remove Custom Default Grid Parameters:') ?>
+            </div>
+            <div class="blcg-custom-grid-config-additional-part-content">
+                <ul>
+                    <li>
+                        <input type="checkbox" value="1" name="remove_default_params[page]" id="<?php echo $this->getHtmlId() ?>-grid-remove-page-number" />
+                        <label for="<?php echo $this->getHtmlId() ?>-grid-remove-page-number">
+                            <?php echo $this->__('Page Number') ?> (<strong><?php if ($_gridModel->getDefaultPage()): ?><?php echo $_gridModel->getDefaultPage() ?><?php else: ?><?php echo $this->__('none') ?><?php endif ?></strong>)
+                        </label>
+                    </li>
+                    <li>
+                        <input type="checkbox" value="1" name="remove_default_params[limit]" id="<?php echo $this->getHtmlId() ?>-grid-remove-page-size" />
+                        <label for="<?php echo $this->getHtmlId() ?>-grid-remove-page-size">
+                            <?php echo $this->__('Page Size') ?> (<strong><?php if ($_gridModel->getDefaultLimit()): ?><?php echo $_gridModel->getDefaultLimit() ?><?php else: ?><?php echo $this->__('none') ?><?php endif ?></strong>)
+                        </label>
+                    </li>
+                    <li>
+                        <input type="checkbox" value="1" name="remove_default_params[sort]" id="<?php echo $this->getHtmlId() ?>-grid-remove-sort" />
+                        <label for="<?php echo $this->getHtmlId() ?>-grid-remove-sort">
+                            <?php echo $this->__('Sort') ?> (<strong><?php if ($_gridModel->getDefaultSort()): ?><?php echo $this->__('column "%s"', $this->htmlEscape($_gridModel->getColumnHeader($_gridModel->getDefaultSort()))) ?><?php else: ?><?php echo $this->__('none') ?><?php endif ?></strong>)
+                        </label>
+                    </li>
+                    <li>
+                        <input type="checkbox" value="" name="remove_default_params[dir]" id="<?php echo $this->getHtmlId() ?>-grid-remove-dir" />
+                        <label for="<?php echo $this->getHtmlId() ?>-grid-remove-dir">
+                            <?php echo $this->__('Sort Direction') ?> (<strong><?php if ($_gridModel->getDefaultDir()): ?><?php echo $this->__($_gridModel->getDefaultDir() == 'asc' ? 'ascending' : 'descending') ?><?php else: ?><?php echo $this->__('none') ?><?php endif ?></strong>)
+                        </label>
+                    </li>
+                    <li>
+                        <input type="checkbox" value="1" name="remove_default_params[filter]" id="<?php echo $this->getHtmlId() ?>-grid-remove-filter" />
+                        <label for="<?php echo $this->getHtmlId() ?>-grid-remove-filter">
+                            <?php echo $this->__('Filters') ?> (<strong><?php if ($_gridModel->getDefaultFilter()): ?><?php echo $this->__('existing') ?><?php else: ?><?php echo $this->__('none') ?><?php endif ?></strong>)
+                        </label>
+                    </li>
+                </ul>
+                <div class="blcg-custom-grid-config-additional-part-actions">
+                    <?php echo $this->getDefaultParametersActionButtonHtml($this->getHtmlId().'-additional-remove') ?>
+                </div>
+            </div>
+        </div>
+    <?php endif ?>
+    <?php if ($this->canDisplayCustomColumnsBlock()): ?>
+        <div class="blcg-custom-grid-config-additional-part blcg-custom-grid-config-additional-custom-columns" id="<?php echo $this->getHtmlId() ?>-additional-custom-columns">
+            <div class="blcg-custom-grid-config-additional-part-label">
+                <?php echo $this->__('Custom Columns:') ?>
+            </div>
+            <div class="blcg-custom-grid-config-additional-part-content">
+                <?php
+                    $_customColumns = $this->getCustomColumns();
+                    $_columnsGroups = $this->getCustomColumnsGroups();
+                    $_displayGroups = (count($_columnsGroups) > 1);
+                    $_previousGroup = null;
+                ?>
+                <div id="<?php echo $this->getHtmlId() ?>-custom-columns-wrapper" class="blcg-custom-columns-wrapper">
+                <?php foreach ($_columnsGroups as $_groupId => $_group): ?>
+                    <?php if ($_displayGroups): ?>
+                        <?php if ($_previousGroup): ?></div><?php endif; $_previousGroup = $_groupId ?>
+                        <div class="blcg-custom-columns-group">
+                            <?php $_startDisplayed = false ?>
+                            <?php // @todo uncomment this if needed to make all groups containing used columns start opened ?>
+                            <?php /* ?>
+                            <?php 
+                                $_startDisplayed = false;
+                                
+                                foreach ($_customColumns[$_groupId] as $_column):
+                                    if ($_column->getSelected()):
+                                        $_startDisplayed = true;
+                                        break;
+                                    endif;
+                                endforeach;
+                            ?>
+                            <?php */ ?>
+                            <?php
+                                $_totalCount = 0;
+                                $_displayedCount = 0;
+                                
+                                foreach ($_customColumns[$_groupId] as $_column):
+                                    $_totalCount++;
+                                    if ($_column->getSelected()):
+                                        $_displayedCount++;
+                                    endif;
+                                endforeach;
+                            ?>
+                            <div class="blcg-custom-columns-group-label <?php if ($_startDisplayed): ?>blcg-custom-columns-group-label-on<?php else: ?>blcg-custom-columns-group-label-off<?php endif ?>">
+                                <?php echo $this->htmlEscape($_group) ?>
+                                <span><?php echo $this->__('(%s/%s)', $_displayedCount, $_totalCount) ?></span>
+                            </div>
+                            <div class="blcg-custom-columns-list" <?php if (!$_startDisplayed): ?>style="display:none;"<?php endif ?>>
+                    <?php else: ?>
+                        <div class="blcg-custom-columns-list">
+                    <?php endif ?>
+                    <?php for ($i=1; $i<2; $i++): ?>
+                    <?php foreach ($_customColumns[$_groupId] as $_column): ?>
+                        <div class="blcg-custom-columns-column">
+                            <label title="<?php echo $this->htmlEscape($_column->getName()) ?>">
+                                <input type="checkbox" name="custom_columns[]" value="<?php echo $_column->getId() ?>"<?php if ($_column->getSelected()): ?> checked="checked"<?php endif ?> />
+                                <span><?php echo $this->htmlEscape($_column->getName()) ?></span>
+                            </label>
+                            <div class="blcg-custom-columns-column-buttons">
+                                <?php if (($_warning = trim($_column->getWarning())) !== ''): ?>
+                                    <div class="blcg-custom-columns-column-button blcg-custom-columns-column-button-warning">
+                                        <div class="blcg-custom-columns-tooltip">
+                                            <div class="blcg-custom-columns-help-text blcg-custom-columns-help-single-text"><?php echo $_warning ?></div>
+                                        </div>
+                                    </div>
+                                <?php endif ?>
+                                <div class="blcg-custom-columns-column-button blcg-custom-columns-column-button-help">
+                                    <div class="blcg-custom-columns-tooltip">
+                                        <?php if (($_description = trim($_column->getDescription())) !== ''): ?>
+                                            <div class="blcg-custom-columns-help-text"><?php echo $_description ?></div>
+                                        <?php endif ?>
+                                        <ul class="blcg-custom-columns-help-features">
+                                            <li class="blcg-custom-columns-help-feature-<?php if ($_column->getAllowStore()): ?>with<?php else: ?>without<?php endif ?>">
+                                                <?php echo $this->__('Selectable Store View') ?>
+                                            </li>
+                                            <li class="blcg-custom-columns-help-feature-<?php if ($_column->getAllowRenderers()): ?>with<?php else: ?>without<?php endif ?>">
+                                                <?php echo $this->__('Selectable Renderer') ?>
+                                            </li>
+                                            <li class="blcg-custom-columns-help-feature-<?php if ($_column->getAllowCustomization()): ?>with<?php else: ?>without<?php endif ?>">
+                                                <?php echo $this->__('Customization Parameters') ?>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach ?><?php endfor ?>
+                    </div>
+                <?php endforeach ?>
+                <?php if ($_displayGroups): ?></div><?php endif ?>
+                </div>
+                <script type="text/javascript">
+                //<![CDATA[
+                    <?php echo $this->getExportJsObjectName() ?> = new blcg.CustomColumn.List('<?php echo $this->getHtmlId() ?>-custom-columns-wrapper');
+                //]]>
+                </script>
+                <div class="blcg-custom-grid-config-additional-part-actions">
+                    <?php echo $this->getCustomColumnsActionButtonHtml($this->getHtmlId().'-additional-custom-columns') ?>
+                </div>
+            </div>
+        </div>
+    <?php endif ?>
+    <?php if ($this->canDisplayExportBlock()): ?>
+        <div class="blcg-custom-grid-config-additional-part blcg-custom-grid-config-additional-export" id="<?php echo $this->getHtmlId() ?>-additional-export">
+            <div class="blcg-custom-grid-config-additional-part-label">
+                <img src="<?php echo $this->getSkinUrl('bl/customgrid/images/export.png') ?>" alt="" class="v-middle"/>
+                <?php echo $this->__('Export:') ?>
+            </div>
+            <div class="blcg-custom-grid-config-additional-part-content">
+                <ul>
+                    <li>
+                        <?php echo $this->__('Format:') ?>
+                        <select name="export[format]" id="<?php echo $this->getHtmlId() ?>-additional-export-format">
+                            <option value=""></option>
+                            <?php foreach ($this->getExportTypes() as $_type): ?>
+                                <option value="<?php echo $_type->getUrl() ?>"><?php echo $this->htmlEscape($_type->getLabel()) ?></option>
+                            <?php endforeach ?>
+                        </select>
+                    </li>
+                    <li>
+                        <?php echo $this->__('Size:') ?>
+                        <select name="export[size]" id="<?php echo $this->getHtmlId() ?>-additional-export-size">
+                            <option value="<?php echo $this->getGridSize() ?>"><?php echo $this->__('Total (%s)', $this->getGridSize()) ?></option>
+                            <option value="20">20</option>
+                            <option value="30">30</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                            <option value="200">200</option>
+                            <option value=""><?php echo $this->__('Other') ?></option>
+                        </select>&nbsp;<input type="text" class="blcg-pagination-input" name="export[custom_size]" id="<?php echo $this->getHtmlId() ?>-additional-export-custom-size" style="display: none;" disabled="disabled" />
+                    </li>
+                    <li>
+                        <?php echo $this->__('From Result:') ?>
+                        <input type="text" class="blcg-pagination-input" name="export[from_result]" value="<?php echo (($this->getGridPageNumber()-1) * $this->getGridPageSize() +1) ?>" id="<?php echo $this->getHtmlId() ?>-additional-export-from-result">
+                    </li>
+                </ul>
+                <div class="blcg-custom-grid-config-additional-part-actions">
+                    <?php echo $this->getExportActionButtonHtml() ?>
+                </div>
+            </div>
+            <script type="text/javascript">
+            //<![CDATA[
+                <?php echo $this->getExportJsObjectName() ?> = new blcg.Grid.Export('<?php echo $this->getHtmlId() ?>-additional-export', {
+                    'format': '<?php echo $this->jsQuoteEscape($this->__('You must select an export format')) ?>',
+                    'custom-size': '<?php echo $this->jsQuoteEscape($this->__('You must enter a custom size')) ?>'
+                }, {
+                    'grid_id': <?php echo $_gridModel->getId() ?>,
+                    'form_key': '<?php echo $this->getFormKey() ?>'
+                });
+            //]]>
+            </script>
+        </div>
+    <?php endif ?>
+    <div style="clear: both;"></div>
+</div>
