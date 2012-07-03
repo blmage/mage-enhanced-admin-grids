@@ -202,7 +202,7 @@ class BL_CustomGrid_Custom_GridController
             
             $this->_initAction()
                 ->_title($gridName)
-                ->_addBreadcrumb($gridName)
+                ->_addBreadcrumb($gridName, $gridName)
                 ->renderLayout();
         } else {
             Mage::getSingleton('adminhtml/session')->addError($this->__('This custom grid no longer exists'));

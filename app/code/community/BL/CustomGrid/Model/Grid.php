@@ -366,9 +366,10 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
         $this->_maxOrder  = null;
         $this->_columns   = array();
         $this->_originIds = array(
-            self::GRID_COLUMN_ORIGIN_GRID => array(),
+            self::GRID_COLUMN_ORIGIN_GRID       => array(),
             self::GRID_COLUMN_ORIGIN_COLLECTION => array(),
             self::GRID_COLUMN_ORIGIN_ATTRIBUTE  => array(),
+            self::GRID_COLUMN_ORIGIN_CUSTOM     => array(),
         );
         $this->_attributesColumns = array();
         return $this;

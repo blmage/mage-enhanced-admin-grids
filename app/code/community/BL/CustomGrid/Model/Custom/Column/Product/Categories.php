@@ -183,7 +183,7 @@ class BL_CustomGrid_Model_Custom_Column_Product_Categories
                 $filteredIds  = array_filter(array_unique(explode(',', $column->getFilter()->getValue())));
                 $filterMode   = $this->_extractStringParam($params, 'filter_mode', self::FILTER_MODE_ONE_CHOOSEN, true);
                 $filterOpr    = '>=';
-                $Filternumber = '1';
+                $filterNumber = '1';
                 
                 if ($filterMode == self::FILTER_MODE_ALL_CHOOSEN) {
                     $filterNumber = count($filteredIds);
