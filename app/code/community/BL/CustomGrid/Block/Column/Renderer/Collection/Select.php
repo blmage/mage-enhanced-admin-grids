@@ -9,34 +9,24 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2011 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class BL_CustomGrid_Block_Column_Renderer_Collection_Select
-    extends Mage_Adminhtml_Block_Template
+    extends BL_CustomGrid_Block_Column_Renderer_Select_Abstract
 {
-    static protected $_instanceNumber = 0;
-    protected $_instanceId;
-    
     static protected $_descriptionsOutput = false;
     
-    public function _construct()
+    protected function _construct()
     {
         parent::_construct();
-        $this->_instanceId = ++self::$_instanceNumber;
-        $this->setId(Mage::helper('core')->uniqHash('blcgCollectionRendererSelect'.$this->_instanceId));
         $this->setTemplate('bl/customgrid/column/renderer/collection/select.phtml');
     }
     
-    public function getHtmlId()
+    protected function _getHtmlIdPrefix()
     {
-        return $this->getId();
-    }
-    
-    public function getJsObjectName()
-    {
-        return $this->getId() . 'JsObject';
+        return 'blcgCRS';
     }
     
     protected function _getAvailableRenderers($withEmpty=false)
@@ -83,12 +73,9 @@ class BL_CustomGrid_Block_Column_Renderer_Collection_Select
         return Mage::helper('core')->jsonEncode($config);
     }
     
-    protected function _beforeToHtml()
+    public function getConfigUrl()
     {
-        if ($this->_getData('select_id') == '') {
-            $this->setData('select_id', $this->getHtmlId().'-select');
-        }
-        return parent::_beforeToHtml();
+        return $this->getUrl('customgrid/column_renderer_collection/index');
     }
     
     public function getDescriptionsOutput()

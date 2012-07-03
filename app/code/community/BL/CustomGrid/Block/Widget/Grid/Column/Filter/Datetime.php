@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2011 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -18,7 +18,7 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Datetime
 {
     public function getValue($index=null)
     {
-        if (is_array($value = $this->getData('value'))) {
+        if (is_array($value = $this->_getData('value'))) {
             if (!empty($value['to']) && !($value['to'] instanceof Zend_Date)) {
                 $value['to'] = null;
                 $this->setData('value', $value);

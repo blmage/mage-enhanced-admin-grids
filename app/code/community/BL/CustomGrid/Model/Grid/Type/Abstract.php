@@ -9,16 +9,54 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2011 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends Varien_Object
 {
+    /**
+    * Available attributes per block type
+    * 
+    * @var array
+    */
     protected $_attributes     = array();
+    /**
+    * Locked collection columns values
+    * 
+    * @var array
+    */
     protected $_lockedValues   = array();
+    /**
+    * Available export types
+    * 
+    * @var array
+    */
     protected $_exportTypes    = array();
+    /**
+    * Editable values per block type
+    * 
+    * @var array
+    */
     protected $_editableValues = array();
+    /**
+    * Available custom columns
+    * 
+    * @var array
+    */
+    protected $_customColumns  = null;
+    /**
+    * Custom columns groups
+    * 
+    * @var array
+    */
+    protected $_columnsGroups  = array();
+    /**
+    * Available custom columns per block type
+    * 
+    * @var array
+    */
+    protected $_blocksColumns  = array();
     
     const EDITABLE_TYPE_FIELD           = 'static';
     const EDITABLE_TYPE_ATTRIBUTE       = 'attribute';
@@ -41,11 +79,13 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends Varien_Object
     protected function _getRequest()
     {
         $controller = Mage::app()->getFrontController();
+        
         if ($controller) {
             $this->_request = $controller->getRequest();
         } else {
             throw new Exception(Mage::helper('core')->__('Can\'t retrieve request object'));
         }
+        
         return $this->_request;
     }
     
@@ -244,7 +284,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends Varien_Object
     }
     
     /**
-    * Return wheter request corresponds to an export request from our module for handled grid
+    * Return whether request corresponds to an export request from our module for handled grid
     * 
     * @param Mage_Core_Controller_Request_Http $request Request object
     * @param string $gridType Grid block type
@@ -264,6 +304,112 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends Varien_Object
         
         return false;
     }
+    
+    protected function _sortCustomColumns($a, $b)
+    {
+        return strcmp($a->getName(), $b->getName());
+    }
+    
+    protected function _getAdditionalCustomColumns()
+    {
+        return array();
+    }
+    
+    protected function _getCustomColumns()
+    {
+        if (is_null($this->_customColumns)) {
+            // Initialize custom columns from the different available sources
+            $xmlColumns =  Mage::getSingleton('customgrid/grid_type')
+                ->getTypeCustomColumnsByCode($this->getCode());
+            
+            $response = new Varien_Object(array('columns' => array()));
+            Mage::dispatchEvent('blcg_grid_type_additional_columns', array(
+                'response'   => $response,
+                'type_model' => $this,
+            ));
+            
+            $this->_customColumns = array_filter(
+                array_merge(
+                    $this->_getAdditionalCustomColumns(),
+                    $xmlColumns,
+                    $response->getColumns()
+                ),
+                create_function('$m', 'return ($m instanceof BL_CustomGrid_Model_Custom_Column_Abstract);')
+            );
+            
+            uasort($this->_customColumns, array($this, '_sortCustomColumns'));
+            
+            // Initialize corresponding groups
+            $defaultGroupId = 1;
+            $currentGroupId = 2;
+            $this->_columnsGroups = array();
+            
+            foreach ($this->_customColumns as $column) {
+                if ($column->hasGroup()) {
+                    if (!$groupId = array_search($column->getGroup(), $this->_columnsGroups)) {
+                        $groupId = 'g'.$currentGroupId++;
+                        $this->_columnsGroups[$groupId] = $column->getGroup();
+                    }
+                    $column->setGroupId($groupId);
+                } else {
+                    $column->setGroupId('g'.$defaultGroupId);
+                }
+            }
+            
+            uasort($this->_columnsGroups, 'strcmp');
+            $this->_columnsGroups['g1'] = Mage::helper('customgrid')->__('Others');
+            $this->_blocksColumns = array();
+        }
+        return $this->_customColumns;
+    }
+    
+    public function getCustomColumns($blockType=null, $rewritingClassName='', $emptyArray=true)
+    {
+        if (is_null($blockType)) {
+            return $this->_getCustomColumns();
+        }
+        if (!isset($this->_blocksColumns[$blockType])) {
+            $this->_blocksColumns[$blockType] = array();
+        }
+        if (!isset($this->_blocksColumns[$blockType][$rewritingClassName])) {
+            $this->_blocksColumns[$blockType][$rewritingClassName] = array();
+            
+            foreach ($this->_getCustomColumns() as $id => $column) {
+                if ($column->isAvailable($blockType, $rewritingClassName)) {
+                    $this->_blocksColumns[$blockType][$rewritingClassName][$id] = $column;
+                }
+            }
+            
+            if (empty($this->_blocksColumns[$blockType][$rewritingClassName])) {
+                $this->_blocksColumns[$blockType][$rewritingClassName] = false;
+            }
+        }
+        return ($this->_blocksColumns[$blockType][$rewritingClassName]
+            ? $this->_blocksColumns[$blockType][$rewritingClassName]
+            : ($emptyArray ? array() : null));
+    }
+    
+    public function getCustomColumn($code)
+    {
+        $columns = $this->_getCustomColumns();
+        return (isset($columns[$code]) ? $columns[$code] : null);
+    }
+    
+    public function getCustomColumnsGroups()
+    {
+        $this->_getCustomColumns();
+        return $this->_columnsGroups;
+    }
+    
+    public function canHaveCustomColumns($blockType, $rewritingClassName='')
+    {
+        return is_array($this->getCustomColumns($blockType, $rewritingClassName, false));
+    }
+    
+    /**
+    * @todo refactor all the editor methods - certainly accept [exclusive or not] callbacks for each action (found in each field config)
+    *       this will be at least needed by custom columns system
+    */
     
     /**
     * Return action URL for given field
@@ -394,6 +540,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends Varien_Object
     protected function _getEditableFields($type)
     {
         $response = new Varien_Object(array('fields' => array()));
+        
         Mage::dispatchEvent('blcg_grid_type_additional_editable_fields', array(
             'response'   => $response,
             'type_model' => $this,
@@ -416,7 +563,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends Varien_Object
     protected function _checkAttributeEditability($type, $attribute)
     {
         return ((!$attribute->hasIsVisible() || $attribute->getIsVisible())
-                && $attribute->getFrontend()->getInputType());
+            && $attribute->getFrontend()->getInputType());
     }
     
     /**
@@ -856,6 +1003,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends Varien_Object
             $column['editable'] = false;
             
             if ($gridModel->isAttributeColumnOrigin($column['origin'])) {
+                // Editable attributes
                 if ($this->isEditableAttribute($type, $column['index'])) {
                     $columns[$columnId]['editable'] = $this->getEditableAttribute($type, $column['index'], $keptKeys);
                     if (isset($column['store_id']) && $column['store_id']
@@ -865,6 +1013,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends Varien_Object
                     }
                 }
             } else {
+                // Editable (attribute) fields
                 if ($this->isEditableField($type, $columnId)) {
                     $columns[$columnId]['editable'] = $this->getEditableField($type, $columnId, $keptKeys);
                 } elseif ($this->isEditableAttributeField($type, $columnId)){
@@ -872,7 +1021,8 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends Varien_Object
                 }
             }
             
-            if (isset($columns[$columnId]['editable']) && is_array($columns[$columnId]['editable'])) {
+            if (isset($columns[$columnId]['editable'])
+                && is_array($columns[$columnId]['editable'])) {
                 $columns[$columnId]['editable']['column_params']['column_id'] = $column['column_id'];
             }
         }
@@ -1372,12 +1522,14 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends Varien_Object
     * Check if user has ACL permissions to edit values
     * 
     * @param string $type Grid block type
+    * @param BL_CustomGrid_Model_Grid Grid model
+    * @param Mage_Adminhtml_Block_Widget_Grid $grid Grid block instance (when known)
+    * @param array $params Edit parameters (when grid block not known)
     * @return bool
     */
-    public function checkUserEditPermissions($type)
+    public function checkUserEditPermissions($type, $model, $block=null, $params=array())
     {
-        return Mage::getModel('admin/session')
-            ->isAllowed('system/customgrid/editor/edit_columns');
+        return $model->checkUserActionPermission(BL_CustomGrid_Model_Grid::GRID_ACTION_EDIT_COLUMNS_VALUES);
     }
     
     /**
@@ -1396,7 +1548,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends Varien_Object
             if (isset($params['additional']['column_id'])
                 && ($column = $model->getColumnFromDbId($params['additional']['column_id']))
                 && $column['allow_edit']) {
-                return $this->checkUserEditPermissions($type);
+                return $this->checkUserEditPermissions($type, $model, null, $params);
             }
         }
         return false;
@@ -1451,6 +1603,30 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends Varien_Object
         } else {
             Mage::throwException(Mage::helper('customgrid')->__('This value is not editable'));
         }
+    }
+    
+    /**
+    * Dispatch given save event
+    * 
+    * @param string $type Grid block type
+    * @param array $config Edited field config
+    * @param array $params Edit parameters
+    * @param mixed $entity Edited entity
+    * @param mixed $value Edited field val
+    * @param string $eventName Dispatched event name
+    * @return this
+    */
+    protected function _dispatchSaveEvent($type, $config, $params, $entity, $value, $eventName)
+    {
+        Mage::dispatchEvent($eventName, array(
+            'type_model'  => $this,
+            'block_type'  => $type,
+            'edit_config' => $config,
+            'edit_params' => $params,
+            'entity'      => $entity,
+            'value'       => $value
+        ));
+        return $this;
     }
     
     /**
@@ -1512,7 +1688,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends Varien_Object
     }
     
     /**
-    * Do some actions before field value is saved (such as filtering when needed)
+    * Do some actions before field value is applied to edited entity (such as filtering when needed)
     * 
     * @param string $type Grid block type
     * @param array $config Edited field config
@@ -1521,7 +1697,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends Varien_Object
     * @param mixed $value Edited field value
     * @return this
     */
-    protected function _beforeSaveEditedFieldValue($type, $config, $params, $entity, &$value)
+    protected function _beforeApplyEditedFieldValue($type, $config, $params, $entity, &$value)
     {
         if ($config['config']['must_filter']) {
             $value = $this->_filterEditedFieldValue($type, $config, $params, $entity, $value);
@@ -1542,6 +1718,22 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends Varien_Object
     protected function _applyEditedFieldValue($type, $config, $params, $entity, $value)
     {
         $entity->setData($config['config']['field_name'], $value);
+        return $this;
+    }
+    
+    /**
+    * Do some actions before field value is saved
+    * 
+    * @param string $type Grid block type
+    * @param array $config Edited field config
+    * @param array $params Edit parameters
+    * @param mixed $entity Edited entity
+    * @param mixed $value Edited field value
+    * @return this
+    */
+    protected function _beforeSaveEditedFieldValue($type, $config, $params, $entity, $value)
+    {
+        $this->_dispatchSaveEvent($type, $config, $params, $entity, $value, 'blcg_grid_type_before_save_field_value');
         return $this;
     }
     
@@ -1577,6 +1769,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends Varien_Object
         if ($config['config']['render_reload']) {
             $this->_reloadEditedEntity($type, $config, $params, $entity);
         }
+        $this->_dispatchSaveEvent($type, $config, $params, $entity, $value, 'blcg_grid_type_after_save_field_value');
         return $this;
     }
     
@@ -1618,7 +1811,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends Varien_Object
     }
     
     /**
-    * Do some actions before attribute value is saved (such as filtering when needed)
+    * Do some actions before attribute value is applied to edited entity (such as filtering when needed)
     * 
     * @param string $type Grid block type
     * @param array $config Edited attribute config
@@ -1627,7 +1820,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends Varien_Object
     * @param mixed $value Edited attribute value
     * @return this
     */
-    protected function _beforeSaveEditedAttributeValue($type, $config, $params, $entity, &$value)
+    protected function _beforeApplyEditedAttributeValue($type, $config, $params, $entity, &$value)
     {
         if ($config['config']['must_filter']) {
             $value = $this->_filterEditedAttributeValue($type, $config, $params, $entity, $value);
@@ -1648,6 +1841,22 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends Varien_Object
     protected function _applyEditedAttributeValue($type, $config, $params, $entity, $value)
     {
         $entity->setData($config['config']['attribute']->getAttributeCode(), $value);
+        return $this;
+    }
+    
+    /**
+    * Do some actions before attribute value is saved
+    * 
+    * @param string $type Grid block type
+    * @param array $config Edited attribute config
+    * @param array $params Edit parameters
+    * @param mixed $entity Edited entity
+    * @param mixed $value Edited attribute value
+    * @return this
+    */
+    protected function _beforeSaveEditedAttributeValue($type, $config, $params, $entity, $value)
+    {
+        $this->_dispatchSaveEvent($type, $config, $params, $entity, $value, 'blcg_grid_type_before_save_attribute_value');
         return $this;
     }
     
@@ -1683,6 +1892,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends Varien_Object
         if ($config['config']['render_reload']) {
             $this->_reloadEditedEntity($type, $config, $params, $entity);
         }
+        $this->_dispatchSaveEvent($type, $config, $params, $entity, $value, 'blcg_grid_type_after_save_attribute_value');
         return $this;
     }
     
@@ -1706,8 +1916,9 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends Varien_Object
                 $config['config']['form']['name']
             );
             
-            $result = $this->_beforeSaveEditedFieldValue($type, $config, $params, $entity, $value)
+            $result = $this->_beforeApplyEditedFieldValue($type, $config, $params, $entity, $value)
                 ->_applyEditedFieldValue($type, $config, $params, $entity, $value)
+                ->_beforeSaveEditedFieldValue($type, $config, $params, $entity, $value)
                 ->_saveEditedFieldValue($type, $config, $params, $entity, $value);
             
             $this->_afterSaveEditedFieldValue($type, $config, $params, $entity, $value, $result);
@@ -1721,8 +1932,9 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends Varien_Object
                 $config['config']['attribute']->getAttributeCode()
             );
             
-            $result = $this->_beforeSaveEditedAttributeValue($type, $config, $params, $entity, $value)
+            $result = $this->_beforeApplyEditedAttributeValue($type, $config, $params, $entity, $value)
                 ->_applyEditedAttributeValue($type, $config, $params, $entity, $value)
+                ->_beforeSaveEditedAttributeValue($type, $config, $params, $entity, $value)
                 ->_saveEditedAttributeValue($type, $config, $params, $entity, $value);
             
             $this->_afterSaveEditedAttributeValue($type, $config, $params, $entity, $value, $result);

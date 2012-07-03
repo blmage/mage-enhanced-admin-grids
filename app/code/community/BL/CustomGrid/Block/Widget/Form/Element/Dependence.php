@@ -34,7 +34,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2011 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -83,7 +83,7 @@ class BL_CustomGrid_Block_Widget_Form_Element_Dependence
         if (!$this->_depends) {
             return '';
         }
-        return '<script type="text/javascript"> new blcg.FormElementDependenceController('
+        return '<script type="text/javascript"> new blcg.Form.Element.DependenceController('
             . $this->_getDependsJson()
             . ($this->_configOptions ? ', ' . Mage::helper('core')->jsonEncode($this->_configOptions) : '')
             . '); </script>';

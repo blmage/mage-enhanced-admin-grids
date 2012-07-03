@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2011 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -37,7 +37,7 @@ class BL_CustomGrid_Block_Widget_Grid_Columns_Config
                 $this->setData('grid_model', null);
             }
         }
-        return $this->getData('grid_model');
+        return $this->_getData('grid_model');
     }
     
     public function getFormKey()
@@ -50,11 +50,6 @@ class BL_CustomGrid_Block_Widget_Grid_Columns_Config
         return $this->getId() . 'JsObject';
     }
     
-    public function getExportJsObjectName()
-    {
-        return $this->getId() . 'ExportJsObject';
-    }
-    
     public function getSaveUrl()
     {
         return $this->getUrl('customgrid/custom_grid/save');
@@ -62,10 +57,7 @@ class BL_CustomGrid_Block_Widget_Grid_Columns_Config
     
     public function getDeleteUrl()
     {
-        if ($model = $this->getGridModel()) {
-            return $this->getUrl('customgrid/custom_grid/delete', array('grid_id' => $model->getId()));
-        }
-        return null;
+        return $this->getUrl('customgrid/custom_grid/delete', array('grid_id' => $this->getGridModel()->getId()));
     }
     
     public function getCustomizeButtonHtml()
@@ -92,6 +84,11 @@ class BL_CustomGrid_Block_Widget_Grid_Columns_Config
         return parent::getButtonHtml($this->__('Save'), $this->getJsObjectName().'.saveGrid();', 'scalable save');
     }
     
+    public function getToggleGridInfosButtonHtml()
+    {
+        return parent::getButtonHtml($this->__('Grid Infos'), '$(\''.$this->getHtmlId().'-grid-infos\').toggle();', 'scalable blcg-grid-infos');
+    }
+    
     public function getToggleAdditionalButtonHtml()
     {
         return parent::getButtonHtml($this->__('More Options'), '$(\''.$this->getHtmlId().'-additional\').toggle();', 'scalable blcg-additional');
@@ -100,23 +97,6 @@ class BL_CustomGrid_Block_Widget_Grid_Columns_Config
     public function getAddColumnButtonHtml()
     {
         return parent::getButtonHtml($this->__('Add Attribute Column'), $this->getJsObjectName().'.addColumn();', 'scalable add');
-    }
-    
-    public function getDefaultParametersActionButtonHtml($htmlId)
-    {
-        if ($model = $this->getGridModel()) {
-            $applyUrl = $this->getUrl('customgrid/custom_grid/saveDefault');
-            $onClick  = 'blcg.Tools.submitContainerValues(\'' . $this->jsQuoteEscape($htmlId) . '\', '
-                        . '\''. $applyUrl . '\', {\'grid_id\': \'' . $model->getId() . '\', '
-                        . '\'form_key\': \'' . $this->getFormKey() . '\'})';
-            return parent::getButtonHtml($this->__('Apply'), $onClick, 'scalable save');
-        }
-        return '';
-    }
-    
-    public function getExportActionButtonHtml()
-    {
-        return parent::getButtonHtml($this->__('Export'), $this->getExportJsObjectName().'.doExport()', 'scalable blcg-export');
     }
     
     public function getGridFilterParamName()
@@ -137,150 +117,109 @@ class BL_CustomGrid_Block_Widget_Grid_Columns_Config
         return null;
     }
     
-    public function getGridPageNumber()
-    {
-        if ($grid = $this->getGridBlock()) {
-            return $grid->blcg_getPage();
-        }
-        return null;
-    }
-    
-    public function getGridPageSize()
-    {
-        if ($grid = $this->getGridBlock()) {
-            return $grid->blcg_getLimit();
-        }
-        return null;
-    }
-    
-    public function getGridSort()
-    {
-        if ($grid = $this->getGridBlock()) {
-            return $grid->blcg_getSort();
-        }
-        return null;
-    }
-    
-    public function getGridSortDirection()
-    {
-        if ($grid = $this->getGridBlock()) {
-            return $grid->blcg_getDir();
-        }
-        return null;
-    }
-    
-    public function getGridFilters()
-    {
-        if ($grid = $this->getGridBlock()) {
-            return $grid->blcg_getFilterParam();
-        }
-        return null;
-    }
-    
-    public function getGridSize()
-    {
-        if ($grid = $this->getGridBlock()) {
-            return $grid->blcg_getCollectionSize();
-        }
-        return null;
-    }
-    
-    public function canDisplayExportBlock()
-    {
-        if ($model = $this->getGridModel()) {
-            return $model->canExport();
-        }
-        return false;
-    }
-    
-    public function canDisplayEditablePart()
-    {
-        if (!$this->hasData('can_display_editable_part')) {
-            $flag = false;
-            if ($model = $this->getGridModel()) {
-                $flag = $model->hasEditableColumns();
-            }
-            $this->setData('can_display_editable_part', $flag);
-        }
-        return $this->getData('can_display_editable_part');
-    }
-    
-    public function canChooseEditableColumns()
-    {
-        if (!$this->hasData('can_choose_editable_columns')) {
-            $this->setData(
-                'can_choose_editable_columns',
-                Mage::getModel('admin/session')
-                    ->isAllowed('system/customgrid/editor/choose_columns')
-            );
-        }
-        return $this->getData('can_choose_editable_columns');
-    }
-    
-    public function getExportTypes()
-    {
-        if ($model = $this->getGridModel()) {
-            return $model->getExportTypes();
-        }
-        return array();
-    }
-    
-    public function getUseDragNDrop()
-    {
-        return Mage::helper('customgrid/config')->getSortWithDnd();
-    }
-    
     public function getFromAjax()
     {
         return ($this->getRequest()->getQuery('ajax') ? true : false);
     }
     
-    public function getStoreSelectHtml($selectName, $storeId=null, $jsOutput=false)
+    public function canDisplayColumnsConfig()
     {
-        return $this->getLayout()->createBlock('customgrid/store_select')
-            ->hasUseGridOption(true)
-            ->hasDefaultOption(true)
-            ->setStoreId($storeId)
-            ->setSelectName($selectName)
-            ->setSelectClassNames('select')
-            ->setOutputAsJs($jsOutput)
-            ->toHtml();
-    }
-    
-    public function getCollectionRendererSelectHtml($selectName, $paramsTargetId=null, $code=null, $forced=false, $forcedLabel='')
-    {
-        return $this->getLayout()->createBlock('customgrid/column_renderer_collection_select')
-            ->setRendererCode($code)
-            ->setIsForcedRenderer($forced)
-            ->setForcedRendererLabel($forcedLabel)
-            ->setParamsTargetId($paramsTargetId)
-            ->setSelectName($selectName)
-            ->setSelectClassNames('select')
-            ->toHtml();
-    }
-    
-    public function getAttributesSelectHtml($id, $selectName, $paramsTargetId=null, $editableContainerId=null,
-        $editableCheckboxId=null, $code=null, $jsOutput=false)
-    {
-        return $this->getLayout()->createBlock('customgrid/column_renderer_attribute_select')
-            ->setId($id)
-            ->setGridModel($this->getGridModel())
-            ->setAttributeCode($code)
-            ->setOutputAsJs($jsOutput)
-            ->setParamsTargetId($paramsTargetId)
-            ->setEditableContainerId($editableContainerId)
-            ->setEditableCheckboxId($editableCheckboxId)
-            ->setSelectName($selectName)
-            ->setSelectClassNames('select')
-            ->toHtml();
-    }
-    
-    public function getColumnLockedValues($columnId)
-    {
-        if ($model = $this->getGridModel()) {
-            return $model->getColumnLockedValues($columnId);
+        if (!$this->hasData('can_display_columns_config')) {
+            $this->setData(
+                'can_display_columns_config',
+                $this->getGridModel()
+                    ->checkUserActionPermission(BL_CustomGrid_Model_Grid::GRID_ACTION_CUSTOMIZE_COLUMNS)
+            );
         }
-        return array();
+        return $this->_getData('can_display_columns_config');
+    }
+    
+    public function getDefaultColumnsConfig()
+    {
+        return $this->canDisplayColumnsConfig();
+    }
+    
+    public function getColumnsConfigHtml()
+    {
+        if ($this->canDisplayColumnsConfig()) {
+            return $this->getLayout()->createBlock('customgrid/widget_grid_columns_config_columns')
+                ->setId($this->getId())
+                ->setGridModel($this->getGridModel())
+                ->setIsNewModel($this->getIsNewModel())
+                ->setGridBlock($this->getGridBlock())
+                ->toHtml();
+        }
+        return '';
+    }
+    
+    public function canDisplayAdditional()
+    {
+        if (!$this->hasData('can_display_additional')) {
+            $this->setData(
+                'can_display_additional',
+                ($this->getGridBlock()
+                 && !$this->getIsNewModel()
+                 && (($this->getGridModel()->canHaveCustomColumns() && $this->canDisplayColumnsConfig())
+                     || $this->getGridModel()->checkUserActionPermission(BL_CustomGrid_Model_Grid::GRID_ACTION_EDIT_DEFAULT_PARAMS)
+                     || $this->getGridModel()->checkUserActionPermission(BL_CustomGrid_Model_Grid::GRID_ACTION_EXPORT_RESULTS)))
+            );
+        }
+        return $this->_getData('can_display_additional');
+    }
+    
+    public function getDefaultAdditional()
+    {
+        return (!$this->getDefaultColumnsConfig()
+            && $this->canDisplayAdditional());
+    }
+    
+    public function getAdditionalHtml()
+    {
+        if ($this->canDisplayAdditional()) {
+            return $this->getLayout()->createBlock('customgrid/widget_grid_columns_config_additional')
+                ->setId($this->getId())
+                ->setGridModel($this->getGridModel())
+                ->setIsNewModel($this->getIsNewModel())
+                ->setGridBlock($this->getGridBlock())
+                ->setStartDisplayed($this->getDefaultAdditional())
+                ->toHtml();
+        }
+        return '';
+    }
+    
+    public function canDisplayGridInfos()
+    {
+        if (!$this->hasData('can_display_grid_infos')) {
+            $this->setData(
+                'can_display_grid_infos',
+                (!$this->getIsNewModel()
+                 && $this->getGridBlock()
+                 && $this->getGridModel()
+                        ->checkUserActionPermission(BL_CustomGrid_Model_Grid::GRID_ACTION_VIEW_GRID_INFOS))
+            );
+        }
+        return $this->_getData('can_display_grid_infos');
+    }
+    
+    public function getDefaultGridInfos()
+    {
+        return (!$this->getDefaultColumnsConfig()
+            && !$this->getDefaultAdditional()
+            && $this->canDisplayGridInfos());
+    }
+    
+    public function getGridInfosHtml()
+    {
+        if ($this->canDisplayGridInfos()) {
+            return $this->getLayout()->createBlock('customgrid/widget_grid_columns_config_infos')
+                ->setId($this->getId())
+                ->setGridModel($this->getGridModel())
+                ->setIsNewModel($this->getIsNewModel())
+                ->setGridBlock($this->getGridBlock())
+                ->setStartDisplayed($this->getDefaultGridInfos())
+                ->toHtml();
+        }
+        return '';
     }
     
     protected function _toHtml()
@@ -298,7 +237,13 @@ class BL_CustomGrid_Block_Widget_Grid_Columns_Config
             } else {
                 $this->setIsNewModel(false);
             }
-            return parent::_toHtml();
+            
+            if ($this->canDisplayColumnsConfig()
+                || $this->canDisplayAdditional()
+                || $this->canDisplayGridInfos()) {
+                // Only display if relevant
+                return parent::_toHtml();
+            }
         }
         return '';
     }

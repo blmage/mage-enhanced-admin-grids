@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2011 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -41,9 +41,9 @@ class BL_CustomGrid_Model_Grid_Type_Cms_Page
         );
     }
     
-    public function checkUserEditPermissions($type)
+    public function checkUserEditPermissions($type, $model, $block=null, $params=array())
     {
-        if (parent::checkUserEditPermissions($type)) {
+        if (parent::checkUserEditPermissions($type, $model, $block, $params)) {
             return Mage::getSingleton('admin/session')->isAllowed('cms/page/save');
         }
         return false;
@@ -88,11 +88,12 @@ class BL_CustomGrid_Model_Grid_Type_Cms_Page
             ),
             'content_heading' => true,
             'content' => array(
-                'type'       => 'editor',
-                'required'   => true,
-                'in_grid'    => false,
-                'form_label' => $helper->__('Content'),
-                'form_style' => 'height:36em;',
+                'type'         => 'editor',
+                'required'     => true,
+                'in_grid'      => false,
+                'form_wysiwyg' => true,
+                'form_label'   => $helper->__('Content'),
+                'form_style'   => 'height:36em;',
             ),
             'layout_update_xml' => array(
                 'type'       => 'textarea',
@@ -142,8 +143,7 @@ class BL_CustomGrid_Model_Grid_Type_Cms_Page
     protected function _loadEditedEntity($type, $config, $params)
     {
         if (isset($params['ids']['page_id'])) {
-            return Mage::getModel('cms/page')
-                ->load($params['ids']['page_id']);
+            return Mage::getModel('cms/page')->load($params['ids']['page_id']);
         }
         return null;
     }

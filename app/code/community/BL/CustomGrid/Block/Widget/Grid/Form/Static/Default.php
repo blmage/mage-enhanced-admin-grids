@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2011 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -46,8 +46,8 @@ class BL_CustomGrid_Block_Widget_Grid_Form_Static_Default
                     $sourceOptions = $editedConfig['form'][$key];
                 } elseif (isset($editedConfig['form'][$cbKey])) {
                     $sourceOptions = call_user_func_array(
-                        $cbKey,
-                        (isset($editedConfig[$cbParamsKey])
+                        $editedConfig['form'][$cbKey],
+                        (isset($editedConfig['form'][$cbParamsKey])
                             ? (is_array($editedConfig['form'][$cbParamsKey]) ? $editedConfig['form'][$cbParamsKey] : array())
                             : array($this->getGridBlockType(), $this->getEditedValue(), $this->getEditParams(), $this->getEditedEntity()))
                     );
@@ -78,12 +78,17 @@ class BL_CustomGrid_Block_Widget_Grid_Form_Static_Default
             );
         } elseif ($type == 'editor') {
             // WYSIWYG editor
-            if (isset($editedConfig['form']['wysiwyg_config'])) {
-                $wysiwygConfig = $editedConfig['form']['wysiwyg_config'];
+            if (isset($editedConfig['form']['wysiwyg']) && $editedConfig['form']['wysiwyg']) {
+                if (isset($editedConfig['form']['wysiwyg_config'])) {
+                    $wysiwygConfig = $editedConfig['form']['wysiwyg_config'];
+                } else {
+                    $wysiwygConfig = Mage::helper('customgrid/editor')->getWysiwygConfig();
+                }
+                $values['config'] = $wysiwygConfig;
             } else {
-                $wysiwygConfig = Mage::helper('customgrid/editor')->getWysiwygConfig();
+                // No config if it appears to be not needed
+                unset($values['config']);
             }
-            $values['config'] = $wysiwygConfig;
         }
         
         /**

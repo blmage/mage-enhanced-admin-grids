@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2011 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -83,7 +83,7 @@ class BL_CustomGrid_Custom_GridController
                 return;
             }
         }
-        parent::_redirectReferer($defaultUrl=null);
+        parent::_redirectReferer($defaultUrl);
     }
     
     public function saveAction()
@@ -91,16 +91,77 @@ class BL_CustomGrid_Custom_GridController
         if ($this->getRequest()->isPost()) {
             $data = $this->getRequest()->getPost();
             
-            if (($grid = $this->_initGrid()) && $grid->getId() 
-                && isset($data['config'])) {
+            if (($grid = $this->_initGrid()) && $grid->getId()) {
                 try {
-                    $grid->updateColumns($data['config']);
+                    $changes = false;
+                    
+                    if (isset($data['config'])
+                        && $grid->checkUserActionPermission(BL_CustomGrid_Model_Grid::GRID_ACTION_CUSTOMIZE_COLUMNS)) {
+                        // Columns config
+                        $grid->updateColumns($data['config'], false);
+                        $changes = true;
+                    }
+                    if (Mage::getSingleton('admin/session')->isAllowed('system/customgrid/grids')) {
+                        $changes = true;
+                        
+                        // Roles config
+                        if (isset($data['role']) && is_array($data['role'])) {
+                            $grid->updateRolesConfig($data['role'], false);
+                        }
+                        
+                        // Custom default params behaviours
+                        $data = array_filter($data, 'is_scalar');
+                        
+                        foreach ($data as $key => $value) {
+                            if (substr($key, 0, 8) == 'default_') {
+                                $grid->setData($key, (empty($value) ? null : $value));
+                                unset($data[$key]);
+                            }
+                        }
+                        
+                        // All other (scalar) settings
+                        $grid->addData($data);
+                    }
+                    
+                    if ($changes) {
+                        $grid->save();
+                    } else {
+                        Mage::throwException($this->__('You have no access to this grid'));
+                    }
+                    
                     $this->_getSession()->addSuccess($this->__('The custom grid has been successfully updated'));
                 } catch (Exception $e) {
                     $this->_getSession()->addError($e->getMessage());
                 }
             } else {
-                $this->_getSession()->addError($this->__('Unknown custom grid'));
+                $this->_getSession()->addError($this->__('This custom grid no longer exists'));
+            }
+        }
+        if ($this->getRequest()->getParam('back', false)) { 
+            $this->_redirect('*/*/edit', array(
+                '_current' => true,
+                'grid_id'  => $grid->getId(),
+            ));
+        } else {
+            $this->_redirectReferer();
+        }
+    }
+    
+    public function saveCustomColumnsAction()
+    {
+        if ($this->getRequest()->isPost()) {
+            $data = $this->getRequest()->getPost();
+            
+            if (($grid = $this->_initGrid()) && $grid->getId()
+                && $grid->checkUserActionPermission(BL_CustomGrid_Model_Grid::GRID_ACTION_CUSTOMIZE_COLUMNS)) {
+                try {
+                    $grid->updateCustomColumns(isset($data['custom_columns']) ? $data['custom_columns'] : array());
+                    $this->_getSession()->addSuccess($this->__('The custom grid has been successfully updated'));
+                } catch (Exception $e) {
+                    $this->_getSession()->addError($e->getMessage());
+                }
+            } else {
+                $this->_getSession()->addError($this->__('This custom grid no longer exists'));
             }
         }
         $this->_redirectReferer();
@@ -111,7 +172,8 @@ class BL_CustomGrid_Custom_GridController
         if ($this->getRequest()->isPost()) {
             $data = $this->getRequest()->getPost();
             
-            if (($grid = $this->_initGrid()) && $grid->getId()) {
+            if (($grid = $this->_initGrid()) && $grid->getId()
+                && $grid->checkUserActionPermission(BL_CustomGrid_Model_Grid::GRID_ACTION_EDIT_DEFAULT_PARAMS)) {
                 try {
                     $grid->updateDefaultParameters(
                         isset($data['grid_default_params'])   ? $data['grid_default_params']   : array(),
@@ -122,7 +184,7 @@ class BL_CustomGrid_Custom_GridController
                     $this->_getSession()->addError($e->getMessage());
                 }
             } else {
-                $this->_getSession()->addError($this->__('Unknown custom grid'));
+                $this->_getSession()->addError($this->__('This custom grid no longer exists'));
             }
         }
         $this->_redirectReferer();
@@ -201,7 +263,8 @@ class BL_CustomGrid_Custom_GridController
         $data  = $this->getRequest()->getParams();
         $infos = (isset($data['export']) && is_array($data['export']) ? $data['export'] : null);
         
-        if (($grid = $this->_initGrid()) && $grid->getId()) {
+        if (($grid = $this->_initGrid()) && $grid->getId()
+            && $grid->checkUserActionPermission(BL_CustomGrid_Model_Grid::GRID_ACTION_EXPORT_RESULTS)) {
             try {
                 $fileName = 'export.csv';
                 $this->_prepareDownloadResponse($fileName, $grid->exportCsvFile($infos));
@@ -221,7 +284,8 @@ class BL_CustomGrid_Custom_GridController
         $data  = $this->getRequest()->getParams();
         $infos = (isset($data['export']) && is_array($data['export']) ? $data['export'] : null);
         
-        if (($grid = $this->_initGrid()) && $grid->getId()) {
+        if (($grid = $this->_initGrid()) && $grid->getId()
+            && $grid->checkUserActionPermission(BL_CustomGrid_Model_Grid::GRID_ACTION_EXPORT_RESULTS)) {
             try {
                 $fileName = 'export.xml';
                 $this->_prepareDownloadResponse($fileName, $grid->exportExcelFile($infos));
@@ -317,20 +381,17 @@ class BL_CustomGrid_Custom_GridController
     
     protected function _isAllowed()
     {
-        $customAllowed = Mage::getModel('admin/session')->isAllowed('system/customgrid/customization');
-        $gridsAllowed  = Mage::getModel('admin/session')->isAllowed('system/customgrid/grids');
-       
+        // Only return allowed flag for actions that don't (at least, atm) have grid-level permissions
         switch ($this->getRequest()->getActionName()) {
-            // All actions used for in-grid customization
             case 'exportCsv':
             case 'exportXls':
-            case 'saveDefault':
-                return $customAllowed;
             case 'save':
-                return ($customAllowed || $gridsAllowed);
+            case 'saveCustom':
+            case 'saveDefault':
+                return true;
+            default:
+                return Mage::getSingleton('admin/session')
+                    ->isAllowed('system/customgrid/grids');
         }
-        
-        // Else actions only used for dedicated custom grids management
-        return $gridsAllowed;
     }
 }

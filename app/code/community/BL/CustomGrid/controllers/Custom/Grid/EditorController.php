@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2011 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -70,6 +70,8 @@ class BL_CustomGrid_Custom_Grid_EditorController
         $errorMessage = null;
         
         if (($gridModel = $this->_initGridModel())
+            // Same call done in the grid type model
+            //&& $gridModel->checkUserActionPermission(BL_CustomGrid_Model_Grid::GRID_ACTION_EDIT_COLUMNS_VALUES, true)
             && ($gridType = $this->_initGridType())) {
             if ($infos = $this->_initEditedValue($gridType)) {
                 list($blockType, $id, $origin) = $infos;
@@ -103,6 +105,7 @@ class BL_CustomGrid_Custom_Grid_EditorController
     public function editInGridAction()
     {
         if (($gridModel = $this->_initGridModel())
+            //&& $gridModel->checkUserActionPermission(BL_CustomGrid_Model_Grid::GRID_ACTION_EDIT_COLUMNS_VALUES, true)
             && ($gridType = $this->_initGridType())) {
             if ($infos = $this->_initEditedValue($gridType)) {
                 list($blockType, $id, $origin) = $infos;
@@ -125,6 +128,7 @@ class BL_CustomGrid_Custom_Grid_EditorController
     public function saveAction()
     {
         if (($gridModel = $this->_initGridModel())
+            //&& $gridModel->checkUserActionPermission(BL_CustomGrid_Model_Grid::GRID_ACTION_EDIT_COLUMNS_VALUES, true)
             && ($gridType = $this->_initGridType())) {
             if ($infos = $this->_initEditedValue($gridType)) {
                 list($blockType, $id, $origin) = $infos;
@@ -142,11 +146,5 @@ class BL_CustomGrid_Custom_Grid_EditorController
         } else {
             $this->getResponse()->setBody($this->__('Unknown grid'));
         }
-    }
-    
-    protected function _isAllowed()
-    {
-        return Mage::getModel('admin/session')
-            ->isAllowed('system/customgrid/editor/edit_columns');
     }
 }

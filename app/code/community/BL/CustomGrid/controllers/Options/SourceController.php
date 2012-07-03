@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2011 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -42,7 +42,11 @@ class BL_CustomGrid_Options_SourceController extends Mage_Adminhtml_Controller_A
         
         if (!$sourceId) {
             if ($type = $this->getRequest()->getParam('type')) {
-                $source->setType($type);
+                if (is_array($type = $source->getPredefinedType($type))) {
+                    $source->addData($type);
+                } else {
+                    $source->setType($type);
+                }
             }
         } else {
             $source->load($sourceId);

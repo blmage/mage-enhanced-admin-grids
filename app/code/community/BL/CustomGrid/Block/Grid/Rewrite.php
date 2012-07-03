@@ -34,9 +34,11 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2011 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
+
+// NOTE : This file is currently no more not up to date, what is lilkely to be fixed in a next release
 
 class BL_CustomGrid_Block_Grid_Rewrite
     extends Mage_Adminhtml_Block_Widget_Grid

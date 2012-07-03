@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2011 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -100,7 +100,7 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Default
             $spacesCount   = ($spacesCount > 0 ? $spacesCount : 3);
             
             foreach ($selected as $key => $value) {
-                if (($value['value'] === '') // TODO callback to test for other emptiness ?
+                if (($value['value'] === '') // @todo callback to test for other emptiness ?
                     || (isset($renderOptions['with_empty_value']) 
                         && (bool)$renderOptions['with_empty_value'])) {
                     continue;
@@ -124,7 +124,7 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Default
                 $rendered[] = str_repeat('&nbsp;', $currentDepth*$spacesCount).$value['label'];
             }
             
-            $rendered = implode('<br />', $rendered); // TODO separator, etc... (=> tax rules / ..)
+            $rendered = implode('<br />', $rendered); // @todo separator, etc... (=> tax rules / ..)
         }
         
         return $rendered;
@@ -323,7 +323,7 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Default
     
     protected function _getRenderedValue()
     {
-        // TODO whenever needed, make (- a far more powerful -) use of render options :)
+        // @todo whenever needed, make (- a far more powerful -) use of render options :)
         $editedConfig    = $this->getEditedConfig();
         $fieldType       = $editedConfig['type'];
         $renderOptions   = $editedConfig['renderer'];
@@ -349,7 +349,7 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Default
                 break;
             case 'checkbox':
             case 'radio':
-                // TODO ? (don't think this is ever used)
+                // @todo ? (don't think this is ever used)
                 $renderedValue = $this->_defaultValue;
                 break;
             case 'editor':

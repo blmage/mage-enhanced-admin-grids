@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2011 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -133,7 +133,7 @@ class BL_CustomGrid_Helper_String extends Mage_Core_Helper_Abstract
                     foreach ($entities[0] as $entity) {
                         if ($entity[1]+1-$entitiesLength <= $left) {
                             $left--;
-                            $entities_length += $helper->strlen($entity[0]);
+                            $entitiesLength += $helper->strlen($entity[0]);
                         } else {
                             // No more characters left
                             break;

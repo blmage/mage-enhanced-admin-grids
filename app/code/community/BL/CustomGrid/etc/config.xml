@@ -10,14 +10,14 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2011 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 -->
 <config>
     <modules>
         <BL_CustomGrid>
-            <version>0.8.4.4</version>
+            <version>0.8.9</version>
         </BL_CustomGrid>
     </modules>
     <global>
@@ -41,6 +41,9 @@
                 <entities>
                     <grid><table>customgrid_grid</table></grid>
                     <grid_column><table>customgrid_grid_column</table></grid_column>
+                    <grid_profile><table>customgrid_grid_profile</table></grid_profile>
+                    <grid_role><table>customgrid_grid_role</table></grid_role>
+                    <grid_user><table>customgrid_grid_user</table></grid_user>
                     <options_source><table>customgrid_options_source</table></options_source>
                     <options_source_model><table>customgrid_options_source_model</table></options_source_model>
                     <options_source_option><table>customgrid_options_source_option</table></options_source_option>
@@ -139,6 +142,32 @@
                                         <customization translate="title" module="customgrid">
                                             <title>Grids Customization</title>
                                             <sort_order>10</sort_order>
+                                            <children>
+                                                <edit_columns translate="title" module="customgrid">
+                                                    <title>Customize Columns</title>
+                                                    <sort_order>10</sort_order>
+                                                </edit_columns>
+                                                <use_columns translate="title" module="customgrid">
+                                                    <title>Use Customized Columns</title>
+                                                    <sort_order>20</sort_order>
+                                                </use_columns>
+                                                <view_grid_infos translate="title" module="customgrid">
+                                                    <title>View Grids Informations</title>
+                                                    <sort_order>30</sort_order>
+                                                </view_grid_infos>
+                                                <edit_default_params translate="title" module="customgrid">
+                                                    <title>Edit Default Parameters</title>
+                                                    <sort_order>40</sort_order>
+                                                </edit_default_params>
+                                                <use_default_params translate="title" module="customgrid">
+                                                    <title>Use Default Parameters</title>
+                                                    <sort_order>50</sort_order>
+                                                </use_default_params>
+                                                <export_results translate="title" module="customgrid">
+                                                    <title>Export Results</title>
+                                                    <sort_order>60</sort_order>
+                                                </export_results>
+                                            </children>
                                         </customization>
                                         <editor translate="title" module="customgrid">
                                             <title>Columns Editor</title>
@@ -154,17 +183,42 @@
                                                 </edit_columns>
                                             </children>
                                         </editor>
+                                        <!-- @todo -->
+                                        <!--
+                                        <profiles translate="title" module="customgrid">
+                                            <title>Profiles</title>
+                                            <sort_order>30</sort_order>
+                                            <children>
+                                                <choose translate="title" module="customgrid">
+                                                    <title>Choose Profile</title>
+                                                    <sort_order>10</sort_order>
+                                                </choose>
+                                                <choose_default translate="title" module="customgrid">
+                                                    <title>Choose Default Profile</title>
+                                                    <sort_order>20</sort_order>
+                                                </choose_default>
+                                                <create translate="title" module="customgrid">
+                                                    <title>Create New Profile</title>
+                                                    <sort_order>30</sort_order>
+                                                </create>
+                                                <delete translate="title" module="customgrid">
+                                                    <title>Delete Profile</title>
+                                                    <sort_order>40</sort_order>
+                                                </delete>
+                                            </children>
+                                        </profiles>
+                                        -->
                                         <grids translate="title" module="customgrid">
                                             <title>Manage Custom Grids</title>
-                                            <sort_order>30</sort_order>
+                                            <sort_order>40</sort_order>
                                         </grids>
                                         <options_source translate="title" module="customgrid">
                                             <title>Manage Options Source</title>
-                                            <sort_order>40</sort_order>
+                                            <sort_order>50</sort_order>
                                         </options_source>
                                         <setup translate="title" module="customgrid">
                                             <title>Setup</title>
-                                            <sort_order>50</sort_order>
+                                            <sort_order>60</sort_order>
                                         </setup>
                                     </children>
                                 </customgrid>
@@ -218,6 +272,19 @@
                 <store_parameter>store</store_parameter>
                 <sort_with_dnd>1</sort_with_dnd>
             </global>
+            <custom_default_params>
+                <page>default</page>
+                <limit>default</limit>
+                <sort>default</sort>
+                <dir>default</dir>
+                <filter>default</filter>
+            </custom_default_params>
+            <custom_columns>
+                <group_in_default_header>1</group_in_default_header>
+            </custom_columns>
+            <editor_sitemap>
+                <delete_file>1</delete_file>
+            </editor_sitemap>
         </customgrid>
     </default>
 </config>

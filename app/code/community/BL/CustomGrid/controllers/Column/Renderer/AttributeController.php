@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2011 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -34,11 +34,13 @@ class BL_CustomGrid_Column_Renderer_AttributeController
     {
         if ($renderer = $this->_initRenderer()) {
             $this->loadLayout('empty');
+            
             if (($params = $this->getRequest()->getParam('params'))
                 && ($block = $this->getLayout()->getBlock('column_renderer_attribute'))) {
                 $params = Mage::getSingleton('customgrid/column_renderer_attribute')->decodeParameters($params);
-                $block->setRendererParams($params);
+                $block->setConfigParams($params);
             }
+            
             $this->renderLayout();
         } else {
             $this->loadLayout(array(
@@ -49,17 +51,10 @@ class BL_CustomGrid_Column_Renderer_AttributeController
         }
     }
     
-    public function buildRendererAction()
+    public function buildConfigAction()
     {
         $params  = $this->getRequest()->getPost('parameters', array());
         $encoded = Mage::getSingleton('customgrid/column_renderer_attribute')->encodeParameters($params);
         $this->getResponse()->setBody($encoded);
-    }
-    
-    protected function _isAllowed()
-    {
-        $session = Mage::getSingleton('admin/session');
-        return ($session->isAllowed('system/customgrid/customization')
-                || $session->isAllowed('system/customgrid/grids'));
     }
 }

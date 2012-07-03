@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2011 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -75,8 +75,8 @@ class BL_CustomGrid_Model_Observer
     */
     protected function _isAllowed()
     {
-        return Mage::getModel('admin/session')
-            ->isAllowed('system/customgrid/customization');
+        return Mage::getSingleton('admin/session')
+            ->isAllowed('system/customgrid/customization/use_columns');
     }
     
     protected function _getRequest()
@@ -92,7 +92,7 @@ class BL_CustomGrid_Model_Observer
     /**
     * Register a new grid block class extending another one, 
     * and add a bunch of new useful methods to it.
-    * See BL_CustomGrid_Block_Grid_Rewrite for a commented version
+    * See BL_CustomGrid_Block_Grid_Rewrite for a commented version (currently no more updated)
     * 
     * @param string $className New grid class name
     * @param string $extends Grid class to extend
@@ -104,6 +104,8 @@ class BL_CustomGrid_Model_Observer
             || !class_exists($extends, true)) {
             return $this;
         }
+        
+        // @todo minify this code if this is useful
         eval('
         class ' . $className . ' extends ' . $extends . '
         {
@@ -114,15 +116,26 @@ class BL_CustomGrid_Model_Observer
             private $_blcg_exportedCollection    = null;
             private $_blcg_holdPrepareCollection = false;
             private $_blcg_prepareEventsEnabled  = true;
-            private $_blcg_additionalAttributes  = array();
-            private $_blcg_mustSelectAdditionalAttributes = false;
+            private $_blcg_defaultParameters     = array();
+            private $_blcg_collectionCallbacks   = array(
+                \'before_prepare\'     => array(),
+                \'after_prepare\'      => array(),
+                \'before_set\'         => array(),
+                \'after_set\'          => array(),
+                \'before_export_load\' => array(),
+                \'after_export_load\'  => array(),
+            );
+            private $_blcg_additionalAttributes = array();
+            private $_blcg_mustSelectAdditionalAttributes   = false;
             
             public function setCollection($collection)
             {
                 if (!is_null($this->_blcg_typeModel)) {
                     $this->_blcg_typeModel->beforeGridSetCollection($this, $collection);
                 }
+                $this->_blcg_launchCollectionCallbacks(\'before_set\', array($this, $collection));
                 $return = parent::setCollection($collection);
+                $this->_blcg_launchCollectionCallbacks(\'after_set\', array($this, $collection));
                 if (!is_null($this->_blcg_typeModel)) {
                     $this->_blcg_typeModel->afterGridSetCollection($this, $collection);
                 }
@@ -169,10 +182,14 @@ class BL_CustomGrid_Model_Observer
                 }
                 if ($this->_blcg_prepareEventsEnabled) {
                     Mage::getSingleton(\'customgrid/observer\')->beforeGridPrepareCollection($this);
+                    $this->_blcg_launchCollectionCallbacks(\'before_prepare\', array($this, $this->getCollection(), $this->_blcg_prepareEventsEnabled));
                     $return = parent::_prepareCollection();
+                    $this->_blcg_launchCollectionCallbacks(\'after_prepare\', array($this, $this->getCollection(), $this->_blcg_prepareEventsEnabled));
                     Mage::getSingleton(\'customgrid/observer\')->afterGridPrepareCollection($this);
                 } else {
+                    $this->_blcg_launchCollectionCallbacks(\'before_prepare\', array($this, $this->getCollection(), $this->_blcg_prepareEventsEnabled));
                     $return = parent::_prepareCollection();
+                    $this->_blcg_launchCollectionCallbacks(\'after_prepare\', array($this, $this->getCollection(), $this->_blcg_prepareEventsEnabled));
                 }
                 if (!is_null($this->_blcg_typeModel)) {
                     $this->_blcg_typeModel->afterGridPrepareCollection($this, $this->_blcg_prepareEventsEnabled);
@@ -219,7 +236,9 @@ class BL_CustomGrid_Model_Observer
                         if (!is_null($this->_blcg_typeModel)) {
                             $this->_blcg_typeModel->beforeGridExportLoadCollection($this, $collection);
                         }
+                        $this->_blcg_launchCollectionCallbacks(\'before_export_load\', array($this, $collection, $page, $pageSize));
                         $collection->load();
+                        $this->_blcg_launchCollectionCallbacks(\'after_export_load\', array($this, $collection, $page, $pageSize));
                         if (!is_null($this->_blcg_typeModel)) {
                             $this->_blcg_typeModel->afterGridExportLoadCollection($this, $collection);
                         }
@@ -254,6 +273,91 @@ class BL_CustomGrid_Model_Observer
                         }
                     }
                 }
+            }
+            
+            public function blcg_isExport()
+            {
+                return $this->_isExport;
+            }
+            
+            public function setDefaultPage($page)
+            {
+                if (!is_null($this->_blcg_gridModel)) {
+                    $page = $this->_blcg_gridModel->getGridBlockDefaultParamValue(\'page\', $page);
+                }
+                return parent::setDefaultPage($page);
+            }
+            
+            public function setDefaultLimit($limit)
+            {
+                if (!is_null($this->_blcg_gridModel)) {
+                    $limit = $this->_blcg_gridModel->getGridBlockDefaultParamValue(\'limit\', $limit);
+                }
+                return parent::setDefaultLimit($limit);
+            }
+            
+            public function setDefaultSort($sort)
+            {
+                if (!is_null($this->_blcg_gridModel)) {
+                    $sort = $this->_blcg_gridModel->getGridBlockDefaultParamValue(\'sort\', $sort);
+                }
+                return parent::setDefaultSort($sort);
+            }
+            
+            public function setDefaultDir($dir)
+            {
+                if (!is_null($this->_blcg_gridModel)) {
+                    $dir = $this->_blcg_gridModel->getGridBlockDefaultParamValue(\'dir\', $dir);
+                }
+                return parent::setDefaultDir($dir);
+            }
+            
+            public function setDefaultFilter($filter)
+            {
+                if (!is_null($this->_blcg_gridModel)) {
+                    $filter = $this->_blcg_gridModel->getGridBlockDefaultParamValue(\'filter\', $filter);
+                }
+                return parent::setDefaultFilter($filter);
+            }
+            
+            public function blcg_setDefaultPage($page)
+            {
+                if (!is_null($this->_blcg_gridModel)) {
+                    $page = $this->_blcg_gridModel->getGridBlockDefaultParamValue(\'page\', $this->_defaultPage, $page, true);
+                }
+                return parent::setDefaultPage($page);
+            }
+            
+            public function blcg_setDefaultLimit($limit)
+            {
+                if (!is_null($this->_blcg_gridModel)) {
+                    $limit = $this->_blcg_gridModel->getGridBlockDefaultParamValue(\'limit\', $this->_defaultLimit, $limit, true);
+                }
+                return parent::setDefaultLimit($limit);
+            }
+            
+            public function blcg_setDefaultSort($sort)
+            {
+                if (!is_null($this->_blcg_gridModel)) {
+                    $sort = $this->_blcg_gridModel->getGridBlockDefaultParamValue(\'sort\', $this->_defaultSort, $sort, true);
+                }
+                return parent::setDefaultSort($sort);
+            }
+            
+            public function blcg_setDefaultDir($dir)
+            {
+                if (!is_null($this->_blcg_gridModel)) {
+                    $dir = $this->_blcg_gridModel->getGridBlockDefaultParamValue(\'dir\', $this->_defaultDir, $dir, true);
+                }
+                return parent::setDefaultDir($dir);
+            }
+            
+            public function blcg_setDefaultFilter($filter)
+            {
+                if (!is_null($this->_blcg_gridModel)) {
+                    $filter = $this->_blcg_gridModel->getGridBlockDefaultParamValue(\'filter\', $this->_defaultFilter, $filter, true);
+                }
+                return parent::setDefaultFilter($filter);
             }
             
             public function blcg_setGridModel($model)
@@ -316,10 +420,10 @@ class BL_CustomGrid_Model_Observer
                 return $this->getParam($this->getVarNameLimit(), $this->_defaultLimit);
             }
             
-            public function blcg_getSort()
+            public function blcg_getSort($checkExists=true)
             {
                 $columnId = $this->getParam($this->getVarNameSort(), $this->_defaultSort);
-                if (isset($this->_columns[$columnId]) && $this->_columns[$columnId]->getIndex()) {
+                if (!$checkExists || (isset($this->_columns[$columnId]) && $this->_columns[$columnId]->getIndex())) {
                     return $columnId;
                 }
                 return null;
@@ -384,6 +488,41 @@ class BL_CustomGrid_Model_Observer
             public function blcg_resetColumnsOrder()
             {
                 $this->_columnsOrder = array();
+                return $this;
+            }
+            
+            public function blcg_addCollectionCallback($type, $callback, $params=array(), $addNative=true)
+            {
+                $this->_blcg_collectionCallbacks[$type][] = array(
+                    \'callback\'   => $callback,
+                    \'params\'     => $params,
+                    \'add_native\' => $addNative,
+                );
+                end($this->_blcg_collectionCallbacks[$type]);
+                $key = key($this->_blcg_collectionCallbacks);
+                reset($this->_blcg_collectionCallbacks);
+                return $key;
+            }
+            
+            public function blcg_removeCollectionCallback($type, $id)
+            {
+                if (isset($this->_blcg_collectionCallbacks[$type][$id])) {
+                    unset($this->_blcg_collectionCallbacks[$type][$id]);
+                }
+                return $this;
+            }
+            
+            protected function _blcg_launchCollectionCallbacks($type, $params=array())
+            {
+                foreach ($this->_blcg_collectionCallbacks[$type] as $callback) {
+                    call_user_func_array(
+                        $callback[\'callback\'],
+                        array_merge(
+                            array_values($callback[\'params\']),
+                            ($callback[\'add_native\']? array_values($params) : array())
+                        )
+                    );
+                }
                 return $this;
             }
         }
@@ -552,7 +691,7 @@ class BL_CustomGrid_Model_Observer
             if ($grid->isExportRequest($request)) {
                 /*
                 If we are on an export request, grid may not be rewrited by the common treatments,
-                so let's force its rewrite
+                (because of not corresponding actions), so let's force its rewrite
                 */
                 $this->_rewriteGridBlock($grid);
                 return $grid;
@@ -569,10 +708,6 @@ class BL_CustomGrid_Model_Observer
     */
     public function onControllerActionPreDispatch($observer)
     {
-        if (!$this->_isAllowed()) {
-            return;
-        }
-        
         $request = $this->_getRequest();
         $this->_initializeFromRequest($request);
         $this->_newGridModels = array();
@@ -652,10 +787,6 @@ class BL_CustomGrid_Model_Observer
     */
     public function beforeBlockToHtml($observer)
     {
-        if (!$this->_isAllowed()) {
-            return;
-        }
-        
         if (($grid = $observer->getEvent()->getBlock())
             && ($grid instanceof Mage_Adminhtml_Block_Widget_Grid)) {
             if ($grid->getTemplate() == 'widget/grid.phtml') {
@@ -706,9 +837,10 @@ class BL_CustomGrid_Model_Observer
                         $grid->getLayout()->createBlock('customgrid/widget_grid_columns_editor')
                             ->setGridBlock($grid)
                             ->setGridModel($model)
+                            ->setIsNewGridModel($newModel)
                     );
                     
-                    // Only replace grid template if it is default one, as it would be really unsure in other cases
+                    // Replace grid template with our own one
                     if (Mage::helper('customgrid')->isMageVersion16()) {
                         $grid->setTemplate('bl/customgrid/widget/grid/16.phtml');
                     } elseif (Mage::helper('customgrid')->isMageVersion15()) {
@@ -718,7 +850,7 @@ class BL_CustomGrid_Model_Observer
                         $grid->setTemplate('bl/customgrid/widget/grid/14'.intval($revision).'.phtml');
                     }
                 }
-            }
+            } // Don't do anything if it's not the base template, as it would be unreliable
         }
     }
     
@@ -729,10 +861,6 @@ class BL_CustomGrid_Model_Observer
     */
     public function beforeBlockPrepareLayout($observer)
     {
-        if (!$this->_isAllowed()) {
-            return;
-        }
-        
         if (($grid = $observer->getEvent()->getBlock())
             && ($grid instanceof Mage_Adminhtml_Block_Widget_Grid)) {
                 $blockType = $grid->getType();
@@ -753,9 +881,11 @@ class BL_CustomGrid_Model_Observer
         
         if (!is_null($model = $this->_getGridModel($blockType, $blockId, true))
             && !$model->getDisabled()) {
-            // Apply custom default values to grid block
-            $model->applyDefaultToGridBlock($grid);
-            // Ask grid to not do any actions that could lead into getting no items
+            if ($model->checkUserActionPermission(BL_CustomGrid_Model_Grid::GRID_ACTION_USE_DEFAULT_PARAMS)) {
+                // Apply custom default values to grid block
+                $model->applyDefaultToGridBlock($grid);
+            }
+            // Ask grid to currently not do further actions that could lead into getting no items
             $grid->blcg_holdPrepareCollection();
         }
     }
@@ -771,14 +901,21 @@ class BL_CustomGrid_Model_Observer
                 // Check grid model against grid columns
                 $grid->getCollection()->load();
                 $applyFromCollection = $model->checkColumnsAgainstGridBlock($grid);
-                // Apply it to grid block (only apply from collection if it could be checked)
-                $model->applyColumnsToGridBlock($grid, $applyFromCollection);
+                
+                if ($model->checkUserActionPermission(BL_CustomGrid_Model_Grid::GRID_ACTION_USE_CUSTOMIZED_COLUMNS)) {
+                    // Apply it to grid block (only apply from collection if it could be checked)
+                    $model->applyColumnsToGridBlock($grid, $applyFromCollection);
+                }
+                
                 // Finish to prepare grid collection
                 $grid->blcg_finishPrepareCollection();
             } else {
                 // If grid has no collection, check and apply directly
                 $model->checkColumnsAgainstGridBlock($grid);
-                $model->applyColumnsToGridBlock($grid, false);
+                
+                if ($model->checkUserActionPermission(BL_CustomGrid_Model_Grid::GRID_ACTION_USE_CUSTOMIZED_COLUMNS)) {
+                    $model->applyColumnsToGridBlock($grid, false);
+                }
             }
         }
     }

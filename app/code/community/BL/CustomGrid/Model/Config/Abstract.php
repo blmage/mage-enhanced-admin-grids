@@ -34,7 +34,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2011 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -160,9 +160,10 @@ abstract class BL_CustomGrid_Model_Config_Abstract extends Varien_Object
     {
         if (!$this->_getData('elements_array')) {
             $result = array();
+            
             if ($this->getElementsXml()) {
                 foreach ($this->getElementsXml()->children() as $element) {
-                    $helper = $element->getAttribute('module') ? $element->getAttribute('module') : 'customgrid';
+                    $helper = ($element->getAttribute('module') ? $element->getAttribute('module') : 'customgrid');
                     $helper = Mage::helper($helper);
                     
                     $values = array(
@@ -174,12 +175,14 @@ abstract class BL_CustomGrid_Model_Config_Abstract extends Varien_Object
                         'description' => $helper->__((string)$element->description),
                         'is_customizable' => $this->_acceptParameters,
                     );
+                    
                     $result[$element->getName()] = array_merge(
                         $values,
                         $this->getElementArrayValues($element, $values, $helper)
                     );
                 }
             }
+            
             uasort($result, array($this, '_sortElements'));
             $this->setData('elements_array', $result);
         }
@@ -190,7 +193,7 @@ abstract class BL_CustomGrid_Model_Config_Abstract extends Varien_Object
     {
         if ($element = $this->getXmlElementByCode($code)) {
             if (!$this->_acceptParameters) {
-                return Mage::getSingleton($element->getAttribute('type'));
+                $instance = Mage::getSingleton($element->getAttribute('type'));
             } else {
                 $instance = Mage::getModel($element->getAttribute('type'));
                 if ($instance && !is_null($params)) {
@@ -198,8 +201,14 @@ abstract class BL_CustomGrid_Model_Config_Abstract extends Varien_Object
                         $instance->addData($params);
                     }
                 }
-                return $instance;
             }
+            
+            $helper = ($element->getAttribute('module') ? $element->getAttribute('module') : 'customgrid');
+            $helper = Mage::helper($helper);
+            $instance->setCode($code);
+            $instance->setName($helper->__((string)$element->name));
+            
+            return $instance;
         }
         return null;
     }
@@ -212,12 +221,12 @@ abstract class BL_CustomGrid_Model_Config_Abstract extends Varien_Object
         return $parameters;
     }
     
-    public function decodeParameters($parameters)
+    public function decodeParameters($parameters, $forceArray=false)
     {
         if (is_string($parameters)) {
-            return unserialize($parameters);
+            $parameters = unserialize($parameters);
         }
-        return $parameters;
+        return ($forceArray && !is_array($parameters) ? array() : $parameters);
     }
     
     protected function _sortElements($a, $b)

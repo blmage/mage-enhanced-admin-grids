@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2011 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -22,13 +22,29 @@ class Bl_CustomGrid_Block_Widget_Grid_Column_Filter_Price
     public function getHtml()
     {
         $html  = '<div class="range">';
-        $html .= '<div class="range-line"><span class="label">' . Mage::helper('adminhtml')->__('From').':</span> <input type="text" name="'.$this->_getHtmlName().'[from]" id="'.$this->_getHtmlId().'_from" value="'.$this->getEscapedValue('from').'" class="input-text no-changes"/></div>';
-        $html .= '<div class="range-line"><span class="label">' . Mage::helper('adminhtml')->__('To').' : </span><input type="text" name="'.$this->_getHtmlName().'[to]" id="'.$this->_getHtmlId().'_to" value="'.$this->getEscapedValue('to').'" class="input-text no-changes"/></div>';
+        
+        $html .= '<div class="range-line"><span class="label">'
+            . Mage::helper('adminhtml')->__('From')
+            .':</span> <input type="text" name="'.$this->_getHtmlName().'[from]" id="'.$this->_getHtmlId().'_from" value="'.$this->getEscapedValue('from').'" class="input-text no-changes"/></div>';
+        $html .= '<div class="range-line"><span class="label">'
+            . Mage::helper('adminhtml')->__('To')
+            .' : </span><input type="text" name="'.$this->_getHtmlName().'[to]" id="'.$this->_getHtmlId().'_to" value="'.$this->getEscapedValue('to').'" class="input-text no-changes"/></div>';
+        
         if ($this->getDisplayCurrencySelect()) {
             $html .= '<div class="range-line"><span class="label">' . Mage::helper('adminhtml')->__('In').' : </span>' . $this->_getCurrencySelectHtml() . '</div>';
         }
+        
         $html .= '</div>';
         return $html;
+    }
+    
+    protected function _getColumnOriginalCurrency()
+    {
+        if ($code = $this->getColumn()->getOriginalCurrencyCode()) {
+            return $code;
+        }
+        // Only a fixed currency code is usable for filtering
+        return false;
     }
     
     public function getDisplayCurrencySelect()
@@ -46,18 +62,16 @@ class Bl_CustomGrid_Block_Widget_Grid_Column_Filter_Price
     
     protected function _getCurrencySelectHtml()
     {
-        $value = $this->getEscapedValue('currency');
-        if (!$value) {
-            $value = $this->_getColumnOriginalCurrency();
+        if (!$value = $this->_getColumnOriginalCurrency()) {
+            return '';
         }
+        $html = '<select name="'.$this->_getHtmlName().'[currency]" id="'.$this->_getHtmlId().'_currency">';
         
-        $html  = '';
-        $html .= '<select name="'.$this->_getHtmlName().'[currency]" id="'.$this->_getHtmlId().'_currency">';
         foreach ($this->_getCurrencyList() as $currency) {
             $html .= '<option value="'.$currency.'" '.($currency == $value ? 'selected="selected"' : '').'>'.$currency.'</option>';
         }
-        $html .= '</select>';
         
+        $html .= '</select>';
         return $html;
     }
     
@@ -72,23 +86,16 @@ class Bl_CustomGrid_Block_Widget_Grid_Column_Filter_Price
     public function getValue($index=null)
     {
         if ($index) {
-            return $this->getData('value', $index);
+            return $this->_getData('value', $index);
         }
-        $value = $this->getData('value');
+        $value = $this->_getData('value');
+        
         if ((isset($value['from']) && strlen($value['from']) > 0) 
             || (isset($value['to']) && strlen($value['to']) > 0)) {
             return $value;
         }
+        
         return null;
-    }
-    
-    protected function _getColumnOriginalCurrency()
-    {
-        if ($code = $this->getColumn()->getOriginalCurrencyCode()) {
-            return $code;
-        }
-        // Only a fixed currency code is usable for filtering
-        return false;
     }
     
     public function getCondition()

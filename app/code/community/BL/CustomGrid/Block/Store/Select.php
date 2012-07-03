@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2011 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -34,6 +34,7 @@ class BL_CustomGrid_Block_Store_Select extends Mage_Adminhtml_Block_Template
     public function getWebsites()
     {
         $websites = Mage::app()->getWebsites();
+        
         if ($websiteIds = $this->getWebsiteIds()) {
             foreach ($websites as $websiteId => $website) {
                 if (!in_array($websiteId, $websiteIds)) {
@@ -41,12 +42,13 @@ class BL_CustomGrid_Block_Store_Select extends Mage_Adminhtml_Block_Template
                 }
             }
         }
+        
         return $websites;
     }
     
     public function getStoreGroups($website)
     {
-        if (!($website instanceof Mage_Core_Model_Website)) {
+        if (!$website instanceof Mage_Core_Model_Website) {
             $website = Mage::app()->getWebsite($website);
         }
         return $website->getGroups();
@@ -54,10 +56,11 @@ class BL_CustomGrid_Block_Store_Select extends Mage_Adminhtml_Block_Template
     
     public function getStores($group)
     {
-        if (!($group instanceof Mage_Core_Model_Store_Group)) {
+        if (!$group instanceof Mage_Core_Model_Store_Group) {
             $group = Mage::app()->getGroup($group);
         }
         $stores = $group->getStores();
+        
         if ($storeIds = $this->getStoreIds()) {
             foreach ($stores as $storeId => $store) {
                 if (!in_array($storeId, $storeIds)) {
@@ -65,6 +68,7 @@ class BL_CustomGrid_Block_Store_Select extends Mage_Adminhtml_Block_Template
                 }
             }
         }
+        
         return $stores;
     }
     

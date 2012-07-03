@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2011 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -17,6 +17,7 @@ class BL_CustomGrid_Model_Options_Source
     extends Mage_Core_Model_Abstract
 {
     protected $_optionsArray = null;
+    static protected $_predefinedTypes = null;
     
     const SOURCE_TYPE_CUSTOM_LIST = 'custom_list';
     const SOURCE_TYPE_MAGE_MODEL  = 'mage_model';
@@ -112,12 +113,80 @@ class BL_CustomGrid_Model_Options_Source
         return Mage::helper('customgrid')->getOptionsHashFromOptionsArray($result);
     }
     
-    static public function getTypesAsOptionHash()
+    static protected function _getPredefinedTypes()
     {
-        return array(
+        $types  = array();
+        $helper = Mage::helper('customgrid');
+        
+        // Options arrays
+        $arrays = array(
+            'blcg_oa_yesno' => array(
+                'model' => 'customgrid/system_config_source_yesno',
+                'label' => $helper->__('Yes/No'),
+            ),
+            'blcg_oa_enableddisabled' => array(
+                'model' => 'customgrid/system_config_source_enableddisabled',
+                'label' => $helper->__('Enabled/Disabled'),
+            )
+        );
+        
+        foreach ($arrays as $id => $config) {
+            $types[$id] = array(
+                'name' => $config['label'],
+                'type' => 'mage_model',
+                'model_name'  => $config['model'],
+                'model_type'  => 'model',
+                'method'      => 'toOptionArray',
+                'return_type' => 'options_array',
+                'value_key'   => 'value',
+                'label_key'   => 'label',
+            );
+        }
+        
+        return $types;
+    }
+    
+    static public function getPredefinedTypes()
+    {
+        if (!is_array(self::$_predefinedTypes)) {
+            $types    = self::_getPredefinedTypes();
+            $response = new Varien_Object(array('types' => $types));
+            Mage::dispatchEvent('blcg_options_source_predefined_types', array('response' => $response));
+            
+            if (is_array($types = $response->getTypes())) {
+                self::$_predefinedTypes = $types;
+            } else {
+                self::$_predefinedTypes = array();
+            }
+        }
+        return self::$_predefinedTypes;
+    }
+    
+    static public function getPredefinedType($id)
+    {
+        $types = self::getPredefinedTypes();
+        return (isset($types[$id]) ? $types[$id] : null);
+    }
+    
+    static public function getTypesAsOptionHash($withPredefined=false)
+    {
+        $types  = array(
             self::SOURCE_TYPE_CUSTOM_LIST => Mage::helper('customgrid')->__('Custom List'),
             self::SOURCE_TYPE_MAGE_MODEL  => Mage::helper('customgrid')->__('Magento Model'),
         );
+        $helper = Mage::helper('customgrid');
+        
+        if ($withPredefined) {
+            $predefined = self::getPredefinedTypes();
+            
+            foreach ($predefined as $id => $type) {
+                if (!isset($types[$id])) {
+                    $types[$id] = $helper->__('%s (predefined)', $type['name']);
+                }
+            }
+        }
+        
+        return $types;
     }
     
     static public function getModelTypesAsOptionHash()

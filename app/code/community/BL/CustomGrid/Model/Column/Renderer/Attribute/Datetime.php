@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2011 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -30,6 +30,7 @@ class BL_CustomGrid_Model_Column_Renderer_Attribute_Datetime
         if ($attribute->getFrontendInput() == 'date') {
             $values['renderer'] = 'customgrid/widget_grid_column_renderer_date';
             $values['filter_time'] = false;
+            
             if ($format = $this->_getData('format')) {
                 try {
                     $values['format'] = Mage::app()->getLocale()->getDateFormat($format);
@@ -40,6 +41,7 @@ class BL_CustomGrid_Model_Column_Renderer_Attribute_Datetime
         } else {
             $values['renderer'] = 'customgrid/widget_grid_column_renderer_datetime';
             $values['filter_time'] = ($this->_getData('filter_time') ? true : false);
+            
             if ($format = $this->_getData('format')) {
                 try {
                     $values['format'] = Mage::app()->getLocale()->getDateTimeFormat($format);

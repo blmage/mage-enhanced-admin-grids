@@ -9,26 +9,22 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2011 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class BL_CustomGrid_Block_Column_Renderer_Attribute_Select
-    extends Mage_Adminhtml_Block_Template
+    extends BL_CustomGrid_Block_Column_Renderer_Select_Abstract
 {
-    static protected $_instanceNumber = 0;
-    protected $_instanceId;
-    
-    public function _construct()
+    protected function _construct()
     {
         parent::_construct();
-        $this->_instanceId = ++self::$_instanceNumber;
         $this->setTemplate('bl/customgrid/column/renderer/attribute/select.phtml');
     }
     
-    public function getJsObjectName()
+    protected function _getHtmlIdPrefix()
     {
-        return $this->getHtmlId() . 'JsObject';
+        return 'blcgARS';
     }
     
     protected function _getAttributes()
@@ -40,11 +36,6 @@ class BL_CustomGrid_Block_Column_Renderer_Attribute_Select
         }
     }
     
-    /**
-     * Return array of available renderers based on configuration
-     *
-     * @return array
-     */
     protected function _getAvailableRenderers($withEmpty=false)
     {
         return Mage::getSingleton('customgrid/column_renderer_attribute')
@@ -91,25 +82,16 @@ class BL_CustomGrid_Block_Column_Renderer_Attribute_Select
     public function getEditableJsonConfig()
     {
         return Mage::helper('core')->jsonEncode(array(
-            'editableContainerId' => ($this->hasData('editable_container_id') ? $this->getData('editable_container_id') : null),
-            'editableCheckboxId'  => ($this->hasData('editable_checkbox_id')  ? $this->getData('editable_checkbox_id')  : null),
+            'editableContainerId' => ($this->hasData('editable_container_id') ? $this->_getData('editable_container_id') : null),
+            'editableCheckboxId'  => ($this->hasData('editable_checkbox_id')  ? $this->_getData('editable_checkbox_id')  : null),
             'yesMessageText'      => '<span class="nobr">'.$this->__('Yes').'</span>',
             'noMessageText'       => '<span class="nobr">'.$this->__('No').'</span>',
         ));
     }
     
-    protected function _beforeToHtml()
+    public function getConfigUrl()
     {
-        if ($this->_getData('id') == '') {
-            $this->setData('id', $this->_instanceId);
-        }
-        if ($this->_getData('html_id') == '') {
-            $this->setData('html_id', 'blcgAttributeRendererSelect'.$this->getId());
-        }
-        if ($this->_getData('select_id') == '') {
-            $this->setData('select_id', $this->getHtmlId().'-select');
-        }
-        return parent::_beforeToHtml();
+        return $this->getUrl('customgrid/column_renderer_attribute/index');
     }
     
     protected function _toHtml()

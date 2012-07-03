@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2011 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -23,8 +23,7 @@ class BL_CustomGrid_Block_Column_Renderer_Attribute_Config_Form
     
     public function getRenderer()
     {
-        $renderer = Mage::registry('current_attribute_column_renderer');
-        if (!$renderer) {
+        if (!$renderer = Mage::registry('current_attribute_column_renderer')) {
             Mage::throwException($this->__('Renderer is not specified'));
         }
         return $renderer;

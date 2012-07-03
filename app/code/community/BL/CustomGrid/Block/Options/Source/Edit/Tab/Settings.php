@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2011 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -41,7 +41,7 @@ class BL_CustomGrid_Block_Options_Source_Edit_Tab_Settings
             'title'  => $this->__('Type'),
             'name'   => 'type',
             'value'  => '',
-            'values' => Mage::getModel('customgrid/options_source')->getTypesAsOptionHash()
+            'values' => Mage::getModel('customgrid/options_source')->getTypesAsOptionHash(true)
         ));
         
         $fieldset->addField('continue_button', 'note', array(

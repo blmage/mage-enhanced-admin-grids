@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2011 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -56,9 +56,9 @@ class BL_CustomGrid_Block_Options_Source_Edit_Tabs
     
     public function getOptionsSource()
     {
-        if (!($this->getData('options_source') instanceof BL_CustomGrid_Model_Options_Source)) {
+        if (!($this->_getData('options_source') instanceof BL_CustomGrid_Model_Options_Source)) {
             $this->setData('options_source', Mage::registry('options_source'));
         }
-        return $this->getData('options_source');
+        return $this->_getData('options_source');
     }
 }
