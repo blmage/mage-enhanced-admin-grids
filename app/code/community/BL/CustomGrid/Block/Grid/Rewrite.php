@@ -38,7 +38,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-// NOTE : This file is currently no more not up to date, what is lilkely to be fixed in a next release
+// NOTE : This file is currently no more up to date, what is likely to be fixed in a next release
 
 class BL_CustomGrid_Block_Grid_Rewrite
     extends Mage_Adminhtml_Block_Widget_Grid
