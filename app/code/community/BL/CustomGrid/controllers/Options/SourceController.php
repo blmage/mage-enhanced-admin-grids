@@ -42,8 +42,8 @@ class BL_CustomGrid_Options_SourceController extends Mage_Adminhtml_Controller_A
         
         if (!$sourceId) {
             if ($type = $this->getRequest()->getParam('type')) {
-                if (is_array($type = $source->getPredefinedType($type))) {
-                    $source->addData($type);
+                if (is_array($typeValue = $source->getPredefinedType($type))) {
+                    $source->addData($typeValue);
                 } else {
                     $source->setType($type);
                 }
