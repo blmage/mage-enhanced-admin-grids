@@ -177,19 +177,20 @@ class BL_CustomGrid_Model_Observer
             
             protected function _prepareCollection()
             {
+                // @todo should we use getCollection() for callbacks, but temporary passing the "_blcg_mustSelectAdditionalAttributes" flag to false ?
                 if (!is_null($this->_blcg_typeModel)) {
                     $this->_blcg_typeModel->beforeGridPrepareCollection($this, $this->_blcg_prepareEventsEnabled);
                 }
                 if ($this->_blcg_prepareEventsEnabled) {
                     Mage::getSingleton(\'customgrid/observer\')->beforeGridPrepareCollection($this);
-                    $this->_blcg_launchCollectionCallbacks(\'before_prepare\', array($this, $this->getCollection(), $this->_blcg_prepareEventsEnabled));
+                    $this->_blcg_launchCollectionCallbacks(\'before_prepare\', array($this, $this->_collection, $this->_blcg_prepareEventsEnabled));
                     $return = parent::_prepareCollection();
-                    $this->_blcg_launchCollectionCallbacks(\'after_prepare\', array($this, $this->getCollection(), $this->_blcg_prepareEventsEnabled));
+                    $this->_blcg_launchCollectionCallbacks(\'after_prepare\', array($this, $this->_collection, $this->_blcg_prepareEventsEnabled));
                     Mage::getSingleton(\'customgrid/observer\')->afterGridPrepareCollection($this);
                 } else {
-                    $this->_blcg_launchCollectionCallbacks(\'before_prepare\', array($this, $this->getCollection(), $this->_blcg_prepareEventsEnabled));
+                    $this->_blcg_launchCollectionCallbacks(\'before_prepare\', array($this, $this->_collection, $this->_blcg_prepareEventsEnabled));
                     $return = parent::_prepareCollection();
-                    $this->_blcg_launchCollectionCallbacks(\'after_prepare\', array($this, $this->getCollection(), $this->_blcg_prepareEventsEnabled));
+                    $this->_blcg_launchCollectionCallbacks(\'after_prepare\', array($this, $this->_collection, $this->_blcg_prepareEventsEnabled));
                 }
                 if (!is_null($this->_blcg_typeModel)) {
                     $this->_blcg_typeModel->afterGridPrepareCollection($this, $this->_blcg_prepareEventsEnabled);

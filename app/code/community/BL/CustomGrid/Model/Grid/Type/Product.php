@@ -21,6 +21,13 @@ class BL_CustomGrid_Model_Grid_Type_Product
     
     public function isAppliableToGrid($type, $rewritingClassName)
     {
+        return (($type == 'adminhtml/catalog_product_grid')
+            || ($type == 'adminhtml/catalog_category_tab_product'));
+    }
+    
+    public function canExport($type)
+    {
+        // @todo implement export for category products tab
         return ($type == 'adminhtml/catalog_product_grid');
     }
     
