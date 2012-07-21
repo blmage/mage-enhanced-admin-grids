@@ -14,7 +14,7 @@ In the waiting, prefer using it on test environments, and only live when you hav
 * widespread in-grid editor
 * new permissions system (much more options, appliable per grid and role)
 * new custom columns system (allows developers to add new columns in a simple way, without needing any block rewrite, and providing some customization options)
-* new custom columns on the products grid : categories, wishlists and carts stats (and most of the inventory fields upcoming)
+* new custom columns on the products grid : categories, wishlists and carts stats, inventory fields
 * new custom columns on the orders grid : billing and shipping addresses fields, payment and shipment methods, colorized order status
 * products grid specific features (attributes, custom columns) shared with the category products tab
 * custom default parameters behaviours
@@ -24,7 +24,9 @@ In the waiting, prefer using it on test environments, and only live when you hav
 ## Roadmap (and contribution)
 From now on, and for a matter of time, I'll mostly focus on adding new custom columns, that will be released each time once ready on the active branch (currently 0.8.9).
 
-However, here are some features that I was initially planning to add (if you wish to contribute, don't hesitate to take some ideas in this list, and to contact me if you have any question - new custom columns, bug fixes and other new features also being more than welcome) :
+However, here are some of the features that I was initially planning to add (if you wish to contribute, don't hesitate to take some ideas in this list, and to contact me if you have any question - new custom columns, bug fixes and other new features also being more than welcome) :
 
+* profiles system (to store all customization values - from columns to default parameters - into different profiles, that should be finely assignable), examples of what could be the corresponding tables are already created by the 0.8.9 setup file
 * flexible export system with customization options (to allow adding more export formats and be able to customize them finely)
-* to be completed
+* checkboxes to allow to not override columns base values but rather use the ones coming from the original block (header, width, alignment)
+* enhance options sources : new type to allow taking values from attributes, more predefined types (eg, payment and shipping methods)
