@@ -52,6 +52,7 @@
                     <allow_customization>1</allow_customization> 
                     <allow_store>1</allow_store>
                 </categories>
+                
                 <carts_count model="customgrid/custom_column_product_stats_quote" module="customgrid">
                     <name>Carts Number</name>
                     <description><![CDATA[Displays the number of carts containing each product]]></description>
@@ -61,6 +62,7 @@
                         <mode>quotes</mode>
                     </model_params>
                 </carts_count>
+                
                 <number_in_carts model="customgrid/custom_column_product_stats_quote" module="customgrid">
                     <name>Quantity in Carts</name>
                     <description><![CDATA[Displays the quantity of each product contained in carts]]></description>
@@ -70,6 +72,7 @@
                         <mode>products</mode>
                     </model_params>
                 </number_in_carts>
+                
                 <wishlists_count model="customgrid/custom_column_product_stats_wishlist" module="customgrid">
                     <name>Wishlists Number</name>
                     <description><![CDATA[Displays the number of wishlists containing each product]]></description>
@@ -79,6 +82,7 @@
                         <mode>wishlists</mode>
                     </model_params>
                 </wishlists_count>
+                
                 <number_in_wishlists model="customgrid/custom_column_product_stats_wishlist" module="customgrid">
                     <name>Quantity in Wishlists</name>
                     <description><![CDATA[Displays the quantity of each product contained in wishlists]]></description>
@@ -93,6 +97,147 @@
                         <mode>products</mode>
                     </model_params>
                 </number_in_wishlists>
+                
+                <stock_manage_stock model="customgrid/custom_column_product_inventory" module="customgrid">
+                    <name>Manage Stock</name>
+                    <group>Inventory</group>
+                    <allow_customization>1</allow_customization>
+                    <model_params>
+                        <table_field_name>manage_stock</table_field_name>
+                        <is_use_config_field>1</is_use_config_field>
+                        <field_type>boolean</field_type>
+                    </model_params>
+                </stock_manage_stock>
+                
+                <stock_qty model="customgrid/custom_column_product_inventory" module="customgrid">
+                    <name>Quantity</name>
+                    <group>Inventory</group>
+                    <model_params>
+                        <table_field_name>qty</table_field_name>
+                        <field_type>decimal</field_type>
+                    </model_params>
+                </stock_qty>
+                
+                <stock_min_qty model="customgrid/custom_column_product_inventory" module="customgrid">
+                    <name>Qty to become Out of Stock</name>
+                    <group>Inventory</group>
+                    <allow_customization>1</allow_customization>
+                    <model_params>
+                        <table_field_name>min_qty</table_field_name>
+                        <is_use_config_field>1</is_use_config_field>
+                    </model_params>
+                </stock_min_qty>
+                
+                <stock_min_sale_qty model="customgrid/custom_column_product_inventory" module="customgrid">
+                    <name>Minimum Qty in Cart</name>
+                    <group>Inventory</group>
+                    <allow_customization>1</allow_customization>
+                    <model_params>
+                        <table_field_name>min_sale_qty</table_field_name>
+                        <is_use_config_field>1</is_use_config_field>
+                        <field_type>decimal</field_type>
+                    </model_params>
+                </stock_min_sale_qty>
+                
+                <stock_max_sale_qty model="customgrid/custom_column_product_inventory" module="customgrid">
+                    <name>Maximum Qty in Cart</name>
+                    <group>Inventory</group>
+                    <allow_customization>1</allow_customization>
+                    <model_params>
+                        <table_field_name>max_sale_qty</table_field_name>
+                        <is_use_config_field>1</is_use_config_field>
+                        <field_type>decimal</field_type>
+                    </model_params>
+                </stock_max_sale_qty>
+                
+                <stock_is_qty_decimal model="customgrid/custom_column_product_inventory" module="customgrid">
+                    <name>Qty Uses Decimals</name>
+                    <group>Inventory</group>
+                    <model_params>
+                        <table_field_name>is_qty_decimal</table_field_name>
+                        <field_type>boolean</field_type>
+                    </model_params>
+                </stock_is_qty_decimal>
+                
+                <stock_backorders model="customgrid/custom_column_product_inventory" module="customgrid">
+                    <name>Backorders</name>
+                    <group>Inventory</group>
+                    <allow_customization>1</allow_customization>
+                    <model_params>
+                        <table_field_name>backorders</table_field_name>
+                        <is_use_config_field>1</is_use_config_field>
+                        <field_type>options</field_type>
+                        <source_model>cataloginventory/source_backorders</source_model>
+                    </model_params>
+                </stock_backorders>
+                
+                <stock_notify_stock_qty model="customgrid/custom_column_product_inventory" module="customgrid">
+                    <name>Notify for Quantity Below</name>
+                    <group>Inventory</group>
+                    <allow_customization>1</allow_customization>
+                    <model_params>
+                        <table_field_name>notify_stock_qty</table_field_name>
+                        <is_use_config_field>1</is_use_config_field>
+                        <field_type>decimal</field_type>
+                    </model_params>
+                </stock_notify_stock_qty>
+                
+                <stock_qty_increments model="customgrid/custom_column_product_inventory" module="customgrid">
+                    <name>Qty Increments</name>
+                    <group>Inventory</group>
+                    <allow_customization>1</allow_customization>
+                    <model_params>
+                        <table_field_name>qty_increments</table_field_name>
+                        <is_use_config_field>1</is_use_config_field>
+                        <field_type>decimal</field_type>
+                    </model_params>
+                </stock_qty_increments>
+                
+                <stock_enable_qty_increments model="customgrid/custom_column_product_inventory" module="customgrid">
+                    <name>Enable Qty Increments</name>
+                    <group>Inventory</group>
+                    <allow_customization>1</allow_customization>
+                    <availability>
+                        <excluded_versions>
+                            <v16>1.6.*</v16>
+                            <v17>1.7.*</v17>
+                            <v18>1.8.*</v18>
+                            <v19>1.9.*</v19>
+                        </excluded_versions>
+                    </availability>
+                    <model_params>
+                        <table_field_name>enable_qty_increments</table_field_name>
+                        <is_use_config_field>1</is_use_config_field>
+                        <field_type>boolean</field_type>
+                    </model_params>
+                </stock_enable_qty_increments>
+                
+                <stock_enable_qty_inc model="customgrid/custom_column_product_inventory" module="customgrid">
+                    <name>Enable Qty Increments</name>
+                    <group>Inventory</group>
+                    <allow_customization>1</allow_customization>
+                    <availability>
+                        <excluded_versions>
+                            <v14>1.4.*</v14>
+                            <v15>1.5.*</v15>
+                        </excluded_versions>
+                    </availability>
+                    <model_params>
+                        <table_field_name>enable_qty_increments</table_field_name>
+                        <is_use_config_field>1</is_use_config_field>
+                        <use_config_field_name>use_config_enable_qty_inc</use_config_field_name>
+                        <field_type>boolean</field_type>
+                    </model_params>
+                </stock_enable_qty_inc>
+                
+                <stock_is_in_stock model="customgrid/custom_column_product_inventory" module="customgrid">
+                    <name>Stock Availability</name>
+                    <group>Inventory</group>
+                    <model_params>
+                        <table_field_name>is_in_stock</table_field_name>
+                        <field_type>boolean</field_type>
+                    </model_params>
+                </stock_is_in_stock>
             </custom_columns>
         </product>
         
@@ -178,6 +323,7 @@
                         <order_field>shipping_method</order_field>
                     </model_params>
                 </shipping_method>
+                
                 <shipping_description model="customgrid/custom_column_order_base" module="customgrid">
                     <name>Description</name>
                     <group>Shipping</group>
@@ -186,6 +332,7 @@
                         <order_field>shipping_description</order_field>
                     </model_params>
                 </shipping_description>
+                
                 <payment_method model="customgrid/custom_column_order_payment" module="customgrid">
                     <name>Method</name>
                     <group>Payment</group>
@@ -194,6 +341,7 @@
                         <payment_field>method</payment_field>
                     </model_params>
                 </payment_method>
+                
                 <store_id model="customgrid/custom_column_simple_duplicate" module="customgrid">
                     <name>Store View</name>
                     <group>Duplicated</group>
@@ -202,6 +350,7 @@
                         <duplicated_field>store_id</duplicated_field>
                     </model_params>
                 </store_id>
+                
                 <status_color model="customgrid/custom_column_order_status_color" module="customgrid">
                     <name>Status (With Color)</name>
                     <description><![CDATA[Displays the status and colorizes the row]]></description>

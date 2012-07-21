@@ -34,9 +34,11 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Select
             );
         } else {
             $options = $this->getColumn()->getOptions();
+            
             if (!empty($options) && is_array($options)) {
                 return $options;
             }
+            
             return array();
         }
     }

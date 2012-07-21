@@ -184,7 +184,7 @@ class BL_CustomGrid_Model_Grid_Type
                                     $value = array_filter($value, 'is_scalar');
                                 }
                                 
-                                call_user_func(array($model, 'add'.$this->_camelize($key)), $value, true);
+                                call_user_func(array($model, 'add'.$this->_camelize($key)), array_values($value), true);
                             }
                         }
                     }
@@ -222,6 +222,7 @@ class BL_CustomGrid_Model_Grid_Type
                     $model->setCustomParamsWindowConfig($configWindow, true);
                 }
                 
+                $model->finalizeConfig();
                 $models[$id] = $model;
             }
             

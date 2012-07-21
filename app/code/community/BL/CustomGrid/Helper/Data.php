@@ -57,8 +57,8 @@ class BL_CustomGrid_Helper_Data extends Mage_Core_Helper_Abstract
                         'label' => $value,
                     );
                 }
-            } else {
-                // Seems to already be an (options ?) array, remove anyway empty values if needed
+            } elseif (isset($value['value']) && isset($value['label'])) {
+                // Seems to already be an options array, remove anyway empty values if needed
                 if ($withEmpty || ($value['value'] !== '')) {
                     $optionsArray[] = $value;
                 }

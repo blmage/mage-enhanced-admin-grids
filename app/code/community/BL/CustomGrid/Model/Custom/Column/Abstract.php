@@ -98,6 +98,11 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract
         return $this;
     }
     
+    public function finalizeConfig()
+    {
+        return $this;
+    }
+    
     protected function _addAvailabilityConfig($type, $value, $merge=false)
     {
         if (!is_array($value)) {
@@ -153,11 +158,11 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract
             return true;
         }
         
-        $matched = true;
+        $matched = false;
         
         foreach ($values as $value) {
-            if (!preg_match($this->_getAvailabilityRegex($value), $reference)) {
-                $matched = false;
+            if (preg_match($this->_getAvailabilityRegex($value), $reference)) {
+                $matched = true;
                 break;
             }
         }
@@ -290,7 +295,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract
     
     protected function _extractStringParam(array $params, $key, $default=null, $notEmpty=false)
     {
-        return (isset($params[$key]) ? ((!$notEmpty || (($value = strval($params[$key])) !== '')) ? $value : $default) : $default);
+        return (isset($params[$key]) ? ((!$notEmpty || (strval($params[$key]) !== '')) ? strval($params[$key]) : $default) : $default);
     }
     
     protected function _getDefaultGridValues($block, $model, $id, $alias, $params, $store, $renderer=null)

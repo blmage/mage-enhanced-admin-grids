@@ -95,7 +95,8 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Store
         }
         if ($this->getValue() == '_deleted_') {
             return array('null' => true);
-        } else {
+        }
+        else {
             return array('eq' => $this->getValue());
         }
     }
