@@ -86,7 +86,7 @@ class Bl_CustomGrid_Block_Widget_Grid_Column_Filter_Price
     public function getValue($index=null)
     {
         if ($index) {
-            return $this->_getData('value', $index);
+            return $this->getData('value', $index);
         }
         $value = $this->_getData('value');
         
