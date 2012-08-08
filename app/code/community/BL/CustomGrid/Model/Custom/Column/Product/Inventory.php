@@ -166,6 +166,7 @@ class BL_CustomGrid_Model_Custom_Column_Product_Inventory
                 return ($this->_extractBoolParam($params['old'], 'use_config_filter')
                     XOR $this->_extractBoolParam($params['new'], 'use_config_filter'));
             }
+            return false;
         }
         return true;
     }
