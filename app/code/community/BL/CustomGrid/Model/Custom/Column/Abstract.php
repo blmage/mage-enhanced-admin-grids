@@ -369,9 +369,20 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract
         return $this;
     }
     
-    protected function _prepareGridCollection($collection, $block, $model, $id, $alias, $params, $store, $renderer=null)
+    public function prepareGridCollectionFiltersMap($model, $block, $collection)
     {
         $this->_getCollectionHelper()->prepareGridCollectionFiltersMap($collection, $block, $model);
+        return $this;
+    }
+    
+    protected function _prepareGridCollection($collection, $block, $model, $id, $alias, $params, $store, $renderer=null)
+    {
+        $block->blcg_addCollectionCallback(
+            self::GC_EVENT_AFTER_SET,
+            array($this, 'prepareGridCollectionFiltersMap'),
+            array($model),
+            true
+        );
         return $this;
     }
     
