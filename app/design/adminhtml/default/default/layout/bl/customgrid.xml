@@ -32,6 +32,18 @@
         </reference>
     </default>
     
+    <blcg_magento_version_to_16>
+        <reference name="head">
+            <action method="addItem"><type>js_css</type><name>prototype/windows/themes/magento.css</name></action>
+        </reference>
+    </blcg_magento_version_to_16>
+    
+    <blcg_magento_version_from_17>
+        <reference name="head">
+            <action method="addCss"><name>lib/prototype/windows/themes/magento.css</name></action>
+        </reference> 
+    </blcg_magento_version_from_17>
+    
     <customgrid_custom_grid_index>
         <reference name="content">
             <block type="customgrid/custom_grid" name="customgrid.custom_grid" />

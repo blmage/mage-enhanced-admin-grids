@@ -751,6 +751,12 @@ class BL_CustomGrid_Model_Observer
     {
         if ($layout = $observer->getLayout()) {
             $layout->getUpdate()->addHandle(array_unique($this->_additionalLayoutHandles));
+            
+            if (Mage::helper('customgrid')->isMageVersionLesserThan('1', '7')) {
+                $layout->getUpdate()->addHandle('blcg_magento_version_to_16');
+            } else {
+                $layout->getUpdate()->addHandle('blcg_magento_version_from_17');
+            }
         }
     }
     
