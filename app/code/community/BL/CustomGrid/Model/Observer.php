@@ -128,6 +128,21 @@ class BL_CustomGrid_Model_Observer
             private $_blcg_additionalAttributes = array();
             private $_blcg_mustSelectAdditionalAttributes   = false;
             
+            public function getModuleName()
+            {
+                $module = $this->getData(\'module_name\');
+                
+                if (is_null($module)) {
+                    if (!$class = get_parent_class($this)) {
+                        $class = get_class($this);
+                    }
+                    $module = substr($class, 0, strpos($class, \'_Block\'));
+                    $this->setData(\'module_name\', $module);
+                }
+                
+                return $module;
+            }
+            
             public function setCollection($collection)
             {
                 if (!is_null($this->_blcg_typeModel)) {
