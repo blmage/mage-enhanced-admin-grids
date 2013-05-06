@@ -22,7 +22,6 @@
             <!-- Some needed elements from editor handle -->
             <action method="addJs"><script>prototype/window.js</script></action>
             <action method="addItem"><type>js_css</type><name>prototype/windows/themes/default.css</name></action>
-            <action method="addItem"><type>js_css</type><name>prototype/windows/themes/magento.css</name></action>
         </reference>
         
         <reference name="before_body_end">
