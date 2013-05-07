@@ -1996,10 +1996,9 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
                 unset($columns[$column['column_id']]);
             } else {
                 // Assume deleted column
-                unset($this->_originIds[$this->_columns[$columnId]['origin']][array_search(
-                    $columnId, 
-                    $this->_columns[$columnId]['origin']
-                )]);
+                if (($key = array_search($columnId, $this->_originIds[$this->_columns[$columnId]['origin']])) !== false) {
+                    unset($this->_originIds[$this->_columns[$columnId]['origin']][$key]);
+                }
                 unset($this->_columns[$columnId]);
             }
         }
