@@ -19,11 +19,18 @@ class BL_CustomGrid_Helper_Collection
     const COLLECTION_APPLIED_MAP_FLAG = '_blcg_hc_applied_map_';
     
     /**
-    * Registered $adapter->quote*() callbacks (usable for readability)
+    * Registered $adapter->quoteIdentifier() callbacks (usable for convenience and readability)
     * 
     * @var array
     */
     protected $_quoteIdentifierCallbacks = array();
+    
+    /**
+    * Count of currently registered quoteIdentifier() callbacks
+    * 
+    * @var integer
+    */
+    protected $_qiCallbacksCount = 0;
     
     /**
     * Base callbacks to call when building filters map for a given grid block
@@ -41,6 +48,13 @@ class BL_CustomGrid_Helper_Collection
     * @var array
     */
     protected $_additionalFiltersMapCallbacks = array();
+    
+    /**
+    * Cache for describeTable() results
+    * 
+    * @var array
+    */
+    protected $_describeTableCache = array();
     
     public function getCollectionAdapter($collection)
     {
@@ -86,20 +100,32 @@ class BL_CustomGrid_Helper_Collection
         return '_table_'.$attribute;
     }
     
-    public function callQuoteIdentifierCallback($callback, $identifier)
+    public function callQuoteIdentifier($identifier, $callbackIndex)
     {
-        if (isset($this->_quoteIdentifierCallbacks[$callback])) {
-            return $callback($this->_quoteIdentifierCallbacks[$callback]['adapter'], $identifier);
+        foreach ($this->_quoteIdentifierCallbacks as $callback) {
+            if ($callback['index'] == $callbackIndex) {
+                $identifier = $callback['adapter']->quoteIdentifier($identifier);
+                break;
+            }
         }
         return $identifier;
     }
     
     public function getQuoteIdentifierCallback($adapter)
     {
-        $quoteCallback = create_function('$a, $i', 'return $a->quoteIdentifier($i);');
-        $callCallback  = create_function('$i', 'return Mage::helper(\'customgrid/collection\')->callQuoteIdentifierCallback(\''.$quoteCallback.'\', $i);');
-        $this->_quoteIdentifierCallbacks[$quoteCallback] = array('adapter' => $adapter);
-        return $callCallback;
+        $adapterKey = spl_object_hash($adapter);
+        
+        if (!isset($this->_quoteIdentifierCallbacks[$adapterKey])) {
+            $callback = create_function('$v', 'return Mage::helper(\'customgrid/collection\')->callQuoteIdentifier($v, '.++$this->_qiCallbacksCount.');');
+            
+            $this->_quoteIdentifierCallbacks[$adapterKey] = array(
+                'adapter'  => $adapter,
+                'index'    => $this->_qiCallbacksCount,
+                'callback' => $callback
+            );
+        }
+        
+        return $this->_quoteIdentifierCallbacks[$adapterKey]['callback'];
     }
     
     public function buildFiltersMapArray($fields, $tableAlias)
@@ -146,7 +172,98 @@ class BL_CustomGrid_Helper_Collection
         return !$collection->hasFlag(self::COLLECTION_APPLIED_MAP_FLAG);
     }
     
-    public function prepareGridCollectionFiltersMap($collection, $block, $model)
+    protected function _sortMatchingTables($a, $b)
+    {
+        return ($a['priority'] > $b['priority'] ? 1 : ($a['priority'] < $b['priority'] ? -1 : 0));
+    }
+    
+    protected function _handleUnmappedFilters($collection, $block, $model, $filters)
+    {
+        // Get collection filters map
+        $reflectedCollection  = new ReflectionObject($collection);
+        // @todo Reflection could maybe be really useful in other places :)
+        
+        try {
+            $mapProperty = $reflectedCollection->getProperty('_map');
+            $mapProperty->setAccessible(true);
+            $collectionFiltersMap = $mapProperty->getValue($collection);
+            
+        } catch (ReflectionException $e) {
+            // Failed to get map poperty
+            $collectionFiltersMap = null;
+        }
+        
+        if (!is_array($collectionFiltersMap)) {
+            // Stop now if we won't be able to determine which fields are mapped, and which are not
+            return $this;
+        } else {
+            // Get mapped fields only
+            $collectionFiltersMap = (isset($collectionFiltersMap['fields']) ? $collectionFiltersMap['fields'] : array());
+        }
+        
+        // Check for "potentially dangerous" unmapped fields in applied filters
+        $unmappedFields = array();
+        
+        foreach ($block->getColumns() as $columnId => $column) {
+            if (isset($filters[$columnId])
+                && (!empty($filters[$columnId]) || strlen($filters[$columnId]) > 0)
+                && $column->getFilter()) {
+                $field = ($column->getFilterIndex() ? $column->getFilterIndex() : $column->getIndex());
+                
+                if ((strpos($field, '.') === false)
+                    && !isset($collectionFiltersMap[$field])
+                    && (strpos($field, BL_CustomGrid_Model_Grid::GRID_COLUMN_ATTRIBUTE_GRID_ALIAS) !== 0)
+                    && (strpos($field, BL_CustomGrid_Model_Grid::GRID_COLUMN_CUSTOM_GRID_ALIAS) !== 0)) {
+                    // Unmapped field name without a table alias, that is not completely sure to not correspond to an actual field
+                    $unmappedFields[] = $field;
+                }
+            }
+        }
+        
+        if (!empty($unmappedFields)) {
+            // Search for unmapped fields in each joined table
+            $adapter = $collection->getSelect()->getAdapter();
+            $matchingTables = array();
+            
+            foreach ($collection->getSelectSql()->getPart(Zend_Db_Select::FROM) as $tableAlias => $table) {
+                $tableName = $table['tableName'];
+                
+                if (!isset($this->_describeTableCache[$tableName])) {
+                    $this->_describeTableCache[$tableName] = $adapter->describeTable($tableName);
+                }
+                $matchingFields = array_intersect($unmappedFields, array_keys($this->_describeTableCache[$tableName]));
+                
+                if (!empty($matchingFields)) {
+                    $matchingTables[$tableAlias] = array(
+                        'fields'   => $matchingFields,
+                        // @todo better priority determination if useful
+                        'priority' => ($table['joinType'] == Zend_Db_Select::FROM ? 1 : ($table['joinType'] == Zend_Db_Select::LEFT_JOIN ? 100 : 10)),
+                    );
+                }
+            }
+            
+            uasort($matchingTables, array($this, '_sortMatchingTables'));
+            
+            foreach ($matchingTables as $tableAlias => $table) {
+                $fields = array_intersect($unmappedFields, $table['fields']);
+                $unmappedFields = array_diff($unmappedFields, $fields);
+                
+                foreach ($fields as $field) {
+                    $this->addFilterToCollectionMap($collection, $adapter->quoteIdentifier($tableAlias.'.'.$field), $field);
+                }
+                if (empty($unmappedFields)) {
+                    break;
+                }
+            }
+            
+            // @todo should it be a toggable feature [at grid level] ?
+            // @todo in case of multiple matching tables for a single field, should we inform the user ? (should not be troublesome in almost all cases)
+        }
+        
+        return $this;
+    }
+    
+    public function prepareGridCollectionFiltersMap($collection, $block, $model, $filters)
     {
         if (!$this->shouldPrepareCollectionFiltersMap($collection)) {
             return $this;
@@ -169,7 +286,9 @@ class BL_CustomGrid_Helper_Collection
             }
         }
         
+        $this->_handleUnmappedFilters($collection, $block, $model, $filters);
         $collection->setFlag(self::COLLECTION_APPLIED_MAP_FLAG, true);
+        
         return $this;
     }
     

@@ -25,6 +25,8 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract
     // Grid collection events on which to apply callbacks
     const GC_EVENT_BEFORE_PREPARE     = 'before_prepare';
     const GC_EVENT_AFTER_PREPARE      = 'after_prepare';
+    const GC_EVENT_BEFORE_SET_FILTERS = 'before_set_filters';
+    const GC_EVENT_AFTER_SET_FILTERS  = 'after_set_filters';
     const GC_EVENT_BEFORE_SET         = 'before_set';
     const GC_EVENT_AFTER_SET          = 'after_set';
     const GC_EVENT_BEFORE_EXPORT_LOAD = 'before_export_load';
@@ -369,16 +371,16 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract
         return $this;
     }
     
-    public function prepareGridCollectionFiltersMap($model, $block, $collection)
+    public function prepareGridCollectionFiltersMap($model, $block, $collection, $filters)
     {
-        $this->_getCollectionHelper()->prepareGridCollectionFiltersMap($collection, $block, $model);
+        $this->_getCollectionHelper()->prepareGridCollectionFiltersMap($collection, $block, $model, $filters);
         return $this;
     }
     
     protected function _prepareGridCollection($collection, $block, $model, $id, $alias, $params, $store, $renderer=null)
     {
         $block->blcg_addCollectionCallback(
-            self::GC_EVENT_AFTER_SET,
+            self::GC_EVENT_BEFORE_SET_FILTERS,
             array($this, 'prepareGridCollectionFiltersMap'),
             array($model),
             true

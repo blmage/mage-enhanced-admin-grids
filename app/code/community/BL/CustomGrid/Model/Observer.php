@@ -120,6 +120,8 @@ class BL_CustomGrid_Model_Observer
             private $_blcg_collectionCallbacks   = array(
                 \'before_prepare\'     => array(),
                 \'after_prepare\'      => array(),
+                \'before_set_filters\' => array(),
+                \'after_set_filters\'  => array(),
                 \'before_set\'         => array(),
                 \'after_set\'          => array(),
                 \'before_export_load\' => array(),
@@ -186,7 +188,10 @@ class BL_CustomGrid_Model_Observer
                     if (!is_null($this->_blcg_gridModel)) {
                         $data = $this->_blcg_gridModel->verifyGridBlockFilters($this, $data);
                     }
-                    return parent::_setFilterValues($data);
+                    $this->_blcg_launchCollectionCallbacks(\'before_set_filters\', array($this, $this->_collection, $data));
+                    $return = parent::_setFilterValues($data);
+                    $this->_blcg_launchCollectionCallbacks(\'after_set_filters\', array($this, $this->_collection, $data));
+                    return $return;
                 }
             }
             
