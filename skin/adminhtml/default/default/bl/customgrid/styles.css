@@ -41,7 +41,9 @@ button.blcg-export span { padding-left:20px; background-image:url(images/ico_exp
 
 /* COLUMNS LIST */
 
-.blcg-custom-grid-config { margin:0 0 6px;   }
+.blcg-custom-grid-config { margin:0 0 6px; }
+.blcg-custom-grid-config .grid table tr:hover,
+.blcg-custom-grid-config .grid table tr.dnd_whileDrag { background-color:#fcf5dd; } 
 .blcg-custom-grid-config .grid table td { vertical-align:middle; }
 .blcg-custom-grid-config .grid table .blcg-drag-handle { padding-left:9px; padding-right:9px;  background:url(images/up-down.gif) no-repeat center center; cursor:move; }
 .blcg-custom-grid-config .grid table .blcg-store-select { margin:0; }
