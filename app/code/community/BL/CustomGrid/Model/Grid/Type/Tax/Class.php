@@ -35,8 +35,8 @@ class BL_CustomGrid_Model_Grid_Type_Tax_Class
     public function checkUserEditPermissions($type, $model, $block=null, $params=array())
     {
         if (parent::checkUserEditPermissions($type, $model, $block, $params)) {
-            if (!is_null($grid)) {
-                $classType = $grid->getClassType();
+            if (!is_null($block)) {
+                $classType = $block->getClassType();
             } elseif (isset($params['additional']['class_type'])) {
                 $classType = $params['additional']['class_type'];
             } else {

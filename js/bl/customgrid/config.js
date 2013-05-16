@@ -2078,4 +2078,4 @@ blcg.Filter.Categories.prototype = {
             blcg.Tools.closeDialog(this.window);
         }
     }
-}
+};
