@@ -817,6 +817,7 @@ blcg.TableDnd.prototype = {
                     this.currentTable = table;
                     this.mouseOffset  = this.getMouseOffset(cell, event);
                     if (this.tableDndConfig.onDragStart) {
+                        event.preventDefault(); 
                         // Call the onDrop method if there is one
                         this.tableDndConfig.onDragStart(table, cell);
                     }
@@ -834,6 +835,7 @@ blcg.TableDnd.prototype = {
                             this.currentTable = table;
                             this.mouseOffset  = this.getMouseOffset(row, event);
                             if (this.tableDndConfig.onDragStart) {
+                                event.preventDefault(); 
                                 // Call the onDrop method if there is one
                                 this.tableDndConfig.onDragStart(table, row);
                             }
@@ -859,6 +861,7 @@ blcg.TableDnd.prototype = {
                     this.currentTable = table;
                     this.mouseOffset  = this.getMouseOffset(cell, event);
                     if (this.tableDndConfig.onDragStart) {
+                        event.preventDefault(); 
                         // Call the onDrop method if there is one
                         this.tableDndConfig.onDragStart(table, cell);
                     }
@@ -874,6 +877,7 @@ blcg.TableDnd.prototype = {
                         this.currentTable = table;
                         this.mouseOffset  = this.getMouseOffset(row, event);
                         if (this.tableDndConfig.onDragStart) {
+                            event.preventDefault(); 
                             // Call the onDrop method if there is one
                             this.tableDndConfig.onDragStart(table, row);
                         }
