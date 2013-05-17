@@ -1,0 +1,7 @@
+app/code/community/*                                app/code/community/
+app/design/adminhtml/default/default/layout/*       app/design/adminhtml/default/default/layout/
+app/design/adminhtml/default/default/template/*     app/design/adminhtml/default/default/template/
+app/etc/modules/*                                   app/etc/modules/
+app/locale/fr_FR/*                                  app/locale/fr_FR/
+js/*                                                js/
+skin/adminhtml/default/default/*                    skin/adminhtml/default/default/
