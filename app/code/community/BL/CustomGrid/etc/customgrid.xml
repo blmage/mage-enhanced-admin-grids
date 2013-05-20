@@ -362,6 +362,29 @@
                     </availability>
                     <allow_customization>1</allow_customization>
                 </status_color>
+                
+                <customer_group model="customgrid/custom_column_order_customer_group" module="customgrid">
+                    <name>Group</name>
+                    <group>Customer</group>
+                    <allow_renderers>1</allow_renderers>
+                    <allow_customization>1</allow_customization>
+                    <model_params>
+                        <order_field>customer_group_id</order_field>
+                    </model_params>
+                    <custom_params>
+                        <config>
+                            <use_default_behaviour>
+                                <label>Use Default Behaviour</label>
+                                <description><![CDATA[Applies by default the use of an "options" renderer with customer group values (still overridable by rendering options)]]></description>
+                                <visible>1</visible>
+                                <type>select</type>
+                                <source_model>customgrid/system_config_source_yesno</source_model>
+                                <sort_order>10</sort_order>
+                                <value>0</value>
+                            </use_default_behaviour>
+                        </config>
+                    </custom_params>
+                </customer_group>
             </custom_columns>
         </sales_order>
         
