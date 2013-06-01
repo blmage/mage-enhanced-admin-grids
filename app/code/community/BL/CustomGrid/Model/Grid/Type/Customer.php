@@ -18,7 +18,8 @@ class BL_CustomGrid_Model_Grid_Type_Customer
 {   
     public function isAppliableToGrid($type, $rewritingClassName)
     {
-        return ($type == 'adminhtml/customer_grid');
+        return (($type == 'adminhtml/customer_grid')
+            || ($type == 'adminhtml/sales_order_create_customer_grid'));
     }
     
     public function canHaveAttributeColumns($type)
@@ -46,5 +47,59 @@ class BL_CustomGrid_Model_Grid_Type_Customer
     protected function _getEditableAttributes($type)
     {
         return array();
+    }
+    
+    protected function _getAddressTypes()
+    {
+        $helper = Mage::helper('customgrid');
+        return array(
+            'billing'  => $helper->__('Billing Address'),
+            'shipping' => $helper->__('Shipping Address'),
+        );
+    }
+    
+    protected function _getAdditionalCustomColumns()
+    {
+        $columns = array();
+        $helper  = Mage::helper('customer');
+        
+        // Add address attributes
+        $addressAttributes = Mage::getModel('customer/address')->getResource()
+            ->loadAllAttributes()
+            ->getAttributesByCode();
+        $keptAttributes = array();
+        
+        foreach ($addressAttributes as $attribute) {
+            if ($attribute->getBackendType() != 'static') {
+                $keptAttributes[$attribute->getAttributeCode()] = $attribute;
+            }
+        }
+        
+        foreach ($this->_getAddressTypes() as $addressType => $typeLabel) {
+            foreach ($keptAttributes as $attributeCode => $attribute) {
+                $columnId   = $addressType.'_address_'.$attributeCode;
+                // Force translation, customer address attributes may not be translated by default
+                $columnName = $helper->__($attribute->getFrontendLabel());
+                
+                // Clarify attributes labels for which we can't know which is which by default
+                if ($attributeCode == 'region') {
+                    $columnName .= ' ('.$helper->__('Name').')';
+                } elseif ($attributeCode == 'region_id') {
+                    $columnName .= ' ('.$helper->__('ID').')';
+                }
+                
+                $column = Mage::getModel('customgrid/custom_column_customer_address_'.$addressType)
+                    ->setId($columnId)
+                    ->setModule('customgrid')
+                    ->setName($columnName)
+                    ->setGroup($typeLabel)
+                    ->setAllowRenderers(true)
+                    ->setModelParams(array('attribute_code' => $attributeCode));
+                
+                $columns[$columnId] = $column;
+            }
+        }
+        
+        return $columns;
     }
 }
