@@ -38,6 +38,11 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract
         $this->initConfig();
     }
     
+    protected function _getBaseHelper()
+    {
+        return Mage::helper('customgrid');
+    }
+    
     protected function _getGridHelper()
     {
         return Mage::helper($this->_gridHelper);
@@ -377,6 +382,12 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract
         return $this;
     }
     
+    public function restoreGridCollectionFiltersMap($model, $block, $collection, $filters)
+    {
+        $this->_getCollectionHelper()->restoreGridCollectionFiltersMap($collection, $block, $model, $filters);
+        return $this;
+    }
+    
     protected function _prepareGridCollection($collection, $block, $model, $id, $alias, $params, $store, $renderer=null)
     {
         $block->blcg_addCollectionCallback(
@@ -385,6 +396,27 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract
             array($model),
             true
         );
+        
+        if ($this->_getBaseHelper()->isMageVersionGreaterThan(1, 6)
+            && $this->_getGridHelper()->isEavEntityGrid($block, $model)) {
+            /**
+            * Fix for Mage_Eav_Model_Entity_Collection_Abstract::_renderOrders() on 1.7+,
+            * which does not handle well fields with table aliases
+            * (it forces the use of addAttributeToSort(), but then in our case possibly on mapped fields,
+            *  which are not / can not be recognized as attributes or static fields)
+            * Note that this does not affect filters applied on custom columns derived from BL_CustomGrid_Model_Custom_Column_Simple_Abstract,
+            * as it forces field orders on EAV entity grids
+            */
+            $block->blcg_addCollectionCallback(
+                self::GC_EVENT_AFTER_SET_FILTERS,
+                array($this, 'restoreGridCollectionFiltersMap'),
+                array($model),
+                true
+            );
+            
+            // @todo or it may not be needed at all to prepare the filters map for EAV entity collections ? (addAttributeToFilter() may do it by itself most of the time)
+        }
+        
         return $this;
     }
     

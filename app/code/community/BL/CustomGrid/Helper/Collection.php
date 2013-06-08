@@ -16,7 +16,8 @@
 class BL_CustomGrid_Helper_Collection
     extends Mage_Core_Helper_Abstract
 {
-    const COLLECTION_APPLIED_MAP_FLAG = '_blcg_hc_applied_map_';
+    const COLLECTION_APPLIED_MAP_FLAG   = '_blcg_hc_applied_map_';
+    const COLLECTION_PREVIOUS_MAP_FLAG  = '_blcg_hc_previous_map_';
     
     /**
     * Registered $adapter->quoteIdentifier() callbacks (usable for convenience and readability)
@@ -177,21 +178,45 @@ class BL_CustomGrid_Helper_Collection
         return ($a['priority'] > $b['priority'] ? 1 : ($a['priority'] < $b['priority'] ? -1 : 0));
     }
     
-    protected function _handleUnmappedFilters($collection, $block, $model, $filters)
+    protected function _getCollectionFiltersMapProperty($collection)
     {
-        // Get collection filters map
-        $reflectedCollection  = new ReflectionObject($collection);
-        // @todo Reflection could maybe be really useful in other places :)
+        $mapProperty = null;
         
         try {
+            $reflectedCollection = new ReflectionObject($collection);
             $mapProperty = $reflectedCollection->getProperty('_map');
             $mapProperty->setAccessible(true);
-            $collectionFiltersMap = $mapProperty->getValue($collection);
-            
-        } catch (ReflectionException $e) {
-            // Failed to get map poperty
-            $collectionFiltersMap = null;
+        } catch (ReflectionException $e) {}
+        
+        return $mapProperty;
+    }
+    
+    protected function _getCollectionFiltersMap($collection)
+    {
+        $collectionFiltersMap = null;
+        
+        if ($mapProperty = $this->_getCollectionFiltersMapProperty($collection)) {
+            try {
+                $collectionFiltersMap = $mapProperty->getValue($collection);
+            } catch (ReflectionException $e) {}
         }
+        
+        return $collectionFiltersMap;
+    }
+    
+    protected function _setCollectionFiltersMap($collection, $filtersMap)
+    {
+        if ($mapProperty = $this->_getCollectionFiltersMapProperty($collection)) {
+            try {
+                $mapProperty->setValue($collection, $filtersMap);
+            } catch (ReflectionException $e) {}
+        }
+        return $this;
+    }
+    
+    protected function _handleUnmappedFilters($collection, $block, $model, $filters)
+    {
+        $collectionFiltersMap = $this->_getCollectionFiltersMap($collection);
         
         if (!is_array($collectionFiltersMap)) {
             // Stop now if we won't be able to determine which fields are mapped, and which are not
@@ -270,6 +295,8 @@ class BL_CustomGrid_Helper_Collection
         }
         
         $blockType = $model->getBlockType();
+        $previousFiltersMap = $this->_getCollectionFiltersMap($collection);
+        $collection->setFlag(self::COLLECTION_PREVIOUS_MAP_FLAG, $previousFiltersMap);
         
         if (isset($this->_baseFiltersMapCallbacks[$blockType])) {
             call_user_func(array($this, $this->_baseFiltersMapCallbacks[$blockType]), $collection, $block, $model);
@@ -289,6 +316,18 @@ class BL_CustomGrid_Helper_Collection
         $this->_handleUnmappedFilters($collection, $block, $model, $filters);
         $collection->setFlag(self::COLLECTION_APPLIED_MAP_FLAG, true);
         
+        return $this;
+    }
+    
+    public function restoreGridCollectionFiltersMap($collection, $block, $model, $resetAppliedFlag=true)
+    {
+        if ($previousFiltersMap = $collection->getFlag(self::COLLECTION_PREVIOUS_MAP_FLAG)) {
+            $this->_setCollectionFiltersMap($collection, $previousFiltersMap);
+            
+            if ($resetAppliedFlag) {
+                $collection->setFlag(self::COLLECTION_APPLIED_MAP_FLAG, true);
+            }
+        }
         return $this;
     }
     

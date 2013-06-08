@@ -773,7 +773,7 @@ class BL_CustomGrid_Model_Observer
         if ($layout = $observer->getLayout()) {
             $layout->getUpdate()->addHandle(array_unique($this->_additionalLayoutHandles));
             
-            if (Mage::helper('customgrid')->isMageVersionLesserThan('1', '7')) {
+            if (Mage::helper('customgrid')->isMageVersionLesserThan(1, 7)) {
                 $layout->getUpdate()->addHandle('blcg_magento_version_to_16');
             } else {
                 $layout->getUpdate()->addHandle('blcg_magento_version_from_17');
@@ -869,12 +869,14 @@ class BL_CustomGrid_Model_Observer
                     );
                     
                     // Replace grid template with our own one
-                    if (Mage::helper('customgrid')->isMageVersion16()) {
+                    $helper = Mage::helper('customgrid');
+                    
+                    if ($helper->isMageVersionGreaterThan(1, 5)) {
                         $grid->setTemplate('bl/customgrid/widget/grid/16.phtml');
-                    } elseif (Mage::helper('customgrid')->isMageVersion15()) {
+                    } elseif ($helper->isMageVersion15()) {
                         $grid->setTemplate('bl/customgrid/widget/grid/15.phtml');
                     } else {
-                        $revision = Mage::helper('customgrid')->getMageVersionRevision();
+                        $revision = $helper->getMageVersionRevision();
                         $grid->setTemplate('bl/customgrid/widget/grid/14'.intval($revision).'.phtml');
                     }
                 }

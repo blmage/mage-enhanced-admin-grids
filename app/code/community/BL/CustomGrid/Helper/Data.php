@@ -144,6 +144,11 @@ class BL_CustomGrid_Helper_Data extends Mage_Core_Helper_Abstract
         return $this->isMageVersion(1, 6);
     }
     
+    public function isMageVersion17()
+    {
+        return $this->isMageVersion(1, 7);
+    }
+    
     public function getMageVersionRevision()
     {
         $infos = Mage::getVersionInfo();
