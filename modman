@@ -1,7 +1,7 @@
-app/code/community/*                                app/code/community/
-app/design/adminhtml/default/default/layout/*       app/design/adminhtml/default/default/layout/
-app/design/adminhtml/default/default/template/*     app/design/adminhtml/default/default/template/
-app/etc/modules/*                                   app/etc/modules/
-app/locale/fr_FR/*                                  app/locale/fr_FR/
-js/*                                                js/
-skin/adminhtml/default/default/*                    skin/adminhtml/default/default/
+app/code/community/BL/CustomGrid/                               app/code/community/BL/CustomGrid/
+app/design/adminhtml/default/default/layout/bl/customgrid.xml   app/design/adminhtml/default/default/layout/bl/customgrid.xml
+app/design/adminhtml/default/default/template/bl/customgrid/    app/design/adminhtml/default/default/template/bl/customgrid/
+app/etc/modules/BL_CustomGrid.xml                               app/etc/modules/BL_CustomGrid.xml
+app/locale/fr_FR/BL_CustomGrid.csv                              app/locale/fr_FR/BL_CustomGrid.csv
+js/bl/customgrid/                                               js/bl/customgrid/
+skin/adminhtml/default/default/bl/customgrid/                   skin/adminhtml/default/default/bl/customgrid/
