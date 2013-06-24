@@ -74,8 +74,12 @@ class BL_CustomGrid_Block_Widget_Grid_Form_Attribute_Product
             'gallery'  => Mage::getConfig()->getBlockClassName('adminhtml/catalog_product_helper_form_gallery'),
             'image'    => Mage::getConfig()->getBlockClassName('adminhtml/catalog_product_helper_form_image'),
             'boolean'  => Mage::getConfig()->getBlockClassName('adminhtml/catalog_product_helper_form_boolean'),
-            'textarea' => Mage::getConfig()->getBlockClassName('customgrid/widget_grid_form_helper_product_wysiwyg')
+            'textarea' => Mage::getConfig()->getBlockClassName('customgrid/widget_grid_form_helper_product_wysiwyg'),
         );
+        
+        if ($this->helper('customgrid')->isMageVersionGreaterThan(1, 6)) {
+            $result['weight'] = Mage::getConfig()->getBlockClassName('adminhtml/catalog_product_helper_form_weight');
+        }
         
         $response = new Varien_Object();
         $response->setTypes(array());
