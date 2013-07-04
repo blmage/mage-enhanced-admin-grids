@@ -947,7 +947,7 @@
                 <name>Product Image</name>
                 <sort_order>60000</sort_order>
                 <config_window>
-                    <height>510</height>
+                    <height>560</height>
                 </config_window>
                 <parameters>
                     <display_images>
@@ -968,19 +968,27 @@
                         <sort_order>20</sort_order>
                         <value>1</value>
                     </display_images_urls>
+                    <original_image_link>
+                        <label>Original Image Link</label>
+                        <description><![CDATA[If you choose "Yes", the images / names will point to the original images URLs.]]></description>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <sort_order>30</sort_order>
+                    </original_image_link>
                     <image_width>
                         <label>Image Width</label>
                         <description><![CDATA[If you specify an image width, then you should indicate an image height too]]></description>
                         <visible>1</visible>
                         <type>text</type>
-                        <sort_order>30</sort_order>
+                        <sort_order>40</sort_order>
                     </image_width>
                     <image_height>
                         <label>Image Height</label>
                         <description><![CDATA[If you specify an image height, then you should indicate an image width too]]></description>
                         <visible>1</visible>
                         <type>text</type>
-                        <sort_order>40</sort_order>
+                        <sort_order>50</sort_order>
                     </image_height>
                     <browser_resize_only>
                         <label>Browser Resize Only</label>
@@ -988,7 +996,7 @@
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>adminhtml/system_config_source_yesno</source_model>
-                        <sort_order>50</sort_order>
+                        <sort_order>60</sort_order>
                         <value>0</value>
                     </browser_resize_only>
                     <filter_on_name>
@@ -996,7 +1004,7 @@
                         <description><![CDATA[If you choose "No", filter will apply on images existence]]></description>
                         <visible>1</visible>
                         <type>select</type>
-                        <sort_order>60</sort_order>
+                        <sort_order>70</sort_order>
                         <source_model>adminhtml/system_config_source_yesno</source_model>
                         <value>1</value>
                     </filter_on_name>

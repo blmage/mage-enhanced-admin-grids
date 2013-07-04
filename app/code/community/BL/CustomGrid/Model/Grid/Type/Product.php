@@ -112,6 +112,10 @@ class BL_CustomGrid_Model_Grid_Type_Product
     
     protected function _prepareEditableAttributeCommonConfig($type, $code, $attribute, $config)
     {
+        if ($attribute->getFrontendInput() == 'weight') {
+            $config['in_grid'] = true;
+        }
+        
         return array_merge(
             parent::_prepareEditableAttributeCommonConfig($type, $code, $attribute, $config),
             array(
