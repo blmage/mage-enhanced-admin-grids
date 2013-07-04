@@ -184,3 +184,7 @@ ul.blcg-custom-columns-help-features li { height:16px; padding:0 0 0 16px; line-
 * html .blcg_minimize { background-color:transparent; background-image:none; filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src="./window/button-minimize.png", sizingMethod="crop"); }
 * html .blcg_maximize { background-color:transparent; background-image:none; filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src="../window/button-maximize.png", sizingMethod="crop"); }
 * html .blcg_content { background:#c7c7c7; }
+
+/* SPECIFIC STYLES */
+
+#sales_order_grid .grid .order-tables tr.headings { background:url(../../images/sort_row_bg.gif) repeat-x scroll 0 50% transparent !important; }
