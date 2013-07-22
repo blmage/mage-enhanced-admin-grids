@@ -182,11 +182,35 @@ class BL_CustomGrid_Helper_Collection
     {
         $mapProperty = null;
         
-        try {
-            $reflectedCollection = new ReflectionObject($collection);
-            $mapProperty = $reflectedCollection->getProperty('_map');
-            $mapProperty->setAccessible(true);
-        } catch (ReflectionException $e) {}
+        if (version_compare(phpversion(), '5.3.0', '<') === true) {
+            // ReflectionProperty::setAccessible() was added in PHP 5.3
+            $collectionClass = get_class($collection);
+            $reflectedClass  = 'Blcg_Hc_' . $collectionClass;
+            
+            if (!class_exists($reflectedClass, false)) {
+                // Hopefully temporary fix (though there might not be other solutions)
+                eval('class '.$reflectedClass.' extends '.$collectionClass.' {
+                    public function getValue($collection)
+                    {
+                        return $collection->_map;
+                    }
+                    
+                    public function setValue($collection, $value)
+                    {
+                        $collection->_map = $value;
+                    }
+                }');
+            }
+            
+            return new $reflectedClass();
+            
+        } else {
+            try {
+                $reflectedCollection = new ReflectionObject($collection);
+                $mapProperty = $reflectedCollection->getProperty('_map');
+                $mapProperty->setAccessible(true);
+            } catch (ReflectionException $e) {}
+        }
         
         return $mapProperty;
     }
