@@ -18,7 +18,8 @@ class BL_CustomGrid_Model_Grid_Type_Permissions_Role_User
 {
     public function isAppliableToGrid($type, $rewritingClassName)
     {
-        return ($type == 'adminhtml/permissions_role_grid_user');
+        return (($type == 'adminhtml/permissions_role_grid_user')
+            || ($type == 'adminhtml/api_role_grid_user'));
     }
     
     public function beforeGridPrepareCollection($grid, $firstTime=true)
