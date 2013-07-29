@@ -82,17 +82,47 @@ class BL_CustomGrid_Model_Grid_Type_Product
         return $keptAttributes;
     }
     
-    protected function _getAdditionalCustomColumns()
-    {
-        return array();
-    }
-    
     public function checkUserEditPermissions($type, $model, $block=null, $params=array())
     {
         if (parent::checkUserEditPermissions($type, $model, $block, $params)) {
             return Mage::getSingleton('admin/session')->isAllowed('catalog/products');
         }
         return false;
+    }
+    
+    protected function _getEditableFields($type)
+    {
+        return array(
+            'qty' => array(
+                'type'            => 'text',
+                'required'        => true,
+                'render_reload'   => false,
+                'form_class'      => 'validate-number',
+                'edit_block_type' => 'customgrid/widget_grid_form_static_product_inventory',
+                'inventory_field' => 'qty',
+            ),
+        );
+    }
+    
+    protected function _checkEntityEditableField($type, $config, $params, $entity)
+    {
+        if (parent::_checkEntityEditableField($type, $config, $params, $entity)) {
+            if ($config['id'] == 'qty') {
+                if (!Mage::helper('core')->isModuleEnabled('Mage_CatalogInventory')) {
+                    Mage::throwException(Mage::helper('customgrid')->__('The "Mage_CatalogInventory" module is disabled'));
+                }
+                if ($entity->isComposite()) {
+                    Mage::throwException(Mage::helper('customgrid')->__('The quantity is not editable for composite products'));
+                }
+                if ($entity->getInventoryReadonly()) {
+                    Mage::throwException(Mage::helper('customgrid')->__('The quantity is read-only for this product'));
+                }
+                if (!$this->_getProductInventoryData($entity, 'manage_stock', true)) {
+                    Mage::throwException(Mage::helper('customgrid')->__('The quantity is not editable for this product'));
+                }
+            }
+        }
+        return true;
     }
     
     protected function _getAdditionalEditableAttributes($type)
@@ -295,6 +325,26 @@ class BL_CustomGrid_Model_Grid_Type_Product
         return $value;
     }
     
+    protected function _applyEditedFieldValue($type, $config, $params, $entity, $value)
+    {
+        if ($config['id'] == 'qty') {
+            $productId = $entity->getId();
+            $stockItem = Mage::getModel('cataloginventory/stock_item');
+            $stockItem->setData(array());
+            $stockItem->loadByProduct($productId)->setProductId($productId);
+            
+            if (isset($params['original_inventory_qty'])
+                && (strlen($params['original_inventory_qty']) > 0)) {
+                $stockItem->setQtyCorrection($item->getQty()-$originalQty);
+            }
+            
+            $stockItem->setQty($value);
+            $entity->setData('_blcg_gtp_stock_item', $stockItem);
+            return $this;
+        }
+        return parent::_applyEditedFieldValue($type, $config, $params, $entity, $value);
+    }
+    
     protected function _beforeApplyEditedAttributeValue($type, $config, $params, $entity, &$value)
     {
         if (Mage::app()->isSingleStoreMode()) {
@@ -319,6 +369,17 @@ class BL_CustomGrid_Model_Grid_Type_Product
         return $this;
     }
     
+    protected function _saveEditedFieldValue($type, $config, $params, $entity, $value)
+    {
+        if ($config['id'] == 'qty') {
+            if ($stockItem = $entity->getData('_blcg_gtp_stock_item')) {
+                $stockItem->save();
+            }
+            return $this;
+        }
+        return parent::_saveEditedFieldValue($type, $config, $params, $entity, $value);
+    }
+    
     protected function _afterSaveEditedAttributeValue($type, $config, $params, $entity, $value, $result)
     {
         if ($this->_mustUseDefaultValueForSave($config, $params)) {
@@ -331,6 +392,29 @@ class BL_CustomGrid_Model_Grid_Type_Product
         // Mage::getModel('catalogrule/rule')->applyAllRulesToProduct($productId);
         */
         return parent::_afterSaveEditedAttributeValue($type, $config, $params, $entity, $value, $result);
+    }
+    
+    protected function _getSavedFieldValueForRender($type, $config, $params, $entity)
+    {
+        if ($config['id'] == 'qty') {
+            if ($stockItem = $entity->getStockItem()) {
+                // Reload stock item to get the updated value
+                $stockItem->setProductId(null)->assignProduct($entity);
+            }
+            return $this->_getProductInventoryData($entity, 'qty')*1;
+        }
+        return parent::_getSavedFieldValueForRender($type, $config, $params, $entity);
+    }
+    
+    protected function _getProductInventoryData($product, $field, $useDefaultConfig=false)
+    {
+        if ($product->getStockItem()) {
+            if (!$useDefaultConfig
+                || ($product->getStockItem()->getData('use_config_'.$field) == 0)) {
+                return $product->getStockItem()->getDataUsingMethod($field);
+            }
+        }
+        return Mage::getStoreConfig(Mage_CatalogInventory_Model_Stock_Item::XML_PATH_ITEM . $field);
     }
     
     public function beforeGridPrepareCollection($grid, $firstTime=true)
