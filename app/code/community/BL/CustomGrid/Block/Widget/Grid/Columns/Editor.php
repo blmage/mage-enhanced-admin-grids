@@ -72,6 +72,14 @@ class BL_CustomGrid_Block_Widget_Grid_Columns_Editor
     {
         // Get block columns, sort them if needed
         $columns = $block->getColumns();
+        
+        // Remove only filterable columns
+        foreach ($columns as $key => $column) {
+            if ($column->getBlcgFilterOnly()) {
+                unset($columns[$key]);
+            }
+        }
+        
         $orders  = $block->getColumnsOrder();
         
         if ($sorted) {
@@ -106,6 +114,14 @@ class BL_CustomGrid_Block_Widget_Grid_Columns_Editor
         
         if ($model->checkUserActionPermission(BL_CustomGrid_Model_Grid::GRID_ACTION_USE_CUSTOMIZED_COLUMNS)) {
             $columns = $model->getSortedColumns(true, false, true, true, true, true);
+            
+            // Remove only filterable columns
+            foreach ($columns as $key => $column) {
+                if ($column['filter_only']) {
+                    unset($columns[$key]);
+                }
+            }
+            
         } else {
             $blockColumns = $this->_getBlockSortedColumns($block);
             $modelColumns = $model->getColumns(true);
@@ -114,13 +130,19 @@ class BL_CustomGrid_Block_Widget_Grid_Columns_Editor
             foreach ($blockColumns as $columnId => $column) {
                 if (isset($modelColumns[$columnId])
                     && $model->isGridColumnOrigin($modelColumns[$columnId]['origin'])) {
+                    if ($modelColumns[$columnId]['filter_only']) {
+                        // Skip only filterable columns
+                        // @todo check what is / what should be the scope of GRID_ACTION_USE_CUSTOMIZED_COLUMNS
+                        continue;
+                    }
                     $modelColumn = $modelColumns[$columnId];
+                    
                     $columns[$columnId] = array(
                         'allow_edit' => $modelColumn['allow_edit'],
                         'editable'   => (isset($modelColumn['editable']) ? $modelColumn['editable'] : false),
                     );
                 } else {
-                    $columns[$columnId] = array('allow_edit' =>  false);
+                    $columns[$columnId] = array('allow_edit' => false);
                 }
             }
         }
