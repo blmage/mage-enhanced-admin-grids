@@ -18,7 +18,7 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Default
 {
     protected function _renderTextValue($value, $renderOptions, $formOptions, $fieldType)
     {
-        return ($value != '' ? htmlspecialchars($value) : '');
+        return ($value !== '' ? htmlspecialchars($value) : '');
     }
     
     protected function _renderLongTextValue($value, $renderOptions, $formOptions, $fieldType)
