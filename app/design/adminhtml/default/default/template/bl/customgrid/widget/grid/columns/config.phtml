@@ -40,6 +40,7 @@
                         <a onclick="return <?php echo $this->getJsObjectName() ?>.unselectAll();" href="#"><?php echo $this->__('Unselect All') ?></a>
                         <span class="separator">|</span>
                         <strong id="<?php echo $this->getHtmlId() ?>-count">0</strong> <?php echo $this->__('columns selected') ?>
+                        (<strong id="<?php echo $this->getHtmlId() ?>-filter-count">0</strong> <?php echo $this->__('for filtering only') ?>)
                     <?php else: ?>
                         <strong><?php echo $this->__('Grid Customization') ?></strong>
                     <?php endif ?>

@@ -158,4 +158,6 @@ class BL_CustomGrid_Block_Widget_Grid_Columns_Config_Columns
     {
         return $this->getUrl('customgrid/custom_column_config/index');
     }
+    
+    // @todo restore getErrorText() from where it was lost
 }

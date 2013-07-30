@@ -1144,8 +1144,10 @@ blcg.Grid.Config.prototype = {
         this.columns = $H({});
         this.columnsIds = $A({});
         this.checkboxes = $H({});
+        this.filterCheckboxes = $H({});
         this.orderInputs = $H({});
         this.checkedValues = $A({});
+        this.checkedFilterValues = $A({});
         this.nextId = 0;
             
         this.containerId = containerId;
@@ -1201,10 +1203,11 @@ blcg.Grid.Config.prototype = {
     
     initElements: function()
     {
-        this.container = $(this.containerId);
-        this.table     = $(this.containerId + '-table');
-        this.rows      = $(this.containerId + '-table-rows');
-        this.count     = $(this.containerId + '-count');
+        this.container   = $(this.containerId);
+        this.table       = $(this.containerId + '-table');
+        this.rows        = $(this.containerId + '-table-rows');
+        this.count       = $(this.containerId + '-count');
+        this.filterCount = $(this.containerId + '-filter-count');
         
         if (this.config.useDnd) {
             // Drag'n'drop if needed
@@ -1312,27 +1315,11 @@ blcg.Grid.Config.prototype = {
         this.columns[nextId] = row;
         this.columnsIds.push(nextId);
         
-        row.getElementsBySelector('.visible-checkbox').each(function(cb){
-            cb.observe('click', function(){
-                if (cb.checked) {
-                    this.checkedValues.push(nextId);
-                } else {
-                    var i = this.checkedValues.indexOf(nextId);
-                    if (i != -1) {
-                        this.checkedValues.splice(i, 1);
-                    }
-                } 
-                this.updateCount(); 
-            }.bind(this));
-            
-            this.checkboxes[nextId] = cb;
-            
-            if (cb.checked) {
-                this.checkedValues.push(nextId);
-            }
-        }.bind(this));
-        this.orderInputs[nextId] = $(this.orderInputId.replace(this.config.idRegex, nextId));
+        var visibleCb = row.getElementsBySelector('.visible-checkbox').first();
+        var filterCb  = row.getElementsBySelector('.filter-only-checkbox').first();
+        this.prepareColumnCheckboxes(nextId, visibleCb, filterCb);
         
+        this.orderInputs[nextId] = $(this.orderInputId.replace(this.config.idRegex, nextId));
         this.updateCount();
         this.redecorateColumns();
         
@@ -1363,41 +1350,102 @@ blcg.Grid.Config.prototype = {
         }.bind(this));
     },
     
+    onVisibleCheckboxClick: function(visibleCb, filterCb, columnId, fromFilter)
+    {
+        if (visibleCb.checked) {
+            this.checkedValues.push(columnId);
+        } else {
+            var i = this.checkedValues.indexOf(columnId);
+            
+            if (i != -1) {
+                this.checkedValues.splice(i, 1);
+            }
+            
+            if (!fromFilter && filterCb) {
+                filterCb.checked = false;
+                this.onFilterCheckboxClick(filterCb, visibleCb, columnId, true);
+            }
+        }
+        if (!fromFilter) {
+            this.updateCount();
+        }
+    },
+    
+    onFilterCheckboxClick: function(filterCb, visibleCb, columnId, fromVisible)
+    {
+        if (filterCb.checked) {
+            this.checkedFilterValues.push(columnId);
+            
+            if (!fromVisible) {
+                visibleCb.checked = true;
+                this.onVisibleCheckboxClick(visibleCb, filterCb, columnId, true);
+            }
+        } else {
+            var i = this.checkedFilterValues.indexOf(columnId);
+            
+            if (i != -1) {
+                this.checkedFilterValues.splice(i, 1);
+            }
+        }
+        if (!fromVisible) {
+            this.updateCount();
+        }
+    },
+    
+    prepareColumnCheckboxes: function(columnId, visibleCb, filterCb)
+    {
+        if (visibleCb) {
+            this.checkboxes[columnId] = visibleCb;
+            
+            visibleCb.observe('click', function(){
+                this.onVisibleCheckboxClick(visibleCb, filterCb, columnId);
+            }.bind(this));
+            
+            if (visibleCb.checked) {
+                this.checkedValues.push(columnId);
+            }
+        }
+        if (filterCb) {
+            this.filterCheckboxes[columnId] = filterCb;
+            
+            if (visibleCb) {
+                filterCb.observe('click', function(){
+                    this.onFilterCheckboxClick(filterCb, visibleCb, columnId);
+                }.bind(this));
+            }
+            
+            if (filterCb.checked) {
+                this.checkedFilterValues.push(columnId);
+            }
+        }
+    },
+    
     initCheckboxes: function()
     {
         this.columnsIds.each(function(columnId){
             var column = this.columns[columnId];
-            column.getElementsBySelector('.visible-checkbox').each(function(cb){
-                cb.observe('click', function(){
-                    if (cb.checked) {
-                        this.checkedValues.push(columnId);
-                    } else {
-                        var i = this.checkedValues.indexOf(columnId);
-                        if (i != -1) {
-                            this.checkedValues.splice(i, 1);
-                        }
-                    } 
-                    this.updateCount(); 
-                }.bind(this));
-                
-                this.checkboxes[columnId] = cb;
-                
-                if (cb.checked) {
-                    this.checkedValues.push(columnId);
-                }
-            }.bind(this));
+            var visibleCb = column.getElementsBySelector('.visible-checkbox').first();
+            var filterCb  = column.getElementsBySelector('.filter-only-checkbox').first();
+            this.prepareColumnCheckboxes(columnId, visibleCb, filterCb);
         }.bind(this));
     },
     
     updateCount: function()
     {
         this.checkedValues = this.checkedValues.uniq();
+        this.checkedFilterValues = this.checkedFilterValues.uniq();
         this.count.update(this.checkedValues.size());
+        this.filterCount.update(this.checkedFilterValues.size());
     },
     
     selectAll: function()
     {
-        this.columnsIds.each(function(columnId){ this.checkboxes[columnId].checked = true; }.bind(this));
+        this.columnsIds.each(function(columnId){
+            if (!!this.checkboxes[columnId]) {
+                this.checkboxes[columnId].checked = true;
+            }
+        }.bind(this));
+        
         this.checkedValues = this.columnsIds;
         this.updateCount();
         return false;
@@ -1405,8 +1453,17 @@ blcg.Grid.Config.prototype = {
     
     unselectAll: function()
     {
-        this.columnsIds.each(function(columnId){ this.checkboxes[columnId].checked = false; }.bind(this));
+        this.columnsIds.each(function(columnId){
+            if (!!this.checkboxes[columnId]) {
+                this.checkboxes[columnId].checked = false;
+            }
+            if (!!this.filterCheckboxes[columnId]) {
+                this.filterCheckboxes[columnId].checked = false;
+            }
+        }.bind(this));
+        
         this.checkedValues = $A({});
+        this.checkedFilterValues = $A({});
         this.updateCount();
         return false;
     },
@@ -1414,24 +1471,31 @@ blcg.Grid.Config.prototype = {
     deleteColumn: function(columnId)
     {
         columnId = '' + columnId;
-        var i = this.columnsIds.indexOf(columnId);
+        var i = this.columnsIds.indexOf(columnId), j;
+        
         if (i != -1) {
             this.columns[columnId].remove();
             this.columnsIds.splice(i, 1);
             this.columns.unset(columnId);
             this.checkboxes.unset(columnId);
-            var j = this.checkedValues.indexOf(columnId);
-            if (j != -1) {
+            this.filterCheckboxes.unset(columnId);
+            
+            if ((j = this.checkedValues.indexOf(columnId)) != -1) {
                 this.checkedValues.splice(j, 1);
-                this.updateCount();
             }
+            if ((j = this.checkedFilterValues.indexOf(columnId)) != -1) {
+                this.checkedFilterValues.splice(j, 1);
+            }
+            
+            this.updateCount();
             this.redecorateColumns();
         }
     },
     
     saveGrid: function()
     {
-        if (this.checkedValues.size() == 0) {
+        if ((this.checkedValues.size() == 0)
+            || (this.checkedValues.size() == this.checkedFilterValues.size())) {
             if (this.config.errorText != '') {
                 alert(this.config.errorText);
             }

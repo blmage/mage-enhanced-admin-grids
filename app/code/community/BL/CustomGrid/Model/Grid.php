@@ -1000,6 +1000,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
             'order'           => $order,
             'origin'          => self::GRID_COLUMN_ORIGIN_GRID,
             'is_visible'      => 1,
+            'filter_only'     => 0,
             'is_system'       => ($column->getIsSystem() ? 1 : 0),
             'missing'         => 0,
             'store_id'        => null,
@@ -1029,6 +1030,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
             'order'           => $order,
             'origin'          => self::GRID_COLUMN_ORIGIN_COLLECTION,
             'is_visible'      => 0,
+            'filter_only'     => 0,
             'is_system'       => 0,
             'missing'         => 0,
             'store_id'        => null,
@@ -1740,7 +1742,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
         $columnsOrders = array();
         $columns = $this->getColumns(false, true);
         uasort($columns, array($this, '_sortColumns'));
-        $attributes    = $this->getAvailableAttributes();
+        $attributes = $this->getAvailableAttributes();
         
         foreach ($columns as $column) {
             if (!in_array($column['id'], $gridIds, true)) {
@@ -1877,6 +1879,16 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
                     $grid->blcg_removeColumn($column['id']);
                 }
             }
+            
+            if ($column['filter_only']
+                && ($columnBlock = $grid->getColumn($column['id']))) {
+                $columnBlock->setBlcgFilterOnly(true);
+                
+                if ($grid->blcg_isExport()) {
+                    // Columns with is_system flag on won't be exported, so forcing it will save us two overloads
+                    $columnBlock->setIsSystem(true);
+                }
+            }
         }
         
         // Apply columns orders
@@ -1918,7 +1930,10 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
         if (isset($column['header'])) {
             $values['header'] = $column['header'];
         }
-        $values['is_visible'] = (isset($column['is_visible']) && $column['is_visible'] ? 1 : 0);
+        
+        $values['is_visible']  = (isset($column['is_visible']) && $column['is_visible'] ? 1 : 0);
+        $values['filter_only'] = ($values['is_visible'] && isset($column['filter_only']) && $column['filter_only'] ? 1 : 0);
+        
         if (isset($column['order'])) {
             $values['order'] = intval($column['order']);
         }
@@ -2013,17 +2028,18 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
                     
                     $this->_columns[$newColumnId] = array_merge(
                         array(
-                            'grid_id'    => $this->getId(),
-                            'id'         => $newColumnId,
-                            'index'      => $column['index'],
-                            'width'      => '',
-                            'align'      => self::GRID_COLUMN_ALIGNMENT_LEFT,
-                            'header'     => '',
-                            'order'      => 0,
-                            'origin'     => self::GRID_COLUMN_ORIGIN_ATTRIBUTE,
-                            'is_visible' => 1,
-                            'is_system'  => 0,
-                            'missing'    => 0,
+                            'grid_id'     => $this->getId(),
+                            'id'          => $newColumnId,
+                            'index'       => $column['index'],
+                            'width'       => '',
+                            'align'       => self::GRID_COLUMN_ALIGNMENT_LEFT,
+                            'header'      => '',
+                            'order'       => 0,
+                            'origin'      => self::GRID_COLUMN_ORIGIN_ATTRIBUTE,
+                            'is_visible'  => 1,
+                            'filter_only' => 0,
+                            'is_system'   => 0,
+                            'missing'     => 0,
                         ),
                         $this->_extractColumnValues($column, true, true, false, $allowEditable)
                     );
@@ -2109,6 +2125,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
                 'order'           => $this->_getNextOrder(),
                 'origin'          => self::GRID_COLUMN_ORIGIN_CUSTOM,
                 'is_visible'      => 1,
+                'filter_only'     => 0,
                 'is_system'       => 0,
                 'missing'         => 0,
                 'store_id'        => null,

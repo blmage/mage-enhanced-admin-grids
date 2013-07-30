@@ -48,7 +48,16 @@
  *  getPagerVisibility()
  *  getVarNamePage()
  */
-$numColumns = sizeof($this->getColumns());
+$_columns = $this->getColumns();
+
+// Remove columns that should not be displayed
+foreach ($_columns as $_key => $_column):
+    if ($_column->getBlcgFilterOnly()):
+        unset($_columns[$_key]);
+    endif;
+endforeach;
+
+$_numColumns = count($_columns);
 ?>
 <?php if($this->getCollection()): ?>
     <?php if($this->canDisplayContainer()): ?>
@@ -128,13 +137,14 @@ $numColumns = sizeof($this->getColumns());
         </tr>
     </table>
 <?php endif; ?>
+<?php echo $this->getChildHtml('bl_custom_grid_grid_columns_filters') ?>
 <?php if($this->getMassactionBlock()->isAvailable()): ?>
 <?php echo $this->getMassactionBlockHtml() ?>
 <?php endif ?>
 <div class="grid">
     <div class="hor-scroll">
     <table cellspacing="0" class="data" id="<?php echo $this->getId() ?>_table">
-        <?php foreach ($this->getColumns() as $_column): ?>
+        <?php foreach ($_columns as $_column): ?>
         <col <?php echo $_column->getHtmlProperty() ?> />
         <?php if ($_column->getEditable() && !$_column->getEditOnly()) : ?>
         <col <?php echo $_column->getHtmlProperty() ?> />
@@ -144,14 +154,14 @@ $numColumns = sizeof($this->getColumns());
             <thead>
                 <?php if ($this->getHeadersVisibility()): ?>
                     <tr class="headings">
-                    <?php foreach ($this->getColumns() as $_column): ?>
+                    <?php foreach ($_columns as $_column): ?>
                         <th<?php echo $_column->getHeaderHtmlProperty() ?>><span class="nobr"><?php echo $_column->getHeaderHtml() ?></span></th>
                     <?php endforeach; ?>
                     </tr>
                 <?php endif; ?>
                 <?php if ($this->getFilterVisibility()): ?>
                     <tr class="filter">
-                    <?php $i=0;foreach ($this->getColumns() as $_column): ?>
+                    <?php $i=0;foreach ($_columns as $_column): ?>
                         <th<?php echo $_column->getHeaderHtmlProperty() ?>><?php echo $_column->getFilterHtml() ?></th>
                     <?php endforeach; ?>
                     </tr>
@@ -161,7 +171,7 @@ $numColumns = sizeof($this->getColumns());
         <?php if ($this->getCountTotals()): ?>
             <tfoot>
                 <tr class="totals">
-                <?php foreach ($this->getColumns() as $_column): ?>
+                <?php foreach ($_columns as $_column): ?>
                     <th class="<?php echo $_column->getCssProperty() ?>"><?php echo ($_column->hasTotalsLabel()) ? $_column->getTotalsLabel() : $_column->getRowField($_column->getGrid()->getTotals()) ?>&nbsp;</th>
                 <?php endforeach; ?>
                 </tr>
@@ -172,11 +182,11 @@ $numColumns = sizeof($this->getColumns());
         <?php if (($this->getCollection()->getSize()>0) && (!$this->getIsCollapsed())): ?>
         <?php foreach ($this->getCollection() as $_index=>$_item): ?>
             <tr title="<?php echo $this->getRowUrl($_item) ?>"<?php if ($_class = $this->getRowClass($_item)):?> class="<?php echo $_class; ?>"<?php endif;?> >
-            <?php $i=0;foreach ($this->getColumns() as $_column): ?>
+            <?php $i=0;foreach ($_columns as $_column): ?>
             
                 <?php if ($this->shouldRenderCell($_item, $_column)):?>
                     <?php $_rowspan = $this->getRowspan($_item, $_column);?>
-                    <td <?php echo ($_rowspan ? 'rowspan="' . $_rowspan . '" ' : '') ?>class="<?php echo $_column->getCssProperty() ?> <?php echo ++$i==$numColumns?'last':'' ?>">
+                    <td <?php echo ($_rowspan ? 'rowspan="' . $_rowspan . '" ' : '') ?>class="<?php echo $_column->getCssProperty() ?> <?php echo ++$i==$_numColumns?'last':'' ?>">
                         <?php echo (($_html = $_column->getRowField($_item)) != '' ? $_html : '&nbsp;') ?>
                     </td>
                     <?php if ($this->shouldRenderEmptyCell($_item, $_column)):?>
@@ -190,7 +200,7 @@ $numColumns = sizeof($this->getColumns());
                 <?php foreach ($_multipleRows as $_i):?>
                 <tr>
                     <?php $i=0;foreach ($this->getMultipleRowColumns($_i) as $_column): ?>
-                        <td class="<?php echo $_column->getCssProperty() ?> <?php echo ++$i==$numColumns-1?'last':'' ?>">
+                        <td class="<?php echo $_column->getCssProperty() ?> <?php echo ++$i==$_numColumns-1?'last':'' ?>">
                             <?php echo (($_html = $_column->getRowField($_i)) != '' ? $_html : '&nbsp;') ?>
                         </td>
                     <?php endforeach; ?>
@@ -201,7 +211,7 @@ $numColumns = sizeof($this->getColumns());
             <?php if ($this->shouldRenderSubTotal($_item)): ?>
                 <tr class="subtotals">
                     <?php $i = 0; foreach ($this->getSubTotalColumns() as $_column): ?>
-                        <td class="<?php echo $_column->getCssProperty() ?> <?php echo ++$i == $numColumns ? 'last' : '' ?>">
+                        <td class="<?php echo $_column->getCssProperty() ?> <?php echo ++$i == $_numColumns ? 'last' : '' ?>">
                             <?php echo ($_column->hasSubtotalsLabel() ? $_column->getSubtotalsLabel() :
                                 $_column->getRowField($this->getSubTotalItem($_item))
                             );

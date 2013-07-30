@@ -166,15 +166,8 @@ class BL_CustomGrid_Model_Observer
                     && ($collection instanceof Mage_Eav_Model_Entity_Collection_Abstract)
                     && count($this->_blcg_additionalAttributes)) {
                     $this->_blcg_mustSelectAdditionalAttributes = false;
-                    foreach ($this->_blcg_additionalAttributes as $attribute) {
-                        $collection->joinAttribute(
-                            $attribute[\'alias\'],
-                            $attribute[\'attribute\'],
-                            $attribute[\'bind\'],
-                            $attribute[\'filter\'],
-                            $attribute[\'join_type\'],
-                            $attribute[\'store_id\']
-                        );
+                    foreach ($this->_blcg_additionalAttributes as $attr) {
+                        $collection->joinAttribute($attr[\'alias\'], $attr[\'attribute\'], $attr[\'bind\'], $attr[\'filter\'], $attr[\'join_type\'], $attr[\'store_id\']);
                     }
                 }
                 return $collection;
@@ -203,14 +196,14 @@ class BL_CustomGrid_Model_Observer
                 }
                 if ($this->_blcg_prepareEventsEnabled) {
                     Mage::getSingleton(\'customgrid/observer\')->beforeGridPrepareCollection($this);
-                    $this->_blcg_launchCollectionCallbacks(\'before_prepare\', array($this, $this->_collection, $this->_blcg_prepareEventsEnabled));
+                    $this->_blcg_launchCollectionCallbacks(\'before_prepare\', array($this, $this->_collection, true));
                     $return = parent::_prepareCollection();
-                    $this->_blcg_launchCollectionCallbacks(\'after_prepare\', array($this, $this->_collection, $this->_blcg_prepareEventsEnabled));
+                    $this->_blcg_launchCollectionCallbacks(\'after_prepare\', array($this, $this->_collection, true));
                     Mage::getSingleton(\'customgrid/observer\')->afterGridPrepareCollection($this);
                 } else {
-                    $this->_blcg_launchCollectionCallbacks(\'before_prepare\', array($this, $this->_collection, $this->_blcg_prepareEventsEnabled));
+                    $this->_blcg_launchCollectionCallbacks(\'before_prepare\', array($this, $this->_collection, false));
                     $return = parent::_prepareCollection();
-                    $this->_blcg_launchCollectionCallbacks(\'after_prepare\', array($this, $this->_collection, $this->_blcg_prepareEventsEnabled));
+                    $this->_blcg_launchCollectionCallbacks(\'after_prepare\', array($this, $this->_collection, false));
                 }
                 if (!is_null($this->_blcg_typeModel)) {
                     $this->_blcg_typeModel->afterGridPrepareCollection($this, $this->_blcg_prepareEventsEnabled);
@@ -863,6 +856,12 @@ class BL_CustomGrid_Model_Observer
                     )->setChild(
                         'bl_custom_grid_grid_columns_editor',
                         $grid->getLayout()->createBlock('customgrid/widget_grid_columns_editor')
+                            ->setGridBlock($grid)
+                            ->setGridModel($model)
+                            ->setIsNewGridModel($newModel)
+                    )->setChild(
+                        'bl_custom_grid_grid_columns_filters',
+                        $grid->getLayout()->createBlock('customgrid/widget_grid_columns_filters')
                             ->setGridBlock($grid)
                             ->setGridModel($model)
                             ->setIsNewGridModel($newModel)

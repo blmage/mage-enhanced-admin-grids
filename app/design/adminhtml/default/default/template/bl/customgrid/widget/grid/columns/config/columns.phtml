@@ -24,6 +24,7 @@
         <table id="<?php echo $this->getHtmlId() ?>-table" class="data" cellspacing="0">
             <?php if ($this->getUseDragNDrop()): ?><col width="20" /><?php endif ?>
             <col class="a-center" width="50" />
+            <col class="a-center" width="50" />
             <?php if ($this->canDisplayEditablePart()): ?>
                 <col class="a-center" width="50" />
             <?php endif ?>
@@ -43,6 +44,7 @@
                 <tr class="headings nodrop">
                     <?php if ($this->getUseDragNDrop()): ?><th></th><?php endif ?>
                     <th><span class="nobr"><?php echo $this->__('Visible') ?></span></th>
+                    <th><span class="nobr"><?php echo $this->__('Filter') ?></span></th>
                     <?php if ($this->canDisplayEditablePart()): ?>
                         <th><span class="nobr"><?php echo $this->__('Editable') ?></span></th>
                     <?php endif ?>
@@ -106,6 +108,9 @@
                     <?php endif ?>
                     <td class="a-center">
                         <input name="config[<?php echo $_dbId ?>][is_visible]" id="visible-checkbox-<?php echo $_dbId ?>" class="visible-checkbox" type="checkbox" value="1" <?php if ($_column['is_visible']): ?>checked="checked"<?php endif ?> />
+                    </td>
+                    <td class="a-center">
+                        <input name="config[<?php echo $_dbId ?>][filter_only]" id="filter-only-checkbox-<?php echo $_dbId ?>" class="filter-only-checkbox" type="checkbox" value="1" <?php if ($_column['filter_only']): ?>checked="checked"<?php endif ?> />
                     </td>
                     <?php if ($_canDisplayEditablePart): ?>
                         <td class="a-center" id="column-editable-infos-<?php echo $_dbId ?>">
@@ -245,6 +250,7 @@
     [
         <?php if ($this->getUseDragNDrop()): ?>{template: '&nbsp;', classNames: ['blcg-drag-handle']},<?php endif ?>
         {template: '<input name="config[{{id}}][is_visible]" id="visible-checkbox-{{id}}" value="1" class="visible-checkbox" type="checkbox" checked="checked" />', classNames: ['a-center']},
+        {template: '<input name="config[{{id}}][filter_only]" id="filter-only-checkbox-{{id}}" value="1" class="filter-only-checkbox" type="checkbox" />', classNames: ['a-center']},
         <?php if ($this->canDisplayEditablePart()): ?>
         {template: '<?php if ($this->canChooseEditableColumns()): ?><input name="config[{{id}}][editable]" disabled="disabled" id="editable-checkbox-{{id}}" class="editable-checkbox" type="checkbox" value="1" checked="checked" /><?php else: ?><span class="nobr"><?php echo $this->jsQuoteEscape($this->__('Yes')) ?></span><?php endif ?>', id: 'column-editable-infos-{{id}}', classNames: ['a-center']},
         <?php endif ?>

@@ -35,9 +35,12 @@ class BL_CustomGrid_Model_Mysql4_Grid_Collection
         }
         
         if (!empty($gridIds)) {
-            $read    = $this->getResource()->getReadConnection();
+            $read = $this->getResource()->getReadConnection();
             $columns = $read->fetchAll($read->select()
                 ->from($this->getTable('customgrid/grid_column')
+                ->columns('*')
+                ->columns(array('is_visible'  => new Zend_Db_Expr('IF(is_visible=2, 1, is_visible)')))
+                ->columns(array('filter_only' => new Zend_Db_Expr('IF(is_visible=2, 1, 0)')))
                 ->where('grid_id IN ?', $gridIds))
                 ->order(array('order', 'asc')));
             

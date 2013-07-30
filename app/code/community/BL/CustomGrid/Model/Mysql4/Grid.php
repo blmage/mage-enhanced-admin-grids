@@ -35,6 +35,14 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
         $columnsIds   = array();
         
         foreach ($object->getColumns() as $column) {
+            if (isset($column['filter_only'])) {
+                if ($column['filter_only']
+                    && isset($column['is_visible'])
+                    && $column['is_visible']) {
+                    $column['is_visible'] = 2;
+                }
+                unset($column['filter_only']); // No new database field to avoid a new setup
+            }
             if (isset($column['column_id']) && ($column['column_id'] > 0)) {
                 // Update existing columns
                 $write->update($columnsTable, $column, $write->quoteInto('column_id = ?', $column['column_id']));
@@ -127,6 +135,9 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
         
         return $read->fetchAll($read->select()
             ->from($columnsTable)
+            ->columns('*')
+            ->columns(array('is_visible'  => new Zend_Db_Expr('IF(is_visible=2, 1, is_visible)')))
+            ->columns(array('filter_only' => new Zend_Db_Expr('IF(is_visible=2, 1, 0)')))
             ->where('grid_id = ?', $gridId));
     }
     

@@ -60,6 +60,10 @@ button.blcg-export span { padding-left:20px; background-image:url(images/ico_exp
 .grid tr.filter .blcg-categories-filter .blcg-filter-button { background:url(images/ico_config.png) no-repeat center center; }
 .blcg-collection-renderers-help-button { background:url(images/ico_help.png) no-repeat center center; }
 
+/* ADDITIONAL FILTERS */
+
+.blcg-additional-filters-table .filter th { width:150px; }
+
 /* IN-GRID EDITOR */
 
 .grid table td.blcg-column-editor-editing { padding-right:38px; }
@@ -125,6 +129,7 @@ ul.blcg-custom-columns-help-features li { height:16px; padding:0 0 0 16px; line-
 .customgrid-custom-grid-column-filter-categories .wrapper-popup { min-width:680px; }
 
 /* CATEGORY FILTER TREE ACTION */
+
 .customgrid-custom-grid-column-filter-categories { background:#fff; }
 .customgrid-custom-grid-column-filter-categories .middle { background:none; min-height:0; }
 .customgrid-custom-grid-column-filter-categories .wrapper-popup { min-width:680px; }
