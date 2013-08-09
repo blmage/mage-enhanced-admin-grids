@@ -391,6 +391,7 @@
                     <description><![CDATA[Displays the same items list as the order view page]]></description>
                     <warning><![CDATA[Will display nothing when exporting results]]></warning>
                     <group>Items</group>
+                    <allow_customization>1</allow_customization>
                     <model_params>
                         <renderer>customgrid/widget_grid_column_renderer_order_items_default</renderer>
                     </model_params>

@@ -110,7 +110,7 @@ class BL_CustomGrid_Model_Custom_Column_Product_Categories
                 'boolean_filter' => array('value' => 0),
                 'filter_mode'    => array('value' => self::FILTER_MODE_CUSTOM),
             ),
-        ), 90);
+        ), 80);
         
         $this->addCustomParam('custom_filter_number', array(
             'label'       => $helper->__('Custom Filter - Number'),
