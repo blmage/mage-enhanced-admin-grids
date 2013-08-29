@@ -34,7 +34,7 @@ class BL_CustomGrid_Block_Widget_Grid_Form_Static_Product_Inventory
                  $field->setValue($qtyValue)
                     ->setAfterElementHtml(
                          $field->getAfterElementHtml()
-                         . '<input type="hidden" name="'.$editedConfig['values_key'].'[original_inventory_qty]" value="'.$qty.'" />'
+                         . '<input type="hidden" name="'.$editedConfig['values_key'].'[original_inventory_qty]" value="'.$qtyValue.'" />'
                      );
             }
         }
