@@ -253,7 +253,7 @@ blcg.Tools = {
             cb.checked = !!checked;
         });
     }
-}
+};
 
 /*
  * Copyright (c) 2006 Jonathan Weiss <jw@innerewut.de>
@@ -396,7 +396,7 @@ blcg.Tooltip.prototype = {
     {
         return document.viewport.getScrollOffsets();
     }
-}
+};
 
 blcg.Config = Class.create();
 blcg.Config.prototype = {
@@ -445,7 +445,7 @@ blcg.Config.prototype = {
         var target = $(this.rendererTargetId);
         target.value = content;
     }
-}
+};
 
 if (typeof(blcg.Renderer) == 'undefined') {
     blcg.Renderer = {};
@@ -565,7 +565,7 @@ blcg.Renderer.Select.prototype = {
             this.currentRenderer = '';
         }
     }
-}
+};
 
 if (typeof(blcg.Renderer.Collection) == 'undefined') {
     blcg.Renderer.Collection = {};
@@ -761,7 +761,7 @@ blcg.Form.Element.DependenceController.prototype = {
             }.bind(this));
         }
     }
-}
+};
 
 /*
 * Table drag'n'drop
@@ -1062,7 +1062,7 @@ blcg.TableDnd.prototype = {
             this.currentTable = null; // Let go of the table too
         }
     }
-}
+};
 
 if (typeof(blcg.Grid) == 'undefined') {
     blcg.Grid = {};
@@ -1135,7 +1135,7 @@ blcg.Grid.Export.prototype = {
         }
         return blcg.Tools.submitContainerValues(this.container, $F(this.formatSelect), this.additional, 'GET');
     }
-}
+};
 
 blcg.Grid.Config = Class.create();
 blcg.Grid.Config.prototype = {
@@ -1503,7 +1503,7 @@ blcg.Grid.Config.prototype = {
         }
         return blcg.Tools.submitContainerValues(this.container, this.saveUrl);
     }
-}
+};
 
 blcg.Grid.Editor = Class.create();
 blcg.Grid.Editor.prototype = {
@@ -1854,6 +1854,24 @@ blcg.Grid.Editor.prototype = {
                                         e.hide();
                                         cell.addClassName('blcg-column-editor-editing-required');
                                     });
+
+                                    // add Editor support for Enter / Escape keys
+                                    $(form).on('keydown', '.select,.required-entry,.input-text', function(e) {
+                                        switch (e.keyCode) {
+                                            case Event.KEY_RETURN: // Enter completes edit
+                                                e.preventDefault();
+                                                editor.validateEdit();
+                                                break;
+
+                                            case Event.KEY_ESC: // Escape cancels edit
+                                                e.preventDefault();
+                                                editor.cancelEdit();
+                                                break;
+                                        }
+                                    });
+
+                                    // automatically focus Editor when commencing edit
+                                    $(form).select('.select', '.required-entry', '.input-text').first().activate();
                                 }
                             } else {
                                 editor.cancelEdit();
@@ -2015,7 +2033,7 @@ blcg.Grid.Editor.prototype = {
             }
         }
     }
-}
+};
 
 if (typeof(blcg.CustomColumn) == 'undefined') {
     blcg.CustomColumn = {};
@@ -2105,7 +2123,7 @@ blcg.CustomColumn.OptionsColor.registerRowChange = function(childId, backgroundC
             });
         }
     }
-}
+};
 
 if (typeof(blcg.Filter) == 'undefined') {
     blcg.Filter = {};
