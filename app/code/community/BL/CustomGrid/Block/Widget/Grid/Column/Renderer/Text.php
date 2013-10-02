@@ -39,6 +39,7 @@ class BL_CustomGrid_BLock_Widget_Grid_Column_Renderer_Text
             $truncateLength = intval($this->getColumn()->getTruncateAt());
             $truncateEnding = $this->getColumn()->getTruncateEnding();
             $truncateExact  = (bool)$this->getColumn()->getTruncateExact();
+            $remainder = '';
             
             if ($truncate == 'html') {
                 $text = $truncateHelper->truncateHtml($text, $truncateLength, $truncateEnding, $remainder, !$truncateExact);
