@@ -1,0 +1,9 @@
+{
+    "name": "mage-eag/mage-enhanced-admin-grids",
+    "type": "magento-module",
+    "description": "Enhanced Admin Grids Extension for Magento",
+    "require": {
+        "magento-hackathon/magento-composer-installer": "dev-master"
+    }
+}
+
