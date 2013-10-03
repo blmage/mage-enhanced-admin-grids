@@ -14,8 +14,9 @@
  */
 ?>
 <?php
-    $_helper    = $this->helper('customgrid');
-    $_gridModel = $this->getGridModel();
+    $_helper = $this->helper('customgrid');
+    $_stringHelper = $this->helper('customgrid/string');
+    $_gridModel    = $this->getGridModel();
     $_columnAlignments = $_gridModel->getColumnAlignments();
     $_columnOrigins    = $_gridModel->getColumnOrigins();
 ?>
@@ -141,14 +142,14 @@
                             <?php if ($_column['missing']): ?>
                                 <em><?php echo $this->htmlEscape($_column['index']) ?></em>
                             <?php else: ?>
-                                <input type="hidden" id="<?php echo $_htmlId ?>-renderer-params-<?php echo $_dbId ?>" name="config[<?php echo $_dbId ?>][renderer_params]" value="<?php echo $this->htmlEscape($_column['renderer_params']) ?>" />
+                                <input type="hidden" id="<?php echo $_htmlId ?>-renderer-params-<?php echo $_dbId ?>" name="config[<?php echo $_dbId ?>][renderer_params]" value="<?php echo $_stringHelper->htmlDoubleEscape($_column['renderer_params']) ?>" />
                                 <?php echo $this->getAttributesSelectHtml($_dbId, 'config['.$_dbId.'][index]', $_htmlId.'-renderer-params-'.$_dbId, ($_canChooseEditableColumns ? 'column-editable-infos-'.$_dbId : false), 'editable-checkbox-'.$_dbId, $_column['index'], false) ?>
                             <?php endif ?>
                         <?php else: ?>
                             <div class="nobr">
                                 <?php echo $_column['index'] ?>
                                 <?php if ($_fromCustom && $_hasCustomColumn && $_customColumn->getAllowCustomization()): ?>
-                                    <input type="hidden" id="<?php echo $_htmlId ?>-custom-params-<?php echo $_dbId ?>" name="config[<?php echo $_dbId ?>][custom_params]" value="<?php echo $this->htmlEscape($_column['custom_params']) ?>" />
+                                    <input type="hidden" id="<?php echo $_htmlId ?>-custom-params-<?php echo $_dbId ?>" name="config[<?php echo $_dbId ?>][custom_params]" value="<?php echo $_stringHelper->htmlDoubleEscape($_column['custom_params']) ?>" />
                                     <span class="blcg-custom-column-config-button" id="<?php echo $_htmlId ?>-custom-button-<?php echo $_dbId ?>" title="<?php echo $this->__('Configuration') ?>"></span>
                                     <script type="text/javascript">
                                         new blcg.CustomColumn.Config('<?php echo $_column['index'] ?>', '<?php echo $_htmlId ?>-custom-button-<?php echo $_dbId ?>', '<?php echo $_htmlId ?>-custom-params-<?php echo $_dbId ?>', '<?php echo $this->getCustomColumnConfigUrl() ?>', <?php echo $this->helper('core')->jsonEncode($_customColumn->getCustomParamsWindowConfig()) ?>);
@@ -176,7 +177,7 @@
                                 endif;
                                 $_rendererParams = (!$_lockedRenderer || ($_rendererType == $_column['renderer_type']) ? $_column['renderer_params'] : '');
                             ?>
-                            <input type="hidden" id="<?php echo $_htmlId ?>-renderer-params-<?php echo $_dbId ?>" name="config[<?php echo $_dbId ?>][renderer_params]" value="<?php echo $this->htmlEscape($_rendererParams) ?>" />
+                            <input type="hidden" id="<?php echo $_htmlId ?>-renderer-params-<?php echo $_dbId ?>" name="config[<?php echo $_dbId ?>][renderer_params]" value="<?php echo $_stringHelper->htmlDoubleEscape($_rendererParams) ?>" />
                             <?php echo $this->getCollectionRendererSelectHtml($_dbId, 'config['.$_dbId.'][renderer_type]', $_htmlId.'-renderer-params-'.$_dbId, $_rendererType, $_lockedRenderer, $_lockedLabel) ?>
                         <?php endif ?>
                     </td>
