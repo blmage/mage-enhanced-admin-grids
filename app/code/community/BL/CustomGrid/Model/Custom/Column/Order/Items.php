@@ -13,7 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
  
-class BL_CustomGrid_Model_Custom_Column_Order_Items
+abstract class BL_CustomGrid_Model_Custom_Column_Order_Items
     extends BL_CustomGrid_Model_Custom_Column_Abstract
 {
     public function initConfig()
@@ -26,14 +26,14 @@ class BL_CustomGrid_Model_Custom_Column_Order_Items
             'type'         => 'select',
             'source_model' => 'customgrid/system_config_source_yesno',
             'value'        => 0,
-        ), 10);
+        ), 100000);
         
         $this->addCustomParam('filter_on_name', array(
             'label'        => $helper->__('Filter on Item Name'),
             'type'         => 'select',
             'source_model' => 'customgrid/system_config_source_yesno',
             'value'        => 0,
-        ), 20);
+        ), 100010);
         
         
         $this->addCustomParam('filter_exclude_child', array(
@@ -41,14 +41,14 @@ class BL_CustomGrid_Model_Custom_Column_Order_Items
             'type'         => 'select',
             'source_model' => 'customgrid/system_config_source_yesno',
             'value'        => 0,
-        ), 30);
+        ), 100030);
         
         $this->addCustomParam('allow_sql_wildcards', array(
             'label'        => $helper->__('Allow SQL Wildcards In Filter'),
             'type'         => 'select',
             'source_model' => 'customgrid/system_config_source_yesno',
             'value'        => 0,
-        ), 40);
+        ), 100040);
         
         $this->setCustomParamsWindowConfig(array('height' => 300));
         
@@ -72,7 +72,22 @@ class BL_CustomGrid_Model_Custom_Column_Order_Items
             
             $orderReflection = new ReflectionClass('Mage_Sales_Model_Order');
             $itemsProperty   = $orderReflection->getProperty('_items');
-            $itemsProperty->setAccessible(true);
+            
+            if (!method_exists($itemsProperty, 'setAccessible')) {
+                // PHP < 5.3.0
+                if (!class_exists('Blcg_Ccoi_Mage_Sales_Model_Order', false)) {
+                    eval('class Blcg_Ccoi_Mage_Sales_Model_Order extends Mage_Sales_Model_Order {
+                        public function setValue($order, $value)
+                        {
+                            $order->_items = $value;
+                        }
+                    }');
+                }
+                
+                $itemsProperty = new Blcg_Ccoi_Mage_Sales_Model_Order();
+            } else {
+                $itemsProperty->setAccessible(true);
+            }
             
             foreach ($collection as $order) {
                 $orderItems = clone $items;
@@ -144,11 +159,13 @@ class BL_CustomGrid_Model_Custom_Column_Order_Items
         return $this;
     }
     
+    abstract protected function _getGridColumnRenderer();
+    
     protected function _getForcedGridValues($block, $model, $id, $alias, $params, $store, $renderer=null)
     {
         $values = array(
             'filter'   => false,
-            'renderer' => $this->getModelParam('renderer'),
+            'renderer' => $this->_getGridColumnRenderer(),
             'sortable' => false,
             'single_wildcard'   => false,
             'multiple_wildcard' => false,

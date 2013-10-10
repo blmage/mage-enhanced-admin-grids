@@ -179,9 +179,9 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     const GRID_DEFAULT_PARAM_DEFAULT             = 'default';
     const GRID_DEFAULT_PARAM_FORCE_ORIGINAL      = 'force_original';
     const GRID_DEFAULT_PARAM_FORCE_CUSTOM        = 'force_custom';
-    const GRID_DEFAULT_PARAM_MERGE_DEFAULT       = 'merge_default'; // merge dans l'ordre des choses
-    const GRID_DEFAULT_PARAM_MERGE_BASE_ORIGINAL = 'merge_on_original'; // l'original se fait merger par dessus
-    const GRID_DEFAULT_PARAM_MERGE_BASE_CUSTOM   = 'merge_on_custom'; // inversement
+    const GRID_DEFAULT_PARAM_MERGE_DEFAULT       = 'merge_default'; 
+    const GRID_DEFAULT_PARAM_MERGE_BASE_ORIGINAL = 'merge_on_original';
+    const GRID_DEFAULT_PARAM_MERGE_BASE_CUSTOM   = 'merge_on_custom';
     
     protected function _construct()
     {

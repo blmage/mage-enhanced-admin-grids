@@ -55,9 +55,53 @@ abstract class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Order_Items_Abstr
         return $this->_column;
     }
     
+    public function setColumn($column)
+    {
+        try {
+            // Copy as much as possible the behaviour from the "order_items" block of the sales order view page
+            $layout = $this->getLayout();
+            $update = Mage::getModel('core/layout_update')
+                ->load('adminhtml_sales_order_view')
+                ->asSimplexml();
+            
+            if ($this->getNeedOrderItemsTemplate()) {
+                if (is_array($blockNodes = $update->xpath("//block[@name='order_items']"))
+                    && ($blockNode = array_shift($blockNodes))
+                    && ($template = (string)$blockNode['template'])) {
+                    $this->setTemplate($template);
+                } else {
+                    // Use base template as default
+                    $this->setTemplate('sales/order/view/items.phtml');
+                }
+            }
+            
+            // Retrieve and use all actions applied to the base block (most commonly, "addColumnRender" and "addItemRender")
+            $parent = new Varien_Object(array('block_name' => $this->getNameInLayout()));
+            $actionNodes = $update->xpath("//block[@name='order_items']//action|//reference[@name='order_items']//action");
+            
+            $layoutReflection = new ReflectionClass($layout);
+            $generateAction   = $layoutReflection->getMethod('_generateAction');
+            $generateAction->setAccessible(true);
+            
+            foreach ($actionNodes as $actionNode) {
+                $generateAction->invoke($layout, $actionNode, $parent);
+            }
+            
+            $this->setOrderItemsBlockInitSuccess(true);
+            
+        } catch (Exception $e) {
+            Mage::logException($e);
+            $this->setOrderItemsBlockInitSuccess(false);
+        }
+        
+        $this->_column = $column;
+        return $this;
+    }
+    
     public function render(Varien_Object $row)
     {
-        if ($this->getOrderItemsCopySuccess()) {
+        if ($this->getOrderItemsBlockInitSuccess()
+            || !$this->getNeedOrderItemsBlockInitSuccess()) {
             $this->setOrder($row);
             return parent::toHtml();
         }

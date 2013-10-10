@@ -12,17 +12,15 @@
  * @copyright  Copyright (c) 2013 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
- 
-class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Order_Items_Default
-    extends BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Order_Items_Abstract
-{
-    public function getNeedOrderItemsTemplate()
-    {
-        return true;
-    }
-    
-    public function getNeedOrderItemsBlockInitSuccess()
-    {
-        return true;
-    }
-}
+?>
+<?php
+    $_itemValues = $this->getValue()->getItemValues();
+    $_valuesHtml = $this->getValue()->getValuesHtml();
+?>
+<tr class="border">
+<?php foreach ($_itemValues as $_itemValue): ?>
+    <td<?php if ($_cssClasses = $this->getItemValueCssClasses($_itemValue, 'value_align')): ?> class="<?php echo $_cssClasses ?>"<?php endif ?>>
+        <?php echo (isset($_valuesHtml[$_itemValue['code']]) ? $_valuesHtml[$_itemValue['code']] : '') ?>
+    </td>
+<?php endforeach ?>
+</tr>

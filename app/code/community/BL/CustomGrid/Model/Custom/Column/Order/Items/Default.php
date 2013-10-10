@@ -1,4 +1,5 @@
 <?php
+
 /**
  * NOTICE OF LICENSE
  *
@@ -13,16 +14,11 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
  
-class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Order_Items_Default
-    extends BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Order_Items_Abstract
+class BL_CustomGrid_Model_Custom_Column_Order_Items_Default
+    extends BL_CustomGrid_Model_Custom_Column_Order_Items
 {
-    public function getNeedOrderItemsTemplate()
+    protected function _getGridColumnRenderer()
     {
-        return true;
-    }
-    
-    public function getNeedOrderItemsBlockInitSuccess()
-    {
-        return true;
+        return 'customgrid/widget_grid_column_renderer_order_items_default';
     }
 }

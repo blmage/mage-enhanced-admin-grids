@@ -386,16 +386,21 @@
                     </custom_params>
                 </customer_group>
                 
-                <default_items model="customgrid/custom_column_order_items" module="customgrid">
+                <default_items model="customgrid/custom_column_order_items_default" module="customgrid">
                     <name>Default</name>
                     <description><![CDATA[Displays the same items list as the order view page]]></description>
                     <warning><![CDATA[Will display nothing when exporting results]]></warning>
                     <group>Items</group>
                     <allow_customization>1</allow_customization>
-                    <model_params>
-                        <renderer>customgrid/widget_grid_column_renderer_order_items_default</renderer>
-                    </model_params>
                 </default_items>
+                
+                <custom_items model="customgrid/custom_column_order_items_custom" module="customgrid">
+                    <name>Customizable</name>
+                    <description><![CDATA[Displays a customizable items list]]></description>
+                    <warning><![CDATA[Will display nothing when exporting results]]></warning>
+                    <group>Items</group>
+                    <allow_customization>1</allow_customization>
+                </custom_items>
             </custom_columns>
         </sales_order>
         
