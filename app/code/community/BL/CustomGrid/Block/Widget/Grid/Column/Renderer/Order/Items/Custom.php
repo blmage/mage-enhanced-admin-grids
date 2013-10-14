@@ -144,8 +144,9 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Order_Items_Custom
         if (is_array($itemValues = $this->getColumn()->getItemValues())
             && !empty($itemValues)) {
             $value = new Varien_Object(array(
-                'order' => $this->getOrder(),
+                'order'       => $this->getOrder(),
                 'item_values' => $itemValues,
+                'hide_header' => (bool) $this->getColumn()->getHideHeader(),
             ));
             $result = $this->_renderResult($value);
         }

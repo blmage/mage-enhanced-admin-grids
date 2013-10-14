@@ -101,6 +101,13 @@ class BL_CustomGrid_Model_Custom_Column_Order_Items_Custom
             ), ($position -= 10));
         }
         
+        $this->addCustomParam('hide_header', array(
+            'label'        => $helper->__('Hide Header'),
+            'description'  => $helper->__('Choose "Yes" if you do not want the field labels to be displayed in the header'),
+            'type'         => 'select',
+            'source_model' => 'customgrid/system_config_source_yesno',
+        ), 0);
+        
         return $this;
     }
     
@@ -120,6 +127,7 @@ class BL_CustomGrid_Model_Custom_Column_Order_Items_Custom
             }
         }
         
+        $values['hide_header'] = $this->_extractBoolParam($params, 'hide_header', false);
         $values['item_values'] = $itemValues;
         return $values;
     }

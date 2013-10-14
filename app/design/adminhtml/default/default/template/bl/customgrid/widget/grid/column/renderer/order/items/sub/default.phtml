@@ -19,11 +19,13 @@
 ?>
 <table class="data-table order-tables" cellspacing="0">
     <thead>
-        <tr class="headings">
-        <?php foreach ($_itemValues as $_itemValue): ?>
-            <th<?php if ($_cssClasses = $this->getItemValueCssClasses($_itemValue, 'header_align')): ?> class="<?php echo $_cssClasses ?>"<?php endif ?>><?php echo $this->htmlEscape($_itemValue['name']) ?></th>
-        <?php endforeach ?>
-        </tr>
+        <?php if (!$this->getValue()->getHideHeader()): ?>
+            <tr class="headings">
+            <?php foreach ($_itemValues as $_itemValue): ?>
+                <th<?php if ($_cssClasses = $this->getItemValueCssClasses($_itemValue, 'header_align')): ?> class="<?php echo $_cssClasses ?>"<?php endif ?>><?php echo $this->htmlEscape($_itemValue['name']) ?></th>
+            <?php endforeach ?>
+            </tr>
+        <?php endif ?>
     </thead>
     <?php $_i=0; foreach ($_rowsHtml as $_rowHtml):?>
         <tbody class="<?php echo (++$_i%2 ? 'even' : 'odd') ?>"><?php echo $_rowHtml ?></tbody>
