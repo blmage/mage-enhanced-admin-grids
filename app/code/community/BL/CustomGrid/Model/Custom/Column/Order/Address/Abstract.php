@@ -13,7 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-abstract class BL_CustomGrid_Model_Custom_Column_Order_Address
+abstract class BL_CustomGrid_Model_Custom_Column_Order_Address_Abstract
     extends BL_CustomGrid_Model_Custom_Column_Simple_Table
 {
     public function initConfig()
@@ -35,12 +35,12 @@ abstract class BL_CustomGrid_Model_Custom_Column_Order_Address
     
     public function getJoinConditionMainField()
     {
-        return 'entity_id';
+        return (($field = parent::getJoinConditionMainField()) ? $field : 'entity_id');
     }
     
     public function getJoinConditionTableField()
     {
-        return 'parent_id';
+        return (($field = parent::getJoinConditionTableField()) ? $field : 'parent_id');
     }
     
     public function getTableFieldName()

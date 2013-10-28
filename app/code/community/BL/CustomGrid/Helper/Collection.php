@@ -39,8 +39,11 @@ class BL_CustomGrid_Helper_Collection
     * @var array
     */
     protected $_baseFiltersMapCallbacks  = array(
-        'adminhtml/catalog_product_grid' => '_prepareCatalogProductFiltersMap',
-        'adminhtml/sales_order_grid'     => '_prepareSalesOrderFiltersMap',
+        'adminhtml/catalog_product_grid'  => '_prepareCatalogProductFiltersMap',
+        'adminhtml/sales_order_grid'      => '_prepareSalesOrderFiltersMap',
+        'adminhtml/sales_invoice_grid'    => '_prepareSalesInvoiceFiltersMap',
+        'adminhtml/sales_shipment_grid'   => '_prepareSalesShipmentFiltersMap',
+        'adminhtml/sales_creditmemo_grid' => '_prepareSalesCreditmemoFiltersMap',
     );
     
     /**
@@ -374,6 +377,12 @@ class BL_CustomGrid_Helper_Collection
         return $this;
     }
     
+    /**
+    * @todo guess that now the below methods aren't really necessary anymore, with the use of _handleUnmappedFilters(),
+    * yet it certainly can speed up some related treatments by reducing the number of cases where _handleUnmappedFilters() is actually needed
+    * (or even eliminating all of them for the concerned tables)
+    */
+    
     protected function _prepareSalesOrderFiltersMap($collection, $block, $model)
     {
         $this->addFilterToCollectionMap(
@@ -395,6 +404,82 @@ class BL_CustomGrid_Helper_Collection
                 'billing_name',
                 'created_at',
                 'updated_at',
+            ), $this->getCollectionMainTableAlias($collection))
+        );
+        return $this;
+    }
+    
+    protected function _prepareSalesInvoiceFiltersMap($collection, $block, $model)
+    {
+        $this->addFilterToCollectionMap(
+            $collection,
+            $this->buildFiltersMapArray(array(
+                'entity_id',
+                'store_id',
+                'base_grand_total',
+                'grand_total',
+                'order_id',
+                'state',
+                'store_currency_code',
+                'order_currency_code',
+                'base_currency_code',
+                'global_currency_code',
+                'increment_id',
+                'order_increment_id',
+                'created_at',
+                'order_created_at',
+                'billing_name',
+            ), $this->getCollectionMainTableAlias($collection))
+        );
+        return $this;
+    }
+    
+    protected function _prepareSalesShipmentFiltersMap($collection, $block, $model)
+    {
+        $this->addFilterToCollectionMap(
+            $collection,
+            $this->buildFiltersMapArray(array(
+                'entity_id',
+                'store_id',
+                'total_qty',
+                'order_id',
+                'shipment_status',
+                'increment_id',
+                'order_increment_id',
+                'created_at',
+                'order_created_at',
+                'shipping_name',
+            ), $this->getCollectionMainTableAlias($collection))
+        );
+        return $this;
+    }
+    
+    protected function _prepareSalesCreditmemoFiltersMap($collection, $block, $model)
+    {
+        $this->addFilterToCollectionMap(
+            $collection,
+            $this->buildFiltersMapArray(array(
+                'entity_id',
+                'store_id',
+                'store_to_order_rate',
+                'base_to_order_rate',
+                'grand_total',
+                'store_to_base_rate',
+                'base_to_global_rate',
+                'base_grand_total',
+                'order_id',
+                'creditmemo_status',
+                'state',
+                'invoice_id',
+                'store_currency_code',
+                'order_currency_code',
+                'base_currency_code',
+                'global_currency_code',
+                'increment_id',
+                'order_increment_id',
+                'created_at',
+                'order_created_at',
+                'billing_name',
             ), $this->getCollectionMainTableAlias($collection))
         );
         return $this;

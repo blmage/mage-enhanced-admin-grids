@@ -1,5 +1,4 @@
 <?php
-
 /**
  * NOTICE OF LICENSE
  *
@@ -15,7 +14,7 @@
  */
  
 class BL_CustomGrid_Model_Custom_Column_Order_Items_Default
-    extends BL_CustomGrid_Model_Custom_Column_Order_Items
+    extends BL_CustomGrid_Model_Custom_Column_Order_Items_Abstract
 {
     protected function _getGridColumnRenderer()
     {

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * NOTICE OF LICENSE
  *
@@ -13,13 +12,12 @@
  * @copyright  Copyright (c) 2013 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
-
-class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Order_Items_Sub_Row_Default
-    extends BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Order_Items_Sub_Abstract
+ 
+class BL_CustomGrid_Model_Custom_Column_Creditmemo_Items_Default
+    extends BL_CustomGrid_Model_Custom_Column_Creditmemo_Items_Abstract
 {
-    protected function _construct()
+    protected function _getGridColumnRenderer()
     {
-        parent::_construct();
-        $this->setTemplate('bl/customgrid/widget/grid/column/renderer/order/items/sub/row/default.phtml');
+        return 'customgrid/widget_grid_column_renderer_creditmemo_items_default';
     }
 }

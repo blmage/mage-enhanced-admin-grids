@@ -33,12 +33,12 @@ class BL_CustomGrid_Model_Custom_Column_Order_Base
     
     public function getJoinConditionMainField()
     {
-        return 'entity_id';
+        return (($field = parent::getJoinConditionMainField()) ? $field : 'entity_id');
     }
     
     public function getJoinConditionTableField()
     {
-        return 'entity_id';
+        return (($field = parent::getJoinConditionTableField()) ? $field : 'entity_id');
     }
     
     public function getTableFieldName()

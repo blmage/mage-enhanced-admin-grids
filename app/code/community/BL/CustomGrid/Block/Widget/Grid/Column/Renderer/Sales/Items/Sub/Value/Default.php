@@ -1,5 +1,4 @@
 <?php
-
 /**
  * NOTICE OF LICENSE
  *
@@ -14,8 +13,8 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Order_Items_Sub_Value_Default
-    extends BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Order_Items_Sub_Abstract
+class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Sales_Items_Sub_Value_Default
+    extends BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Sales_Items_Sub_Abstract
 {
     public function render(Varien_Object $value)
     {
@@ -32,7 +31,11 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Order_Items_Sub_Value_Defa
                 $result = implode('<br />', Mage::helper('catalog')->splitSku($this->htmlEscape($item->getSku())));
                 
             } elseif ($code == 'quantity') {
-                $result = $itemRenderer->getColumnHtml($item, 'qty');
+                if ($value->hasOrder()) {
+                    $result = $itemRenderer->getColumnHtml($item, 'qty');
+                } else {
+                    $result = $item->getQty()*1;
+                }
                 
             } elseif (($code == 'original_price')
                 || ($code == 'tax_amount')
@@ -57,7 +60,7 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Order_Items_Sub_Value_Defa
                 }
                 
             } else {
-                $result = $value->getItem()->getDataUsingMethod($code);
+                $result = $item->getDataUsingMethod($code);
             }
         }
         

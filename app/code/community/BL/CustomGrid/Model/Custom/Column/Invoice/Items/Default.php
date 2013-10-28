@@ -9,15 +9,15 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2013 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
-
-class BL_CustomGrid_Model_Custom_Column_Order_Address_Billing
-    extends BL_CustomGrid_Model_Custom_Column_Order_Address_Abstract
+ 
+class BL_CustomGrid_Model_Custom_Column_Invoice_Items_Default
+    extends BL_CustomGrid_Model_Custom_Column_Invoice_Items_Abstract
 {
-    public function getAddressType()
+    protected function _getGridColumnRenderer()
     {
-        return 'billing';
+        return 'customgrid/widget_grid_column_renderer_invoice_items_default';
     }
 }

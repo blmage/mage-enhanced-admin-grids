@@ -9,25 +9,20 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2013 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_Grid_Type_Order
+class BL_CustomGrid_Model_Grid_Type_Invoice
     extends BL_CustomGrid_Model_Grid_Type_Sales_Abstract
 {
     public function isAppliableToGrid($type, $rewritingClassName)
     {
-        return ($type == 'adminhtml/sales_order_grid');
-    }
-    
-    protected function _isOrdersGrid()
-    {
-        return true;
+        return ($type == 'adminhtml/sales_invoice_grid');
     }
     
     protected function _getItemsCustomColumnModel($customizable=false)
     {
-        return 'customgrid/custom_column_order_items_'.($customizable ? 'custom' : 'default');
+        return 'customgrid/custom_column_invoice_items_'.($customizable ? 'custom' : 'default');
     }
 }

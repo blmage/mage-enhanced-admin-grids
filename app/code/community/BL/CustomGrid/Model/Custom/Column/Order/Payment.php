@@ -30,12 +30,12 @@ class BL_CustomGrid_Model_Custom_Column_Order_Payment
     
     public function getJoinConditionMainField()
     {
-        return 'entity_id';
+        return (($field = parent::getJoinConditionMainField()) ? $field : 'entity_id');
     }
     
     public function getJoinConditionTableField()
     {
-        return 'parent_id';
+        return (($field = parent::getJoinConditionTableField()) ? $field : 'parent_id');
     }
     
     public function getTableFieldName()

@@ -14,7 +14,7 @@
  */
 
 class BL_CustomGrid_Model_Custom_Column_Order_Address_Shipping
-    extends BL_CustomGrid_Model_Custom_Column_Order_Address
+    extends BL_CustomGrid_Model_Custom_Column_Order_Address_Abstract
 {
     public function getAddressType()
     {

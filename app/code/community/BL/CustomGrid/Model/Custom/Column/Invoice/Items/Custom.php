@@ -13,8 +13,8 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
  
-class BL_CustomGrid_Model_Custom_Column_Order_Items_Custom
-    extends BL_CustomGrid_Model_Custom_Column_Order_Items_Abstract
+class BL_CustomGrid_Model_Custom_Column_Invoice_Items_Custom
+    extends BL_CustomGrid_Model_Custom_Column_Invoice_Items_Abstract
 {
     protected function _isCustomizableList()
     {
@@ -27,11 +27,8 @@ class BL_CustomGrid_Model_Custom_Column_Order_Items_Custom
             $baseValues = array(
                 'name'            => 'Name',
                 'sku'             => 'SKU',
-                'original_price'  => 'Original Price',
-                'status'          => 'Status',
                 'quantity'        => 'Qty',
                 'tax_amount'      => 'Tax Amount',
-                'tax_percent'     => 'Tax Percent',
                 'discount_amount' => 'Discount Amount',
                 'row_total'       => 'Row Total',
             );
@@ -44,13 +41,13 @@ class BL_CustomGrid_Model_Custom_Column_Order_Items_Custom
                 'row_total',
             );
             
-            $this->setData('item_values', $this->_getItemValuesList($baseValues, $amountsKeys, 'blcg_custom_column_order_items_custom_values'));
+            $this->setData('item_values', $this->_getItemValuesList($baseValues, $amountsKeys, 'blcg_custom_column_invoice_items_custom_values'));
         }
         return $this->_getData('item_values');
     }
     
     protected function _getGridColumnRenderer()
     {
-        return 'customgrid/widget_grid_column_renderer_order_items_custom';
+        return 'customgrid/widget_grid_column_renderer_invoice_items_custom';
     }
 }

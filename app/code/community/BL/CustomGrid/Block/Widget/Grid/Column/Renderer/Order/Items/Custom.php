@@ -1,5 +1,4 @@
 <?php
-
 /**
  * NOTICE OF LICENSE
  *
@@ -15,142 +14,36 @@
  */
 
 class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Order_Items_Custom
-    extends BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Order_Items_Abstract
+    extends BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Sales_Items_Custom_Abstract
 {
-    const DEFAULT_ROW_RENDERER    = 'customgrid/widget_grid_column_renderer_order_items_sub_row_default';
-    const DEFAULT_RESULT_RENDERER = 'customgrid/widget_grid_column_renderer_order_items_sub_default';
-    
-    public function setColumn($column)
+    protected function _getItemsBlockType()
     {
-        $this->setOrderItemsInitSuccess(true);
-        return parent::setColumn($column);
+        return 'adminhtml/sales_order_view_items';
     }
     
-    protected function _getRendererBlock($type)
+    protected function _getActionLayoutHandle()
     {
-        $name  = 'blcg_wgcroic_renderer_'.str_replace('/', '_', $type);
-        $block = false;
-        
-        if (!$this->getData('failed_renderers/'.$name)) {
-            $block = $this->getLayout()->getBlock($name);
-            
-            if (!$block) {
-                try {
-                    $block = $this->getLayout()->createBlock($type, $name);
-                } catch (Exception $e) {
-                    Mage::logException($e);
-                }
-                if (!$block instanceof BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Order_Items_Sub_Interface) {
-                    $failedRenderers = $this->getDataSetDefault('failed_renderers', array());
-                    $failedRenderers[$name] = true;
-                    $this->setData('failed_renderers', $failedRenderers);
-                } else {
-                    $block->setItemRendererBlock($this);
-                }
-            }
-        }
-        
-        return $block;
+        return 'adminhtml_sales_order_view';
     }
     
-    protected function _getItemValueRenderer($value)
+    protected function _getItemsBlockLayoutName()
     {
-        $valueRenderer = false;
-        $renderers = $value->getData('item_value/renderers');
-        
-        foreach ($renderers as $renderer) {
-            if (($renderer = $this->_getRendererBlock($renderer))
-                && $renderer->canRender($value)) {
-                $valueRenderer = $renderer;
-                break;
-            }
-        }
-        
-        return $valueRenderer;
+        return 'order_items';
     }
     
-    protected function _renderValue($value)
+    protected function _getItemsBlockDefaultTemplate()
     {
-        $result = '';
-        
-        if ($renderer = $this->_getItemValueRenderer($value)) {
-            $result = $renderer->render($value);
-        }
-        
-        return $result;
+        return 'sales/order/view/items.phtml';
     }
     
-    protected function _getRowRenderer($value)
+    protected function _prepareItemsBlock(Varien_Object $row)
     {
-        // @todo could allow to propose (and to make propose) different designs / styles
-        return $this->_getRendererBlock(self::DEFAULT_ROW_RENDERER);
+        $this->_getItemsBlock()->setOrder($row);
+        return $this;
     }
     
-    protected function _renderRow($value)
+    protected function _getRowKey()
     {
-        $result = '';
-        
-        if ($renderer = $this->_getRowRenderer($value)) {
-            $valuesHtml = array();
-            $itemValues = $this->getColumn()->getItemValues();
-            
-            foreach ($itemValues as $itemValue) {
-                $value->setItemValue($itemValue);
-                $valuesHtml[$itemValue['code']] = $this->_renderValue($value);
-            }
-            
-            $value->unsItemValue()->setValuesHtml($valuesHtml);
-            $result = $renderer->render($value);
-            $value->unsValuesHtml();
-        }
-        
-        return $result;
-    }
-    
-    protected function _getResultRenderer($value)
-    {
-        // @todo same thing :)
-        return $this->_getRendererBlock(self::DEFAULT_RESULT_RENDERER);
-    }
-    
-    protected function _renderResult($value)
-    {
-        $result = '';
-        
-        if ($renderer = $this->_getResultRenderer($value)) {
-            $rowsHtml = array();
-            $itemsCollection = $value->getOrder()->getItemsCollection();
-            
-            foreach ($itemsCollection as $item) {
-                if (!$item->getParentItem()) {
-                    $value->setItem($item);
-                    $this->setPriceDataObject($item);
-                    $rowsHtml[] = $this->_renderRow($value);
-                }
-            }
-            
-            $value->unsItem()->setRowsHtml($rowsHtml);
-            $result = $renderer->render($value);
-            $value->unsRowsHtml();
-        }
-        
-        return $result;
-    }
-    
-    protected function _toHtml()
-    {
-        $result = '';
-        
-        if (is_array($itemValues = $this->getColumn()->getItemValues())
-            && !empty($itemValues)) {
-            $value = new Varien_Object(array(
-                'order'       => $this->getOrder(),
-                'item_values' => $itemValues,
-                'hide_header' => (bool) $this->getColumn()->getHideHeader(),
-            ));
-            $result = $this->_renderResult($value);
-        }
-        
-        return $result;
+        return 'order';
     }
 }

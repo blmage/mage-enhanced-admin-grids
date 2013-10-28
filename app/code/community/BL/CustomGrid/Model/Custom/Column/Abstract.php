@@ -36,6 +36,10 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract
     {
         parent::_construct();
         $this->initConfig();
+        
+        if (!$this->getFromCustomGridXml()) {
+            $this->finalizeConfig();
+        }
     }
     
     protected function _getBaseHelper()
@@ -190,6 +194,19 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract
     public function shouldInvalidateFilters($grid, $column, $params, $rendererTypes)
     {
         return ($rendererTypes['old'] != $rendererTypes['new']);
+    }
+    
+    public function setName($name)
+    {
+        $this->setData('name', $name);
+        $windowConfig = $this->_getData('custom_params_window_config');
+        
+        if (is_array($windowConfig) && !isset($windowConfig['title'])) {
+            $windowConfig['title'] = $this->_getBaseHelper()->__('Customization : %s', $name);
+            $this->setCustomParamsWindowConfig($windowConfig);
+        }
+        
+        return $this;
     }
     
     protected function _setConfigParams($key, array $params, $merge=false)

@@ -128,7 +128,7 @@ class BL_CustomGrid_Model_Grid_Type
                 if (!isset($column['@']) || !isset($column['@']['model'])) {
                     continue;
                 }
-                $model = Mage::getModel($column['@']['model']);
+                $model = Mage::getModel($column['@']['model'], array('from_custom_grid_xml' => true));
                 $model->setId($id);
                 
                 // Apply main raw fields

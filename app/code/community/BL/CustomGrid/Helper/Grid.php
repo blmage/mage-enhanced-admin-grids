@@ -130,4 +130,17 @@ class BL_CustomGrid_Helper_Grid
     {
         return ($block->getCollection() instanceof Mage_Eav_Model_Entity_Collection_Abstract);
     }
+    
+    public function getGridDisplayableColumns($block)
+    {
+        $columns = $block->getColumns();
+        
+        foreach ($columns as $key => $column) {
+            if ($column->getBlcgFilterOnly()) {
+                unset($columns[$key]);
+            }
+        }
+        
+        return $columns;
+    }
 }
