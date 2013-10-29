@@ -205,10 +205,9 @@ abstract class BL_CustomGrid_Model_Custom_Column_Sales_Items_Abstract
         return ($this->_getItemsTable() == 'sales/order_item');
     }
     
-    protected function _addExcludeChildFilterToSelect($select, $itemAlias, $collection, $column)
+    protected function _addExcludeChildFilterToSelect($select, $itemAlias, $collection, $column, $qi)
     {
         if (!$this->_isOrderItemsList()) {
-            list($adapter, $qi) = $this->_getCollectionAdapter($collection, true);
             $oiAlias = $this->_getUniqueTableAlias('oi');
             
             $select->joinInner(
@@ -257,7 +256,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Sales_Items_Abstract
             ->where(implode(' OR ', $textConditions));
         
         if ($this->_extractBoolParam($params, 'filter_exclude_child')) {
-            $this->_addExcludeChildFilterToSelect($select, $itemAlias, $collection, $column);
+            $this->_addExcludeChildFilterToSelect($select, $itemAlias, $collection, $column, $qi);
         }
         
         $collection->getSelect()->where(new Zend_Db_Expr($select).' > 0');
