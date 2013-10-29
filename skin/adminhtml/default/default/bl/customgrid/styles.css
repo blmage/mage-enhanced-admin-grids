@@ -192,4 +192,7 @@ ul.blcg-custom-columns-help-features li { height:16px; padding:0 0 0 16px; line-
 
 /* SPECIFIC STYLES */
 
-#sales_order_grid .grid .order-tables tr.headings { background:url(../../images/sort_row_bg.gif) repeat-x scroll 0 50% transparent !important; }
+#sales_order_grid .grid .order-tables tr.headings,
+#sales_invoice_grid .grid .order-tables tr.headings,
+#sales_shipment_grid .grid .order-tables tr.headings,
+#sales_creditmemo_grid .grid .order-tables tr.headings { background:url(../../images/sort_row_bg.gif) repeat-x scroll 0 50% transparent !important; }
