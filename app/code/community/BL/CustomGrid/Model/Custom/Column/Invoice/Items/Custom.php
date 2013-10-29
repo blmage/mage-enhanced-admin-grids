@@ -34,9 +34,7 @@ class BL_CustomGrid_Model_Custom_Column_Invoice_Items_Custom
             );
             
             $amountsKeys = array(
-                'original_price',
                 'tax_amount',
-                'tax_percent',
                 'discount_amount',
                 'row_total',
             );

@@ -166,7 +166,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Sales_Items_Abstract
     {
         return Mage::getModel('sales/order')
             ->getCollection()
-            ->addFieldToFilter('entity_id', array('in' => $ordersIds))
+            ->addFieldToFilter('entity_id', array('in' => array_unique($ordersIds)))
             ->load();
     }
     
@@ -174,7 +174,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Sales_Items_Abstract
     {
         $items = Mage::getModel('sales/order_item')
             ->getCollection()
-            ->addFieldToFilter('order_id', array('in' => $ordersIds));
+            ->addFieldToFilter('order_id', array('in' => array_unique($ordersIds)));
         
         if ($excludeChildren) {
             $items->filterByParent();

@@ -34,14 +34,12 @@ class BL_CustomGrid_Model_Custom_Column_Creditmemo_Items_Custom
             );
             
             $amountsKeys = array(
-                'original_price',
                 'tax_amount',
-                'tax_percent',
                 'discount_amount',
                 'row_total',
             );
             
-            $this->setData('item_values', $this->_getItemValuesList($baseValues, array(), 'blcg_custom_column_creditmemo_items_custom_values'));
+            $this->setData('item_values', $this->_getItemValuesList($baseValues, $amountsKeys, 'blcg_custom_column_creditmemo_items_custom_values'));
         }
         return $this->_getData('item_values');
     }
