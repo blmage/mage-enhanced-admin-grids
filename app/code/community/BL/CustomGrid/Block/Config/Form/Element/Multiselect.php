@@ -13,20 +13,11 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Yesno
-    extends BL_CustomGrid_Block_Widget_Grid_Column_Filter_Select
+class BL_CustomGrid_Block_Config_Form_Element_Multiselect
+    extends Varien_Data_Form_Element_Multiselect
 {
-    protected function _getOptions()
+    public function getName()
     {
-        return array(
-            array(
-                'value' => 1,
-                'label' => Mage::helper('customgrid')->__('Yes'),
-            ),
-            array(
-                'value' => 0,
-                'label' => Mage::helper('customgrid')->__('No'),
-            ),
-        );
+        return Varien_Data_Form_Element_Abstract::getName();
     }
 }

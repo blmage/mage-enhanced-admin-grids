@@ -51,13 +51,17 @@ abstract class BL_CustomGrid_Block_Config_Form_Abstract
     protected function _prepareForm()
     {
         $form = new Varien_Data_Form();
-        $renderer = $this->getRenderer();
         $fieldsetHtmlId = 'options_fieldset' . md5($this->_getFormCode());
         $this->setFieldsetHtmlId($fieldsetHtmlId);
         
-        $fieldset = $form->addFieldset($fieldsetHtmlId, array(
-            'legend' => $this->__('Configuration')
-        ));
+        $fieldset = $form->addFieldset($fieldsetHtmlId, array('legend' => $this->__('Configuration')));
+        /*
+        Use an own renderer for multiselect fields to prevent a bug between
+        Prototype JS / Form.serializeElements() (imploding the values) and
+        Varien_Data_Form_Element_Multiselect (generating an array parameter),
+        leading to obtain an array with a single value containing the expected imploded values
+        */
+        $fieldset->addType('multiselect', 'BL_CustomGrid_Block_Config_Form_Element_Multiselect');
         
         $form->setUseContainer(true);
         $form->setId($this->_getFormId());
@@ -78,6 +82,7 @@ abstract class BL_CustomGrid_Block_Config_Form_Abstract
         
         // Prepare element data with values (either from request of from default values)
         $fieldName = $parameter->getKey();
+        
         $data = array(
             'name'     => $form->addSuffixToName($fieldName, 'parameters'),
             'label'    => $parameter->getLabel(),
@@ -96,6 +101,7 @@ abstract class BL_CustomGrid_Block_Config_Form_Abstract
             $data['value'] = (isset($values[$fieldName]) ? $values[$fieldName] : '');
         } else {
             $data['value'] = $parameter->getValue();
+            
             // Prepare unique ID value
             if (($fieldName == 'unique_id') && ($data['value'] == '')) {
                 $data['value'] = md5(microtime(true));
@@ -141,8 +147,9 @@ abstract class BL_CustomGrid_Block_Config_Form_Abstract
         
         // @todo type-specific values whenever needed
         
-        // Instantiate field and render html
+        // Instantiate field
         $field = $fieldset->addField($this->getFieldsetHtmlId().'_'.$fieldName, $fieldType, $data);
+        
         if ($fieldRenderer) {
             $field->setRenderer($fieldRenderer);
         }
@@ -157,6 +164,7 @@ abstract class BL_CustomGrid_Block_Config_Form_Abstract
         // Extra html preparations
         if ($helper = $parameter->getHelperBlock()) {
             $helperBlock = $this->getLayout()->createBlock($helper->getType(), '', $helper->getData());
+            
             if ($helperBlock instanceof Varien_Object) {
                 $helperBlock->setConfig($helper->getData())
                     ->setFieldsetId($fieldset->getId())

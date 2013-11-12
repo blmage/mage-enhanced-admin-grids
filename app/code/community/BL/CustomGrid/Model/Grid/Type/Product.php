@@ -401,7 +401,8 @@ class BL_CustomGrid_Model_Grid_Type_Product
                 // Reload stock item to get the updated value
                 $stockItem->setProductId(null)->assignProduct($entity);
             }
-            return $this->_getProductInventoryData($entity, 'qty')*1;
+            $value = $this->_getProductInventoryData($entity, 'qty')*1;
+            return (strval($value) !== '' ? $value : 0);
         }
         return parent::_getSavedFieldValueForRender($type, $config, $params, $entity);
     }

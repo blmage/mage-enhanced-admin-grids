@@ -677,6 +677,78 @@
                 <sort_order>70000</sort_order>
             </country>
             
+            <eu_country type="customgrid/column_renderer_collection_country_eu" module="customgrid">
+                <name>EU Country</name>
+                <description>Displays whether a country belongs to the EU</description>
+                <sort_order>75000</sort_order>
+                <parameters>
+                    <base_display_format>
+                        <label>Base Display Format</label>
+                        <description><![CDATA[Available variables : <strong>{is_eu_country}</strong>, <strong>{country_code}</strong>, <strong>{country_name}</strong><br />(variables will be replaced by the corresponding values).<br />If no value is set, "{is_eu_country}" will be used by default]]></description>
+                        <visible>1</visible>
+                        <type>text</type>
+                        <sort_order>10</sort_order>
+                    </base_display_format>
+                    <export_display_format>
+                        <label>Export Display Format</label>
+                        <description>If no value is set, then the base display format will be used</description>
+                        <visible>1</visible>
+                        <type>text</type>
+                        <sort_order>20</sort_order>
+                    </export_display_format>
+                    <custom_source>
+                        <label>Custom Source</label>
+                        <description><![CDATA[Choose "Yes" to use a custom source of EU countries.<br /><strong>For Magento versions < 1.7, you should always use this option as there is no base EU countries list by default</strong>]]></description>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>customgrid/system_config_source_yesno</source_model>
+                        <sort_order>30</sort_order>
+                    </custom_source>
+                    <system_config_source>
+                        <label>System Configuration Source</label>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>customgrid/system_config_source_yesno</source_model>
+                        <sort_order>40</sort_order>
+                        <depends>
+                            <custom_source>
+                                <value>1</value>
+                            </custom_source>
+                        </depends>
+                    </system_config_source>
+                    <system_config_source_path>
+                        <label>System Configuration Source Path</label>
+                        <description><![CDATA[Eg : "general/country/eu_countries"]]></description>
+                        <visible>1</visible>
+                        <type>text</type>
+                        <sort_order>50</sort_order>
+                        <depends>
+                            <custom_source>
+                                <value>1</value>
+                            </custom_source>
+                            <system_config_source>
+                                <value>1</value>
+                            </system_config_source>
+                        </depends>
+                    </system_config_source_path>
+                    <eu_countries>
+                        <label>EU Countries</label>
+                        <visible>1</visible>
+                        <type>multiselect</type>
+                        <source_model>adminhtml/system_config_source_country</source_model>
+                        <sort_order>60</sort_order>
+                        <depends>
+                            <custom_source>
+                                <value>1</value>
+                            </custom_source>
+                            <system_config_source>
+                                <value>0</value>
+                            </system_config_source>
+                        </depends>
+                    </eu_countries>
+                </parameters>
+            </eu_country>
+            
             <options type="customgrid/column_renderer_collection_options" module="customgrid">
                 <name>Options</name>
                 <description>Displays a value from an options source</description>
@@ -689,7 +761,7 @@
                         <label>With/Without Filter</label>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <source_model>customgrid/system_config_source_yesno</source_model>
                         <sort_order>10</sort_order>
                     </boolean_filter>
                     <source_id>
@@ -703,7 +775,7 @@
                         <label>Show Missing Option Values</label>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <source_model>customgrid/system_config_source_yesno</source_model>
                         <sort_order>30</sort_order>
                     </show_missing>
                     <display_full_path>
@@ -711,7 +783,7 @@
                         <description>For sources with multiple levels of options, display labels of all levels, and not just last one</description>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <source_model>customgrid/system_config_source_yesno</source_model>
                         <sort_order>40</sort_order>
                     </display_full_path>
                     <options_separator>
@@ -731,7 +803,7 @@
                         <description>Choose "Yes" if the field contains multiple values separated by a given string</description>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <source_model>customgrid/system_config_source_yesno</source_model>
                         <sort_order>60</sort_order>
                     </imploded_values>
                     <imploded_separator>
@@ -763,7 +835,7 @@
                         <description>Choose "Yes" if the filter must match the entire value, and not just be contained within</description>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <source_model>customgrid/system_config_source_yesno</source_model>
                         <sort_order>10</sort_order>
                         <value>no</value>
                     </exact_filter>
@@ -821,7 +893,7 @@
                         <label>Truncate without breaking words</label>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <source_model>customgrid/system_config_source_yesno</source_model>
                         <sort_order>70</sort_order>
                         <depends>
                             <truncate>
@@ -836,7 +908,7 @@
                         <label>Escape HTML</label>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <source_model>customgrid/system_config_source_yesno</source_model>
                         <sort_order>80</sort_order>
                         <value>0</value>
                     </escape_html>
@@ -844,7 +916,7 @@
                         <label>Apply PHP function nl2br()</label>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <source_model>customgrid/system_config_source_yesno</source_model>
                         <sort_order>90</sort_order>
                         <value>0</value>
                     </nl2br>
@@ -873,7 +945,7 @@
                         <label>With/Without Filter</label>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <source_model>customgrid/system_config_source_yesno</source_model>
                         <sort_order>10</sort_order>
                     </boolean_filter>
                     <default_source_id>
@@ -888,14 +960,14 @@
                         <label>Force use of default options source</label>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <source_model>customgrid/system_config_source_yesno</source_model>
                         <sort_order>30</sort_order>
                     </force_default_source>
                     <show_missing>
                         <label>Show Missing Option Values</label>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <source_model>customgrid/system_config_source_yesno</source_model>
                         <sort_order>40</sort_order>
                     </show_missing>
                     <display_full_path>
@@ -903,7 +975,7 @@
                         <description>For sources with multiple levels of options, display labels of all levels, and not just last one</description>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <source_model>customgrid/system_config_source_yesno</source_model>
                         <sort_order>50</sort_order>
                     </display_full_path>
                     <options_separator>
@@ -933,7 +1005,7 @@
                         <description>If you choose "No", only images names will be displayed</description>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <source_model>customgrid/system_config_source_yesno</source_model>
                         <sort_order>10</sort_order>
                         <value>1</value>
                     </display_images>
@@ -942,7 +1014,7 @@
                         <description>Images URLs are used as images titles, or as result if images are not displayed or on results export. If you choose "No", only the images paths within the media/catalog directory will be displayed</description>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <source_model>customgrid/system_config_source_yesno</source_model>
                         <sort_order>20</sort_order>
                         <value>1</value>
                     </display_images_urls>
@@ -951,7 +1023,7 @@
                         <description>If you choose "Yes", the images / names will point to the original images URLs</description>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <source_model>customgrid/system_config_source_yesno</source_model>
                         <sort_order>30</sort_order>
                     </original_image_link>
                     <image_width>
@@ -973,7 +1045,7 @@
                         <description><![CDATA[Used when image dimensions are specified.<br />If you choose "Yes", the original full-size images will be used and resized, when needed, by your web browser only (regarding images URLs, only the original ones will likewise be displayed in all cases)]]></description>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <source_model>customgrid/system_config_source_yesno</source_model>
                         <sort_order>60</sort_order>
                         <value>0</value>
                     </browser_resize_only>
@@ -983,7 +1055,7 @@
                         <visible>1</visible>
                         <type>select</type>
                         <sort_order>70</sort_order>
-                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <source_model>customgrid/system_config_source_yesno</source_model>
                         <value>1</value>
                     </filter_on_name>
                 </parameters>
@@ -1153,7 +1225,7 @@
                         <label>Apply Rates For Display</label>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <source_model>customgrid/system_config_source_yesno</source_model>
                         <sort_order>90</sort_order>
                         <value>0</value>
                     </apply_rates>
@@ -1180,7 +1252,7 @@
                         <description>Only for columns with time values</description>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <source_model>customgrid/system_config_source_yesno</source_model>
                         <sort_order>20</sort_order>
                         <value>0</value>
                     </filter_time>
@@ -1198,7 +1270,7 @@
                         <label>Show Number Sign</label>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <source_model>customgrid/system_config_source_yesno</source_model>
                         <sort_order>10</sort_order>
                     </show_number_sign>
                 </parameters>
@@ -1274,7 +1346,7 @@
                         <label>Truncate without breaking words</label>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <source_model>customgrid/system_config_source_yesno</source_model>
                         <sort_order>70</sort_order>
                         <depends>
                             <truncate>
@@ -1289,7 +1361,7 @@
                         <label>Escape HTML</label>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <source_model>customgrid/system_config_source_yesno</source_model>
                         <sort_order>80</sort_order>
                         <value>0</value>
                     </escape_html>
@@ -1297,7 +1369,7 @@
                         <label>Apply PHP function nl2br()</label>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <source_model>customgrid/system_config_source_yesno</source_model>
                         <sort_order>90</sort_order>
                         <value>0</value>
                     </nl2br>
