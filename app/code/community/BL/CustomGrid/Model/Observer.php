@@ -896,9 +896,15 @@ class BL_CustomGrid_Model_Observer
                 $blockId   = $grid->getId();
                 
                 if (($model = $this->_getGridModel($blockType, $blockId, true))
-                    && (!$model->getDisabled())) {
-                    // Add type model here and not in before_to_html event, because this one is not called for export
-                    $grid->blcg_setGridModel($model)->blcg_setTypeModel($model->getTypeModel());
+                    && !$model->getDisabled()) {
+                    if (Mage::helper('customgrid')->isRewritedGrid($grid)) {
+                        // Add models to the grids here and not in the "before_to_html" event, because the latter is not called for export
+                        $grid->blcg_setGridModel($model)->blcg_setTypeModel($model->getTypeModel());
+                    } else {
+                        // For some reason the grid was not rewrited, exclude it to prevent problems
+                        // @todo once available, add related message (with disable rewrite and refresh cache links)
+                        $this->_excludedModels[] = $model->getId();
+                    }
                 }
         }
     }
