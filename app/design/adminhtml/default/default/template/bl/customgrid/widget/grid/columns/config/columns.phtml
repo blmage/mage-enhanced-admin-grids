@@ -14,15 +14,16 @@
  */
 ?>
 <?php
+    $_htmlId = $this->getHtmlId();
     $_helper = $this->helper('customgrid');
     $_stringHelper = $this->helper('customgrid/string');
     $_gridModel    = $this->getGridModel();
     $_columnAlignments = $_gridModel->getColumnAlignments();
     $_columnOrigins    = $_gridModel->getColumnOrigins();
 ?>
-<div id="<?php echo $this->getHtmlId() ?>-grid" class="grid">
+<div id="<?php echo $_htmlId ?>-grid" class="grid">
     <div class="hor-scroll">
-        <table id="<?php echo $this->getHtmlId() ?>-table" class="data" cellspacing="0">
+        <table id="<?php echo $_htmlId ?>-table" class="data" cellspacing="0">
             <?php if ($this->getUseDragNDrop()): ?><col width="20" /><?php endif ?>
             <col class="a-center" width="50" />
             <col class="a-center" width="50" />
@@ -63,7 +64,7 @@
                     <th><span class="nobr"><?php echo $this->__('Actions') ?></span></th>
                 </tr>
             </thead>
-            <tbody id="<?php echo $this->getHtmlId() ?>-table-rows">
+            <tbody id="<?php echo $_htmlId ?>-table-rows">
             <?php $_i = 0; ?>
             
             <?php
@@ -82,8 +83,7 @@
             
             <?php foreach ($_columns as $_columnId => $_column): ?>
                 <?php
-                    $_dbId   = $_column['column_id'];
-                    $_htmlId = $this->getHtmlId();
+                    $_dbId = $_column['column_id'];
                     $_fromGrid       = $_gridModel->isGridColumnOrigin($_column['origin']);
                     $_fromCollection = $_gridModel->isCollectionColumnOrigin($_column['origin']);
                     $_fromAttribute  = $_gridModel->isAttributeColumnOrigin($_column['origin']);
