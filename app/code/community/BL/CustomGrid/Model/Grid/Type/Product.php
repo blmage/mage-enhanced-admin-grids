@@ -22,7 +22,10 @@ class BL_CustomGrid_Model_Grid_Type_Product
     public function isAppliableToGrid($type, $rewritingClassName)
     {
         return (($type == 'adminhtml/catalog_product_grid')
-            || ($type == 'adminhtml/catalog_category_tab_product'));
+            || ($type == 'adminhtml/catalog_category_tab_product')
+            || ($type == 'adminhtml/catalog_product_edit_tab_related')
+            || ($type == 'adminhtml/catalog_product_edit_tab_upsell')
+            || ($type == 'adminhtml/catalog_product_edit_tab_crosssell'));
     }
     
     public function canExport($type)
