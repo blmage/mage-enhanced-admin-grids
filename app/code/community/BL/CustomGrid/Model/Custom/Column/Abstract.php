@@ -388,7 +388,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract
     
     protected function _handleApplyError($block, $model, $id, $alias, $params, $store, $renderer=null, $message='')
     {
-        Mage::getSingleton('adminhtml/session')
+        Mage::getSingleton('customgrid/session')
             ->addError(Mage::helper('customgrid')->__('The "%s" custom column could not be applied : "%s"', $this->getName(), $message));
         return $this;
     }

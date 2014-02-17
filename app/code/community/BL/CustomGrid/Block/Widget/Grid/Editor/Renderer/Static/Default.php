@@ -100,7 +100,7 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Default
             $spacesCount   = ($spacesCount > 0 ? $spacesCount : 3);
             
             foreach ($selected as $key => $value) {
-                if (($value['value'] === '') // @todo callback to test for other emptiness ?
+                if (($value['value'] === '') // @todo callback to test for other kinds of emptiness ?
                     || (isset($renderOptions['with_empty_value']) 
                         && (bool)$renderOptions['with_empty_value'])) {
                     continue;

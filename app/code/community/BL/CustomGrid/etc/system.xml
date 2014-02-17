@@ -15,10 +15,16 @@
  */
 -->
 <config>
-   <sections>
+    <tabs>
         <customgrid translate="label" module="customgrid">
-            <label>Custom Grids</label>
-            <tab>general</tab>
+            <label>Enhanced Admin Grids</label>
+            <sort_order>110</sort_order>
+        </customgrid>
+    </tabs>
+    <sections>
+        <customgrid translate="label" module="customgrid">
+            <label>Base Configuration</label>
+            <tab>customgrid</tab>
             <frontend_type>text</frontend_type>
             <sort_order>10000</sort_order>
             <show_in_default>1</show_in_default>
@@ -28,7 +34,7 @@
                 <global translate="label" module="customgrid">
                     <label>General</label>
                     <frontend_type>text</frontend_type>
-                    <sort_order>10</sort_order>
+                    <sort_order>0</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>0</show_in_website>
                     <show_in_store>0</show_in_store>
@@ -83,23 +89,103 @@
                         </sort_with_dnd>
                     </fields>
                 </global>
-                <!-- @todo with profiles system -->
-                <!--
-                <profiles translate="label" module="customgrid">
-                    <label>Grids Profiles</label>
+                <custom_columns translate="label" module="customgrid">
+                    <label>Custom Columns</label>
                     <frontend_type>text</frontend_type>
                     <sort_order>1000</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>0</show_in_website>
                     <show_in_store>0</show_in_store>
                     <fields>
+                        <group_in_default_header translate="label" module="customgrid">
+                            <label>Add Group Name In Default Header</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </group_in_default_header>
                     </fields>
-                </profiles>
-                -->
-                <custom_default_params translate="label" module="customgrid">
-                    <label>Custom Default Parameters Behaviour</label>
+                </custom_columns>
+                <customization_params translate="label" module="customgrid">
+                    <label>Customization Parameters - Default Values</label>
                     <frontend_type>text</frontend_type>
                     <sort_order>2000</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>0</show_in_website>
+                    <show_in_store>0</show_in_store>
+                    <fields>
+                        <ignore_custom_headers translate="label" module="customgrid">
+                            <label>Ignore Custom Headers (Base Grid Columns)</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>customgrid/system_config_source_yesno</source_model>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </ignore_custom_headers>
+                        <ignore_custom_widths translate="label" module="customgrid">
+                            <label>Ignore Custom Widths (Base Grid Columns)</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>customgrid/system_config_source_yesno</source_model>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </ignore_custom_widths>
+                        <ignore_custom_alignments translate="label" module="customgrid">
+                            <label>Ignore Custom Alignments (Base Grid Columns)</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>customgrid/system_config_source_yesno</source_model>
+                            <sort_order>30</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </ignore_custom_alignments>
+                        <pagination_values translate="label comment" module="customgrid">
+                            <label>Custom Pagination Values</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>40</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <comment><![CDATA[Numeric values separated by commas. If none is set, base pagination values will be used (ie 20, 30, 50, 100, 200)]]></comment>
+                        </pagination_values>
+                        <default_pagination_value translate="label comment" module="customgrid">
+                            <label>Default Pagination Value</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>50</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <comment><![CDATA[This value will replace the original default value from the grids. If the default value (either this one or, if it is not set, the original) can not be found in the pagination values used for the current grid, the smallest available pagination value will be used by default]]></comment>
+                        </default_pagination_value>
+                        <merge_base_pagination translate="label comment" module="customgrid">
+                            <label>Merge Base Pagination Values</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>customgrid/system_config_source_yesno</source_model>
+                            <sort_order>60</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <comment><![CDATA[Choose "Yes" to make the base pagination values be added to the custom ones]]></comment>
+                        </merge_base_pagination>
+                        <pin_header translate="label" module="customgrid">
+                            <label>Pin Pager And Mass-Actions Block</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>customgrid/system_config_source_yesno</source_model>
+                            <sort_order>70</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </pin_header>
+                    </fields>
+                </customization_params>
+                <custom_default_params translate="label" module="customgrid">
+                    <label>Custom Default Parameters Behaviour - Default Values</label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>3000</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>0</show_in_website>
                     <show_in_store>0</show_in_store>
@@ -156,29 +242,23 @@
                         </filter>
                     </fields>
                 </custom_default_params>
-                <custom_columns translate="label" module="customgrid">
-                    <label>Custom Columns</label>
+                <!-- @todo with profiles system -->
+                <!--
+                <profiles translate="label" module="customgrid">
+                    <label>Grids Profiles</label>
                     <frontend_type>text</frontend_type>
-                    <sort_order>3000</sort_order>
+                    <sort_order>4000</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>0</show_in_website>
                     <show_in_store>0</show_in_store>
                     <fields>
-                        <group_in_default_header translate="label" module="customgrid">
-                            <label>Add Group Name In Default Header</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
-                            <sort_order>10</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>0</show_in_website>
-                            <show_in_store>0</show_in_store>
-                        </group_in_default_header>
                     </fields>
-                </custom_columns>
+                </profiles>
+                -->
                 <editor_sitemap translate="label" module="customgrid">
                     <label>Editor - Grid Type : Google Sitemap</label>
                     <frontend_type>text</frontend_type>
-                    <sort_order>30000</sort_order>
+                    <sort_order>100000</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>0</show_in_website>
                     <show_in_store>0</show_in_store>
@@ -196,5 +276,152 @@
                 </editor_sitemap>
             </groups>
         </customgrid>
+        <customgrid_rewriters translate="label comment" module="customgrid">
+            <label>Rewriters Configuration</label>
+            <tab>customgrid</tab>
+            <frontend_type>text</frontend_type>
+            <sort_order>10001</sort_order>
+            <show_in_default>1</show_in_default>
+            <show_in_website>0</show_in_website>
+            <show_in_store>0</show_in_store>
+            <groups>
+                <eval translate="label comment" module="customgrid">
+                    <label>eval()ed Classes</label>
+                    <comment><![CDATA[Rewriting classes are automatically eval()ed at runtime.<br /><strong>eval() must be available on your server</strong>.]]></comment>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>10</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>0</show_in_website>
+                    <show_in_store>0</show_in_store>
+                    <fields>
+                        <enabled translate="label" module="customgrid">
+                            <label>Enabled</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>customgrid/system_config_source_yesno</source_model>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </enabled>
+                        <priority translate="label comment" module="customgrid">
+                            <label>Priority</label>
+                            <comment><![CDATA[Rewriters with lower priority values are used first]]></comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </priority>
+                        <display_errors translate="label" module="customgrid">
+                            <label>Display Error Messages</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>customgrid/system_config_source_yesno</source_model>
+                            <sort_order>30</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </display_errors>
+                        <display_errors_if_success translate="label" module="customgrid">
+                            <label>Display Error Messages If Rewrite Success</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>customgrid/system_config_source_yesno</source_model>
+                            <sort_order>40</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends><display_errors>1</display_errors></depends>
+                        </display_errors_if_success>
+                        <log_errors translate="label comment" module="customgrid">
+                            <label>Log Error Messages</label>
+                            <comment><![CDATA[Error messages are written to the exceptions log]]></comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>customgrid/system_config_source_yesno</source_model>
+                            <sort_order>50</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </log_errors>
+                        <log_errors_if_success translate="label" module="customgrid">
+                            <label>Log Error Messages If Rewrite Success</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>customgrid/system_config_source_yesno</source_model>
+                            <sort_order>60</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends><log_errors>1</log_errors></depends>
+                        </log_errors_if_success>
+                    </fields>
+                </eval>
+                <file translate="label" module="customgrid">
+                    <label>Auto-generated Class Files</label>
+                    <comment><![CDATA[Rewriting classes are automatically generated in corresponding files inside the <span>app/code/community/BL/CustomGrid/Block/Rewrite</span> directory.<br />Each file is only re-generated when the rewrite code is significantly changed.<br /><strong>Check your folder permissions before using this method.</strong>]]></comment>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>20</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>0</show_in_website>
+                    <show_in_store>0</show_in_store>
+                    <fields>
+                        <enabled translate="label" module="customgrid">
+                            <label>Enabled</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>customgrid/system_config_source_yesno</source_model>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </enabled>
+                        <priority translate="label comment" module="customgrid">
+                            <label>Priority</label>
+                            <comment><![CDATA[Rewriters with lower priority values are used first]]></comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </priority>
+                        <display_errors translate="label" module="customgrid">
+                            <label>Display Error Messages</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>customgrid/system_config_source_yesno</source_model>
+                            <sort_order>30</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </display_errors>
+                        <display_errors_if_success translate="label" module="customgrid">
+                            <label>Display Error Messages If Rewrite Success</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>customgrid/system_config_source_yesno</source_model>
+                            <sort_order>40</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends><display_errors>1</display_errors></depends>
+                        </display_errors_if_success>
+                        <log_errors translate="label comment" module="customgrid">
+                            <label>Log Error Messages</label>
+                            <comment><![CDATA[Error messages are written to the exceptions log]]></comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>customgrid/system_config_source_yesno</source_model>
+                            <sort_order>50</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </log_errors>
+                        <log_errors_if_success translate="label" module="customgrid">
+                            <label>Log Error Messages If Rewrite Success</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>customgrid/system_config_source_yesno</source_model>
+                            <sort_order>60</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends><log_errors>1</log_errors></depends>
+                        </log_errors_if_success>
+                    </fields>
+                </file>
+            </groups>
+        </customgrid_rewriters>
     </sections>
 </config>

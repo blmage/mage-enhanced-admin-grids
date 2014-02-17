@@ -137,7 +137,7 @@ class BL_CustomGrid_Custom_GridController
                 $this->_getSession()->addError($this->__('This custom grid no longer exists'));
             }
         }
-        if ($this->getRequest()->getParam('back', false)) { 
+        if ($this->getRequest()->getParam('back', false)) {
             $this->_redirect('*/*/edit', array(
                 '_current' => true,
                 'grid_id'  => $grid->getId(),

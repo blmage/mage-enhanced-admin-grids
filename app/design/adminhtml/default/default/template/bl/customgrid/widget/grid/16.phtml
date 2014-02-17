@@ -48,16 +48,9 @@
  *  getPagerVisibility()
  *  getVarNamePage()
  */
-$_columns = $this->getColumns();
-
-// Remove columns that should not be displayed
-foreach ($_columns as $_key => $_column):
-    if ($_column->getBlcgFilterOnly()):
-        unset($_columns[$_key]);
-    endif;
-endforeach;
-
+$_columns    = $this->helper('customgrid/grid')->getGridBlockDisplayableColumns($this);
 $_numColumns = count($_columns);
+$_gridModel  = $this->helper('customgrid/grid')->getGridModelFromBlock($this);;
 ?>
 <?php if($this->getCollection()): ?>
     <?php if($this->canDisplayContainer()): ?>
@@ -77,6 +70,12 @@ $_numColumns = count($_columns);
         <?php echo $this->getMessagesBlock()->getGroupedHtml() ?>
         <?php echo $this->getChildHtml('bl_custom_grid_grid_columns_config') ?>
     <?php endif; ?>
+
+<?php if ($_gridModel && $_gridModel->getPinnableHeader()): ?>
+<div class="blcg-grid-pinned-actions-block-placeholder"></div>
+<div class="blcg-grid-pinnable-actions-block">
+<?php endif ?>
+
 <?php if($this->getPagerVisibility() || $this->getExportTypes() || $this->getFilterVisibility()): ?>
     <table cellspacing="0" class="actions">
         <tr>
@@ -103,6 +102,14 @@ $_numColumns = count($_columns);
             <?php echo $this->__('of %s pages', $this->getCollection()->getLastPageNumber()) ?>
             <span class="separator">|</span>
             <?php echo $this->__('View') ?>
+            
+            <?php if ($_gridModel): ?>
+            <select name="<?php echo $this->getVarNameLimit() ?>" onchange="<?php echo $this->getJsObjectName() ?>.loadByElement(this)">
+                <?php foreach ($_gridModel->getPaginationValues() as $_value): ?>
+                <option value="<?php echo $_value ?>"<?php if($this->getCollection()->getPageSize()==$_value): ?> selected="selected"<?php endif; ?>><?php echo $_value ?></option>
+                <?php endforeach ?>
+            </select>
+            <?php else: ?>
             <select name="<?php echo $this->getVarNameLimit() ?>" onchange="<?php echo $this->getJsObjectName() ?>.loadByElement(this)">
                 <option value="20"<?php if($this->getCollection()->getPageSize()==20): ?> selected="selected"<?php endif; ?>>20</option>
                 <option value="30"<?php if($this->getCollection()->getPageSize()==30): ?> selected="selected"<?php endif; ?>>30</option>
@@ -110,6 +117,8 @@ $_numColumns = count($_columns);
                 <option value="100"<?php if($this->getCollection()->getPageSize()==100): ?> selected="selected"<?php endif; ?>>100</option>
                 <option value="200"<?php if($this->getCollection()->getPageSize()==200): ?> selected="selected"<?php endif; ?>>200</option>
             </select>
+            <?php endif ?>
+
             <?php echo $this->__('per page') ?><span class="separator">|</span>
             <?php echo $this->__('Total %d records found', $this->getCollection()->getSize()) ?>
             <span id="<?php echo $this->getHtmlId() ?>-total-count" class="no-display"><?php echo $this->getCollection()->getSize() ?></span>
@@ -141,6 +150,11 @@ $_numColumns = count($_columns);
 <?php if($this->getMassactionBlock()->isAvailable()): ?>
 <?php echo $this->getMassactionBlockHtml() ?>
 <?php endif ?>
+
+<?php if ($_gridModel && $_gridModel->getPinnableHeader()): ?>
+</div>
+<?php endif ?>
+
 <div class="grid">
     <div class="hor-scroll">
     <table cellspacing="0" class="data" id="<?php echo $this->getId() ?>_table">
@@ -250,5 +264,17 @@ $_numColumns = count($_columns);
 //]]>
 </script>
 <?php endif; ?>
+
+<?php if ($_gridModel && $_gridModel->getPinnableHeader()): ?>
+<script type="text/javascript">
+//<![CDATA[
+    <?php echo $this->helper('core')->uniqHash('blcgPinner_') ?> = new blcg.Grid.ActionsPinner('<?php echo $this->getId() ?>', '<?php echo $this->getId() ?>_table');
+//]]>
+</script>
+<?php endif ?>
+
+<?php endif ?>
+<?php if ($this->helper('customgrid')->isAjaxRequest()): ?>
+    <?php echo $this->getMessagesBlock()->setIsAjaxMode(true)->toHtml() ?>
 <?php endif ?>
 <?php echo $this->getChildHtml('bl_custom_grid_grid_columns_editor') ?>

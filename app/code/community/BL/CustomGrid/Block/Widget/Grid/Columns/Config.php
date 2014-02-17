@@ -16,7 +16,7 @@
 class BL_CustomGrid_Block_Widget_Grid_Columns_Config
     extends Mage_Adminhtml_Block_Widget
 {
-    static protected $_instancesNumber = 0; 
+    static protected $_instancesNumber = 0;
     protected $_instanceId = null;
     
     protected function _construct()
@@ -73,8 +73,8 @@ class BL_CustomGrid_Block_Widget_Grid_Columns_Config
     public function getDeleteButtonHtml()
     {
         return parent::getButtonHtml(
-            $this->__('Delete'), 
-            'confirmSetLocation(\''.$this->__('Are you sure?').'\', \''.$this->getDeleteUrl().'\')', 
+            $this->__('Delete'),
+            'confirmSetLocation(\''.$this->__('Are you sure?').'\', \''.$this->getDeleteUrl().'\')',
             'scalable delete'
         );
     }
@@ -231,7 +231,7 @@ class BL_CustomGrid_Block_Widget_Grid_Columns_Config
                 $model->initWithGridBlock($this->getGridBlock())->save();
                 $this->setIsNewModel(true);
             } elseif (($block = $this->getGridBlock())
-                      && !Mage::helper('customgrid')->isRewritedGrid($block)) {
+                      && !$this->helper('customgrid')->isRewritedGrid($block)) {
                 // Do not display if a not rewrited grid is given
                 return '';
             } else {

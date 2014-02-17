@@ -15,6 +15,32 @@
 .blcg-clearer { clear:both; }
 .blcg-tooltip { padding:4px 8px; background:#fff; border:1px solid #000; }
 
+/* MESSAGES LIST */
+
+.blcg-messages-wrapper { position:fixed; right:0; bottom:0; width:100%; z-index:10; }
+.blcg-messages-tabs { height:32px; margin-right:16px; }
+.blcg-messages-tab { float:right; display:block; height:32px; line-height:34px; margin-left:8px; padding:0 10px 0 30px; font-weight:bold; border-style:solid; border-width:1px 1px 0; background-repeat:no-repeat; background-position:6px center; cursor:pointer; }
+.blcg-messages-tab.no-display { display:none; }
+.blcg-messages-lists { clear:both; }
+.blcg-messages-list-wrapper { max-height:200px; overflow-y:auto; border-width:1px 0 0; border-style:solid; }
+.blcg-messages-list { padding:8px 12px; }
+.blcg-messages-content-date { margin:0 0 4px; font-size:14px; font-weight:bold; }
+.blcg-messages-tab-warning { color:#000000; background-color:#e6e6e6; border-color:#666e73; }
+.blcg-messages-tab-error,
+.blcg-messages-list-wrapper-error { color:#df280a; background-color:#faefe7; border-color:#f16048; }
+.blcg-messages-tab-success,
+.blcg-messages-list-wrapper-success { color:#3d6611; background-color:#eff5ea; border-color:#95a486; }
+.blcg-messages-tab-notice,
+.blcg-messages-list-wrapper-notice { color:#3d6611; background-color:#fffbf0; border-color:#ffd967; }
+.blcg-messages-tab-warning,
+.blcg-messages-list-wrapper-warning { color:#000000; background-color:#e6e6e6; border-color:#666e73; }
+.blcg-messages-tab-error { background-image:url(../../images/error_msg_icon.gif); }
+.blcg-messages-tab-success { background-image:url(../../images/success_msg_icon.gif); }
+.blcg-messages-tab-notice { background-image:url(../../images/note_msg_icon.gif); }
+.blcg-messages-tab-warning { background-image:url(../../images/warning_msg_icon.gif); }
+.blcg-messages-list li { padding:8px 8px 2px !important; background:none !important; }
+.blcg-messages-list ul li { margin:0 !important; }
+
 /* IN-GRID / EDIT BLOCK HEADER */
 
 .blcg-content-header { margin-bottom:18px; padding-top:9px; padding-bottom:.25em; font-family:Arial,Helvetica,sans-serif; border-bottom:4px solid #dfdfdf; }
@@ -128,6 +154,12 @@ ul.blcg-custom-columns-help-features li { height:16px; padding:0 0 0 16px; line-
 .customgrid-custom-grid-column-filter-categories .middle { background:none; min-height:0; }
 .customgrid-custom-grid-column-filter-categories .wrapper-popup { min-width:680px; }
 
+/* PINNABLE GRID HEADER */
+
+.blcg-grid-pinned-actions-block { z-index:1; background:#fff; }
+.blcg-grid-pinned-actions-block .actions td { padding:0 6px; }
+.blcg-grid-pinned-actions-block table.massaction td:first-child { white-space:nowrap; }
+
 /* CATEGORY FILTER TREE ACTION */
 
 .customgrid-custom-grid-column-filter-categories { background:#fff; }
@@ -196,3 +228,5 @@ ul.blcg-custom-columns-help-features li { height:16px; padding:0 0 0 16px; line-
 #sales_invoice_grid .grid .order-tables tr.headings,
 #sales_shipment_grid .grid .order-tables tr.headings,
 #sales_creditmemo_grid .grid .order-tables tr.headings { background:url(../../images/sort_row_bg.gif) repeat-x scroll 0 50% transparent !important; }
+
+#customgrid_rewriters_file.config .comment span { font-family:Courier New,Courier,Arial,Helvetica,sans-serif; }

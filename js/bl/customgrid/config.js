@@ -255,6 +255,45 @@ blcg.Tools = {
     }
 };
 
+blcg.EventsManager = Class.create();
+blcg.EventsManager.prototype = {
+    initialize: function()
+    {
+        this.handlers = $H({});
+    },
+    
+    addUniqueHandler: function(id, type, element, eventName, callback)
+    {
+        var handler = this.handlers.get(id);
+        
+        if (handler) {
+            if (handler.type == 'varien') {
+                if (typeof(varienGlobalEvents) != 'undefined') {
+                    varienGlobalEvents.removeEventHandler(handler.eventName, handler.callback)
+                }
+            } else if (type == 'prototype') {
+                Event.stopObserving(handler.element, handler.eventName, handler.callback);
+            }
+            this.handlers.unset(id);
+        }
+        if (type == 'varien') {
+            if (typeof(varienGlobalEvents) != 'undefined') {
+                varienGlobalEvents.attachEventHandler(eventName, callback);
+            } else {
+                return;
+            }
+        } else if (type == 'prototype') {
+            Event.observe(element, eventName, callback);
+        } else {
+            return;
+        }
+        
+        this.handlers.set(id, {type: type, element: element, eventName: eventName, callback: callback});
+    }
+};
+
+blcgEventsManager = new blcg.EventsManager();
+
 /*
  * Copyright (c) 2006 Jonathan Weiss <jw@innerewut.de>
  *
@@ -800,8 +839,10 @@ blcg.TableDnd.prototype = {
         
         this.makeDraggable(table);
         
-        Event.observe(document, 'mousemove', function(event){ this.onMouseMove(event); }.bind(this));
-        Event.observe(document, 'mouseup', function(event){ this.onMouseUp(event); }.bind(this));
+        var onMouseMoveHandler = this.onMouseMove.bind(this);
+        var onMouseUpHandler = this.onMouseUp.bind(this);
+        blcgEventsManager.addUniqueHandler('blcg-dnd-'+$(table).identify()+'-mouse-move', 'prototype', document, 'mousemove', onMouseMoveHandler);
+        blcgEventsManager.addUniqueHandler('blcg-dnd-'+$(table).identify()+'-mouse-up', 'prototype', document, 'mouseup', onMouseUpHandler);
     },
     
     makeDraggable: function(table)
@@ -1089,12 +1130,8 @@ blcg.Grid.Export.prototype = {
         
         this.customSizeInput.hide();
         this.customSizeInput.disabled = true;
-        this.customSizeInput.observe('change', function(){
-            this.verifyInput(this.customSizeInput, '');
-        }.bind(this));
-        this.fromResultInput.observe('change', function(){
-            this.verifyInput(this.fromResultInput, '1');
-        }.bind(this));
+        this.customSizeInput.observe('change', function(){ this.verifyInput(this.customSizeInput, '');  }.bind(this));
+        this.fromResultInput.observe('change', function(){ this.verifyInput(this.fromResultInput, '1'); }.bind(this));
         
         this.sizeSelect.observe('change', function(){
             if ($F(this.sizeSelect) != '') {
@@ -1171,8 +1208,8 @@ blcg.Grid.Config.prototype = {
             orderPitch: 1,
             useDnd: false
         }, config || {});
-        this.config.originalMaxOrder = this.config.maxOrder;
         
+        this.config.originalMaxOrder = this.config.maxOrder;
         this.config.idRegex = new RegExp(this.config.idTemplate, 'g');
         this.config.jsIdRegex = new RegExp(this.config.jsIdTemplate, 'g');
         this.config.orderRegex = new RegExp(this.config.orderTemplate, 'g');
@@ -1505,6 +1542,154 @@ blcg.Grid.Config.prototype = {
     }
 };
 
+blcg.Grid.ActionsPinner = Class.create();
+blcg.Grid.ActionsPinner.prototype = {
+    initialize: function(containerId, gridTableId)
+    {
+        this.container   = $(containerId);
+        this.gridTable   = $(gridTableId);
+        this.pinnedBlock = this.container.select('.blcg-grid-pinnable-actions-block').first();
+        
+        if (!this.pinnedBlock || this.pinnedBlock.empty()) {
+            return;
+        }
+        
+        this.pinnedPlaceholder = this.container.select('.blcg-grid-pinned-actions-block-placeholder').first();
+        this.isVisible   = true;
+        this.isPinned    = false;
+        this.isWorking   = false;
+        this.pinPosition = 0;
+        this.pinnedPartHeight = 0;
+        
+        if (this.pinnedBlock && this.pinnedPlaceholder) {
+            var onScrollHandler = this.onScroll.bind(this);
+            blcgEventsManager.addUniqueHandler('blcg-gap-'+containerId+'-load',   'prototype', window, 'load',   onScrollHandler);
+            blcgEventsManager.addUniqueHandler('blcg-gap-'+containerId+'-scroll', 'prototype', window, 'scroll', onScrollHandler);
+            blcgEventsManager.addUniqueHandler('blcg-gap-'+containerId+'-resize', 'prototype', window, 'resize', onScrollHandler);
+            
+            var onTabShowHandler = function(tab){ this.onTabShow(tab.tab); }.bind(this);
+            var onTabHideHandler = function(tab){ this.onTabHide(tab.tab); }.bind(this);
+            blcgEventsManager.addUniqueHandler('blcg-gap-'+containerId+'-tab-show', 'varien', null, 'showTab', onTabShowHandler);
+            blcgEventsManager.addUniqueHandler('blcg-gap-'+containerId+'-tab-hide', 'varien', null, 'hideTab', onTabHideHandler);
+        }
+        
+        this.onScroll();
+    },
+    
+    getFixedHeaderHeight: function()
+    {
+        var fixedHeader = $$('.content-header-floating').first();
+        return (fixedHeader && fixedHeader.visible() ? fixedHeader.getHeight() : 0);
+    },
+    
+    pin: function()
+    {
+        if (this.isPinned || this.isWorking) {
+            this.checkPosition();
+            return;
+        }
+        
+        this.isWorking   = true;
+        this.isPinned    = true;
+        this.pinPosition = this.getFixedHeaderHeight();
+        
+        if (this.pinnedBlock) {
+            this.pinnedBlock.setStyle({
+                'position': 'fixed',
+                'left': 0,
+                'top': this.pinPosition + 'px',
+                'width': '100%'
+            });
+            
+            this.pinnedBlock.addClassName('blcg-grid-pinned-actions-block'); 
+            this.pinnedPartHeight = this.pinnedBlock.getHeight();
+        }
+        
+        this.pinnedPlaceholder.setStyle({'height': this.pinnedPartHeight + 'px'});
+        this.isWorking = false;
+    },
+    
+    unPin: function()
+    {
+        if (!this.isPinned || this.isWorking) {
+            return;
+        }
+        
+        this.isWorking   = true;
+        this.isPinned    = false;
+        this.pinPosition = 0;
+        this.pinnedPartHeight = 0;
+        
+        if (this.pinnedBlock) {
+            this.pinnedBlock.removeClassName('blcg-grid-pinned-actions-block');
+            this.pinnedPlaceholder.setStyle({'height': '0'});
+            this.pinnedBlock.writeAttribute('style', '');
+        }
+        
+        this.isWorking = false;
+    },
+    
+    onTabShow: function(tab)
+    {
+        if (!this.isVisible
+            && (tab = $(tab.id + '_content'))
+            && this.container.descendantOf(tab)) {
+            this.isVisible = true;
+            this.onScroll();
+        }
+    },
+
+    onTabHide: function(tab)
+    {
+        if (this.isVisible
+            && (tab = $(tab.id + '_content'))
+            && this.container.descendantOf(tab)) {
+            this.isVisible = false;
+            this.unPin();
+        }
+    },
+    
+    checkPosition: function()
+    {
+        if (!this.isPinned || this.isWorking) {
+            return;
+        }
+        
+        this.isWorking  = true;
+        this.pinnedPartHeight = this.pinnedBlock.getHeight();
+        var newPosition = this.getFixedHeaderHeight();
+        
+        if (newPosition != this.pinPosition) {
+            this.pinPosition = newPosition;
+            this.pinnedBlock.setStyle({'top': newPosition + 'px'});
+        }
+        
+        this.isWorking = false;
+    },
+    
+    onScroll: function()
+    {
+        if (this.isWorking || !this.isVisible) {
+            return;
+        }
+        
+        var tableHeight = this.gridTable.getHeight();
+        
+        if (tableHeight > 0) {
+            var tableTop = this.gridTable.viewportOffset().top,
+                headerHeight = this.getFixedHeaderHeight();
+            
+            if (tableTop+tableHeight+this.pinnedPartHeight < headerHeight) {
+                this.unPin();
+            } else if (tableTop-headerHeight-this.pinnedPartHeight < 0) {
+                this.pin();
+            } else {
+                this.unPin();
+            }
+        }
+    }
+};
+
 blcg.Grid.Editor = Class.create();
 blcg.Grid.Editor.prototype = {
     initialize: function(tableId, cells, rowsIds, additionalParams, globalParams, errorMessages)
@@ -1604,7 +1789,7 @@ blcg.Grid.Editor.prototype = {
     getCellOverlay: function(cell)
     {
         var overlay = $(this.getCellOverlayId(cell));
-        return (overlay ? overlay : this.createCellOverlay(cell));       
+        return (overlay ? overlay : this.createCellOverlay(cell));
     },
     
     positionCellOverlay: function(cell, overlay, mustShow)
@@ -2044,7 +2229,8 @@ blcg.CustomColumn.List.prototype = {
     initialize: function(wrapperId, config)
     {
         this.wrapper = $(wrapperId);
-        this.config  = Object.extend({
+        
+        this.config = Object.extend({
             groupClass: 'blcg-custom-columns-group',
             labelClass: 'blcg-custom-columns-group-label',
             labelOnClass: 'blcg-custom-columns-group-label-on',
@@ -2087,6 +2273,74 @@ blcg.CustomColumn.List.prototype = {
         }.bind(this));
     }
 } 
+
+blcg.MessagesTabs = Class.create();
+blcg.MessagesTabs.prototype = {
+    initialize: function(wrapperId, types, config)
+    {
+        this.wrapper = $(wrapperId);
+        this.types = $A(types);
+        
+        this.config = Object.extend({
+            tabIdPrefix: 'blcg-messages-tab-',
+            countIdPrefix: 'blcg-messages-tab-count-',
+            wrapperIdPrefix: 'blcg-messages-list-wrapper-',
+            tabClass: 'blcg-messages-tab',
+            wrapperClass: 'blcg-messages-list-wrapper',
+            hiddenClass: 'no-display',
+            messageSelector: '.messages li li'
+        }, config || {});
+        
+        this.types.each(function(type){
+            $(this.config.tabIdPrefix + type).observe('click', this.toggleMessages.bind(this, type, false));
+        }.bind(this));
+    },
+    
+    hideMessages: function()
+    {
+        $$('.' + this.config.wrapperClass).invoke('addClassName', this.config.hiddenClass);
+    },
+    
+    showMessages: function(type)
+    {
+        this.hideMessages();
+        $(this.config.wrapperIdPrefix + type).removeClassName(this.config.hiddenClass);
+    },
+    
+    toggleMessages: function(type, closeOnly)
+    {
+        if ($(this.config.wrapperIdPrefix + type).hasClassName(this.config.hiddenClass)) {
+            if (!closeOnly) {
+                this.showMessages(type);
+            }
+        } else {
+            this.hideMessages();
+        }
+    },
+    
+    addMessages: function(wrapperId)
+    {
+        var newWrapper = $(wrapperId);
+        
+        this.types.each(function(type){
+            var mainWrapper = $(this.config.wrapperIdPrefix + type),
+                subWrapper  = newWrapper.select('.' + this.config.wrapperIdPrefix + type).first();
+            
+            if (subWrapper) {
+                mainWrapper.insert({top: subWrapper.down()});
+                var count = mainWrapper.select(this.config.messageSelector).size();
+                $(this.config.countIdPrefix + type).update('' + count);
+                
+                if (count > 0) {
+                    $(this.config.tabIdPrefix + type).removeClassName(this.config.hiddenClass);
+                } else {
+                    $(this.config.tabIdPrefix + type).addClassName(this.config.hiddenClass);
+                    this.toggleMessages(type, true);
+                }
+            }
+        }.bind(this));
+    }
+};
 
 blcg.CustomColumn.Form = Class.create(blcg.Config);
 

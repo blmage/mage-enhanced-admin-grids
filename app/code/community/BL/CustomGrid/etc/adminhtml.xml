@@ -15,60 +15,6 @@
  */
 -->
 <config>
-    <events>
-        <controller_action_predispatch>
-            <observers>
-                <bl_customgrid>
-                    <type>singleton</type>
-                    <class>customgrid/observer</class>
-                    <method>onControllerActionPreDispatch</method>
-                </bl_customgrid>
-            </observers>
-        </controller_action_predispatch>
-        <controller_action_layout_load_before>
-            <observers>
-                <bl_customgrid>
-                    <type>singleton</type>
-                    <class>customgrid/observer</class>
-                    <method>beforeControllerActionLayoutLoad</method>
-                </bl_customgrid>
-            </observers>
-        </controller_action_layout_load_before>
-        <core_block_abstract_prepare_layout_before>
-            <observers>
-                <bl_customgrid>
-                    <type>singleton</type>
-                    <class>customgrid/observer</class>
-                    <method>beforeBlockPrepareLayout</method>
-                </bl_customgrid>
-            </observers>
-        </core_block_abstract_prepare_layout_before>
-        <core_block_abstract_to_html_before>
-            <observers>
-                <bl_customgrid>
-                    <type>singleton</type>
-                    <class>customgrid/observer</class>
-                    <method>beforeBlockToHtml</method>
-                </bl_customgrid>
-            </observers>
-        </core_block_abstract_to_html_before>
-    </events>
-    <translate>
-        <modules>
-            <customgrid>
-                <files>
-                    <default>BL_CustomGrid.csv</default>
-                </files>
-            </customgrid>
-        </modules>
-    </translate>
-    <layout>
-        <updates>
-            <customgrid>
-                <file>bl/customgrid.xml</file>
-            </customgrid>
-        </updates>
-    </layout>
     <acl>
         <resources>
             <all>
@@ -159,16 +105,25 @@
                                         <sort_order>50</sort_order>
                                     </options_source>
                                     <setup translate="title" module="customgrid">
-                                        <title>Setup</title>
+                                        <title>Base Configuration (Menu Link)</title>
                                         <sort_order>60</sort_order>
                                     </setup>
+                                    <rewriters_setup translate="title" module="customgrid">
+                                        <title>Rewriters Configuration (Menu Link)</title>
+                                        <sort_order>70</sort_order>
+                                    </rewriters_setup>
                                 </children>
                             </customgrid>
                             <config>
                                 <children>
                                     <customgrid translate="title" module="customgrid">
-                                        <title>Custom Grids Configuration</title>
+                                        <title>EAG - Base Configuration</title>
+                                        <sort_order>10000</sort_order>
                                     </customgrid>
+                                    <customgrid_rewriters translate="title" module="customgrid">
+                                        <title>EAG - Rewriters Configuration</title>
+                                        <sort_order>10010</sort_order>
+                                    </customgrid_rewriters>
                                 </children>
                             </config>
                         </children>
@@ -195,10 +150,15 @@
                             <action>customgrid/options_source/index</action>
                         </options_source>
                         <setup translate="title" module="customgrid">
-                            <title>Setup</title>
+                            <title>Base Configuration</title>
                             <sort_order>30</sort_order>
                             <action>adminhtml/system_config/edit/section/customgrid/</action>
                         </setup>
+                        <rewriters_setup translate="title" module="customgrid">
+                            <title>Rewriters Configuration</title>
+                            <sort_order>40</sort_order>
+                            <action>adminhtml/system_config/edit/section/customgrid_rewriters/</action>
+                        </rewriters_setup>
                     </children>
                 </customgrid>
             </children>

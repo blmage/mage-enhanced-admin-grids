@@ -262,7 +262,7 @@ class BL_CustomGrid_Helper_Collection
                 && $column->getFilter()) {
                 $field = ($column->getFilterIndex() ? $column->getFilterIndex() : $column->getIndex());
                 
-                if ((strpos($field, '.') === false)
+                if ((strpos($field, '.') === false) // @todo not completely safe as "." is allowed in quoted identifier
                     && !isset($collectionFiltersMap[$field])
                     && (strpos($field, BL_CustomGrid_Model_Grid::GRID_COLUMN_ATTRIBUTE_GRID_ALIAS) !== 0)
                     && (strpos($field, BL_CustomGrid_Model_Grid::GRID_COLUMN_CUSTOM_GRID_ALIAS) !== 0)) {

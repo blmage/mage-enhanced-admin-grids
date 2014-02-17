@@ -28,6 +28,7 @@
             <block type="customgrid/column_renderer_collection_select" name="customgrid.column_collection_renderers_descriptions">
                 <action method="setTemplate"><template>bl/customgrid/column/renderer/collection/descriptions.phtml</template></action>
             </block>
+            <block type="customgrid/messages" name="customgrid.messages" />
         </reference>
     </default>
     

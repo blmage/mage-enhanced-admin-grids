@@ -24,6 +24,7 @@ class BL_CustomGrid_Block_Widget_Grid_Columns_Config_Infos
     
     public function getGridInformations()
     {
+        $block  = $this->getGridBlock();
         $model  = $this->getGridModel();
         $helper = Mage::helper('customgrid');
         
@@ -33,7 +34,7 @@ class BL_CustomGrid_Block_Widget_Grid_Columns_Config_Infos
             array('label' => $helper->__('Rewriting Class'), 'value' => $model->getRewritingClassName()),
             array('label' => $helper->__('Module Name'),     'value' => $model->getModuleName()),
             array('label' => $helper->__('Controller Name'), 'value' => $model->getControllerName()),
-            array('label' => $helper->__('Block ID'),        'value' => $model->getBlockId()),
+            array('label' => $helper->__('Block ID'),        'value' => ($block ? $block->getId() : $model->getBlockId())),
         );
     }
 }

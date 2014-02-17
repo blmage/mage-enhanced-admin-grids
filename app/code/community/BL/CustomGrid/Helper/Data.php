@@ -14,7 +14,7 @@
  */
 
 class BL_CustomGrid_Helper_Data extends Mage_Core_Helper_Abstract
-{ 
+{
     public function implodeArray($array, $glue=',')
     {
         return (is_array($array) ? implode($glue, $array) : '');
@@ -25,10 +25,40 @@ class BL_CustomGrid_Helper_Data extends Mage_Core_Helper_Abstract
         return (is_array($array = @unserialize($array)) ? $array : array());
     }
     
+    protected function _parseIntValue($value)
+    {
+        return ($value !== '' ? intval($value) : null);
+    }
+    
+    public function parseCsvIntArray($string, $unique=true, $sorted=false, $min=null, $max=null)
+    {
+        $values = array_map(array($this, '_parseIntValue'), explode(',', $string));
+        $filterCodes = array('!is_null($v)');
+        
+        if ($unique) {
+            $values = array_unique($values);
+        }
+        if (!is_null($min)) {
+            $filterCodes[] = '($v >= '.intval($min).')';
+        }
+        if (!is_null($max)) {
+            $filterCodes[] = '($v <= '.intval($max).')';
+        }
+        
+        $filterCode = 'return ('.implode(' && ', $filterCodes).');';
+        $values = array_filter($values, create_function('$v', $filterCode));
+        
+        if ($sorted) {
+            sort($values, SORT_NUMERIC);
+        }
+        
+        return $values;
+    }
+    
     public function getOptionsHashFromOptionsArray(array $optionsArray, $withEmpty=false)
     {
         $optionsHash = array();
-            
+        
         foreach ($optionsArray as $key => $value) {
             if (is_array($value)) {
                 if (isset($value['value']) && isset($value['label'])) {
@@ -48,7 +78,7 @@ class BL_CustomGrid_Helper_Data extends Mage_Core_Helper_Abstract
     public function getOptionsArrayFromOptionsHash(array $optionsHash, $withEmpty=false)
     {
         $optionsArray = array();
-            
+        
         foreach ($optionsHash as $key => $value) {
             if (!is_array($value)) {
                 if ($withEmpty || ($key !== '')) {
@@ -161,5 +191,10 @@ class BL_CustomGrid_Helper_Data extends Mage_Core_Helper_Abstract
             return (bool) preg_match('#^BL_CustomGrid_Block_Rewrite_.+$#', $class);
         }
         return false;
+    }
+    
+    public function isAjaxRequest()
+    {
+        return $this->_getRequest()->isAjax();
     }
 }

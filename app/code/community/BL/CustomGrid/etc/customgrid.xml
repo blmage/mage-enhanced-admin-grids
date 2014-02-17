@@ -675,6 +675,9 @@
                 <name>Country</name>
                 <description>Displays a country name from its code</description>
                 <sort_order>70000</sort_order>
+                <config_window>
+                    <height>200</height>
+                </config_window>
             </country>
             
             <eu_country type="customgrid/column_renderer_collection_country_eu" module="customgrid">

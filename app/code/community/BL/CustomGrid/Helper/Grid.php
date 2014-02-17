@@ -20,12 +20,18 @@ class BL_CustomGrid_Helper_Grid
     
     protected $_baseVerifyCallbacks = array(
         'block' => array(
-            'adminhtml/catalog_product_grid' => '_verifyCatalogProductGridBlock',
-            'adminhtml/sales_order_grid'     => '_verifySalesOrderGridBlock',
+            'adminhtml/catalog_product_grid'  => '_verifyCatalogProductGridBlock',
+            'adminhtml/sales_order_grid'      => '_verifySalesOrderGridBlock',
+            'adminhtml/sales_invoice_grid'    => '_verifySalesInvoiceGridBlock',
+            'adminhtml/sales_shipment_grid'   => '_verifySalesShipmentGridBlock',
+            'adminhtml/sales_creditmemo_grid' => '_verifySalesCreditmemoGridBlock',
         ),
         'collection' => array(
-            'adminhtml/catalog_product_grid' => '_verifyCatalogProductGridCollection',
-            'adminhtml/sales_order_grid'     => '_verifySalesOrderGridCollection',
+            'adminhtml/catalog_product_grid'  => '_verifyCatalogProductGridCollection',
+            'adminhtml/sales_order_grid'      => '_verifySalesOrderGridCollection',
+            'adminhtml/sales_invoice_grid'    => '_verifySalesInvoiceGridCollection',
+            'adminhtml/sales_shipment_grid'   => '_verifySalesShipmentGridCollection',
+            'adminhtml/sales_creditmemo_grid' => '_verifySalesCreditmemoGridCollection',
         ),
     );
     protected $_additionalVerifyCallbacks = array(
@@ -86,7 +92,7 @@ class BL_CustomGrid_Helper_Grid
     {
         if (($block instanceof Mage_Adminhtml_Block_Widget_Grid)
             && Mage::helper('customgrid')->isRewritedGrid($block)) {
-            return $this->_verifyGridElement('block', $block->getBlockType(), $block, $model);
+            return $this->_verifyGridElement('block', $model->getBlockType(), $block, $model);
         }
         return false;
     }
@@ -95,7 +101,7 @@ class BL_CustomGrid_Helper_Grid
     {
         if (($collection = $block->getCollection())
             && ($collection instanceof Varien_Data_Collection_Db)) {
-            return $this->_verifyGridElement('collection', $block->getBlockType(), $collection, $model);
+            return $this->_verifyGridElement('collection', $model->getBlockType(), $collection, $model);
         }
         return false;
     }
@@ -126,12 +132,51 @@ class BL_CustomGrid_Helper_Grid
         return ($collection instanceof Mage_Sales_Model_Mysql4_Order_Grid_Collection);
     }
     
+    protected function _verifySalesInvoiceGridBlock($block, $model, $checkFrom16)
+    {
+        return ($block instanceof Mage_Adminhtml_Block_Sales_Invoice_Grid);
+    }
+    
+    protected function _verifySalesInvoiceGridCollection($collection, $model, $checkFrom16)
+    {
+        if ($checkFrom16) {
+            return ($collection instanceof Mage_Sales_Model_Resource_Order_Invoice_Grid_Collection);
+        }
+        return ($collection instanceof Mage_Sales_Model_Mysql4_Order_Invoice_Grid_Collection);
+    }
+    
+    protected function _verifySalesShipmentGridBlock($block, $model, $checkFrom16)
+    {
+        return ($block instanceof Mage_Adminhtml_Block_Sales_Shipment_Grid);
+    }
+    
+    protected function _verifySalesShipmentGridCollection($collection, $model, $checkFrom16)
+    {
+        if ($checkFrom16) {
+            return ($collection instanceof Mage_Sales_Model_Resource_Order_Shipment_Grid_Collection);
+        }
+        return ($collection instanceof Mage_Sales_Model_Mysql4_Order_Shipment_Grid_Collection);
+    }
+    
+    protected function _verifySalesCreditmemoGridBlock($block, $model, $checkFrom16)
+    {
+        return ($block instanceof Mage_Adminhtml_Block_Sales_Creditmemo_Grid);
+    }
+    
+    protected function _verifySalesCreditmemoGridCollection($collection, $model, $checkFrom16)
+    {
+        if ($checkFrom16) {
+            return ($collection instanceof Mage_Sales_Model_Resource_Order_Creditmemo_Grid_Collection);
+        }
+        return ($collection instanceof Mage_Sales_Model_Mysql4_Order_Creditmemo_Grid_Collection);
+    }
+    
     public function isEavEntityGrid($block, $model)
     {
         return ($block->getCollection() instanceof Mage_Eav_Model_Entity_Collection_Abstract);
     }
     
-    public function getGridDisplayableColumns($block)
+    public function getGridBlockDisplayableColumns($block)
     {
         $columns = $block->getColumns();
         
@@ -142,5 +187,13 @@ class BL_CustomGrid_Helper_Grid
         }
         
         return $columns;
+    }
+    
+    public function getGridModelFromBlock($block)
+    {
+        if (Mage::helper('customgrid')->isRewritedGrid($block)) {
+            return $block->blcg_getGridModel();
+        }
+        return null;
     }
 }
