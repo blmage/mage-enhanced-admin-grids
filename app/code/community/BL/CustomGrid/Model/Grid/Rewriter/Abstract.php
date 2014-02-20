@@ -41,13 +41,13 @@ abstract class BL_CustomGrid_Model_Grid_Rewriter_Abstract
                 Mage::throwException(Mage::helper('customgrid')->__('The original class "%s" does not exist', $originalClass));
             }
             if (class_exists($blcgClass, false)) {
-                Mage::throwException(Mage::helper('customgrid')->__('The rewrite class "%s" already exists', $blcgClass));
+                Mage::throwException(Mage::helper('customgrid')->__('The rewriting class "%s" already exists', $blcgClass));
             }
             
             $this->_rewriteGrid($blcgClass, $originalClass, $gridType);
             
             if (!class_exists($blcgClass, true)) {
-                Mage::throwException(Mage::helper('customgrid')->__('The generated rewrite class "%s" can not be found', $blcgClass));
+                Mage::throwException(Mage::helper('customgrid')->__('The generated rewriting class "%s" can not be found', $blcgClass));
             }
             
             $rewriteSuccess = true;
