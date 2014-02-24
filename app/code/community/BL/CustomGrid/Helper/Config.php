@@ -18,6 +18,7 @@ class BL_CustomGrid_Helper_Config extends Mage_Core_Helper_Abstract
     const XML_GLOBAL_EXCEPTIONS_HANDLING_MODE         = 'customgrid/global/exceptions_handling_mode';
     const XML_GLOBAL_EXCEPTIONS_LIST                  = 'customgrid/global/exceptions_list';
     const XML_GLOBAL_EXCLUSIONS_LIST                  = 'customgrid/global/exclusions_list';
+    const XML_GLOBAL_FORCE_GRID_REWRITES              = 'customgrid/global/force_grid_rewrites';
     const XML_GLOBAL_STORE_PARAMETER                  = 'customgrid/global/store_parameter';
     const XML_GLOBAL_SORT_WITH_DND                    = 'customgrid/global/sort_with_dnd';
     const XML_CUSTOM_PARAMS_IGNORE_CUSTOM_HEADERS     = 'customgrid/customization_params/ignore_custom_headers';
@@ -140,6 +141,11 @@ class BL_CustomGrid_Helper_Config extends Mage_Core_Helper_Abstract
             }
         }
         return ($this->getExceptionsHandlingMode() == self::GRID_EXCEPTION_HANDLING_ALLOW);
+    }
+    
+    public function getForceGridRewrites()
+    {
+        return Mage::getStoreConfigFlag(self::XML_GLOBAL_FORCE_GRID_REWRITES);
     }
     
     public function getStoreParameter($default=null)

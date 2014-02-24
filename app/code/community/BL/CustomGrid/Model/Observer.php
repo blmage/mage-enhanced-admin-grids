@@ -91,6 +91,21 @@ class BL_CustomGrid_Model_Observer
         return Mage::app()->getConfig();
     }
     
+    protected function _getSession()
+    {
+        return Mage::getSingleton('customgrid/session');
+    }
+    
+    protected function _getHelper()
+    {
+        return Mage::helper('customgrid');
+    }
+    
+    protected function _getConfigHelper()
+    {
+        return Mage::helper('customgrid/config');
+    }
+    
    /**
      * Retrieve block class name
      *
@@ -195,7 +210,7 @@ class BL_CustomGrid_Model_Observer
             || ($rewritingClassName == $grid->getRewritingClassName())) {
             // Grid model corresponds to current configuration
             
-            if (Mage::helper('customgrid/config')->isExcludedGrid($grid->getBlockType(), $rewritingClassName)) {
+            if ($this->_getConfigHelper()->isExcludedGrid($grid->getBlockType(), $rewritingClassName)) {
                 // Do not rewrite if now excluded
                 $this->_excludedModels[] = $grid->getId();
                 
@@ -221,7 +236,7 @@ class BL_CustomGrid_Model_Observer
                 if ($blcgClass) {
                     foreach ($rewriteErrors as $error) {
                         if ($error['rewriter']->getDisplayErrorsIfSuccess()) {
-                            Mage::getSingleton('customgrid/session')->addError($error['exception']->getMessage());
+                            $this->_getSession()->addError($error['exception']->getMessage());
                         }
                         if ($error['rewriter']->getLogErrorsIfSuccess()) {
                             Mage::logException($error['exception']);
@@ -252,13 +267,18 @@ class BL_CustomGrid_Model_Observer
                     
                     $this->_getConfig()->extend($rewriteXml, true);
                     
+                    if ($this->_getConfigHelper()->getForceGridRewrites()) {
+                        // Put the rewriting class name in the config cache (should prevent some problems when the config gets overriden afterwards)
+                        $this->_getConfig()->getBlockClassName($grid->getBlockType());
+                    }
+                    
                     // Remember current type is now rewrited
                     $this->_rewritedTypes[$grid->getBlockType()] = true;
                     
                 } else {
                     foreach ($rewriteErrors as $error) {
                         if ($error['rewriter']->getDisplayErrors()) {
-                            Mage::getSingleton('customgrid/session')->addError($error['exception']->getMessage());
+                            $this->_getSession()->addError($error['exception']->getMessage());
                         }
                         if ($error['rewriter']->getLogErrors()) {
                             Mage::logException($error['exception']);
@@ -352,7 +372,7 @@ class BL_CustomGrid_Model_Observer
         if ($layout = $observer->getLayout()) {
             $layout->getUpdate()->addHandle(array_unique($this->_additionalLayoutHandles));
             
-            if (Mage::helper('customgrid')->isMageVersionLesserThan(1, 7)) {
+            if ($this->_getHelper()->isMageVersionLesserThan(1, 7)) {
                 $layout->getUpdate()->addHandle('blcg_magento_version_to_16');
             } else {
                 $layout->getUpdate()->addHandle('blcg_magento_version_from_17');
@@ -410,7 +430,7 @@ class BL_CustomGrid_Model_Observer
                         list(,, $rewritingClassName) = $this->_getBlockTypeInfos($blockType);
                     }
                     
-                    if (Mage::helper('customgrid/config')->isExcludedGrid($blockType, $rewritingClassName)) {
+                    if ($this->_getConfigHelper()->isExcludedGrid($blockType, $rewritingClassName)) {
                         return;
                     }
                     
@@ -460,7 +480,7 @@ class BL_CustomGrid_Model_Observer
                     }
                     
                     // Replace grid template with our own one
-                    $helper = Mage::helper('customgrid');
+                    $helper = $this->_getHelper();
                     
                     if ($helper->isMageVersionGreaterThan(1, 5)) {
                         $grid->setTemplate('bl/customgrid/widget/grid/16.phtml');
@@ -489,12 +509,12 @@ class BL_CustomGrid_Model_Observer
                 
                 if (($model = $this->_getGridModel($blockType, $blockId, true))
                     && !$model->getDisabled()) {
-                    if (Mage::helper('customgrid')->isRewritedGrid($grid)) {
+                    if ($this->_getHelper()->isRewritedGrid($grid)) {
                         // Add models to the grids here and not in the "before_to_html" event, because the latter is not called for export
                         $grid->blcg_setGridModel($model)->blcg_setTypeModel($model->getTypeModel());
                     } else {
                         // For some reason the grid was not rewrited, exclude it to prevent problems
-                        // @todo add related message (with disable rewrite and refresh cache links)
+                        $this->_getSession()->addError($this->_getHelper()->__('The "%s" grid was not rewrited', $blockType));
                         $this->_excludedModels[] = $model->getId();
                     }
                 }
