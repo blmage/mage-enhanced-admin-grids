@@ -25,7 +25,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Order_Items_Abstract
                 $ordersIds[] = $order->getId();
             }
             
-            $items = $this->_getOrdersItemsCollection($ordersIds);
+            $items = $this->_getOrdersItemsCollection($ordersIds, true, 'blcg_custom_column_order_items_list_order_items_collection');
             $orderReflection = new ReflectionClass('Mage_Sales_Model_Order');
             $itemsProperty   = $orderReflection->getProperty('_items');
             

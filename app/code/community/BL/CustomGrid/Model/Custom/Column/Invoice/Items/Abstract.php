@@ -33,7 +33,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Invoice_Items_Abstract
                 ->load();
             
             $orders = $this->_getOrdersCollection($ordersIds);
-            $ordersItems = $this->_getOrdersItemsCollection($ordersIds, false);
+            $ordersItems = $this->_getOrdersItemsCollection($ordersIds, false, 'blcg_custom_column_invoice_items_list_order_items_collection');
             
             $invoiceReflection = new ReflectionClass('Mage_Sales_Model_Order_Invoice');
             $itemsProperty = $invoiceReflection->getProperty('_items');

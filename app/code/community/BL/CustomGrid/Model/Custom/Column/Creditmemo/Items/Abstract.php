@@ -33,7 +33,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Creditmemo_Items_Abstract
                 ->load();
             
             $orders = $this->_getOrdersCollection($ordersIds);
-            $ordersItems = $this->_getOrdersItemsCollection($ordersIds, false);
+            $ordersItems = $this->_getOrdersItemsCollection($ordersIds, false, 'blcg_custom_column_creditmemo_items_list_order_items_collection');
             
             $creditmemoReflection = new ReflectionClass('Mage_Sales_Model_Order_Creditmemo');
             $itemsProperty = $creditmemoReflection->getProperty('_items');

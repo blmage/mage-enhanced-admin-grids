@@ -170,7 +170,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Sales_Items_Abstract
             ->load();
     }
     
-    protected function _getOrdersItemsCollection($ordersIds, $excludeChildren=true)
+    protected function _getOrdersItemsCollection($ordersIds, $excludeChildren=true, $event=null)
     {
         $items = Mage::getModel('sales/order_item')
             ->getCollection()
@@ -178,6 +178,11 @@ abstract class BL_CustomGrid_Model_Custom_Column_Sales_Items_Abstract
         
         if ($excludeChildren) {
             $items->filterByParent();
+        }
+        if (!empty($event)) {
+            $response = new Varien_Object(array('items_collection' => $items));
+            Mage::dispatchEvent($event, array('response' => $response));
+            $items = $response->getItemsCollection();
         }
         
         return $items->load();
