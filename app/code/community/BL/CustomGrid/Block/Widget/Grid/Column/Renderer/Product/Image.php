@@ -55,6 +55,7 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Product_Image
                 $result .= '<a href="'.$imageUrl.'" target="_blank">';
             }
             if ($this->getColumn()->getDisplayImages()) {
+                $dimensions = '';
                 if ((($width = intval($this->getColumn()->getImageWidth())) > 0)
                     && (($height = intval($this->getColumn()->getImageHeight())) > 0)) {
                     $dimensions = ' width="'.$width.'" height="'.$height.'" ';
