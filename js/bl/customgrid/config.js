@@ -1594,6 +1594,8 @@ blcg.Grid.ActionsPinner.prototype = {
         this.pinPosition = this.getFixedHeaderHeight();
         
         if (this.pinnedBlock) {
+            this.pinnedBlock.select('.blcg-additional-filters-table').invoke('addClassName', 'no-display');
+            
             this.pinnedBlock.setStyle({
                 'position': 'fixed',
                 'left': 0,
@@ -1621,6 +1623,7 @@ blcg.Grid.ActionsPinner.prototype = {
         this.pinnedPartHeight = 0;
         
         if (this.pinnedBlock) {
+            this.pinnedBlock.select('.blcg-additional-filters-table').invoke('removeClassName', 'no-display');
             this.pinnedBlock.removeClassName('blcg-grid-pinned-actions-block');
             this.pinnedPlaceholder.setStyle({'height': '0'});
             this.pinnedBlock.writeAttribute('style', '');
