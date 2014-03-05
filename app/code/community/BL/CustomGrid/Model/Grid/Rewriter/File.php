@@ -27,18 +27,27 @@ class BL_CustomGrid_Model_Grid_Rewriter_File
         $ioFile->checkAndCreateFolder($rewriteDir);
         $ioFile->cd($rewriteDir);
         
-        if ($ioFile->fileExists($fileName, true)
-            && ($content = $ioFile->read($fileName))) {
-            $lines = preg_split('#\R#', $content, 3);
-            
-            if (isset($lines[0])
-                && isset($lines[1])
-                && ($lines[0] == '<?php')
-                && preg_match('#^// BLCG_REWRITE_CODE_VERSION\\=([0-9]+)$#', $lines[1], $matches)) {
-                if ($matches[1] === strval(self::REWRITE_CODE_VERSION)) {
-                    // File is up-to-date
-                    return $this;
+        // Use open() to initialize Varien_Io_File::$_iwd
+        // Prevents a warning when chdir() is used without error control in Varien_Io_File::read())
+        if ($ioFile->fileExists($fileName, true) && $ioFile->open()) {
+            if ($content = $ioFile->read($fileName)) {
+                $lines = preg_split('#\R#', $content, 3);
+                $isUpToDate = false;
+                
+                if (isset($lines[0])
+                    && isset($lines[1])
+                    && ($lines[0] == '<?php')
+                    && preg_match('#^// BLCG_REWRITE_CODE_VERSION\\=([0-9]+)$#', $lines[1], $matches)) {
+                    if ($matches[1] === strval(self::REWRITE_CODE_VERSION)) {
+                        $isUpToDate = true;
+                    }
                 }
+            }
+            
+            $ioFile->close();
+            
+            if ($isUpToDate) {
+                return $this;
             }
         }
         
