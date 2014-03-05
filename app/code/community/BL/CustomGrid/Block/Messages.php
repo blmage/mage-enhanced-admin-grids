@@ -34,7 +34,11 @@ class BL_CustomGrid_Block_Messages
         $session = Mage::getSingleton('customgrid/session');
         $this->addMessages($session->getMessages(true));
         $this->setEscapeMessageFlag($session->getEscapeMessages(true));
-        $this->addStorageType('customgrid/session');
+        
+        if (method_exists($this, 'addStorageType')) {
+            $this->addStorageType('customgrid/session');
+        }
+        
         return parent::_beforeToHtml();
     }
     

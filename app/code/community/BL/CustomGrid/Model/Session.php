@@ -21,7 +21,7 @@ class BL_CustomGrid_Model_Session
     protected function _construct()
     {
         parent::_construct();
-        $this->_now = Varien_Date::now();
+        $this->_now = date('Y-m-d H:i:s');
     }
     
     public function addMessage(Mage_Core_Model_Message_Abstract $message)

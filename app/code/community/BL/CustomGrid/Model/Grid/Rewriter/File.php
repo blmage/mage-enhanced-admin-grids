@@ -28,7 +28,7 @@ class BL_CustomGrid_Model_Grid_Rewriter_File
         $ioFile->cd($rewriteDir);
         
         // Use open() to initialize Varien_Io_File::$_iwd
-        // Prevents a warning when chdir() is used without error control in Varien_Io_File::read())
+        // Prevents a warning when chdir() is used without error control in Varien_Io_File::read()
         if ($ioFile->fileExists($fileName, true) && $ioFile->open()) {
             if ($content = $ioFile->read($fileName)) {
                 $lines = preg_split('#\R#', $content, 3);
