@@ -2178,14 +2178,22 @@ blcg.Grid.Editor.prototype = {
                                 }
                             } else {
                                 editor.cancelEdit();
-                                if (transport.responseText != '') {
+                                
+                                if (!transport.responseText.isJSON()
+                                    && (transport.responseText != '')) {
                                     alert(transport.responseText);
+                                } else {
+                                    // @todo generic error message
                                 }
                             }
                         } catch(e) {
                             editor.cancelEdit();
-                            if (transport.responseText != '') {
+                            
+                            if (!transport.responseText.isJSON()
+                                && (transport.responseText != '')) {
                                 alert(transport.responseText);
+                            } else {
+                                // @todo generic error message
                             }
                         }
                         
@@ -2202,6 +2210,7 @@ blcg.Grid.Editor.prototype = {
                 });
             } else {
                 this.cancelEdit();
+                
                 if (this.errorMessages.get('save_no_params')) {
                     alert(this.errorMessages.get('save_no_params'));
                 }
@@ -2211,6 +2220,9 @@ blcg.Grid.Editor.prototype = {
     
     cancelEdit: function(fromDialog, errorMessage)
     {
+        if (this.isRequestRunning) {
+            return;
+        }
         if (this.editedCell) {
             if (this.hasPreviousValue) {
                 this.editedCell.innerHTML = this.previousValue;
