@@ -2042,35 +2042,47 @@ blcg.Grid.Editor.prototype = {
                                         e.hide();
                                         cell.addClassName('blcg-column-editor-editing-required');
                                     });
-
+                                    
                                     // add Editor support for Enter / Escape keys
-                                    $(form).on('keydown', '.select,.required-entry,.input-text', function(e) {
-                                        switch (e.keyCode) {
-                                            case Event.KEY_RETURN: // Enter completes edit
-                                                e.preventDefault();
-                                                editor.validateEdit();
-                                                break;
-
-                                            case Event.KEY_ESC: // Escape cancels edit
-                                                e.preventDefault();
-                                                editor.cancelEdit();
-                                                break;
-                                        }
+                                    var formInputs = $(form).select('.select, .required-entry, .input-text');
+                                    
+                                    formInputs.each(function(input){
+                                        input.observe('keydown', function(e){
+                                            switch (e.keyCode) {
+                                                case Event.KEY_RETURN: // Enter completes edit
+                                                    e.preventDefault();
+                                                    editor.validateEdit();
+                                                    break;
+                                                
+                                                case Event.KEY_ESC: // Escape cancels edit
+                                                    e.preventDefault();
+                                                    editor.cancelEdit();
+                                                    break;
+                                            }
+                                        });
                                     });
-
+                                    
                                     // automatically focus Editor when commencing edit
-                                    $(form).select('.select', '.required-entry', '.input-text').first().activate();
+                                    formInputs.first().activate();
                                 }
                             } else {
                                 editor.cancelEdit();
-                                if (transport.responseText != '') {
+                                
+                                if (!transport.responseText.isJSON()
+                                    && (transport.responseText != '')) {
                                     alert(transport.responseText);
+                                } else {
+                                    // @todo generic error message
                                 }
                             }
                         } catch(e) {
                             editor.cancelEdit();
-                            if (transport.responseText != '') {
+                            
+                            if (!transport.responseText.isJSON()
+                                && (transport.responseText != '')) {
                                 alert(transport.responseText);
+                            } else {
+                                // @todo generic error message
                             }
                         }
                         
