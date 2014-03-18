@@ -251,6 +251,11 @@
                         <input type="text" class="blcg-pagination-input" name="export[from_result]" value="<?php echo (($this->getGridPageNumber()-1) * $this->getGridPageSize() +1) ?>" id="<?php echo $this->getHtmlId() ?>-additional-export-from-result">
                     </li>
                 </ul>
+                <div class="no-display">
+                <?php foreach ($this->getExportAdditionalParams() as $_name => $_value): ?>
+                    <input type="hidden" name="<?php echo $this->htmlEscape($_name) ?>" value="<?php echo $this->htmlEscape($_value) ?>" />
+                <?php endforeach ?>
+                </div>
                 <div class="blcg-custom-grid-config-additional-part-actions">
                     <?php echo $this->getExportActionButtonHtml() ?>
                 </div>

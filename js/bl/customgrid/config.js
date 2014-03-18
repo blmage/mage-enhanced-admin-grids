@@ -1170,7 +1170,7 @@ blcg.Grid.Export.prototype = {
             }
             return false;
         }
-        return blcg.Tools.submitContainerValues(this.container, $F(this.formatSelect), this.additional, 'GET');
+        return blcg.Tools.submitContainerValues(this.container, $F(this.formatSelect), this.additional, 'POST');
     }
 };
 

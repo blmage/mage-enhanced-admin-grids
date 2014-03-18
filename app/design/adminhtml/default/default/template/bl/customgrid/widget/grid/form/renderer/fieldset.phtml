@@ -55,7 +55,7 @@
         <div class="hor-scroll">
 <?php endif ?>
         <?php if ($_element->getComment()): ?>
-            <p class="comment"><?php echo $this->escapeHtml($_element->getComment()) ?></p>
+            <p class="comment"><?php echo $this->htmlEscape($_element->getComment()) ?></p>
         <?php endif; ?>
         <?php if ($_element->hasHtmlContent()): ?>
             <?php echo $_element->getHtmlContent(); ?>

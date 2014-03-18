@@ -141,4 +141,16 @@ class BL_CustomGrid_Block_Widget_Grid_Columns_Config_Additional
     {
         return $this->getGridModel()->getExportTypes();
     }
+    
+    public function getExportAdditionalParams()
+    {
+        $params = array();
+        
+        if (($block = $this->getGridBlock())
+            && ($massactionBlock = $block->getMassactionBlock())) {
+            $params[$massactionBlock->getFormFieldNameInternal()] = $massactionBlock->getSelectedJson();
+        }
+        
+        return $params;
+    }
 }
