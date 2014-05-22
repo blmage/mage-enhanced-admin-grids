@@ -333,6 +333,15 @@
                     </availability>
                 </status_color>
                 
+                <customer_email model="customgrid/custom_column_order_base" module="customgrid">
+                    <name>Email</name>
+                    <group>Customer</group>
+                    <allow_renderers>1</allow_renderers>
+                    <model_params>
+                        <order_field>customer_email</order_field>
+                    </model_params>
+                </customer_email>
+                
                 <customer_group model="customgrid/custom_column_order_customer_group" module="customgrid">
                     <name>Group</name>
                     <group>Customer</group>
