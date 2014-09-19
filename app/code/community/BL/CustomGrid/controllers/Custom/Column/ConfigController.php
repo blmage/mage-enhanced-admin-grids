@@ -9,22 +9,22 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class BL_CustomGrid_Custom_Column_ConfigController
-    extends Mage_Adminhtml_Controller_Action
+    extends BL_CustomGrid_Controller_Grid_Action
 {
     protected function _initCustomColumn()
     {
-        $config = Mage::getSingleton('customgrid/grid_type');
+        $typeConfig = Mage::getSingleton('customgrid/grid_type_config');
         
         if (($code = $this->getRequest()->getParam('code'))
-            && (count($code = explode('/', $code)) == 2)
-            && ($gridType = $config->getTypeInstanceByCode($code[0]))
-            && ($customColumn = $gridType->getCustomColumn($code[1]))) {
-            Mage::register('current_custom_column', $customColumn);
+            && (count($codeParts = explode('/', $code)) == 2)
+            && ($gridType = $typeConfig->getTypeInstanceByCode($codeParts[0]))
+            && ($customColumn = $gridType->getCustomColumn($codeParts[1]))) {
+            Mage::register('blcg_custom_column', $customColumn);
         } else {
             $customColumn = null;
         }
@@ -35,28 +35,34 @@ class BL_CustomGrid_Custom_Column_ConfigController
     public function indexAction()
     {
         if ($column = $this->_initCustomColumn()) {
-            $this->loadLayout('empty');
+            $this->loadLayout('blcg_empty');
             
-            if (($params = $this->getRequest()->getParam('params'))
-                && ($block = $this->getLayout()->getBlock('custom_column_config'))) {
-                $params = Mage::getSingleton('customgrid/grid_type')->decodeParameters($params);
-                $block->setConfigParams($params);
+            if ($configBlock = $this->getLayout()->getBlock('blcg.custom_column.config')) {
+                if ($configTargetId = $this->getRequest()->getParam('config_target_id')) {
+                    $configBlock->setConfigTargetId($configTargetId);
+                }
+                if ($params = $this->getRequest()->getParam('params')) {
+                    $configBlock->setConfigValues(
+                        Mage::getSingleton('customgrid/grid_type_config')->decodeParameters($params)
+                    );
+                }
             }
             
             $this->renderLayout();
         } else {
             $this->loadLayout(array(
-                'empty', 
-                strtolower($this->getFullActionName()),
-                'customgrid_custom_column_config_unknown',
-            ))->renderLayout();
+                    'blcg_empty', 
+                    strtolower($this->getFullActionName()),
+                    'customgrid_custom_column_config_unknown',
+                ))
+                ->renderLayout();
         }
     }
     
     public function buildConfigAction()
     {
-        $params  = $this->getRequest()->getPost('parameters', array());
-        $encoded = Mage::getSingleton('customgrid/grid_type')->encodeParameters($params);
-        $this->getResponse()->setBody($encoded);
+        $params = $this->getRequest()->getPost('parameters', array());
+        $params = Mage::getSingleton('customgrid/grid_type_config')->encodeParameters($params);
+        $this->_setActionSuccessJsonResponse(array('parameters' => $params));
     }
 }

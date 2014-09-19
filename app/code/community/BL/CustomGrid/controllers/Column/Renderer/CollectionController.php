@@ -9,52 +9,61 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class BL_CustomGrid_Column_Renderer_CollectionController
-    extends Mage_Adminhtml_Controller_Action
+    extends BL_CustomGrid_Controller_Grid_Action
 {
     protected function _initRenderer()
     {
         if ($code = $this->getRequest()->getParam('code')) {
-            $renderer = Mage::getSingleton('customgrid/column_renderer_collection')->getConfigAsObject($code);
+            $renderer = Mage::getSingleton('customgrid/column_renderer_config_collection')
+                ->getObjectElementByCode($code);
+            
             if ($renderer->isEmpty()) {
                 $renderer = null;
             }
         } else {
             $renderer = null;
         }
-        Mage::register('current_collection_column_renderer', $renderer);
+        
+        Mage::register('blcg_collection_column_renderer', $renderer);
         return $renderer;
     }
     
     public function indexAction()
     {
         if ($renderer = $this->_initRenderer()) {
-            $this->loadLayout('empty');
+            $this->loadLayout('blcg_empty');
             
-            if (($params = $this->getRequest()->getParam('params'))
-                && ($block = $this->getLayout()->getBlock('column_renderer_collection'))) {
-                $params = Mage::getSingleton('customgrid/column_renderer_collection')->decodeParameters($params);
-                $block->setConfigParams($params);
+            if ($configBlock = $this->getLayout()->getBlock('blcg.column_renderer.collection.config')) {
+                if ($rendererTargetId = $this->getRequest()->getParam('renderer_target_id')) {
+                    $configBlock->setRendererTargetId($rendererTargetId);
+                }
+                if ($params = $this->getRequest()->getParam('params')) {
+                    $configBlock->setConfigValues(
+                        Mage::getSingleton('customgrid/column_renderer_config_collection')->decodeParameters($params)
+                    );
+                }
             }
             
             $this->renderLayout();
         } else {
             $this->loadLayout(array(
-                'empty', 
-                strtolower($this->getFullActionName()),
-                'customgrid_column_renderer_collection_unknown',
-            ))->renderLayout();
+                    'blcg_empty', 
+                    strtolower($this->getFullActionName()),
+                    'customgrid_column_renderer_collection_unknown',
+                ))
+                ->renderLayout();
         }
     }
     
     public function buildConfigAction()
     {
-        $params  = $this->getRequest()->getPost('parameters', array());
-        $encoded = Mage::getSingleton('customgrid/column_renderer_collection')->encodeParameters($params);
-        $this->getResponse()->setBody($encoded);
+        $params = $this->getRequest()->getPost('parameters', array());
+        $params = Mage::getSingleton('customgrid/column_renderer_config_collection')->encodeParameters($params);
+        $this->_setActionSuccessJsonResponse(array('parameters' => $params));
     }
 }

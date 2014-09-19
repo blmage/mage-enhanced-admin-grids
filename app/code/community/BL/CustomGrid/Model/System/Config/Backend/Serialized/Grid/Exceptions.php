@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -18,13 +18,17 @@ class BL_CustomGrid_Model_System_Config_Backend_Serialized_Grid_Exceptions
 {
     protected function _beforeSave()
     {
-        // Clean given value by removing "__empty" and incomplete sub values
         $value = $this->getValue();
         
         if (is_array(($value))) {
-            unset($value['__empty']);
+            if (isset($value['__empty'])) {
+                unset($value['__empty']);
+            }
+            
             foreach ($value as $key => $exception) {
-                if (trim($exception['block_type']) == '') {
+                if (!is_array($exception)
+                    || !isset($exception['block_type'])
+                    || (trim($exception['block_type']) == '')) {
                     unset($value[$key]);
                 }
             }

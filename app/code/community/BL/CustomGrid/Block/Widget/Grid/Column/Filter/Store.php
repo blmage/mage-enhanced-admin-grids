@@ -34,70 +34,79 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Store
     extends Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Abstract
 {
-
     public function getHtml()
     {
         $storeModel = Mage::getSingleton('adminhtml/system_store');
-        $websiteCollection = $storeModel->getWebsiteCollection();
-        $groupCollection   = $storeModel->getGroupCollection();
-        $storeCollection   = $storeModel->getStoreCollection();
+        $websites = $storeModel->getWebsiteCollection();
+        $storeGroups = $storeModel->getGroupCollection();
+        $stores = $storeModel->getStoreCollection();
         
-        $html  = '<select name="' . $this->_getHtmlName() . '" ' . $this->getColumn()->getValidateClass() . '>';
-        $value = $this->getColumn()->getValue();
-        $html .= '<option value=""' . (!$value ? ' selected="selected"' : '') . '></option>';
-        $html .= '<option value="0"' . (strval($value) === '0' ? ' selected="selected"' : '') . '>' . Mage::helper('adminhtml')->__('All Store Views') . '</option>';
+        $selected = ' selected="selected" ';
+        $spaces = str_repeat('&nbsp;', 4);
+        $value  = $this->getValue();
         
-        foreach ($websiteCollection as $website) {
+        $html = '<select name="' . $this->_getHtmlName() . '" ' . $this->getColumn()->getValidateClass() . '>'
+            . '<option value=""'  . (!$value ? $selected : '') . '></option>'
+            . '<option value="0"' . (strval($value) === '0' ? $selected : '') . '>'
+            . $this->helper('adminhtml')->__('All Store Views')
+            . '</option>';
+        
+        foreach ($websites as $website) {
             $websiteShow = false;
-            foreach ($groupCollection as $group) {
-                if ($group->getWebsiteId() != $website->getId()) {
+            
+            foreach ($storeGroups as $storeGroup) {
+                $storeGroupShow = false;
+                
+                if ($storeGroup->getWebsiteId() != $website->getId()) {
                     continue;
                 }
-                $groupShow = false;
-                foreach ($storeCollection as $store) {
-                    if ($store->getGroupId() != $group->getId()) {
+                
+                foreach ($stores as $store) {
+                    if ($store->getGroupId() != $storeGroup->getId()) {
                         continue;
                     }
                     if (!$websiteShow) {
                         $websiteShow = true;
-                        $html .= '<optgroup label="' . $website->getName() . '"></optgroup>';
+                        $html .= '<optgroup label="' . $this->htmlEscape($website->getName()) . '"></optgroup>';
                     }
-                    if (!$groupShow) {
-                        $groupShow = true;
-                        $html .= '<optgroup label="&nbsp;&nbsp;&nbsp;&nbsp;' . $group->getName() . '">';
+                    if (!$storeGroupShow) {
+                        $storeGroupShow = true;
+                        $html .= '<optgroup label="' . $this->htmlEscape($storeGroup->getName()) . '">';
                     }
-                    $value = $this->getValue();
-                    $html .= '<option value="' . $store->getId() . '"' . ($value == $store->getId() ? ' selected="selected"' : '') . '>&nbsp;&nbsp;&nbsp;&nbsp;' . $store->getName() . '</option>';
+                    
+                    $html .= '<option value="' . $store->getId() . '"' . ($value == $store->getId() ? $selected : '')
+                        . '>' . $spaces . $store->getName() . '</option>';
                 }
-                if ($groupShow) {
+                
+                if ($storeGroupShow) {
                     $html .= '</optgroup>';
                 }
             }
         }
         
-        $selected = ($this->getValue() == '_deleted_') ? ' selected' : '';
-        $html .= '<option value="_deleted_"'.$selected.'>'.$this->__('[ deleted ]').'</option>';
-        $html .= '</select>';
+        $html .= '<option value="_deleted_"' . ($value == '_deleted_' ? $selected : '') . '>'
+            . $this->__('[ deleted ]')
+            . '</option>'
+            . '</select>';
+        
         return $html;
     }
     
     public function getCondition()
     {
-        if (is_null($this->getValue())) {
+        if (is_null($value = $this->getValue())) {
             return null;
         }
-        if ($this->getValue() == '_deleted_') {
+        if ($value == '_deleted_') {
             return array('null' => true);
         }
-        else {
-            return array('eq' => $this->getValue());
-        }
+        return array('eq' => $value);
     }
 }

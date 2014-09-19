@@ -15,18 +15,18 @@
 ?>
 <?php $_columns = $this->getColumns() ?>
 <?php if (!empty($_columns)): ?>
-<table class="grid data blcg-additional-filters-table" cellspacing="0">
-    <tr class="headings">
-    <?php foreach ($_columns as $_column): ?>
-        <th>
-            <span class="nobr"><?php echo $_column->getHeader() ?></span>
-        </th>
-    <?php endforeach ?>
-    </tr>
-    <tr class="filter">
-    <?php foreach ($_columns as $_column): ?>
-        <th><?php echo $_column->getFilterHtml() ?></th>
-    <?php endforeach ?>
-    </tr>
-</table>
+    <table class="grid data blcg-additional-filters-table" cellspacing="0">
+        <tr class="headings">
+        <?php foreach ($_columns as $_column): ?>
+            <th>
+                <span class="nobr"><?php echo $_column->getHeader() ?></span>
+            </th>
+        <?php endforeach ?>
+        </tr>
+        <tr class="filter">
+        <?php foreach ($_columns as $_column): ?>
+            <th><?php echo $_column->getFilterHtml() ?></th>
+        <?php endforeach ?>
+        </tr>
+    </table>
 <?php endif ?>

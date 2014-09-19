@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -18,23 +18,23 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Product_Categories
 {
     protected function _getRowResult(Varien_Object $row)
     {
-        $displayIds = (bool) $this->getColumn()->getDisplayIds();
-        $ids        = explode(',', $row->getData($this->getColumn()->getIndex()));
-        $minLevel   = intval($this->getColumn()->getAscentLimit());
-        $result     = array();
+        $result = array();
+        $displayIds   = (bool) $this->getColumn()->getDisplayIds();
+        $categoryIds  = explode(',', $row->getData($this->getColumn()->getIndex()));
+        $minimumLevel = intval($this->getColumn()->getAscentLimit());
         
-        if (empty($ids)) {
+        if (empty($categoryIds)) {
             return $result;
         }
         
         if ($tree = $this->getColumn()->getCategoryTree()) {
-            foreach ($ids as $categoryId) {
+            foreach ($categoryIds as $categoryId) {
                 $subResult = array();
                 
                 if ($node = $tree->getNodeById($categoryId)) {
                     $subResult[] = ($displayIds ? $categoryId : $node->getName());
                     
-                    while (($node = $node->getParent()) && ($node->getLevel() >= $minLevel)) {
+                    while (($node = $node->getParent()) && ($node->getLevel() >= $minimumLevel)) {
                         $subResult[] = ($displayIds ? $node->getId() : $node->getName());
                     }
                     
@@ -42,23 +42,23 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Product_Categories
                 }
             }
         } elseif ($hash = $this->getColumn()->getCategoryHash()) {
-            foreach ($ids as $categoryId) {
+            foreach ($categoryIds as $categoryId) {
                 if (isset($hash[$categoryId])) {
                     $result[] = array($hash[$categoryId]->getName());
                 }
             }
         } else {
-            $result = array_map(create_function('$v', 'return array($v);'), $ids);
+            $result = array_map(create_function('$v', 'return array($v);'), $categoryIds);
         }
         
         return $result;
     }
     
-    protected function _renderRow($row, $levelSep, $resultSep)
+    protected function _renderRow($row, $levelSeparator, $resultSeparator)
     {
         $result = $this->_getRowResult($row);
-        array_walk($result, create_function('&$v, $k, $s', '$v = implode($v, $s);'), $levelSep);
-        return implode($resultSep, $result);
+        array_walk($result, create_function('&$v, $k, $s', '$v = implode($v, $s);'), $levelSeparator);
+        return implode($resultSeparator, $result);
     }
     
     public function render(Varien_Object $row)

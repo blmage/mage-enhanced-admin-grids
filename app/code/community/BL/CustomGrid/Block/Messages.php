@@ -50,8 +50,7 @@ class BL_CustomGrid_Block_Messages
     public function getDateFormat()
     {
         if (!$this->hasData('date_format')) {
-            $format = Mage::app()->getLocale()
-                ->getDateTimeFormat(Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM);
+            $format = Mage::app()->getLocale()->getDateTimeFormat(Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM);
             $this->setData('date_format', $format);
         }
         return $this->_getData('date_format');
@@ -140,13 +139,18 @@ class BL_CustomGrid_Block_Messages
         );
     }
     
-    /**
-     * @todo
-     * Possibly expected for messages system :
-     * - fully customizable
-     * - messages persistence
-     * - ability to remove messages (single / by date / by type)
-     * - ability to ignore specific types of messages (or make use of simple/complex rules)
-     * - ACL
-     */
+    public function getIncludeJsScript()
+    {
+        return $this->getDataSetDefault('include_js_script', true);
+    }
+    
+    public function getAjaxModeWrapperId()
+    {
+        if (!$this->hasData('ajax_mode_wrapper_id')) {
+            $this->setData('ajax_mode_wrapper_id', $this->helper('core')->uniqHash('blcg-ajax-messages-wrapper-'));
+        }
+        return $this->_getData('ajax_mode_wrapper_id');
+    }
+    
+    // @todo persistent clearable messages ? (would give a consistent behaviour between Ajax and "classic" requests)
 }

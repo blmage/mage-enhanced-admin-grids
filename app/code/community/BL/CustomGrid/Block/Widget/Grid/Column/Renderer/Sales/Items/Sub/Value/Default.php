@@ -28,7 +28,7 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Sales_Items_Sub_Value_Defa
                 $result = $this->htmlEscape($item->getName());
                 
             } elseif ($code == 'sku') {
-                $result = implode('<br />', Mage::helper('catalog')->splitSku($this->htmlEscape($item->getSku())));
+                $result = implode('<br />', $this->helper('catalog')->splitSku($this->htmlEscape($item->getSku())));
                 
             } elseif ($code == 'quantity') {
                 if ($value->hasOrder()) {
@@ -46,15 +46,19 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Sales_Items_Sub_Value_Defa
                 $result = $itemRenderer->displayTaxPercent($item);
                 
             } elseif ($code == 'row_total') {
-                if (Mage::helper('customgrid')->isMageVersionLesserThan(1, 6)) {
+                if ($this->helper('customgrid')->isMageVersionLesserThan(1, 6)) {
                     $result = $itemRenderer->displayPrices(
-                        $item->getBaseRowTotal() - $item->getBaseDiscountAmount() + $item->getBaseTaxAmount() + $item->getBaseWeeeTaxAppliedRowAmount(),
-                        $item->getRowTotal() - $item->getDiscountAmount() + $item->getTaxAmount() + $item->getWeeeTaxAppliedRowAmount()
+                        $item->getBaseRowTotal() - $item->getBaseDiscountAmount() + $item->getBaseTaxAmount()
+                            + $item->getBaseWeeeTaxAppliedRowAmount(),
+                        $item->getRowTotal() - $item->getDiscountAmount() + $item->getTaxAmount()
+                            + $item->getWeeeTaxAppliedRowAmount()
                     );
                 } else {
                     $result = $itemRenderer->displayPrices(
-                        $item->getBaseRowTotal() + $item->getBaseTaxAmount() + $item->getBaseHiddenTaxAmount() + $item->getBaseWeeeTaxAppliedRowAmount() - $item->getBaseDiscountAmount(),
-                        $item->getRowTotal() + $item->getTaxAmount() + $item->getHiddenTaxAmount() + $item->getWeeeTaxAppliedRowAmount() - $item->getDiscountAmount()
+                        $item->getBaseRowTotal() + $item->getBaseTaxAmount() + $item->getBaseHiddenTaxAmount()
+                            + $item->getBaseWeeeTaxAppliedRowAmount() - $item->getBaseDiscountAmount(),
+                        $item->getRowTotal() + $item->getTaxAmount() + $item->getHiddenTaxAmount()
+                            + $item->getWeeeTaxAppliedRowAmount() - $item->getDiscountAmount()
                     );
                     
                 }

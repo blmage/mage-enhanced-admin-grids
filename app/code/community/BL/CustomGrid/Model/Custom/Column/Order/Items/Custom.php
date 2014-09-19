@@ -21,35 +21,38 @@ class BL_CustomGrid_Model_Custom_Column_Order_Items_Custom
         return true;
     }
     
-    public function getItemValues()
+    protected function _getItemBaseValues()
     {
-        if (!$this->hasData('item_values')) {
-            $baseValues = array(
-                'name'            => 'Name',
-                'sku'             => 'SKU',
-                'original_price'  => 'Original Price',
-                'status'          => 'Status',
-                'quantity'        => 'Qty',
-                'tax_amount'      => 'Tax Amount',
-                'tax_percent'     => 'Tax Percent',
-                'discount_amount' => 'Discount Amount',
-                'row_total'       => 'Row Total',
-            );
-            
-            $amountsKeys = array(
-                'original_price',
-                'tax_amount',
-                'tax_percent',
-                'discount_amount',
-                'row_total',
-            );
-            
-            $this->setData('item_values', $this->_getItemValuesList($baseValues, $amountsKeys, 'blcg_custom_column_order_items_custom_values'));
-        }
-        return $this->_getData('item_values');
+        return array(
+            'name'            => 'Name',
+            'sku'             => 'SKU',
+            'original_price'  => 'Original Price',
+            'status'          => 'Status',
+            'quantity'        => 'Qty',
+            'tax_amount'      => 'Tax Amount',
+            'tax_percent'     => 'Tax Percent',
+            'discount_amount' => 'Discount Amount',
+            'row_total'       => 'Row Total',
+        );
     }
     
-    protected function _getGridColumnRenderer()
+    protected function _getItemAmountsValuesKeys()
+    {
+        return array(
+            'original_price',
+            'tax_amount',
+            'tax_percent',
+            'discount_amount',
+            'row_total',
+        );
+    }
+    
+    protected function _getItemValuesEventName()
+    {
+        return 'blcg_custom_column_order_items_custom_values';
+    }
+    
+    protected function _getColumnBlockRenderer()
     {
         return 'customgrid/widget_grid_column_renderer_order_items_custom';
     }

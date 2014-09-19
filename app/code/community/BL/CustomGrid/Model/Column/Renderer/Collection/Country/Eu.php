@@ -16,50 +16,46 @@
 class BL_CustomGrid_Model_Column_Renderer_Collection_Country_Eu
     extends BL_CustomGrid_Model_Column_Renderer_Collection_Abstract
 {
-    protected function _getSystemConfigCountries($path)
+    protected function _getSystemConfigCountries($configPath)
     {
-        if (!is_array($countries = Mage::getStoreConfig($path))) {
+        if (!is_array($countries = Mage::getStoreConfig($configPath))) {
             $countries = explode(',', $countries);
         }
         return $countries;
     }
     
-    public function getColumnGridValues($index, $store, $grid)
+    public function getColumnBlockValues($columnIndex, Mage_Core_Model_Store $store,
+        BL_CustomGrid_Model_Grid $gridModel)
     {
         $values = array(
             'renderer' => 'customgrid/widget_grid_column_renderer_country_eu',
             'filter'   => 'customgrid/widget_grid_column_filter_country_eu',
-            'base_display_format'   => $this->_getData('base_display_format'),
-            'export_display_format' => $this->_getData('export_display_format'),
+            'base_display_format'   => $this->getData('values/base_display_format'),
+            'export_display_format' => $this->getData('values/export_display_format'),
         );
         
         $euCountries  = array();
         $allCountries = array();
         
-        // Get EU countries
-        if ((bool) $this->_getData('custom_source')) {
-            if ((bool) $this->_getData('system_config_source')) {
-                if ($path = $this->_getData('system_config_source_path')) {
-                    // System configuration value
-                    $euCountries = $this->_getSystemConfigCountries($path);
+        if ($this->getData('values/custom_source')) {
+            if ($this->getData('values/system_config_source')) {
+                if ($configPath = $this->getData('values/system_config_source_path')) {
+                    $euCountries = $this->_getSystemConfigCountries($configPath);
                 }
-            } elseif ($euCountries = $this->_getData('eu_countries')) {
-                // User-defined value
+            } elseif ($euCountries = $this->getData('values/eu_countries')) {
                 if (!is_array($euCountries)) {
                     $euCountries = explode(',', $euCountries);
                 }
             }
         } elseif (Mage::helper('customgrid')->isMageVersionGreaterThan(1, 6)) {
-            // Magento base value
             $euCountries = $this->_getSystemConfigCountries('general/country/eu_countries');
         }
         
-        // Clean EU countries, prepare all countries
         $countries = Mage::getResourceModel('directory/country_collection')
             ->loadData()
             ->toOptionArray(false);
         
-        $countries   = Mage::helper('customgrid')->getOptionsHashFromOptionsArray($countries);
+        $countries  = Mage::helper('customgrid')->getOptionsHashFromOptionsArray($countries);
         $isEuCountry = array();
         
         foreach ($euCountries as $key => $code) {
@@ -70,7 +66,7 @@ class BL_CustomGrid_Model_Column_Renderer_Collection_Country_Eu
             }
         }
         foreach ($countries as $code => $name) {
-            $allCountries[$code] = new Varien_Object(array(
+            $allCountries[$code] = new BL_CustomGrid_Object(array(
                 'code'  => $code,
                 'name'  => $name,
                 'is_eu' => isset($isEuCountry[$code]),
@@ -79,7 +75,6 @@ class BL_CustomGrid_Model_Column_Renderer_Collection_Country_Eu
         
         $values['eu_countries']  = array_unique($euCountries);
         $values['all_countries'] = $allCountries;
-        
         return $values;
     }
 }

@@ -16,39 +16,36 @@
 abstract class BL_CustomGrid_Model_Custom_Column_Order_Items_Abstract
     extends BL_CustomGrid_Model_Custom_Column_Sales_Items_Abstract
 {
-    public function addItemsToGridCollection($alias, $params, $block, $collection, $firstTime)
+    public function addItemsToGridCollection($columnIndex, array $params,
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock, Varien_Data_Collection_Db $collection, $firstTime)
     {
-        if (!$firstTime && !$block->blcg_isExport()) {
+        if (!$firstTime && !$gridBlock->blcg_isExport()) {
             $ordersIds = array();
             
             foreach ($collection as $order) {
                 $ordersIds[] = $order->getId();
             }
             
-            $items = $this->_getOrdersItemsCollection($ordersIds, true, 'blcg_custom_column_order_items_list_order_items_collection');
-            $orderReflection = new ReflectionClass('Mage_Sales_Model_Order');
-            $itemsProperty   = $orderReflection->getProperty('_items');
+            $eventName = 'blcg_custom_column_order_items_list_order_items_collection';
+            $items = $this->_getOrdersItemsCollection($ordersIds, true, $eventName);
+            $propertyName  = 'sales/order::_items';
+            $itemsProperty = Mage::helper('customgrid/reflection')->getModelReflectionProperty($propertyName, true);
             
-            if (!method_exists($itemsProperty, 'setAccessible')) {
-                // PHP < 5.3.0
-                $itemsProperty = Mage::getSingleton('customgrid/reflection_property_sales_order_items');
-            } else {
-                $itemsProperty->setAccessible(true);
-            }
-            
-            foreach ($collection as $order) {
-                $orderId = $order->getId();
-                $orderItems = clone $items;
-                
-                foreach ($orderItems as $item) {
-                    if ($item->getOrderId() != $orderId) {
-                        $orderItems->removeItemByKey($item->getId());
-                    } else {
-                        $item->setOrder($order);
+            if ($itemsProperty) {
+                foreach ($collection as $order) {
+                    $orderId = $order->getId();
+                    $orderItems = clone $items;
+                    
+                    foreach ($orderItems as $item) {
+                        if ($item->getOrderId() != $orderId) {
+                            $orderItems->removeItemByKey($item->getId());
+                        } else {
+                            $item->setOrder($order);
+                        }
                     }
+                    
+                    $itemsProperty->setValue($order, $orderItems);
                 }
-                
-                $itemsProperty->setValue($order, $orderItems);
             }
         }
         return $this;

@@ -18,15 +18,20 @@ class BL_CustomGrid_Model_Session
 {
     protected $_now;
     
-    protected function _construct()
+    public function __construct()
     {
-        parent::_construct();
+        $this->init('customgrid');
         $this->_now = date('Y-m-d H:i:s');
     }
     
     public function addMessage(Mage_Core_Model_Message_Abstract $message)
     {
-        $message->setIdentifier(uniqid().'|'.$this->_now);
+        $message->setIdentifier(uniqid() . '|' . $this->_now);
         return parent::addMessage($message);
+    }
+    
+    public function hasMessages()
+    {
+        return ($this->getMessages()->count() > 0);
     }
 }

@@ -9,56 +9,69 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Helper_Config extends Mage_Core_Helper_Abstract
+class BL_CustomGrid_Helper_Config
+    extends Mage_Core_Helper_Abstract
 {
-    const XML_GLOBAL_EXCEPTIONS_HANDLING_MODE         = 'customgrid/global/exceptions_handling_mode';
-    const XML_GLOBAL_EXCEPTIONS_LIST                  = 'customgrid/global/exceptions_list';
-    const XML_GLOBAL_EXCLUSIONS_LIST                  = 'customgrid/global/exclusions_list';
-    const XML_GLOBAL_FORCE_GRID_REWRITES              = 'customgrid/global/force_grid_rewrites';
-    const XML_GLOBAL_STORE_PARAMETER                  = 'customgrid/global/store_parameter';
-    const XML_GLOBAL_SORT_WITH_DND                    = 'customgrid/global/sort_with_dnd';
-    const XML_CUSTOM_PARAMS_IGNORE_CUSTOM_HEADERS     = 'customgrid/customization_params/ignore_custom_headers';
-    const XML_CUSTOM_PARAMS_IGNORE_CUSTOM_WIDTHS      = 'customgrid/customization_params/ignore_custom_widths';
-    const XML_CUSTOM_PARAMS_IGNORE_CUSTOM_ALIGNMENTS  = 'customgrid/customization_params/ignore_custom_alignments';
-    const XML_CUSTOM_PARAMS_PAGINATION_VALUES         = 'customgrid/customization_params/pagination_values';
-    const XML_CUSTOM_PARAMS_DEFAULT_PAGINATION_VALUE  = 'customgrid/customization_params/default_pagination_value';
-    const XML_CUSTOM_PARAMS_MERGE_BASE_PAGINATION     = 'customgrid/customization_params/merge_base_pagination';
-    const XML_CUSTOM_PARAMS_PIN_HEADER                = 'customgrid/customization_params/pin_header';
-    const XML_CUSTOM_DEFAULT_PARAM_BEHAVIOUR_BASE_KEY = 'customgrid/custom_default_params/%s';
-    const XML_CUSTOM_COLUMNS_GROUP_IN_DEFAULT_HEADER  = 'customgrid/custom_columns/group_in_default_header';
+    // Global
+    const CONFIG_PATH_EXCLUSIONS_LIST = 'customgrid/global/exclusions_list';
+    const CONFIG_PATH_EXCEPTIONS_LIST = 'customgrid/global/exceptions_list';
+    const CONFIG_PATH_EXCEPTIONS_HANDLING_MODE = 'customgrid/global/exceptions_handling_mode';
+    const CONFIG_PATH_STORE_PARAMETER = 'customgrid/global/store_parameter';
+    const CONFIG_PATH_SORT_WITH_DND   = 'customgrid/global/sort_with_dnd';
     
-    const GRID_EXCEPTION_HANDLING_EXCLUDE = 'exclude';
-    const GRID_EXCEPTION_HANDLING_ALLOW   = 'allow';
+    // Customization parameters
+    const CONFIG_PATH_IGNORE_CUSTOM_HEADERS    = 'customgrid/customization_params/ignore_custom_headers';
+    const CONFIG_PATH_IGNORE_CUSTOM_WIDTHS     = 'customgrid/customization_params/ignore_custom_widths';
+    const CONFIG_PATH_IGNORE_CUSTOM_ALIGNMENTS = 'customgrid/customization_params/ignore_custom_alignments';
+    const CONFIG_PATH_PAGINATION_VALUES        = 'customgrid/customization_params/pagination_values';
+    const CONFIG_PATH_DEFAULT_PAGINATION_VALUE = 'customgrid/customization_params/default_pagination_value';
+    const CONFIG_PATH_MERGE_BASE_PAGINATION    = 'customgrid/customization_params/merge_base_pagination';
+    const CONFIG_PATH_PIN_HEADER               = 'customgrid/customization_params/pin_header';
+    
+    // Default parameters behaviours
+    const CONFIG_PATH_DEFAULT_PARAMETER_BEHAVIOUR_BASE_KEY = 'customgrid/default_params_behaviours/%s';
+    
+    // Profiles
+    const CONFIG_PATH_PROFILES_DEFAULT_RESTRICTED  = 'customgrid/profiles/default_restricted';
+    const CONFIG_PATH_PROFILES_DEFAULT_ASSIGNED_TO = 'customgrid/profiles/default_assigned_to';
+    
+    // Custom columns
+    const CONFIG_PATH_GROUP_IN_CUSTOM_COLUMNS_DEFAULT_HEADER = 'customgrid/custom_columns/group_in_default_header';
+    
+    const GRID_EXCEPTION_HANDLING_MODE_ALLOW = 'allow';
+    const GRID_EXCEPTION_HANDLING_MODE_EXCLUDE = 'exclude';
     
     protected $_configCache = array();
+    
+    protected function _getHelper()
+    {
+        return Mage::helper('customgrid');
+    }
+    
+    protected function _getSerializedArrayConfig($path)
+    {
+        $values = Mage::getStoreConfig($path);
+        
+        if (!is_array($values)) { 
+            $values = $this->_getHelper()->unserializeArray($values);
+        }
+        
+        return $values;
+    }
+    
     
     protected function _prepareExceptionPattern($pattern)
     {
         return str_replace(array('\\*', '\\.'), array('.*', '.'), '#' . preg_quote($pattern, '#') . '#i');
     }
     
-    protected function _getSerializedArrayConfig($key)
+    protected function _getExceptionsListConfig($path)
     {
-        $values = Mage::getStoreConfig($key);
-        
-        if (!is_array($values)) {
-            /* 
-            Unserialize values if needed 
-            (should always be the case, as _afterLoad is not called with getStoreConfig)
-            */
-            $values = Mage::helper('customgrid')->unserializeArray($values);
-        }
-        
-        return $values;
-    }
-    
-    protected function _getExceptionsListConfig($key)
-    {
-        $exceptions = $this->_getSerializedArrayConfig($key);
+        $exceptions = $this->_getSerializedArrayConfig($path);
         
         foreach ($exceptions as $key => $exception) {
             // Prepare exceptions patterns
@@ -71,34 +84,34 @@ class BL_CustomGrid_Helper_Config extends Mage_Core_Helper_Abstract
         return $exceptions;
     }
     
-    protected function _matchGridAgainstException($exception, $blockType, $rewritingClassName)
+    protected function _matchGridBlockAgainstException($exception, $blockType, $rewritingClassName)
     {
-        return (preg_match($exception['block_type'], $blockType)
-            && preg_match($exception['rewriting_class_name'], $rewritingClassName));
+        return preg_match($exception['block_type'], $blockType)
+            && preg_match($exception['rewriting_class_name'], $rewritingClassName);
     }
     
-    public function addGridToExclusionsList($blockType, $rewritingClassName, $reinit=false)
+    public function addGridToExclusionsList($blockType, $rewritingClassName, $reinitConfig=false)
     {
-        $list  = $this->_getSerializedArrayConfig(self::XML_GLOBAL_EXCLUSIONS_LIST);
-        $found = false;
+        $exclusionsList = $this->_getSerializedArrayConfig(self::CONFIG_PATH_EXCLUSIONS_LIST);
+        $isExistingExclusion = false;
         
-        foreach ($list as $exclusion) {
+        foreach ($exclusionsList as $exclusion) {
             if (($exclusion['block_type'] === $blockType)
                 && ($exclusion['rewriting_class_name'] === $rewritingClassName)) {
-                $found = true;
+                $isExistingExclusion = true;
                 break;
             }
         }
         
-        if (!$found) {
-            $list[] = array(
+        if (!$isExistingExclusion) {
+            $exclusionsList[] = array(
                 'block_type' => $blockType,
                 'rewriting_class_name' => $rewritingClassName
             );
             
-            Mage::getConfig()->saveConfig(self::XML_GLOBAL_EXCLUSIONS_LIST, serialize($list), 'default', 0);
+            Mage::getConfig()->saveConfig(self::CONFIG_PATH_EXCLUSIONS_LIST, serialize($exclusionsList), 'default', 0);
             
-            if ($reinit) {
+            if ($reinitConfig) {
                 Mage::getConfig()->reinit();
                 Mage::app()->reinitStores();
             }
@@ -110,119 +123,111 @@ class BL_CustomGrid_Helper_Config extends Mage_Core_Helper_Abstract
     public function getExclusionsList()
     {
         if (!isset($this->_configCache['exclusions_list'])) {
-            $this->_configCache['exclusions_list'] = $this->_getExceptionsListConfig(self::XML_GLOBAL_EXCLUSIONS_LIST);
+            $this->_configCache['exclusions_list'] = $this->_getExceptionsListConfig(self::CONFIG_PATH_EXCLUSIONS_LIST);
         }
         return $this->_configCache['exclusions_list'];
-    }
-    
-    public function getExceptionsHandlingMode()
-    {
-        return Mage::getStoreConfig(self::XML_GLOBAL_EXCEPTIONS_HANDLING_MODE);
     }
     
     public function getExceptionsList()
     {
         if (!isset($this->_configCache['exceptions_list'])) {
-            $this->_configCache['exceptions_list'] = $this->_getExceptionsListConfig(self::XML_GLOBAL_EXCEPTIONS_LIST);
+            $this->_configCache['exceptions_list'] = $this->_getExceptionsListConfig(self::CONFIG_PATH_EXCEPTIONS_LIST);
         }
         return $this->_configCache['exceptions_list'];
     }
     
-    public function isExcludedGrid($blockType, $rewritingClassName)
+    public function getExceptionsHandlingMode()
+    {
+        return Mage::getStoreConfig(self::CONFIG_PATH_EXCEPTIONS_HANDLING_MODE);
+    }
+    
+    public function isExcludedGridBlock($blockType, $rewritingClassName)
     {
         foreach ($this->getExclusionsList() as $exclusion) {
-            if ($this->_matchGridAgainstException($exclusion, $blockType, $rewritingClassName)) {
+            if ($this->_matchGridBlockAgainstException($exclusion, $blockType, $rewritingClassName)) {
                 return true;
             }
         }
         foreach ($this->getExceptionsList() as $exception) {
-            if ($this->_matchGridAgainstException($exception, $blockType, $rewritingClassName)) {
-                return ($this->getExceptionsHandlingMode() == self::GRID_EXCEPTION_HANDLING_EXCLUDE);
+            if ($this->_matchGridBlockAgainstException($exception, $blockType, $rewritingClassName)) {
+                return ($this->getExceptionsHandlingMode() == self::GRID_EXCEPTION_HANDLING_MODE_EXCLUDE);
             }
         }
-        return ($this->getExceptionsHandlingMode() == self::GRID_EXCEPTION_HANDLING_ALLOW);
-    }
-    
-    public function getForceGridRewrites()
-    {
-        return Mage::getStoreConfigFlag(self::XML_GLOBAL_FORCE_GRID_REWRITES);
+        return ($this->getExceptionsHandlingMode() == self::GRID_EXCEPTION_HANDLING_MODE_ALLOW);
     }
     
     public function getStoreParameter($default=null)
     {
-        return ((($value = Mage::getStoreConfig(self::XML_GLOBAL_STORE_PARAMETER)) !== '') ? $value : $default);
+        $value = trim(Mage::getStoreConfig(self::CONFIG_PATH_STORE_PARAMETER));
+        return ($value !== '' ? $value : $default);
     }
     
     public function getSortWithDnd()
     {
-        return Mage::getStoreConfig(self::XML_GLOBAL_SORT_WITH_DND);
+        return Mage::getStoreConfigFlag(self::CONFIG_PATH_SORT_WITH_DND);
     }
     
     public function getIgnoreCustomHeaders()
     {
-        return Mage::getStoreConfigFlag(self::XML_CUSTOM_PARAMS_IGNORE_CUSTOM_HEADERS);
+        return Mage::getStoreConfigFlag(self::CONFIG_PATH_IGNORE_CUSTOM_HEADERS);
     }
     
     public function getIgnoreCustomWidths()
     {
-        return Mage::getStoreConfigFlag(self::XML_CUSTOM_PARAMS_IGNORE_CUSTOM_WIDTHS);
+        return Mage::getStoreConfigFlag(self::CONFIG_PATH_IGNORE_CUSTOM_WIDTHS);
     }
     
     public function getIgnoreCustomAlignments()
     {
-        return Mage::getStoreConfigFlag(self::XML_CUSTOM_PARAMS_IGNORE_CUSTOM_ALIGNMENTS);
+        return Mage::getStoreConfigFlag(self::CONFIG_PATH_IGNORE_CUSTOM_ALIGNMENTS);
     }
     
     public function getPaginationValues()
     {
         if (!isset($this->_configCache['pagination_values'])) {
-            $this->_configCache['pagination_values'] = Mage::helper('customgrid')
-                ->parseCsvIntArray(Mage::getStoreConfig(self::XML_CUSTOM_PARAMS_PAGINATION_VALUES), true, true, 1);
+            $this->_configCache['pagination_values'] = $this->_getHelper()
+                ->parseCsvIntArray(Mage::getStoreConfig(self::CONFIG_PATH_PAGINATION_VALUES), true, true, 1);
         }
         return $this->_configCache['pagination_values'];
     }
     
-    public function getDefaultPaginationValue($checkInList=true, $smallestDefault=true, $valuesList=null)
+    public function getDefaultPaginationValue()
     {
-        /*
-        $value = intval(Mage::getStoreConfig(self::XML_CUSTOM_PARAMS_DEFAULT_PAGINATION_VALUE));
-        
-        if (is_null($valuesList) && ($smallestDefault || ($value && $checkInList))) {
-            $valuesList = $this->getPaginationValues();
-        }
-        if ($value) {
-            if ($checkInList && !in_array($value, $valuesList)) {
-                $value = false;
-            }
-        }
-        if (!$value && $smallestDefault && !empty($valuesList)) {
-            $value = array_reduce($valuesList, 'min');
-        } else {
-            $value = false;
-        }
-        
-        return $value;
-        */
-        return intval(Mage::getStoreConfig(self::XML_CUSTOM_PARAMS_DEFAULT_PAGINATION_VALUE));
+        return (int) Mage::getStoreConfig(self::CONFIG_PATH_DEFAULT_PAGINATION_VALUE);
     }
     
     public function getMergeBasePagination()
     {
-        return Mage::getStoreConfigFlag(self::XML_CUSTOM_PARAMS_MERGE_BASE_PAGINATION);
+        return Mage::getStoreConfigFlag(self::CONFIG_PATH_MERGE_BASE_PAGINATION);
     }
     
     public function getPinHeader()
     {
-        return Mage::getStoreConfigFlag(self::XML_CUSTOM_PARAMS_PIN_HEADER);
+        return Mage::getStoreConfigFlag(self::CONFIG_PATH_PIN_HEADER);
     }
     
-    public function getCustomDefaultParamBehaviour($type)
+    public function geDefaultParameterBehaviour($type)
     {
-        return Mage::getStoreConfig(sprintf(self::XML_CUSTOM_DEFAULT_PARAM_BEHAVIOUR_BASE_KEY, $type));
+        return Mage::getStoreConfig(sprintf(self::CONFIG_PATH_DEFAULT_PARAMETER_BEHAVIOUR_BASE_KEY, $type));
+    }
+    
+    public function getProfilesDefaultRestricted()
+    {
+       return Mage::getStoreConfigFlag(self::CONFIG_PATH_PROFILES_DEFAULT_RESTRICTED); 
+    }
+    
+    public function getProfilesDefaultAssignedTo()
+    {
+        if (!isset($this->_configCache['profiles_default_assigned_to'])) {
+            $helper = $this->_getHelper();
+            $value  = Mage::getStoreConfig(self::CONFIG_PATH_PROFILES_DEFAULT_ASSIGNED_TO);
+            $this->_configCache['profiles_default_assigned_to'] = $helper->parseCsvIntArray($value, true, false, 1);
+        }
+        return $this->_configCache['profiles_default_assigned_to'];
     }
     
     public function getAddGroupToCustomColumnsDefaultHeader()
     {
-        return Mage::getStoreConfigFlag(self::XML_CUSTOM_COLUMNS_GROUP_IN_DEFAULT_HEADER);
+        return Mage::getStoreConfigFlag(self::CONFIG_PATH_GROUP_IN_CUSTOM_COLUMNS_DEFAULT_HEADER);
     }
 }

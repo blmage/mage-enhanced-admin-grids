@@ -9,80 +9,82 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class BL_CustomGrid_Model_Custom_Column_Order_Status_Color
     extends BL_CustomGrid_Model_Custom_Column_Simple_Duplicate
 {
-    public function initConfig()
+    protected function _prepareConfig()
     {
-        parent::initConfig();
-        $helper = Mage::helper('customgrid');
+        $helper = $this->_getBaseHelper();
+        $sortOrder = 10;
         
-        $this->addCustomParam('only_cell', array(
+        $this->addCustomizationParam('only_cell', array(
             'label'        => $helper->__('Only Colorize Status Cell'),
             'type'         => 'select',
             'source_model' => 'adminhtml/system_config_source_yesno',
             'value'        => 0,
-        ), 10);
+        ), $sortOrder);
         
-        // Add two colors params for each status
-        $order    = 20;
-        $statuses = Mage::getSingleton('sales/order_config')->getStatuses();
-        
-        foreach ($statuses as $id => $status) {
-            $this->addCustomParam($id.'_background', array(
+        foreach ($this->getOrderStatuses() as $key => $status) {
+            $this->addCustomizationParam($key . '_background', array(
                 'label'       => $helper->__('"%s" Background Color', $status),
                 'description' => $helper->__('Must be a valid CSS color'),
                 'type'        => 'text',
                 'value'       => '',
-            ), $order);
+            ), $sortOrder += 10);
             
-            $this->addCustomParam($id.'_text', array(
+            $this->addCustomizationParam($key . '_text', array(
                 'label'       => $helper->__('"%s" Text Color', $status),
                 'description' => $helper->__('Must be a valid CSS color'),
                 'type'        => 'text',
                 'value'       => '',
-            ), $order+10);
-            
-            $order += 20;
+            ), $sortOrder += 10);
         }
         
-        $this->setCustomParamsWindowConfig(array('height' => 450));
-        
+        $this->setCustomizationWindowConfig(array('height' => 450));
         return $this;
     }
     
-    public function getDuplicatedField()
+    public function getDuplicatedFieldName()
     {
         return 'status';
     }
     
-    protected function _getForcedGridValues($block, $model, $id, $alias, $params, $store, $renderer=null)
+    protected function _getForcedBlockValues(Mage_Adminhtml_Block_Widget_Grid $gridBlock,
+        BL_CustomGrid_Model_Grid $gridModel, $columnBlockId, $columnIndex, array $params, Mage_Core_Model_Store $store)
     {
-        $statuses = Mage::getSingleton('sales/order_config')->getStatuses();
-        $colors   = array();
+        $colors = array();
         
-        foreach ($statuses as $id => $status) {
-            $bkgColor  = $this->_extractStringParam($params, $id.'_background', '', true);
-            $textColor = $this->_extractStringParam($params, $id.'_text', '', true);
+        foreach ($this->getOrderStatuses() as $key => $status) {
+            $textColor = $this->_extractStringParam($params, $key . '_text', '', true);
+            $backgroundColor = $this->_extractStringParam($params, $key . '_background', '', true);
             
-            if (($bkgColor !== '') || ($textColor !== '')) {
-                $colors[$id] = array(
-                    'background' => $bkgColor,
+            if (($textColor !== '') || ($backgroundColor !== '')) {
+                $colors[$key] = array(
                     'text' => $textColor,
+                    'background' => $backgroundColor,
                 );
             }
         }
         
         return array(
+            // @todo lock "options" renderer, to allow customizing the filter, + remember to use proper inheritance
             'renderer'  => 'customgrid/widget_grid_column_renderer_order_status_color',
             'filter'    => 'adminhtml/widget_grid_column_filter_select',
             'only_cell' => $this->_extractBoolParam($params, 'only_cell'),
-            'options'   => $statuses,
+            'options'   => $this->getOrderStatuses(),
             'options_colors' => $colors,
         );
+    }
+    
+    public function getOrderStatuses()
+    {
+        if (!$this->hasData('order_statuses')) {
+            $this->setData('order_statuses', Mage::getSingleton('sales/order_config')->getStatuses());
+        }
+        return $this->_getData('order_statuses');
     }
 }

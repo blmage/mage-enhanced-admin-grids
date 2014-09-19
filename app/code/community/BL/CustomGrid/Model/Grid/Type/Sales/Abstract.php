@@ -18,17 +18,15 @@ abstract class BL_CustomGrid_Model_Grid_Type_Sales_Abstract
 {
     protected function _getAddressTypes()
     {
-        $helper = Mage::helper('customgrid');
-        
         return array(
-            'billing'  => $helper->__('Billing Address'),
-            'shipping' => $helper->__('Shipping Address'),
+            'billing'  => $this->_getHelper()->__('Billing Address'),
+            'shipping' => $this->_getHelper()->__('Shipping Address'),
         );
     }
     
     protected function _getAddressFields()
     {
-        $helper = Mage::helper('customgrid');
+        $helper = $this->_getHelper();
         
         return array(
             'prefix'     => $helper->__('Prefix'),
@@ -66,10 +64,10 @@ abstract class BL_CustomGrid_Model_Grid_Type_Sales_Abstract
             ->setName($name)
             ->setGroup($group)
             ->setAllowRenderers(true)
-            ->setModelParams(array('order_field' => (empty($orderField) ? $id : $orderField)));
+            ->setConfigParams(array('order_field' => (empty($orderField) ? $id : $orderField)));
         
         if (!$this->_isOrdersGrid()) {
-            $column->setModelParams(array('join_condition_main_field' => $this->_getOrderIdField()), true);
+            $column->setConfigParams(array('join_condition_main_field_name' => $this->_getOrderIdField()), true);
         }
         
         return $column;
@@ -77,16 +75,16 @@ abstract class BL_CustomGrid_Model_Grid_Type_Sales_Abstract
     
     protected function _getAddressCustomColumn($id, $typeId, $fieldId, $typeLabel, $fieldLabel)
     {
-        $column = Mage::getModel('customgrid/custom_column_order_address_'.$typeId)
+        $column = Mage::getModel('customgrid/custom_column_order_address_' . $typeId)
             ->setId($id)
             ->setModule('customgrid')
             ->setName($fieldLabel)
             ->setGroup($typeLabel)
             ->setAllowRenderers(true)
-            ->setModelParams(array('address_field' => $fieldId));
+            ->setConfigParams(array('address_field' => $fieldId));
         
         if (!$this->_isOrdersGrid()) {
-            $column->setModelParams(array('join_condition_main_field' => $this->_getOrderIdField()), true);
+            $column->setConfigParams(array('join_condition_main_field_name' => $this->_getOrderIdField()), true);
         }
         
         return $column;
@@ -100,10 +98,10 @@ abstract class BL_CustomGrid_Model_Grid_Type_Sales_Abstract
             ->setName($name)
             ->setGroup($group)
             ->setAllowRenderers(true)
-            ->setModelParams(array('payment_field' => (empty($paymentField) ? $id : $paymentField)));
+            ->setConfigParams(array('payment_field' => (empty($paymentField) ? $id : $paymentField)));
         
         if (!$this->_isOrdersGrid()) {
-            $column->setModelParams(array('join_condition_main_field' => $this->_getOrderIdField()), true);
+            $column->setConfigParams(array('join_condition_main_field_name' => $this->_getOrderIdField()), true);
         }
         
         return $column;
@@ -123,33 +121,50 @@ abstract class BL_CustomGrid_Model_Grid_Type_Sales_Abstract
     
     protected function _getAdditionalCustomColumns()
     {
-        $helper  = Mage::helper('customgrid');
-        $columns = array();
+        $helper  = $this->_getHelper();
         
-        // Base order fields
-        $columns['shipping_method']  = $this->_getOrderBaseCustomColumn('shipping_method', $helper->__('Method'), $helper->__('Shipping'));
-        $columns['shipping_description'] = $this->_getOrderBaseCustomColumn('shipping_description', $helper->__('Description'), $helper->__('Shipping'));
+        $columns = array(
+            'shipping_method' => $this->_getOrderBaseCustomColumn(
+                    'shipping_method',
+                    $helper->__('Method'),
+                    $helper->__('Shipping')
+                ),
+            'shipping_description' => $this->_getOrderBaseCustomColumn(
+                    'shipping_description',
+                    $helper->__('Description'),
+                    $helper->__('Shipping')
+                ),
+            'payment_method' => $this->_getPaymentCustomColumn(
+                    'payment_method',
+                    $helper->__('Method'),
+                    $helper->__('Payment'),
+                    'method'
+                ),
+            'default_items' => $this->_getItemsCustomColumn('default_items'),
+            'custom_items'  => $this->_getItemsCustomColumn('custom_items', true),
+        );
         
         if (!$this->_isOrdersGrid()) {
-            $columns['base_grand_total'] = $this->_getOrderBaseCustomColumn('base_grand_total', Mage::helper('sales')->__('G.T. (Base)'), $helper->__('Order Amounts'));
-            $columns['grand_total'] = $this->_getOrderBaseCustomColumn('grand_total', Mage::helper('sales')->__('G.T. (Purchased)'), $helper->__('Order Amounts'));
+            $columns['base_grand_total'] = $this->_getOrderBaseCustomColumn(
+                'base_grand_total',
+                Mage::helper('sales')->__('G.T. (Base)'),
+                $helper->__('Order Amounts')
+            );
+            
+            $columns['grand_total'] = $this->_getOrderBaseCustomColumn(
+                'grand_total',
+                Mage::helper('sales')->__('G.T. (Purchased)'),
+                $helper->__('Order Amounts')
+            );
         }
         
-        // Payment fields
-        $columns['payment_method'] = $this->_getPaymentCustomColumn('payment_method', $helper->__('Method'), $helper->__('Payment'), 'method');
-        
-        // Items
-        $columns['default_items'] = $this->_getItemsCustomColumn('default_items');
-        $columns['custom_items']  = $this->_getItemsCustomColumn('custom_items', true);
-        
-        // Address fields
         foreach ($this->_getAddressTypes() as $typeId => $typeLabel) {
             foreach ($this->_getAddressFields() as $fieldId => $fieldLabel) {
-                $columnId = $typeId.'_'.$fieldId;
-                $columns[$columnId] = $this->_getAddressCustomColumn($columnId, $typeId, $fieldId, $typeLabel, $fieldLabel);
+                $id = $typeId . '_' . $fieldId;
+                $columns[$id] = $this->_getAddressCustomColumn($id, $typeId, $fieldId, $typeLabel, $fieldLabel);
             }
         }
         
-        return array_filter($columns);
+        return $columns;
     }
 }

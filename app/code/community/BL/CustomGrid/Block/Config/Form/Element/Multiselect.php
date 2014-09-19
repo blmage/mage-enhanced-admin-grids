@@ -18,6 +18,7 @@ class BL_CustomGrid_Block_Config_Form_Element_Multiselect
 {
     public function getName()
     {
+        // [] should not be appended to the field name
         return Varien_Data_Form_Element_Abstract::getName();
     }
 }

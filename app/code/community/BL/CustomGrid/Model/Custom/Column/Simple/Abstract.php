@@ -9,41 +9,47 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 abstract class BL_CustomGrid_Model_Custom_Column_Simple_Abstract
     extends BL_CustomGrid_Model_Custom_Column_Abstract
 {
-    abstract public function addFieldToGridCollection($alias, $params, $block, $collection);
+    abstract public function addFieldToGridCollection($columnIndex, array $params,
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock, Varien_Data_Collection_Db $collection);
     
-    public function shouldForceFieldOrder($collection, $block, $model, $id, $alias, $params, $store, $renderer=null)
+    protected function _shouldForceFieldOrder(Varien_Data_Collection_Db $collection,
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock, BL_CustomGrid_Model_Grid $gridModel, $columnBlockId, $columnIndex,
+        array $params)
     {
-        return (($block->blcg_getSort(false) === $id)
-            && $this->_getGridHelper()->isEavEntityGrid($block, $model));
+        return ($gridBlock->blcg_getSort(false) === $columnBlockId)
+            && $this->_getGridHelper()->isEavEntityGrid($gridBlock, $gridModel);
     }
     
-    public function addSortToGridCollection($id, $alias, $block, $collection)
+    public function addSortToGridCollection($columnBlockId, $columnIndex,
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock, Varien_Data_Collection_Db $collection)
     {
-        $collection->getSelect()->order(new Zend_Db_Expr($alias.' '.$block->blcg_getDir()));
+        $collection->getSelect()->order(new Zend_Db_Expr($columnIndex . ' ' . $gridBlock->blcg_getDir()));
         return $this;
     }
     
-    protected function _applyToGridCollection($collection, $block, $model, $id, $alias, $params, $store, $renderer=null)
+    protected function _applyToGridCollection(Varien_Data_Collection_Db $collection,
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock, BL_CustomGrid_Model_Grid $gridModel, $columnBlockId, $columnIndex,
+        array $params, Mage_Core_Model_Store $store)
     {
-        $block->blcg_addCollectionCallback(
+        $gridBlock->blcg_addCollectionCallback(
             self::GC_EVENT_AFTER_SET,
             array($this, 'addFieldToGridCollection'),
-            array($alias, $params),
+            array($columnIndex, $params),
             true
         );
         
-        if ($this->shouldForceFieldOrder($collection, $block, $model, $id, $alias, $params, $store, $renderer)) {
-            $block->blcg_addCollectionCallback(
+        if ($this->_shouldForceFieldOrder($collection, $gridBlock, $gridModel, $columnBlockId, $columnIndex, $params)) {
+            $gridBlock->blcg_addCollectionCallback(
                 self::GC_EVENT_AFTER_SET,
                 array($this, 'addSortToGridCollection'),
-                array($id, $alias),
+                array($columnBlockId, $columnIndex),
                 true
             );
         }

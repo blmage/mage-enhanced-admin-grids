@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -23,18 +23,18 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Store
     
     protected function _renderRow(Varien_Object $row, $space, $break)
     {
-        $out = '';
-        $origStores    = $row->getData($this->getColumn()->getIndex());
-        $skipWebsite   = (bool) $this->getColumn()->getSkipWebsite();
-        $skipStore     = (bool) $this->getColumn()->getSkipStore();
-        $skipStoreView = (bool) $this->getColumn()->getSkipStoreView();
-        $skipAllViews  = (bool) $this->getColumn()->getSkipAllViews();
-        $flatValueKey  = ($flatValueKey = $this->getColumn()->getFlatValueKey() ? $flatValueKey : 'store_name');
+        $result = '';
+        $originalStores = $row->getData($this->getColumn()->getIndex());
+        $skipWebsite    = (bool) $this->getColumn()->getSkipWebsite();
+        $skipStore      = (bool) $this->getColumn()->getSkipStore();
+        $skipStoreView  = (bool) $this->getColumn()->getSkipStoreView();
+        $skipAllViews   = (bool) $this->getColumn()->getSkipAllViews();
+        $flatValueKey   = ($flatValueKey = $this->getColumn()->getFlatValueKey() ? $flatValueKey : 'store_name');
         
-        if (is_null($origStores) && ($flatValue = $row->getData($flatValueKey))) {
+        if (is_null($originalStores) && ($flatValue = $row->getData($flatValueKey))) {
             $scopes = array();
             
-            foreach (explode("\n", $flatValue) as $k => $label) {
+            foreach (explode("\n", $flatValue) as $label) {
                 $scopes[] = $label;
             }
             
@@ -52,49 +52,50 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Store
             }
             
             $i = 0;
+            
             foreach ($scopes as $scope) {
-                $out .= str_repeat($space, 3*$i++) . $scope . $break;
+                $result .= str_repeat($space, 3*$i++) . $scope . $break;
             }
             
-            $out .= Mage::helper('adminhtml')->__(' [deleted]');
-            return $out;
+            $result .= $this->helper('adminhtml')->__(' [deleted]');
+            return $result;
         }
         
-        if (!is_array($origStores)) {
-            $origStores = array($origStores);
+        if (!is_array($originalStores)) {
+            $originalStores = array($originalStores);
         }
-        if (empty($origStores)) {
+        if (empty($originalStores)) {
             return '';
-        } elseif (in_array(0, $origStores) && (count($origStores) == 1) && !$skipAllViews) {
-            $out .= Mage::helper('adminhtml')->__('All Store Views');
+        } elseif (in_array(0, $originalStores) && (count($originalStores) == 1) && !$skipAllViews) {
+            $result .= $this->helper('adminhtml')->__('All Store Views');
         }
         
-        $data = $this->_getStoreModel()->getStoresStructure(false, $origStores);
+        $data = $this->_getStoreModel()->getStoresStructure(false, $originalStores);
         
         foreach ($data as $website) {
             $i = 0;
             
             if (!$skipWebsite) {
-                $out .= $website['label'] . $break;
+                $result .= $website['label'] . $break;
                 $i = 1;
             }
             
             foreach ($website['children'] as $group) {
                 if (!$skipStore) {
-                    $out .= str_repeat($space, 3*$i) . $group['label'] . $break;
+                    $result .= str_repeat($space, 3*$i) . $group['label'] . $break;
                     $j = $i+1;
                 } else {
                     $j = $i;
                 }
                 if (!$skipStoreView) {
                     foreach ($group['children'] as $store) {
-                        $out .= str_repeat($space, 3*$j) . $store['label'] . $break;
+                        $result .= str_repeat($space, 3*$j) . $store['label'] . $break;
                     }
                 }
             }
         }
         
-        return $out;
+        return $result;
     }
     
     public function render(Varien_Object $row)

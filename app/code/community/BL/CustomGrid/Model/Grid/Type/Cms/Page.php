@@ -9,47 +9,33 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class BL_CustomGrid_Model_Grid_Type_Cms_Page
     extends BL_CustomGrid_Model_Grid_Type_Abstract
 {
-    public function isAppliableToGrid($type, $rewritingClassName)
+    protected function _getSupportedBlockTypes()
     {
-        return ($type == 'adminhtml/cms_page_grid');
+        return 'adminhtml/cms_page_grid';
     }
     
-    protected function _getColumnsLockedValues($type)
+    protected function _getColumnsLockedValues($blockType)
     {
         return array(
             'store_code' => array(
-                'renderer'      => '',
-                'config_values' => array(
-                    'filter'   => false,
-                    'sortable' => false,
-                ),
+                'renderer' => '',
+                'config_values' => array('filter' => false, 'sortable' => false),
             ),
             '_first_store_id' => array(
-                'renderer'      => '',
-                'config_values' => array(
-                    'filter'   => false,
-                    'sortable' => false,
-                ),
+                'renderer' => '',
+                'config_values' => array('filter' => false,'sortable' => false),
             ),
         );
     }
     
-    public function checkUserEditPermissions($type, $model, $block=null, $params=array())
-    {
-        if (parent::checkUserEditPermissions($type, $model, $block, $params)) {
-            return Mage::getSingleton('admin/session')->isAllowed('cms/page/save');
-        }
-        return false;
-    }
-    
-    protected function _getBaseEditableFields($type)
+    protected function _getBaseEditableFields($blockType)
     {
         $helper = Mage::helper('cms');
         
@@ -86,7 +72,7 @@ class BL_CustomGrid_Model_Grid_Type_Cms_Page
                 'form_label'    => $helper->__('Meta Description'),
                 'window_height' => 310,
             ),
-            'content_heading' => true,
+            'content_heading' => array(), // this one only need default values
             'content' => array(
                 'type'         => 'editor',
                 'required'     => true,
@@ -126,8 +112,8 @@ class BL_CustomGrid_Model_Grid_Type_Cms_Page
         if (!Mage::app()->isSingleStoreMode()) {
             $fields['store_id'] = array(
                 'type'              => 'multiselect',
-                'form_values'       => Mage::getSingleton('adminhtml/system_store')->getStoreValuesForForm(false, true),
                 'required'          => true,
+                'form_values'       => Mage::getSingleton('adminhtml/system_store')->getStoreValuesForForm(false, true),
                 'render_block_type' => 'customgrid/widget_grid_editor_renderer_static_store',
             );
         }
@@ -135,41 +121,40 @@ class BL_CustomGrid_Model_Grid_Type_Cms_Page
         return $fields;
     }
     
-    protected function _getEntityRowIdentifiersKeys($type)
+    protected function _getEntityRowIdentifiersKeys($blockType)
     {
         return array('page_id');
     }
     
-    protected function _loadEditedEntity($type, $config, $params)
+    protected function _loadEditedEntity($blockType, BL_CustomGrid_Object $config, array $params, $entityId)
     {
-        if (isset($params['ids']['page_id'])) {
-            return Mage::getModel('cms/page')->load($params['ids']['page_id']);
-        }
-        return null;
+        return Mage::getModel('cms/page')->load($entityId);
     }
     
-    protected function _getLoadedEntityName($type, $config, $params, $entity)
+    protected function _getLoadedEntityName($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
         return $entity->getTitle();
     }
     
-    protected function _applyEditedFieldValue($type, $config, $params, $entity, $value)
+    protected function _getEditRequiredAclPermissions($blockType)
     {
-        if ($config['id'] != 'store_id') {
-            $entity->setStores($entity->getStoreId());
-            return parent::_applyEditedFieldValue($type, $config, $params, $entity, $value);
-        } else {
+        return 'cms/page/save';
+    }
+    
+    protected function _applyEditedFieldValue($blockType, BL_CustomGrid_Object $config, array $params, $entity, $value)
+    {
+        if ($config['id'] == 'store_id') {
             $entity->setStores($value);
             return $this;
         }
+        $entity->setStores($entity->getStoreId());
+        return parent::_applyEditedFieldValue($blockType, $config, $params, $entity, $value);
     }
     
-    protected function _getSavedFieldValueForRender($type, $config, $params, $entity)
+    protected function _getSavedFieldValueForRender($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
-        if ($config['id'] == 'store_id') {
-            return $entity->getStores();
-        } else {
-            return parent::_getSavedFieldValueForRender($type, $config, $params, $entity);
-        }
+        return ($config['id'] == 'store_id')
+            ? $entity->getStores()
+            : parent::_getSavedFieldValueForRender($blockType, $config, $params, $entity);
     }
 }

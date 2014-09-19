@@ -41,47 +41,78 @@ abstract class BL_CustomGrid_Model_Custom_Column_Sales_Items_Abstract
         return false;
     }
     
-    protected function _sortItemValues($a, $b)
+    protected function _getItemBaseValues()
     {
-        return ($a['position'] > $b['position'] ? 1 : ($a['position'] < $b['position'] ? -1 : 0));
+        return array();
     }
     
-    protected function _getItemValuesList($baseValues, $amountsKeys, $event=null)
+    protected function _getItemAmountsValuesKeys()
     {
-        $itemValues  = array();
+        return array();
+    }
+    
+    protected function _getItemValuesEventName()
+    {
+        return null;
+    }
+    
+    protected function _sortItemValues(BL_CustomGrid_Object $a, BL_CustomGrid_Object $b)
+    {
+        return $a->compareIntDataTo('position', $b);
+    }
+    
+    protected function _getItemValues()
+    {
         $salesHelper = Mage::helper('sales');
+        $baseValues  = $this->_getItemBaseValues();
+        $amountsKeys = $this->_getItemAmountsValuesKeys();
+        $eventName   = $this->_getItemValuesEventName();
+        $itemValues  = array();
         $position    = 0;
         
         foreach ($baseValues as $key => $value) {
-            $itemValues[$key] = array(
-                'code'         => $key,
-                'name'         => $salesHelper->__($value),
-                'description'  => '',
-                'default'      => true,
-                'position'     => ($position += 100),
-                'renderers'    => array(999999 => 'customgrid/widget_grid_column_renderer_sales_items_sub_value_default'),
-            );
+            $itemValues[$key] = new BL_CustomGrid_Object(array(
+                'code'        => $key,
+                'name'        => $salesHelper->__($value),
+                'description' => '',
+                'default'     => true,
+                'position'    => ($position += 100),
+            ));
             
             if (in_array($key, $amountsKeys)) {
-                $itemValues[$key]['value_align'] = 'right';
+                $itemValues[$key]->setData('value_align', 'right');
             }
-            // Also usable: "header_align" for header label alignment
+            // Also usable: "header_align" for header label alignment (possible values: left, center, right)
         }
         
-        if (!empty($event)) {
+        if (!empty($eventName)) {
             $response = new Varien_Object(array('item_values' => $itemValues));
-            Mage::dispatchEvent($event, array('response' => $response));
+            Mage::dispatchEvent($eventName, array('response' => $response));
             $itemValues = $response->getItemValues();
         }
         
         uasort($itemValues, array($this, '_sortItemValues'));
+        $itemValue = null;
         
-        foreach ($itemValues as $key => $value) {
-            $itemValues[$key]['last'] = false;
-            sort($itemValues[$key]['renderers'], SORT_NUMERIC);
+        foreach ($itemValues as $key => $itemValue) {
+            if (is_array($itemValue)) {
+                $itemValue = new BL_CustomGrid_Object($itemValue);
+                $itemValues[$key] = $itemValue;
+            }
+            if (!is_object($itemValue)) {
+                unset($itemValues[$key]);
+                continue;
+            }
+            
+            $itemValue->addData(array(
+                'last' => false,
+                'renderers/999999' => 'customgrid/widget_grid_column_renderer_sales_items_sub_value_default',
+            ));
+            
+            $itemValue->ksortData('renderers', SORT_NUMERIC);
         }
-        if (!is_null($key)) {
-            $itemValues[$key]['last'] = true;
+        if (is_object($itemValue)) {
+            $itemValue->setData('last', true);
         }
         
         return $itemValues;
@@ -89,43 +120,42 @@ abstract class BL_CustomGrid_Model_Custom_Column_Sales_Items_Abstract
     
     public function getItemValues()
     {
-        return array();
+        if (!$this->hasData('item_values')) {
+            $this->setData('item_values', $this->_getItemValues());
+        }
+        return $this->_getData('item_values');
     }
     
-    public function initConfig()
+    protected function _prepareConfig()
     {
-        parent::initConfig();
-        $helper = Mage::helper('customgrid');
+        $helper = $this->_getBaseHelper();
         
         if ($this->_canFilterOnSku()) {
-            $this->addCustomParam('filter_on_sku', array(
+            $this->addCustomizationParam('filter_on_sku', array(
                 'label'        => $helper->__('Filter on Item SKU'),
                 'type'         => 'select',
                 'source_model' => 'customgrid/system_config_source_yesno',
                 'value'        => 0,
             ), 100000);
         }
-        
         if ($this->_canFilterOnName()) {
-            $this->addCustomParam('filter_on_name', array(
+            $this->addCustomizationParam('filter_on_name', array(
                 'label'        => $helper->__('Filter on Item Name'),
                 'type'         => 'select',
                 'source_model' => 'customgrid/system_config_source_yesno',
                 'value'        => 0,
             ), 100010);
         }
-        
         if ($this->_canExcludeChildrenFromFilter()) {
-            $this->addCustomParam('filter_exclude_child', array(
+            $this->addCustomizationParam('filter_exclude_child', array(
                 'label'        => $helper->__('Exclude Child Items From Filter'),
                 'type'         => 'select',
                 'source_model' => 'customgrid/system_config_source_yesno',
                 'value'        => 0,
             ), 100020);
         }
-        
         if ($this->_canAllowSqlWildcardsInFilter()) {
-            $this->addCustomParam('allow_sql_wildcards', array(
+            $this->addCustomizationParam('allow_sql_wildcards', array(
                 'label'        => $helper->__('Allow SQL Wildcards In Filter'),
                 'type'         => 'select',
                 'source_model' => 'customgrid/system_config_source_yesno',
@@ -136,29 +166,30 @@ abstract class BL_CustomGrid_Model_Custom_Column_Sales_Items_Abstract
         if ($this->_isCustomizableList()) {
             $itemValues = array_reverse($this->getItemValues());
             $position = -10;
+            $hideHeaderDescription = 'Choose "Yes" if you do not want the field labels to be displayed in the header';
             
-            foreach ($itemValues as $key => $value) {
-                 $this->addCustomParam('display_'.$key, array(
-                    'label'        => $helper->__('Display "%s"', $value['name']),
-                    'description'  => $value['description'],
+            $this->addCustomizationParam('hide_header', array(
+                'label'        => $helper->__('Hide Header'),
+                'description'  => $helper->__($hideHeaderDescription),
+                'type'         => 'select',
+                'source_model' => 'customgrid/system_config_source_yesno',
+            ), ($position -= 10));
+            
+            foreach ($itemValues as $key => $itemValue) {
+                 $this->addCustomizationParam('display_' . $key, array(
+                    'label'        => $helper->__('Display "%s"', $itemValue->getData('name')),
+                    'description'  => $itemValue->getData('description'),
                     'type'         => 'select',
                     'source_model' => 'customgrid/system_config_source_yesno',
-                    'value'        => ($value['default'] ? 1 : 0),
+                    'value'        => ($itemValue->getData('default') ? 1 : 0),
                 ), ($position -= 10));
             }
             
-            $this->addCustomParam('hide_header', array(
-                'label'        => $helper->__('Hide Header'),
-                'description'  => $helper->__('Choose "Yes" if you do not want the field labels to be displayed in the header'),
-                'type'         => 'select',
-                'source_model' => 'customgrid/system_config_source_yesno',
-            ), 0);
-            
-            $this->setCustomParamsWindowConfig(array('height' => 500));
+            $this->setCustomizationWindowConfig(array('height' => 500));
         } else {
-            $this->setCustomParamsWindowConfig(array('height' => 300));
+            $this->setCustomizationWindowConfig(array('height' => 300));
         }
-         
+        
         return $this;
     }
     
@@ -170,7 +201,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Sales_Items_Abstract
             ->load();
     }
     
-    protected function _getOrdersItemsCollection($ordersIds, $excludeChildren=true, $event=null)
+    protected function _getOrdersItemsCollection($ordersIds, $excludeChildren=true, $eventName=null)
     {
         $items = Mage::getModel('sales/order_item')
             ->getCollection()
@@ -181,21 +212,24 @@ abstract class BL_CustomGrid_Model_Custom_Column_Sales_Items_Abstract
         }
         if (!empty($event)) {
             $response = new Varien_Object(array('items_collection' => $items));
-            Mage::dispatchEvent($event, array('response' => $response));
+            Mage::dispatchEvent($eventName, array('response' => $response));
             $items = $response->getItemsCollection();
         }
         
         return $items->load();
     }
     
-    abstract public function addItemsToGridCollection($alias, $params, $block, $collection, $firstTime);
+    abstract public function addItemsToGridCollection($columnIndex, array $params,
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock, Varien_Data_Collection_Db $collection, $firstTime);
     
-    protected function _applyToGridCollection($collection, $block, $model, $id, $alias, $params, $store, $renderer=null)
+    protected function _applyToGridCollection(Varien_Data_Collection_Db $collection,
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock, BL_CustomGrid_Model_Grid $gridModel, $columnBlockId, $columnIndex,
+        array $params, Mage_Core_Model_Store $store)
     {
-        $block->blcg_addCollectionCallback(
+        $gridBlock->blcg_addCollectionCallback(
             self::GC_EVENT_AFTER_PREPARE,
             array($this, 'addItemsToGridCollection'),
-            array($alias, $params),
+            array($columnIndex, $params),
             true
         );
         return $this;
@@ -210,72 +244,78 @@ abstract class BL_CustomGrid_Model_Custom_Column_Sales_Items_Abstract
         return ($this->_getItemsTable() == 'sales/order_item');
     }
     
-    protected function _addExcludeChildFilterToSelect($select, $itemAlias, $collection, $column, $qi)
+    protected function _addExcludeChildFilterToSelect(Varien_Db_Select $select, $itemAlias, 
+        Varien_Data_Collection_Db $collection, $qi)
     {
         if (!$this->_isOrderItemsList()) {
             $oiAlias = $this->_getUniqueTableAlias('oi');
             
             $select->joinInner(
                     array($oiAlias => $collection->getTable('sales/order_item')),
-                    $qi($itemAlias.'.order_item_id').' = '.$qi($oiAlias.'.item_id'),
+                    $qi($itemAlias . '.order_item_id') . ' = ' . $qi($oiAlias . '.item_id'),
                     array()
                 )
-                ->where($qi($oiAlias.'.parent_item_id').' IS NULL');
+                ->where($qi($oiAlias . '.parent_item_id') . ' IS NULL');
         } else {
-            $select->where($qi($itemAlias.'.parent_item_id').' IS NULL');
+            $select->where($qi($itemAlias . '.parent_item_id') . ' IS NULL');
         }
         return $this;
     }
     
-    public function addFilterToGridCollection($collection, $column)
+    public function addFilterToGridCollection(Varien_Data_Collection_Db $collection,
+        Mage_Adminhtml_Block_Widget_Grid_Column $columnBlock)
     {
         list($adapter, $qi) = $this->_getCollectionAdapter($collection, true);
         $mainAlias = $this->_getCollectionMainTableAlias($collection);
         $itemAlias = $this->_getUniqueTableAlias();
-        $params    = $column->getBlcgFilterParams();
+        $params    = $columnBlock->getBlcgFilterParams();
         
-        if (is_array($condition = $column->getFilter()->getCondition())
-            && isset($condition['like'])) {
+        if (is_array($condition = $columnBlock->getFilter()->getCondition()) && isset($condition['like'])) {
             $condition = $condition['like'];
         } else {
             return $this;
         }
+        
         $textConditions = array();
         
         if ($this->_extractBoolParam($params, 'filter_on_sku')) {
-            $textConditions[] = $adapter->quoteInto($qi($itemAlias.'.sku').'  LIKE ?', $condition);
+            $textConditions[] = $adapter->quoteInto($qi($itemAlias . '.sku') . ' LIKE ?', $condition);
         }
         if ($this->_extractBoolParam($params, 'filter_on_name')) {
-            $textConditions[] = $adapter->quoteInto($qi($itemAlias.'.name').'  LIKE ?', $condition);
+            $textConditions[] = $adapter->quoteInto($qi($itemAlias . '.name') . ' LIKE ?', $condition);
         }
         if (empty($textConditions)) {
             return $this;
         }
+        
+        $fkFieldName = $this->_getParentFkFieldName();
+        $pkFieldName = $this->_getParentPkFieldName();
         
         $select = $adapter->select()
             ->from(
                 array($itemAlias => $collection->getTable($this->_getItemsTable())),
                 array('count' => new Zend_Db_Expr('COUNT(*)'))
             )
-            ->where($qi($itemAlias.'.'.$this->_getParentFkFieldName()).' = '.$qi($mainAlias.'.'.$this->_getParentPkFieldName()))
+            ->where($qi($itemAlias . '.' . $fkFieldName) . ' = ' . $qi($mainAlias . '.' . $pkFieldName))
             ->where(implode(' OR ', $textConditions));
         
         if ($this->_extractBoolParam($params, 'filter_exclude_child')) {
-            $this->_addExcludeChildFilterToSelect($select, $itemAlias, $collection, $column, $qi);
+            $this->_addExcludeChildFilterToSelect($select, $itemAlias, $collection, $qi);
         }
         
-        $collection->getSelect()->where(new Zend_Db_Expr($select).' > 0');
+        $collection->getSelect()->where(new Zend_Db_Expr($select) . ' > 0');
         return $this;
     }
     
-    abstract protected function _getGridColumnRenderer();
+    abstract protected function _getColumnBlockRenderer();
     
-    protected function _getForcedGridValues($block, $model, $id, $alias, $params, $store, $renderer=null)
+    protected function _getForcedBlockValues(Mage_Adminhtml_Block_Widget_Grid $gridBlock,
+        BL_CustomGrid_Model_Grid $gridModel, $columnBlockId, $columnIndex, array $params, Mage_Core_Model_Store $store)
     {
         $values = array(
             'filter'   => false,
-            'renderer' => $this->_getGridColumnRenderer(),
             'sortable' => false,
+            'renderer' => $this->_getColumnBlockRenderer(),
             'single_wildcard'   => false,
             'multiple_wildcard' => false,
         );
@@ -294,8 +334,8 @@ abstract class BL_CustomGrid_Model_Custom_Column_Sales_Items_Abstract
         if ($this->_isCustomizableList()) {
             $itemValues = $this->getItemValues();
             
-            foreach ($itemValues as $key => $value) {
-                if (!$this->_extractBoolParam($params, 'display_'.$value['code'], true)) {
+            foreach ($itemValues as $key => $itemValue) {
+                if (!$this->_extractBoolParam($params, 'display_' . $itemValue->getData('code'), false)) {
                     unset($itemValues[$key]);
                 }
             }

@@ -16,7 +16,7 @@
 class BL_CustomGrid_Model_Custom_Column_Creditmemo_Items_Default
     extends BL_CustomGrid_Model_Custom_Column_Creditmemo_Items_Abstract
 {
-    protected function _getGridColumnRenderer()
+    protected function _getColumnBlockRenderer()
     {
         return 'customgrid/widget_grid_column_renderer_creditmemo_items_default';
     }

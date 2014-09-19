@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -19,28 +19,27 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Product_Image
     protected function _getImageUrl(Varien_Object $row)
     {
         if (strlen($image = $this->_getValue($row)) && ($image != 'no_selection')) {
-            $dummyProduct = Mage::getModel('catalog/product');
-            $helper = Mage::helper('catalog/image')
-                ->init($dummyProduct, $this->getColumn()->getAttributeCode(), $image);
+            $dummyProduct  = Mage::getModel('catalog/product');
+            $attributeCode = $this->getColumn()->getAttributeCode();
+            $helper = $this->helper('catalog/image')->init($dummyProduct, $attributeCode, $image);
             $helper->placeholder('bl/customgrid/images/catalog/product/placeholder.jpg');
             
             if (!$this->getColumn()->getBrowserResizeOnly()
-                && (($width = intval($this->getColumn()->getImageWidth())) > 0)
-                && (($height = intval($this->getColumn()->getImageHeight())) > 0)) {
+                && (($width = (int) $this->getColumn()->getImageWidth()) > 0)
+                && (($height = (int) $this->getColumn()->getImageHeight()) > 0)) {
                 $helper->resize($width, $height);
             }
             
-            return array($image, (string)$helper);
+            return array($image, (string) $helper);
         }
         return null;
     }
     
     protected function _getOriginalImageUrl(Varien_Object $row)
     {
-        if (strlen($image = $this->_getValue($row)) && ($image != 'no_selection')) {
-            return Mage::getBaseUrl('media') . 'catalog/product/' . $image;
-        }
-        return null;
+        return (strlen($image = $this->_getValue($row)) && ($image != 'no_selection'))
+            ? Mage::getBaseUrl('media') . 'catalog/product/' . $image
+            : null;
     }
     
     public function render(Varien_Object $row)
@@ -50,17 +49,20 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Product_Image
         if ($images = $this->_getImageUrl($row)) {
             $image = ($this->getColumn()->getDisplayImagesUrls() ? $images[1] : $images[0]);
             
-            if ($this->getColumn()->getOriginalImageLink()
-                && ($imageUrl = $this->_getOriginalImageUrl($row))) {
-                $result .= '<a href="'.$imageUrl.'" target="_blank">';
+            if ($this->getColumn()->getOriginalImageLink() && ($imageUrl = $this->_getOriginalImageUrl($row))) {
+                $result = '<a href="' . $imageUrl . '" target="_blank">';
             }
             if ($this->getColumn()->getDisplayImages()) {
-                $dimensions = '';
-                if ((($width = intval($this->getColumn()->getImageWidth())) > 0)
-                    && (($height = intval($this->getColumn()->getImageHeight())) > 0)) {
-                    $dimensions = ' width="'.$width.'" height="'.$height.'" ';
+                $title = $this->htmlEscape($image);
+                $dimensions = ' ';
+                $source = $images[1];
+                
+                if ((($width = (int) $this->getColumn()->getImageWidth()) > 0)
+                    && (($height = (int) $this->getColumn()->getImageHeight()) > 0)) {
+                    $dimensions = ' width="' . $width . '" height="' . $height . '" ';
                 }
-                $result .= '<img src="'.$images[1].'" alt="'.$this->htmlEscape($image).'" title="'.$this->htmlEscape($image).'" '.$dimensions.' />';
+                
+                $result .= '<img src="' . $source . '" alt="' . $title . '" title="' . $title . '"' . $dimensions . '/>';
             } else {
                 $result .= $image;
             }
@@ -74,10 +76,8 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Product_Image
     
     public function renderExport(Varien_Object $row)
     {
-        if ($images = $this->_getImageUrl($row)) {
-            return ($this->getColumn()->getDisplayImagesUrls() ? $images[1] : $images[0]);
-        } else {
-            return '';
-        }
+        return ($images = $this->_getImageUrl($row))
+            ? ($this->getColumn()->getDisplayImagesUrls() ? $images[1] : $images[0])
+            : '';
     }
 }

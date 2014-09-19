@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -24,15 +24,48 @@ class BL_CustomGrid_Block_Options_Source_Edit_Tab_Custom_List
         $this->setTemplate('bl/customgrid/options/source/edit/custom/list.phtml');
     }
     
+    protected function _prepareLayout()
+    {
+        $button = $this->getLayout()
+            ->createBlock('adminhtml/widget_button')
+            ->setData(array(
+                'name'    => 'add_custom_option_item_button',
+                'label'   => $this->helper('catalog')->__('Add Option'),
+                'onclick' => 'return blcgOptionsSourceControl.addItem()',
+                'class'   => 'add',
+            ));
+        
+        $this->setChild('add_button', $button);
+        return parent::_prepareLayout();
+    }
+    
     public function getOptionsSource()
     {
         return Mage::registry('options_source');
     }
     
-    public function render(Varien_Data_Form_Element_Abstract $element)
+    protected function _sortValues($a, $b)
     {
-        $this->setElement($element);
-        return $this->toHtml();
+        $result = strcmp($a['value'], $b['value']);
+        return ($result === 0 ? strcasecmp($a['label'], $b['label']) : $result);
+    }
+    
+    public function getValues()
+    {
+        $values = $this->_element->getValue();
+        
+        if (is_array($values)) {
+            usort($values, array($this, '_sortValues'));
+        } else {
+            $values = array();
+        }
+        
+        return $values;
+    }
+    
+    public function getAddButtonHtml()
+    {
+        return $this->getChildHtml('add_button');
     }
     
     public function setElement(Varien_Data_Form_Element_Abstract $element)
@@ -46,41 +79,9 @@ class BL_CustomGrid_Block_Options_Source_Edit_Tab_Custom_List
         return $this->_element;
     }
     
-    public function getValues()
+    public function render(Varien_Data_Form_Element_Abstract $element)
     {
-        $values = array();
-        $data   = $this->getElement()->getValue();
-        
-        if (is_array($data)) {
-            usort($data, array($this, '_sortValues'));
-            $values = $data;
-        }
-        
-        return $values;
-    }
-    
-    protected function _sortValues($a, $b)
-    {
-        $result = strcmp($a['value'], $b['value']);
-        return ($result === 0 ? strcasecmp($a['label'], $b['label']) : $result);
-    }
-    
-    protected function _prepareLayout()
-    {
-        $button = $this->getLayout()->createBlock('adminhtml/widget_button')
-            ->setData(array(
-                'label'   => Mage::helper('catalog')->__('Add Option'),
-                'onclick' => 'return customOptionsSourceControl.addItem()',
-                'class'   => 'add',
-            ));
-        $button->setName('add_custom_option_item_button');
-        
-        $this->setChild('add_button', $button);
-        return parent::_prepareLayout();
-    }
-    
-    public function getAddButtonHtml()
-    {
-        return $this->getChildHtml('add_button');
+        $this->setElement($element);
+        return $this->toHtml();
     }
 }

@@ -9,24 +9,20 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class BL_CustomGrid_Block_Column_Renderer_Collection_Config_Form
     extends BL_CustomGrid_Block_Column_Renderer_Config_Form_Abstract
 {
-    protected function _getFormId()
+    public function getFormId()
     {
-        return 'column_renderer_collection_options_form';
+        return 'blcg_column_renderer_collection_config_form';
     }
     
     public function getRenderer()
     {
-        $renderer = Mage::registry('current_collection_column_renderer');
-        if (!$renderer) {
-            Mage::throwException($this->__('Renderer is not specified'));
-        }
-        return $renderer;
+        return Mage::registry('blcg_collection_column_renderer');
     }
 }

@@ -10,14 +10,14 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 -->
 <config>
     <modules>
         <BL_CustomGrid>
-            <version>0.8.9</version>
+            <version>0.9.9</version>
         </BL_CustomGrid>
     </modules>
     <global>
@@ -47,6 +47,7 @@
                     <options_source><table>customgrid_options_source</table></options_source>
                     <options_source_model><table>customgrid_options_source_model</table></options_source_model>
                     <options_source_option><table>customgrid_options_source_option</table></options_source_option>
+                    <role_profile><table>customgrid_role_profile</table></role_profile>
                 </entities>
             </customgrid_mysql4>
         </models>
@@ -132,27 +133,31 @@
         <customgrid>
             <global>
                 <exclusions_list><![CDATA[a:5:{s:1:"1";a:2:{s:10:"block_type";s:18:"adminhtml/report_*";s:20:"rewriting_class_name";s:1:"*";}s:1:"2";a:2:{s:10:"block_type";s:33:"enhancedgrid/catalog_product_grid";s:20:"rewriting_class_name";s:1:"*";}s:1:"3";a:2:{s:10:"block_type";s:36:"adminhtml/newsletter_subscriber_grid";s:20:"rewriting_class_name";s:1:"*";}s:1:"4";a:2:{s:10:"block_type";s:34:"adminhtml/newsletter_template_grid";s:20:"rewriting_class_name";s:1:"*";}s:1:"5";a:2:{s:10:"block_type";s:36:"adminhtml/system_email_template_grid";s:20:"rewriting_class_name";s:1:"*";}}]]></exclusions_list>
-                <exceptions_list></exceptions_list>
                 <exceptions_handling_mode>exclude</exceptions_handling_mode>
                 <store_parameter>store</store_parameter>
                 <sort_with_dnd>1</sort_with_dnd>
             </global>
             <customization_params>
+                <ignore_custom_headers>0</ignore_custom_headers>
+                <ignore_custom_widths>0</ignore_custom_widths>
+                <ignore_custom_alignments>0</ignore_custom_alignments>
+                <merge_base_pagination>0</merge_base_pagination>
                 <pin_header>1</pin_header>
             </customization_params>
-            <custom_default_params>
+            <default_params_behaviours>
                 <page>default</page>
                 <limit>default</limit>
                 <sort>default</sort>
                 <dir>default</dir>
                 <filter>default</filter>
-            </custom_default_params>
+            </default_params_behaviours>
+            <profiles>
+                <default_restricted>0</default_restricted>
+                <default_assigned_to>blcg_creator_role</default_assigned_to>
+            </profiles>
             <custom_columns>
                 <group_in_default_header>1</group_in_default_header>
             </custom_columns>
-            <editor_sitemap>
-                <delete_file>1</delete_file>
-            </editor_sitemap>
         </customgrid>
         <customgrid_rewriters>
             <eval>
@@ -174,5 +179,10 @@
                 <log_errors_if_success>0</log_errors_if_success>
             </file>
         </customgrid_rewriters>
+        <customgrid_editors>
+            <sitemap>
+                <delete_file>1</delete_file>
+            </sitemap>
+        </customgrid_editors>
     </default>
 </config>

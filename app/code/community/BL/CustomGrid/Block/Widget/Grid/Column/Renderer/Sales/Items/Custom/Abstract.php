@@ -21,10 +21,10 @@ abstract class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Sales_Items_Custo
     
     protected function _getRendererBlock($type)
     {
-        $name  = 'blcg_wgcrsica_renderer_'.str_replace('/', '_', $type);
+        $name  = 'blcg_wgcrsica_renderer_' . str_replace('/', '_', $type);
         $block = false;
         
-        if (!$this->getData('failed_renderers/'.$name)) {
+        if (!$this->getData('failed_renderers/' . $name)) {
             $block = $this->getLayout()->getBlock($name);
             
             if (!$block) {
@@ -52,8 +52,7 @@ abstract class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Sales_Items_Custo
         $renderers = $value->getData('item_value/renderers');
         
         foreach ($renderers as $renderer) {
-            if (($renderer = $this->_getRendererBlock($renderer))
-                && $renderer->canRender($value)) {
+            if (($renderer = $this->_getRendererBlock($renderer)) && $renderer->canRender($value)) {
                 $valueRenderer = $renderer;
                 break;
             }
@@ -75,7 +74,6 @@ abstract class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Sales_Items_Custo
     
     protected function _getRowRenderer($value)
     {
-        // @todo could allow to propose (and to make propose) different designs / styles
         return $this->_getRendererBlock(self::DEFAULT_ROW_RENDERER);
     }
     
@@ -102,7 +100,6 @@ abstract class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Sales_Items_Custo
     
     protected function _getResultRenderer($value)
     {
-        // @todo same thing :)
         return $this->_getRendererBlock(self::DEFAULT_RESULT_RENDERER);
     }
     
@@ -146,13 +143,13 @@ abstract class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Sales_Items_Custo
     {
         $result = '';
         
-        if (is_array($itemValues = $this->getColumn()->getItemValues())
-            && !empty($itemValues)) {
+        if (is_array($itemValues = $this->getColumn()->getItemValues()) && !empty($itemValues)) {
             $value = new Varien_Object(array(
                 'item_values' => $itemValues,
                 'hide_header' => (bool) $this->getColumn()->getHideHeader(),
                 $this->_getRowKey() => $row,
             ));
+            
             $result = $this->_renderResult($value);
         }
         

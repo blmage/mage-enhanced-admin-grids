@@ -1,0 +1,63 @@
+<?php
+/**
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
+ *
+ * @category   BL
+ * @package    BL_CustomGrid
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+?>
+<?php echo $this->getFormInitScripts() ?>
+<div class="content-header">
+    <?php echo $this->getHeaderHtml() ?>
+    <p class="form-buttons"><?php echo $this->getButtonsHtml('header') ?></p>
+</div>
+<?php echo $this->getFormHtml() ?>
+<?php if ($this->hasFooterButtons()): ?>
+    <div class="content-footer">
+        <p class="form-buttons"><?php echo $this->getButtonsHtml('footer') ?></p>
+    </div>
+<?php endif ?>
+<?php
+$_formHtmlId = $this->getFormHtmlId();
+$_profilesJsObjectName = $this->getProfilesBarJsObjectName();
+$_profilesJsObjectName = $this->helper('customgrid/string')->sanitizeJsObjectName($_profilesJsObjectName);
+?>
+<script type="text/javascript">
+//<![CDATA[
+blcgGridProfileForm = new varienForm('<?php echo $_formHtmlId ?>');
+
+blcgGridProfileForm.submit = function(url) {
+    <?php if ($_profilesJsObjectName): ?>
+    if (typeof(<?php echo $_profilesJsObjectName ?>) != 'undefined') {
+        if (this.validator && this.validator.validate()) {
+            <?php echo $_profilesJsObjectName ?>.applyAction(
+                '<?php echo $this->jsQuoteEscape($this->getActionCode()) ?>',
+                $('<?php echo $_formHtmlId ?>').serialize(true)
+            );
+        }
+    } else {
+        alert('<?php echo $this->jsQuoteEscape($this->__('Can\'t find profiles JS object')) ?>');
+    }
+    <?php else: ?>
+        alert('<?php echo $this->jsQuoteEscape($this->__('Can\'t find profiles JS object')) ?>');
+    <?php endif ?>
+    return false;
+}.bind(blcgGridProfileForm);
+
+$('<?php echo $_formHtmlId ?>').observe('keydown', function(e) {
+    if (e.keyCode == Event.KEY_RETURN) {
+        e.stop();
+        blcgGridProfileForm.submit();
+        return;
+    }
+}).select('input[type!=hidden], select, textarea').first().focus();
+//]]>
+</script>
+<?php echo $this->getFormScripts() ?>

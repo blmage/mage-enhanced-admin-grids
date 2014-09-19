@@ -9,39 +9,26 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class BL_CustomGrid_Model_Grid_Type_Product_Review
     extends BL_CustomGrid_Model_Grid_Type_Abstract
 {
-    public function isAppliableToGrid($type, $rewritingClassName)
+    protected function _getSupportedBlockTypes()
     {
-        // @todo apply also to product's tabs corresponding grid
-        return ($type == 'adminhtml/review_grid');
+        // @todo also apply this to the corresponding product edit tab
+        return 'adminhtml/review_grid';
     }
     
-    public function canExport($type)
+    public function canExport($blockType)
     {
-        // @todo allow it when new export system is done (look at tax class type)
-        return false;
+        // @todo implement this for the supported block types
+        return !$this->isSupportedBlockType($blockType);
     }
     
-    public function checkUserEditPermissions($type, $model, $block=null, $params=array())
-    {
-        if (parent::checkUserEditPermissions($type, $model, $block, $params)) {
-            if ((Mage::registry('use_pending_filter') === true)
-                || isset($params['additional']['use_pending_filter'])) {
-                return Mage::getSingleton('admin/session')->isAllowed('catalog/reviews_ratings/reviews/pending');
-            } else {
-                return Mage::getSingleton('admin/session')->isAllowed('catalog/reviews_ratings/reviews/all');
-            }
-        }
-        return false;
-    }
-    
-    protected function _getBaseEditableFields($type)
+    protected function _getBaseEditableFields($blockType)
     {
         $helper = Mage::helper('review');
         
@@ -77,41 +64,53 @@ class BL_CustomGrid_Model_Grid_Type_Product_Review
         return $fields;
     }
     
-    public function getAdditionalEditParams($type, $grid)
+    public function getAdditionalEditParams($blockType, Mage_Adminhtml_Block_Widget_Grid $gridBlock)
     {
-        if (Mage::registry('use_pending_filter') === true) {
-            return array('use_pending_filter' => 1);
+        $params = array();
+        
+         if (Mage::registry('use_pending_filter') === true) {
+            $params['use_pending_filter'] = 1;
         }
-        return array();
+        
+        return $params;
     }
     
-    protected function _getEntityRowIdentifiersKeys($type)
+    protected function _getEntityRowIdentifiersKeys($blockType)
     {
         return array('review_id');
     }
     
-    protected function _loadEditedEntity($type, $config, $params)
+    protected function _loadEditedEntity($blockType, BL_CustomGrid_Object $config, array $params, $entityId)
     {
-        if (isset($params['ids']['review_id'])) {
-            return Mage::getModel('review/review')->load($params['ids']['review_id']);
-        }
-        return null;
+        return Mage::getModel('review/review')->load($entityId);
     }
     
-    protected function _isEditedEntityLoaded($type, $config, $params, $entity)
+    protected function _isEditedEntityLoaded($blockType, BL_CustomGrid_Object $config, array $params, $entity,
+        $entityId)
     {
-        if (parent::_isEditedEntityLoaded($type, $config, $params, $entity)) {
-            if ($entity->getStatus() == $entity->getPendingStatus()) {
-                return isset($params['additional']['use_pending_filter']);
-            } else {
-                return !isset($params['additional']['use_pending_filter']);
-            }
+        if (parent::_isEditedEntityLoaded($blockType, $config, $params, $entity, $entityId)) {
+            $usePendingFilter = (isset($params['additional']) && isset($params['additional']['use_pending_filter']));
+            return ($entity->getStatus() == $entity->getPendingStatus() ? $usePendingFilter : !$usePendingFilter);
         }
         return false;
     }
     
-    protected function _getLoadedEntityName($type, $config, $params, $entity)
+    protected function _getLoadedEntityName($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
         return $entity->getTitle();
+    }
+    
+    public function checkUserEditPermissions($blockType, BL_CustomGrid_Model_Grid $gridModel,
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock=null, array $params=array())
+    {
+        if (parent::checkUserEditPermissions($blockType, $gridModel, $gridBlock, $params)) {
+            if ((Mage::registry('use_pending_filter') === true)
+                || (isset($params['additional']) && isset($params['additional']['use_pending_filter']))) {
+                return Mage::getSingleton('admin/session')->isAllowed('catalog/reviews_ratings/reviews/pending');
+            } else {
+                return Mage::getSingleton('admin/session')->isAllowed('catalog/reviews_ratings/reviews/all');
+            }
+        }
+        return false;
     }
 }

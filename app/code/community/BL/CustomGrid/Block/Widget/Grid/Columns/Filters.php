@@ -47,5 +47,7 @@ class BL_CustomGrid_Block_Widget_Grid_Columns_Filters
         return '';
     }
     
-    // @todo next step: either enable sortability, either only apply filters, do not select values when it's not needed (eg for attribute columns and custom columns with sub-queries)
+    // @todo next step: either enable sortability, either only apply filters :
+    // if possible, do not select values when it is not actually needed
+    // (eg for attribute columns and custom columns with sub-queries)
 }

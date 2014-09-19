@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -23,34 +23,51 @@ class BL_CustomGrid_Model_Mysql4_Grid_Collection
     
     protected function _afterLoad()
     {
-        parent::_afterLoad();
-        $this->walk('afterLoad');
+        if ($this->count() > 0) {
+            $this->addRolesConfigToResult();
+            $this->addUsersConfigToResult();
+            $this->addProfilesToResult();
+            $this->walk('afterLoad');
+        }
+        return parent::_afterLoad();
     }
     
-    public function addColumnsToResult()
+    protected function _getGridIds()
     {
         $gridIds = array();
+        
         foreach ($this as $grid) {
             $gridIds[] = $grid->getId();
         }
         
-        if (!empty($gridIds)) {
-            $read = $this->getResource()->getReadConnection();
-            $columns = $read->fetchAll($read->select()
-                ->from($this->getTable('customgrid/grid_column')
-                ->columns('*')
-                ->columns(array('is_visible'  => new Zend_Db_Expr('IF(is_visible=2, 1, is_visible)')))
-                ->columns(array('filter_only' => new Zend_Db_Expr('IF(is_visible=2, 1, 0)')))
-                ->where('grid_id IN ?', $gridIds))
-                ->order(array('order', 'asc')));
-            
-            foreach ($columns as $column) {
-                if ($this->getItemById($column['grid_id'])) {
-                    $this->getItemById($column['grid_id'])->addColumn($column);
-                }
+        return $gridIds;
+    }
+    
+    protected function _addArrangedValuesToResult(array $values, $key)
+    {
+        foreach ($values as $gridId => $gridValues) {
+            if ($grid = $this->getItemById($gridId)) {
+                $grid->setDataUsingMethod($key, $gridValues);
             }
         }
-        
         return $this;
+    }
+    
+    public function addRolesConfigToResult()
+    {
+        $roles = $this->getResource()->getGridRoles($this->_getGridIds());
+        return $this->_addArrangedValuesToResult($roles, 'roles_config');
+    }
+    
+    public function addUsersConfigToResult()
+    {
+        $users = $this->getResource()->getGridUsers($this->_getGridIds());
+        return $this->_addArrangedValuesToResult($users, 'users_config');
+    }
+    
+    public function addProfilesToResult()
+    {
+        $profiles = $this->getResource()->getGridProfiles($this->_getGridIds());
+        return $this->_addArrangedValuesToResult($profiles, 'profiles');
     }
 }

@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -19,72 +19,67 @@ class BL_CustomGrid_Model_Column_Renderer_Attribute_Price
     const CURRENCY_TYPE_BASE   = 'base_currency';
     const CURRENCY_TYPE_COLUMN = 'column_currency';
     
-    public function isAppliableToColumn($attribute, $grid)
+    public function isAppliableToAttribute(Mage_Eav_Model_Entity_Attribute $attribute,
+        BL_CustomGrid_Model_Grid $gridModel)
     {
         return ($attribute->getFrontendInput() == 'price');
     }
     
-    protected function _getCurrencyValues($baseCode, $store, $grid)
+    protected function _getCurrencyValues($baseCode, Mage_Core_Model_Store $store, BL_CustomGrid_Model_Grid $gridModel)
     {
-        // Currency value key
-        $key = $baseCode.'_currency_code';
+        $isFixedCurrency = true;
         
-        if (($currency = $this->_getData($baseCode.'_currency')) == self::CURRENCY_TYPE_BASE) {
-            // Base currency explicitely used
+        if (($currency = $this->getData('values/' . $baseCode . '_currency')) == self::CURRENCY_TYPE_BASE) {
+            // Base currency
             $currency = $store->getBaseCurrency()->getCode();
-        } else {
-            if ($currency == self::CURRENCY_TYPE_COLUMN) {
-                $columnType = $this->_getData($baseCode.'_currency_column_type');
-                
-                if ($columnType == BL_CustomGrid_Model_Grid::GRID_COLUMN_ORIGIN_ATTRIBUTE) {
-                    // Currency taken from attribute column
-                    $key = $baseCode.'_currency';
-                    $currency = $grid->getColumnIndexFromCode(
-                        $this->_getData($baseCode.'_currency_column_attribute_code'),
-                        $columnType,
-                        intval($this->_getData($baseCode.'_currency_column_position'))
-                    );
-                } else {
-                    // Currency taken from grid/collection column
-                    $key = $baseCode.'_currency';
-                    $currency = $grid->getColumnIndexFromCode(
-                        $this->_getData($baseCode.'_currency_column'),
-                        $columnType
-                    );
-                }
-            } // Else may/should be a currency code
+        } else if ($currency == self::CURRENCY_TYPE_COLUMN) {
+            // Currency from column value
+            $columnType = $this->getData('values/' . $baseCode . '_currency_column_type');
+            $isFixedCurrency = false;
             
-            $allowed = Mage::getModel('customgrid/column_renderer_collection_source_currency')
+            if (($columnType == BL_CustomGrid_Model_Grid::COLUMN_ORIGIN_ATTRIBUTE)
+                || ($columnType == BL_CustomGrid_Model_Grid::COLUMN_ORIGIN_CUSTOM)) {
+                $currency = $gridModel->getColumnIndexFromCode(
+                    $this->getData('values/' . $baseCode . '_currency_column_index'),
+                    $columnType,
+                    (int) $this->getData('values/' . $baseCode . '_currency_column_position')
+                );
+            } else {
+                $currency = $gridModel->getColumnIndexFromCode(
+                    $this->getData('values/' . $baseCode . '_currency_column'),
+                    $columnType
+                );
+            }
+        } // Else fixed currency code
+        
+        if ($isFixedCurrency) {
+            $allowedCurrencies = Mage::getModel('customgrid/column_renderer_source_attribute_currency')
                 ->toOptionHash();
             
-            if (!isset($allowed[$currency])) {
-                // Base currency if given currency is not allowed / does not exist
-                $key = $baseCode.'_currency_code';
+            if (!isset($allowedCurrencies[$currency])) {
                 $currency = $store->getBaseCurrency()->getCode();
             }
+            
+            $key = $baseCode . '_currency_code';
+        } else {
+            $key = $baseCode . '_currency';
         }
         
         return array($key => $currency);
     }
     
-    public function getColumnGridValues($index, $store, $grid)
+    public function getColumnBlockValues(Mage_Eav_Model_Entity_Attribute $attribute,
+        Mage_Core_Model_Store $store, BL_CustomGrid_Model_Grid $gridModel)
     {
-        // Custom filter / renderer
         $values = array(
-            'filter'   => 'customgrid/widget_grid_column_filter_price',
             'renderer' => 'customgrid/widget_grid_column_renderer_price',
+            'filter'   => 'customgrid/widget_grid_column_filter_price',
+            'default_currency_code' => $store->getBaseCurrency()->getCode(),
         );
         
-        // Get original currency values
-        $values += $this->_getCurrencyValues('original', $store, $grid);
-        
-        // Get display currency values
-        $values += $this->_getCurrencyValues('display', $store, $grid);
-        
-        // Then add apply-rates flag
-        $values += array(
-            'apply_rates' => ($this->_getData('apply_rates') ? true : false),
-        );
+        $values += $this->_getCurrencyValues('original', $store, $gridModel);
+        $values += $this->_getCurrencyValues('display',  $store, $gridModel);
+        $values += array('apply_rates' => (bool) $this->getData('values/apply_rates'));
         
         return $values;
     }

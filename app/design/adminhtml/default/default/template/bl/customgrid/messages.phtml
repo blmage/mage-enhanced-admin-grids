@@ -13,39 +13,40 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 ?>
+<?php $_wrapperId = $this->getAjaxModeWrapperId() ?>
 <?php if ($this->getIsAjaxMode()): ?>
-<?php $_wrapperId = $this->helper('core')->uniqHash('blcg-ajax-messages-wrapper-') ?>
-<div id="<?php echo $_wrapperId ?>">
-<?php foreach ($this->getMessagesTypes() as $_type => $_label): ?>
-    <?php if ($this->hasMessages($_type)): ?>
-        <li class="no-display blcg-messages-list-wrapper blcg-messages-list-wrapper-<?php echo $_type ?>">
-            <div class="blcg-messages-list"><?php echo $this->getMessagesHtml($_type) ?></div>
-        </li>
-    <?php endif ?>
-<?php endforeach ?>
-</div>
+    <ul id="<?php echo $_wrapperId ?>" class="no-display">
+    <?php foreach ($this->getMessagesTypes() as $_type => $_label): ?>
+        <?php if ($this->hasMessages($_type)): ?>
+            <li class="blcg-no-display blcg-messages-list-wrapper blcg-messages-list-wrapper-<?php echo $_type ?>">
+                <div class="blcg-messages-list"><?php echo $this->getMessagesHtml($_type) ?></div>
+            </li>
+        <?php endif ?>
+    <?php endforeach ?>
+</ul>
 <?php else: ?>
-<div id="blcg-messages-wrapper" class="blcg-messages-wrapper">
-    <ul class="blcg-messages-tabs">
-    <?php $_counts = array(); ?>
-    <?php foreach ($this->getMessagesTypes() as $_type => $_label): ?>
-        <li id="blcg-messages-tab-<?php echo $_type ?>" class="blcg-messages-tab blcg-messages-tab-<?php echo $_type ?><?php if (!$_count = $this->getMessagesCount($_type)): ?> no-display<?php endif ?>"><?php echo $this->htmlEscape($_label) ?> (<span id="blcg-messages-tab-count-<?php echo $_type ?>"><?php echo $_count ?></span>)</li>
-    <?php endforeach ?>
-    </ul>
-    <ul class="blcg-messages-lists">
-    <?php foreach ($this->getMessagesTypes() as $_type => $_label): ?>
-        <li id="blcg-messages-list-wrapper-<?php echo $_type ?>" class="no-display blcg-messages-list-wrapper blcg-messages-list-wrapper-<?php echo $_type ?>">
-            <div class="blcg-messages-list"><?php echo $this->getMessagesHtml($_type) ?></div>
-        </li>
-    <?php endforeach ?>
-    </ul>
-</div>
+    <div id="blcg-messages-wrapper" class="blcg-messages-wrapper">
+        <ul class="blcg-messages-tabs">
+        <?php $_counts = array() ?>
+        <?php foreach ($this->getMessagesTypes() as $_type => $_label): ?>
+            <li id="blcg-messages-tab-<?php echo $_type ?>" class="blcg-messages-tab blcg-messages-tab-<?php echo $_type ?><?php if (!$_count = $this->getMessagesCount($_type)): ?> blcg-no-display<?php endif ?>"><?php echo $this->htmlEscape($_label) ?> (<span id="blcg-messages-tab-count-<?php echo $_type ?>"><?php echo $_count ?></span>)</li>
+        <?php endforeach ?>
+        </ul>
+        <ul class="blcg-messages-lists">
+        <?php foreach ($this->getMessagesTypes() as $_type => $_label): ?>
+            <li id="blcg-messages-list-wrapper-<?php echo $_type ?>" class="blcg-no-display blcg-messages-list-wrapper blcg-messages-list-wrapper-<?php echo $_type ?>">
+                <div class="blcg-messages-list"><?php echo $this->getMessagesHtml($_type) ?></div>
+            </li>
+        <?php endforeach ?>
+        </ul>
+    </div>
 <?php endif ?>
+<?php if ($this->getIncludeJsScript()): ?>
 <script type="text/javascript">
 //<![CDATA[
 <?php if ($this->getIsAjaxMode()): ?>
 if (typeof(blcgMessagesTabs) != 'undefined') {
-    blcgMessagesTabs.addMessages('<?php echo $_wrapperId ?>')
+    blcgMessagesTabs.addMessagesFromWrapper('<?php echo $_wrapperId ?>')
     $('<?php echo $_wrapperId ?>').remove();
 }
 <?php else: ?>
@@ -53,3 +54,4 @@ var blcgMessagesTabs = new blcg.MessagesTabs('blcg-messages-wrapper', <?php echo
 <?php endif ?>
 //]]>
 </script>
+<?php endif ?>

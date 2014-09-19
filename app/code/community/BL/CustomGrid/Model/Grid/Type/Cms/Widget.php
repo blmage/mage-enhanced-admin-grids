@@ -9,27 +9,19 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class BL_CustomGrid_Model_Grid_Type_Cms_Widget
     extends BL_CustomGrid_Model_Grid_Type_Abstract
 {
-    public function isAppliableToGrid($type, $rewritingClassName)
+    protected function _getSupportedBlockTypes()
     {
-        return ($type == 'widget/adminhtml_widget_instance_grid');
+        return 'widget/adminhtml_widget_instance_grid';
     }
     
-    public function checkUserEditPermissions($type, $model, $block=null, $params=array())
-    {
-        if (parent::checkUserEditPermissions($type, $model, $block, $params)) {
-            return Mage::getSingleton('admin/session')->isAllowed('cms/widget_instance');
-        }
-        return false;
-    }
-    
-    protected function _getBaseEditableFields($type)
+    protected function _getBaseEditableFields($blockType)
     {
         $helper = Mage::helper('widget');
         
@@ -47,8 +39,8 @@ class BL_CustomGrid_Model_Grid_Type_Cms_Widget
         if (!Mage::app()->isSingleStoreMode()) {
             $fields['store_ids'] = array(
                 'type'              => 'multiselect',
-                'form_values'       => Mage::getSingleton('adminhtml/system_store')->getStoreValuesForForm(false, true),
                 'required'          => true,
+                'form_values'       => Mage::getSingleton('adminhtml/system_store')->getStoreValuesForForm(false, true),
                 'render_block_type' => 'customgrid/widget_grid_editor_renderer_static_store',
             );
         }
@@ -56,36 +48,39 @@ class BL_CustomGrid_Model_Grid_Type_Cms_Widget
         return $fields;
     }
     
-    protected function _getEntityRowIdentifiersKeys($type)
+    protected function _getEntityRowIdentifiersKeys($blockType)
     {
         return array('instance_id');
     }
     
-    protected function _loadEditedEntity($type, $config, $params)
+    protected function _loadEditedEntity($blockType, BL_CustomGrid_Object $config, array $params, $entityId)
     {
-        if (isset($params['ids']['instance_id'])) {
-            return Mage::getModel('widget/widget_instance')->load($params['ids']['instance_id']);
-        }
-        return null;
+        return Mage::getModel('widget/widget_instance')->load($entityId);
     }
     
-    protected function _getLoadedEntityName($type, $config, $params, $entity)
+    protected function _getLoadedEntityName($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
         return $entity->getTitle();
     }
     
-    protected function _prepareWidgetPageGroups($widget)
+    protected function _getEditRequiredAclPermissions($blockType)
+    {
+        return 'cms/widget_instance';
+    }
+    
+    protected function _prepareWidgetPageGroups($entity)
     {
         /**
-        * Groups coming from edit form have not the same values as loaded ones,
-        * so prepare existing ones to make as if they had been edited
-        */
-        if (is_array($pageGroups = $widget->getData('page_groups'))) {
-            $newGroups = array();
+         * Groups coming from the edit form do not have the same values as if they were loaded,
+         * so prepare the given (loaded) ones to make them look like they have just been edited
+         */
+        if (is_array($pageGroups = $entity->getData('page_groups'))) {
+            $editedPageGroups = array();
             
             foreach ($pageGroups as $pageGroup) {
-                $newGroups[] = array(
+                $editedPageGroups[] = array(
                     'page_group' => $pageGroup['group'],
+                    
                     $pageGroup['group'] => array(
                         'page_id'       => $pageGroup['page_id'],
                         'page_group'    => $pageGroup['group'],
@@ -98,38 +93,36 @@ class BL_CustomGrid_Model_Grid_Type_Cms_Widget
                 );
             }
             
-            $widget->setData('page_groups', $newGroups);
+            $entity->setData('page_groups', $editedPageGroups);
         }
         return $this;
     }
     
-    protected function _applyEditedFieldValue($type, $config, $params, $entity, $value)
+    protected function _applyEditedFieldValue($blockType, BL_CustomGrid_Object $config, array $params, $entity, $value)
     {
-        if ($config['id'] == 'sort_order') {
+        if ($config->getId() == 'sort_order') {
             $entity->setSortOrder(empty($value) ? '0' : $value);
             return $this;
-        } else {
-            return parent::_applyEditedFieldValue($type, $config, $params, $entity, $value);
         }
+        return parent::_applyEditedFieldValue($blockType, $config, $params, $entity, $value);
     }
     
-    protected function _beforeSaveEditedFieldValue($type, $config, $params, $entity, $value)
+    protected function _beforeSaveEditedFieldValue($blockType, BL_CustomGrid_Object $config, array $params, $entity,
+        $value)
     {
-        if ((($result = $entity->validate()) !== true) && is_string($result)) {
+        if (is_string($result = $entity->validate())) {
             Mage::throwException($result);
         }
-        // Ensure page groups will be succesfully saved, and not resetted
         $this->_prepareWidgetPageGroups($entity);
-        return parent::_beforeSaveEditedFieldValue($type, $config, $params, $entity, $value);
+        return parent::_beforeSaveEditedFieldValue($blockType, $config, $params, $entity, $value);
     }
     
-    protected function _getSavedFieldValueForRender($type, $config, $params, $entity)
+    protected function _getSavedFieldValueForRender($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
-        if ($config['id'] == 'store_ids') {
+        if ($config->getId() == 'store_ids') {
             $storesIds = $entity->getStoreIds();
             return (is_array($storesIds) ? $storesIds : explode(',', $storesIds));
-        } else {
-            return parent::_getSavedFieldValueForRender($type, $config, $params, $entity);
         }
+        return parent::_getSavedFieldValueForRender($blockType, $config, $params, $entity);
     }
 }

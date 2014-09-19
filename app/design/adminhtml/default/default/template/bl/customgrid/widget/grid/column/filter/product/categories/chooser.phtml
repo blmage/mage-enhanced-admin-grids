@@ -34,10 +34,11 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 ?>
+<?php $_jsObjectName = $this->helper('customgrid/string')->sanitizeJsObjectName($this->getJsObjectName()) ?>
 <p class="form-buttons blcg-filter-form-buttons">
     <?php echo $this->getApplyButtonHtml() ?>
 </p>
@@ -52,29 +53,30 @@
 </div>
 <?php if($this->getRootNode() && $this->getRootNode()->hasChildren()): ?>
 <script type="text/javascript">
-Ext.EventManager.onDocumentReady(function(){
-    var blcgCategoryLoader = new Ext.tree.TreeLoader({
-       dataUrl: '<?php echo $this->getLoadTreeUrl()?>'
-    });
+//<![CDATA[
+Ext.EventManager.onDocumentReady(function() {
+    var blcgCategoryLoader = new Ext.tree.TreeLoader({dataUrl: '<?php echo $this->getLoadTreeUrl()?>'});
     
     blcgCategoryLoader.createNode = function(config)
     {
         config.uiProvider = Ext.tree.CheckboxNodeUI;
         var node;
+        
         if (config.children && !config.children.length) {
             delete(config.children);
             node = new Ext.tree.AsyncTreeNode(config);
         } else {
             node = new Ext.tree.TreeNode(config);
         }
+        
         return node;
     };
     
-    blcgCategoryLoader.on('beforeload', function(treeLoader, node){
+    blcgCategoryLoader.on('beforeload', function(treeLoader, node) {
         treeLoader.baseParams.category = node.attributes.id;
     });
     
-    blcgCategoryLoader.on('load', function(treeLoader, node, config){
+    blcgCategoryLoader.on('load', function(treeLoader, node, config) {
         varienWindowOnload();
     });
     
@@ -94,6 +96,7 @@ Ext.EventManager.onDocumentReady(function(){
         } else {
             blcgCategoryRemove(node.id);
         }
+        
         varienElementMethods.setHasChanges(node.getUI().checkbox);
     }, tree);
     
@@ -113,23 +116,27 @@ Ext.EventManager.onDocumentReady(function(){
     root.expand();
 });
 
-function blcgBuildCategoryTree(parent, config){
+function blcgBuildCategoryTree(parent, config)
+{
     if (!config) {
         return null;
     }
     if (parent && config && config.length){
-        for (var i = 0; i < config.length; i++){
+        for (var i=0; i<config.length; i++){
             config[i].uiProvider = Ext.tree.CheckboxNodeUI;
             var node;
             var _node = Object.clone(config[i]);
+            
             if (_node.children && !_node.children.length) {
                 delete(_node.children);
                 node = new Ext.tree.AsyncTreeNode(_node);
             } else {
                 node = new Ext.tree.TreeNode(config[i]);
             }
+            
             parent.appendChild(node);
             node.loader = node.getOwnerTree().loader;
+            
             if(config[i].children){
                 blcgBuildCategoryTree(node, config[i].children);
             }
@@ -156,20 +163,24 @@ function blcgCategoryAdd(id)
 function blcgCategoryRemove(id)
 {
     var ids = $('blcg_filtered_categories').value.split(',');
+    
     while (-1 != ids.indexOf(id)) {
         ids.splice(ids.indexOf(id), 1);
     }
+    
     $('blcg_filtered_categories').value = ids.join(',');
 }
-<?php if ($this->getJsObject() != ''): ?>
+<?php if ($_jsObjectName != ''): ?>
+
 function blcgApplyCategories()
 {
-    if (typeof(parent.<?php echo $this->getJsObject() ?>) != 'undefined') {
-        parent.<?php echo $this->getJsObject() ?>.applyChoice($('blcg_filtered_categories').value);
+    if (typeof(parent.<?php echo $_jsObjectName ?>) != 'undefined') {
+        parent.<?php echo $_jsObjectName ?>.applyChoice($('blcg_filtered_categories').value);
     } else {
         alert('<?php echo $this->jsQuoteEscape($this->__('Can\'t apply choice : JS object can\'t be found')) ?>');
     }
 }
 <?php endif ?>
+//]]>
 </script>
 <?php endif ?>

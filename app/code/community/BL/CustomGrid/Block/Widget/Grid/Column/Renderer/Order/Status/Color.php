@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -18,7 +18,7 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Order_Status_Color
 {
     protected function _renderRow(Varien_Object $row, $forExport=false)
     {
-        $return  = '';
+        $result  = '';
         $options = $this->getColumn()->getOptions();
         $colors  = $this->getColumn()->getOptionsColors();
         
@@ -29,23 +29,26 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Order_Status_Color
             $value = $row->getData($this->getColumn()->getIndex());
             
             if (isset($options[$value])) {
-                $return = $options[$value];
+                $result = $options[$value];
             } else {
-                $return = $value;
+                $result = $value;
             }
             if (!$forExport && isset($colors[$value])) {
-                $elementId = Mage::helper('core')->uniqHash('blcg-gcr-osc-');
-                $onlyCell  = ((bool)$this->getColumn()->getOnlyCell() ? 'true' : 'false');
+                $elementId = $this->helper('core')->uniqHash('blcg-gcr-osc-');
+                $onlyCell  = ($this->getColumn()->getOnlyCell() ? 'true' : 'false');
                 
-                $return   .= '<span id="'.$elementId.'"></span>'
+                $result .= '<span id="' . $elementId . '"></span>'
                     . '<script type="text/javascript">'
-                    . 'blcg.CustomColumn.OptionsColor.registerRowChange("'.$elementId.'", "'
-                    .$this->jsQuoteEscape($colors[$value]['background'], '"').'", "'
-                    .$this->jsQuoteEscape($colors[$value]['text'], '"').'", '.$onlyCell.');</script>';
+                    . "\n" . '//<![CDATA[' . "\n"
+                    . 'blcg.Grid.CustomColumn.OptionsColor.registerRowChange("' . $elementId . '", '
+                    . '"' . $this->jsQuoteEscape($colors[$value]['background'], '"') . '", '
+                    . '"' . $this->jsQuoteEscape($colors[$value]['text'], '"') . '", ' . $onlyCell . ');'
+                    . "\n" . '//<![CDATA[' . "\n"
+                    . '</script>';
             }
         }
         
-        return $return;
+        return $result;
     }
     
     public function render(Varien_Object $row)

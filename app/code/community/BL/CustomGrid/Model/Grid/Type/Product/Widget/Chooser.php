@@ -9,25 +9,21 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class BL_CustomGrid_Model_Grid_Type_Product_Widget_Chooser
     extends BL_CustomGrid_Model_Grid_Type_Abstract
 {
-    public function isAppliableToGrid($type, $rewritingClassName)
+    protected function _getSupportedBlockTypes()
     {
-        return ($type == 'adminhtml/catalog_product_widget_chooser');
+        return 'adminhtml/catalog_product_widget_chooser';
     }
     
-    public function matchGridBlock($blockType, $blockId, $model)
+    public function matchGridBlock($blockType, $blockId, BL_CustomGrid_Model_Grid $gridModel) 
     {
-        /*
-        Block ID seems to be too much varying to be able to rely on,
-        so let's assume all choosers share the same config, and this should be OK
-        (and at least, far better from creating as much customizations as widgets...)
-        */
-        return ($blockType == $model->getBlockType());
+        // A new block ID is generated each time corresponding grids are loaded
+        return ($blockType == $gridModel->getBlockType());
     }
 }

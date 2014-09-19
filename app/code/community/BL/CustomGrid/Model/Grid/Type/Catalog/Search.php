@@ -9,27 +9,19 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class BL_CustomGrid_Model_Grid_Type_Catalog_Search
     extends BL_CustomGrid_Model_Grid_Type_Abstract
 {
-    public function isAppliableToGrid($type, $rewritingClassName)
+    protected function _getSupportedBlockTypes()
     {
-        return ($type == 'adminhtml/catalog_search_grid');
+        return 'adminhtml/catalog_search_grid';
     }
     
-    public function checkUserEditPermissions($type, $model, $block=null, $params=array())
-    {
-        if (parent::checkUserEditPermissions($type, $model, $block, $params)) {
-            return Mage::getSingleton('admin/session')->isAllowed('catalog/search');
-        }
-        return false;
-    }
-    
-    protected function _getBaseEditableFields($type)
+    protected function _getBaseEditableFields($blockType)
     {
         $helper = Mage::helper('catalog');
         
@@ -79,35 +71,38 @@ class BL_CustomGrid_Model_Grid_Type_Catalog_Search
         return $fields;
     }
     
-    protected function _getEntityRowIdentifiersKeys($type)
+    protected function _getEntityRowIdentifiersKeys($blockType)
     {
         return array('query_id');
     }
     
-    protected function _loadEditedEntity($type, $config, $params)
+    protected function _loadEditedEntity($blockType, BL_CustomGrid_Object $config, array $params, $entityId)
     {
-        if (isset($params['ids']['query_id'])) {
-            return Mage::getModel('catalogsearch/query')->load($params['ids']['query_id']);
-        }
-        return null;
+        return Mage::getModel('catalogsearch/query')->load($entityId);
     }
     
-    protected function _getLoadedEntityName($type, $config, $params, $entity)
+    protected function _getLoadedEntityName($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
         return $entity->getQueryText();
     }
     
-    protected function _beforeSaveEditedFieldValue($type, $config, $params, $entity, $value)
+    protected function _getEditRequiredAclPermissions($blockType)
     {
-        $model = Mage::getModel('catalogsearch/query');
-        $model->setStoreId($entity->getStoreId());
-        $model->loadByQueryText($entity->getQueryText());
+        return 'catalog/search';
+    }
+    
+    protected function _beforeSaveEditedFieldValue($blockType, BL_CustomGrid_Object $config, array $params, $entity,
+        $value)
+    {
+        $duplicate = Mage::getModel('catalogsearch/query')
+            ->setStoreId($entity->getStoreId())
+            ->loadByQueryText($entity->getQueryText());
         
-        if ($model->getId() && ($model->getId() != $entity->getId())) {
+        if ($duplicate->getId() && ($duplicate->getId() != $entity->getId())) {
             Mage::throwException(Mage::helper('catalog')->__('Search Term with such search query already exists.'));
         }
         
         $entity->setIsProcessed(0);
-        return parent::_beforeSaveEditedFieldValue($type, $config, $params, $entity, $value);
+        return parent::_beforeSaveEditedFieldValue($blockType, $config, $params, $entity, $value);
     }
 }

@@ -28,16 +28,16 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Sales_Items_Sub_Abstract
         return parent::toHtml();
     }
     
-    public function getItemValueCssClasses(array $value, $alignmentKey=null)
+    public function getItemValueCssClasses(Varien_Object $value, $alignmentKey=null)
     {
         $classes = array();
         
-        if (isset($value['last']) && $value['last']) {
+        if ($value->getLast()) {
             $classes[] = 'last';
         }
-        if (!empty($alignmentKey) && isset($value[$alignmentKey])) {
-            if (in_array($value[$alignmentKey], array('left', 'center', 'right'))) {
-                $classes[] = 'a-'.$value[$alignmentKey];
+        if (!empty($alignmentKey) && ($alignment = $value->getData($alignmentKey))) {
+            if (in_array($alignment, array('left', 'center', 'right'))) {
+                $classes[] = 'a-' . $alignment;
             }
         }
         

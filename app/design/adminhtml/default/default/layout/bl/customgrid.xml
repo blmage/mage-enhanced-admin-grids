@@ -10,7 +10,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 -->
@@ -25,12 +25,17 @@
         </reference>
         
         <reference name="before_body_end">
-            <block type="customgrid/column_renderer_collection_select" name="customgrid.column_collection_renderers_descriptions">
-                <action method="setTemplate"><template>bl/customgrid/column/renderer/collection/descriptions.phtml</template></action>
-            </block>
-            <block type="customgrid/messages" name="customgrid.messages" />
+            <block type="customgrid/column_renderer_collection_descriptions" name="blcg.column_renderer.collection.descriptions" />
+            <block type="customgrid/messages" name="blcg.messages" />
         </reference>
     </default>
+    
+    <blcg_empty>
+        <block type="core/text_list" name="root" output="toHtml">
+            <block type="core/template" name="formkey" as="formkey" template="formkey.phtml" />
+            <block type="core/text_list" name="content" as="content" />
+        </block>
+    </blcg_empty>
     
     <blcg_magento_version_to_16>
         <reference name="head">
@@ -44,121 +49,132 @@
         </reference> 
     </blcg_magento_version_from_17>
     
-    <customgrid_custom_grid_index>
+    <customgrid_grid_index>
         <reference name="content">
-            <block type="customgrid/custom_grid" name="customgrid.custom_grid" />
+            <block type="customgrid/grid" name="blcg.grid.index" />
         </reference>
-    </customgrid_custom_grid_index>
+    </customgrid_grid_index>
     
-    <customgrid_custom_grid_edit>
-        <reference name="content">
-            <block type="customgrid/custom_grid_edit" name="custom_grid_edit" />
-        </reference>
+    <customgrid_grid_edit>
         <reference name="left">
-            <block type="customgrid/custom_grid_edit_tabs" name="custom_grid_tabs" />
+            <block type="customgrid/grid_edit_tabs" name="blcg.grid.edit.tabs">
+                <block type="customgrid/grid_profile_switcher" name="blcg.grid.edit.profile_switcher" as="profile_switcher" />
+            </block>
         </reference>
-    </customgrid_custom_grid_edit>
+        <reference name="content">
+            <block type="customgrid/grid_edit" name="blcg.grid.edit" />
+        </reference>
+    </customgrid_grid_edit>
     
     <customgrid_column_renderer_collection_index>
-        <block name="column_renderer_collection" type="customgrid/column_renderer_collection" output="toHtml" />
+        <reference name="content">
+            <block type="customgrid/column_renderer_collection_config" name="blcg.column_renderer.collection.config" />
+        </reference>
     </customgrid_column_renderer_collection_index>
     
     <customgrid_column_renderer_collection_unknown>
-        <remove name="column_renderer_collection" />
-        <block type="adminhtml/template" name="column_renderer_collection.unknown" output="toHtml">
-            <action method="setTemplate"><template>bl/customgrid/column/renderer/collection/unknown.phtml</template></action>
-        </block>
+        <reference name="content">
+            <remove name="blcg.column_renderer.collection.config" />
+            <block type="adminhtml/template" name="blcg.column_renderer.collection.unknown" template="bl/customgrid/column/renderer/collection/unknown.phtml" />
+        </reference>
     </customgrid_column_renderer_collection_unknown>
     
     <customgrid_column_renderer_attribute_index>
-        <block name="column_renderer_attribute" type="customgrid/column_renderer_attribute" output="toHtml" />
+        <reference name="content">
+            <block type="customgrid/column_renderer_attribute_config" name="blcg.column_renderer.attribute.config" />
+        </reference>
     </customgrid_column_renderer_attribute_index>
     
     <customgrid_column_renderer_attribute_unknown>
-        <remove name="column_renderer_attribute" />
-        <block type="adminhtml/template" name="column_renderer_attribute.unknown" output="toHtml">
-            <action method="setTemplate"><template>bl/customgrid/column/renderer/attribute/unknown.phtml</template></action>
-        </block>
+        <reference name="content">
+            <remove name="blcg.column_renderer.attribute.config" />
+            <block type="adminhtml/template" name="blcg.column_renderer.attribute.unknown" template="bl/customgrid/column/renderer/attribute/unknown.phtml" />
+        </reference>
     </customgrid_column_renderer_attribute_unknown>
     
     <customgrid_custom_column_config_index>
-        <block name="custom_column_config" type="customgrid/custom_column_config" output="toHtml" />
+        <reference name="content">
+            <block type="customgrid/custom_column_config" name="blcg.custom_column.config" />
+        </reference>
     </customgrid_custom_column_config_index>
     
     <customgrid_custom_column_config_unknown>
-        <remove name="column_renderer_attribute" />
-        <block type="adminhtml/template" name="custom_column_config.unknown" output="toHtml">
-            <action method="setTemplate"><template>bl/customgrid/custom/column/config/unknown.phtml</template></action>
-        </block>
+        <reference name="content">
+            <remove name="blcg.custom_column.config" />
+            <block type="adminhtml/template" name="blcg.custom_column.unknown" template="bl/customgrid/custom/column/config/unknown.phtml" />
+        </reference>
     </customgrid_custom_column_config_unknown>
+    
+    <customgrid_grid_profile_form_window_action>
+        <reference name="content">
+            <block type="customgrid/grid_profile_form_container" name="blcg.grid_profile.form_container" />
+        </reference>
+    </customgrid_grid_profile_form_window_action>
+    
+    <customgrid_grid_profile_form_window_error>
+        <reference name="content">
+            <block type="adminhtml/template" name="blcg.grid_profile.form_error" template="bl/customgrid/grid/profile/form/error.phtml" />
+        </reference>
+    </customgrid_grid_profile_form_window_error>
     
     <customgrid_options_source_index>
         <reference name="content">
-            <block type="customgrid/options_source" name="customgrid.options_source" />
+            <block type="customgrid/options_source" name="blcg.options_source.index" />
         </reference>
     </customgrid_options_source_index>
     
     <customgrid_options_source_new>
-        <reference name="content">
-            <block type="customgrid/options_source_edit" name="options_source_edit" />
-        </reference>
         <reference name="left">
-            <block type="customgrid/options_source_edit_tabs" name="options_source_tabs" />
+            <block type="customgrid/options_source_edit_tabs" name="blcg.options_source.edit.tabs" />
+        </reference>
+        <reference name="content">
+            <block type="customgrid/options_source_edit" name="blcg.options_source.edit" />
         </reference>
     </customgrid_options_source_new>
     
     <customgrid_options_source_edit>
-        <reference name="content">
-            <block type="customgrid/options_source_edit" name="options_source_edit" />
-        </reference>
         <reference name="left">
-            <block type="customgrid/options_source_edit_tabs" name="options_source_tabs" />
+            <block type="customgrid/options_source_edit_tabs" name="blcg.options_source.edit.tabs" />
+        </reference>
+        <reference name="content">
+            <block type="customgrid/options_source_edit" name="blcg.options_source.edit" />
         </reference>
     </customgrid_options_source_edit>
     
-    <customgrid_options_source_custom_list>
-        <reference name="options_source_tabs">
-            <action method="addTab"><name>custom_list</name><block>customgrid/options_source_edit_tab_custom</block></action>
-        </reference>
-    </customgrid_options_source_custom_list>
-    
-    <customgrid_options_source_mage_model>
-        <reference name="options_source_tabs">
-            <action method="addTab"><name>mage_model</name><block>customgrid/options_source_edit_tab_model</block></action>
-        </reference>
-    </customgrid_options_source_mage_model>
-    
-    <custom_grid_editor_handle_editor>
+    <blcg_grid_editor_handle_editor>
         <update handle="editor" />
         <reference name="head">
             <action method="setCanLoadExtJs"><flag>1</flag></action>
             <action method="setCanLoadTinyMce"><flag>1</flag></action>
         </reference>
-    </custom_grid_editor_handle_editor>
+    </blcg_grid_editor_handle_editor>
     
-    <custom_grid_editor_handle_product>
+    <blcg_grid_editor_handle_product>
         <reference name="js">
-            <block type="adminhtml/catalog_product_edit_js" template="catalog/product/js.phtml" name="catalog_product_js" />
-            <block type="core/template" name="catalog.wysiwyg.js" template="catalog/wysiwyg/js.phtml"/>
+            <block type="adminhtml/catalog_product_edit_js" template="catalog/product/js.phtml" name="blcg.catalog_product.edit.js" />
+            <block type="core/template" name="blcg.catalog_product.edit.wysiwyg_js" template="catalog/wysiwyg/js.phtml" />
         </reference>
-    </custom_grid_editor_handle_product>
+    </blcg_grid_editor_handle_product>
     
-    <customgrid_custom_grid_editor_edit>
+    <customgrid_grid_editor_edit>
         <update handle="popup" />
         <remove name="footer" />
         <reference name="content">
-            <block type="customgrid/widget_grid_form_container" name="customgrid.grid_form_container" />
+            <block type="customgrid/widget_grid_editor_form_container" name="blcg.grid_editor.form_container" />
         </reference>
-    </customgrid_custom_grid_editor_edit>
+    </customgrid_grid_editor_edit>
     
-    <customgrid_custom_grid_column_filter_categories>
+    <customgrid_grid_column_filter_categories>
         <update handle="popup" />
         <remove name="footer" />
+        <reference name="root">
+            <action method="addBodyClass"><class>customgrid-custom-grid-column-filter-categories</class></action>
+        </reference>
         <reference name="head">
             <action method="setCanLoadExtJs"><flag>1</flag></action>
         </reference>
         <reference name="content">
-            <block type="customgrid/widget_grid_column_filter_product_categories_chooser" name="customgrid.filter.categories.chooser" />
+            <block type="customgrid/widget_grid_column_filter_product_categories_chooser" name="blcg.filter.categories.chooser" />
         </reference>
-    </customgrid_custom_grid_column_filter_categories>
+    </customgrid_grid_column_filter_categories>
 </layout>

@@ -9,21 +9,45 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Options_SourceController extends Mage_Adminhtml_Controller_Action
+class BL_CustomGrid_Options_SourceController
+    extends Mage_Adminhtml_Controller_Action
 {
+    protected function _initOptionsSource($requireId=false)
+    {
+        $source = Mage::getModel('customgrid/options_source');
+        
+        if (!$sourceId = (int) $this->getRequest()->getParam('id')) {
+            if ($type = $this->getRequest()->getParam('type')) {
+                if (is_array($typeValues = $source->getPredefinedType($type))) {
+                    $source->addData($typeValues);
+                } else {
+                    $source->setType($type);
+                }
+            }
+        } else {
+            $source->load($sourceId);
+        }
+        
+        if ($requireId && !$source->getId()) {
+            return false;
+        }
+        
+        Mage::register('blcg_options_source', $source);
+        return $source;
+    }
+    
     protected function _initAction($layoutIds=null)
     {
-        $this->loadLayout($layoutIds)
+        return $this->loadLayout($layoutIds)
             ->_setActiveMenu('system/customgrid/options_source')
             ->_title($this->__('Custom Grids'))
             ->_title($this->__('Manage Options Source'))
             ->_addBreadcrumb($this->__('Custom Grids'), $this->__('Custom Grids'))
             ->_addBreadcrumb($this->__('Manage Options Source'), $this->__('Manage Options Source'));
-        return $this;
     }
     
     public function indexAction()
@@ -35,32 +59,6 @@ class BL_CustomGrid_Options_SourceController extends Mage_Adminhtml_Controller_A
         $this->_initAction()->renderLayout();
     }
     
-    protected function _initOptionsSource($needId=false)
-    {
-        $sourceId = (int) $this->getRequest()->getParam('id');
-        $source   = Mage::getModel('customgrid/options_source');
-        
-        if (!$sourceId) {
-            if ($type = $this->getRequest()->getParam('type')) {
-                if (is_array($typeValue = $source->getPredefinedType($type))) {
-                    $source->addData($typeValue);
-                } else {
-                    $source->setType($type);
-                }
-            }
-        } else {
-            $source->load($sourceId);
-        }
-        
-        if ($needId && !$source->getId()) {
-            return false;
-        }
-        
-        Mage::register('options_source', $source);
-        Mage::register('current_options_source', $source);
-        return $source;
-    }
-    
     public function newAction()
     {
         $source = $this->_initOptionsSource();
@@ -69,37 +67,40 @@ class BL_CustomGrid_Options_SourceController extends Mage_Adminhtml_Controller_A
             return $this->_redirect('*/*/edit', array('_current' => true));
         }
         
-        // Set entered data if was error when we saved
-        $data = Mage::getSingleton('adminhtml/session')->getOptionsSourceData(true);
+        $data = $this->_getSession()->getOptionsSourceData(true);
+        
         if (!empty($data)) {
             $source->addData($data);
         }
         
         $this->_initAction(array(
-            'default',
-            strtolower($this->getFullActionName()),
-            'customgrid_options_source_'.$source->getType()
-        ))->_title($this->__('New Options Source'))->renderLayout();
+                'default',
+                strtolower($this->getFullActionName()),
+                'customgrid_options_source_' . $source->getType()
+            ))
+            ->_title($this->__('New Options Source'))
+            ->renderLayout();
     }
     
     public function editAction()
     {
-        if (!($source= $this->_initOptionsSource(true))) {
+        if (!$source= $this->_initOptionsSource(true)) {
             $this->_getSession()->addError($this->__('This options source no longer exists.'));
             return $this->_redirect('*/*/');
         }
         
-        // Set entered data if was error when we saved
-        $data = Mage::getSingleton('adminhtml/session')->getOptionsSourceData(true);
+        $data = $this->_getSession()->getOptionsSourceData(true);
+        
         if (!empty($data)) {
             $source->addData($data);
         }
         
         $this->_initAction(array(
-            'default',
-            strtolower($this->getFullActionName()),
-            'customgrid_options_source_'.$source->getType()
-        ))->_title($source->getName())
+                'default',
+                strtolower($this->getFullActionName()),
+                'customgrid_options_source_' . $source->getType()
+            ))
+            ->_title($source->getName())
             ->_addBreadcrumb($source->getName(), $source->getName())
             ->renderLayout();
     }
@@ -108,7 +109,7 @@ class BL_CustomGrid_Options_SourceController extends Mage_Adminhtml_Controller_A
     {
         if ($data = $this->getRequest()->getPost()) {
             if (!$source = $this->_initOptionsSource()) {
-                Mage::getSingleton('adminhtml/session')->addError($this->__('Wrong options source was specified.'));
+                $this->_getSession()->addError($this->__('This options source no longer exists.'));
                 return $this->_redirect('*/*/index');
             }
             
@@ -117,26 +118,22 @@ class BL_CustomGrid_Options_SourceController extends Mage_Adminhtml_Controller_A
             try {
                 $source->save();
                 
-                Mage::getSingleton('adminhtml/session')->addSuccess($this->__('The options source has been successfully saved.'));
-                Mage::getSingleton('adminhtml/session')->setOptionsSourceData(false);
+                $this->_getSession()
+                    ->setOptionsSourceData(false)
+                    ->addSuccess($this->__('The options source has been successfully saved.'));
                 
                 if ($redirectBack = $this->getRequest()->getParam('back', false)) {
-                    return $this->_redirect('*/*/edit', array(
-                        'id' => $source->getId(),
-                        '_current' => true,
-                    ));
+                    return $this->_redirect('*/*/edit', array('_current' => true));
                 } else {
                     return $this->_redirect('*/*/');
                 }
             } catch (Exception $e) {
-                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
-                Mage::getSingleton('adminhtml/session')->setOptionsSourceData($data);
+                $this->_getSession()
+                    ->setOptionsSourceData($data)
+                    ->addError($e->getMessage());
                 
                 if ($source->getId()) {
-                    return $this->_redirect('*/*/edit', array(
-                        'id' => $source->getId(),
-                        '_current' => true,
-                    ));
+                    return $this->_redirect('*/*/edit', array('_current' => true));
                 } else {
                     return $this->_redirect('*/*/new');
                 }
@@ -150,17 +147,27 @@ class BL_CustomGrid_Options_SourceController extends Mage_Adminhtml_Controller_A
         if ($source = $this->_initOptionsSource(true)) {
             try {
                 $source->delete();
-                Mage::getSingleton('adminhtml/session')->addSuccess($this->__('The options source has been successfully deleted.'));
+                $this->_getSession()->addSuccess($this->__('The options source has been successfully deleted.'));
                 $this->_redirect('*/*/');
                 return;
             } catch (Exception $e) {
-                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
+                $this->_getSession()->addError($e->getMessage());
                 $this->_redirect('*/*/edit', array('id' => $source->getId()));
                 return;
             }
         }
-        Mage::getSingleton('adminhtml/session')->addError($this->__('This options source no longer exists.'));
+        $this->_getSession()->addError($this->__('This options source no longer exists.'));
         $this->_redirect('*/*/');
+    }
+    
+    protected function _validateSources()
+    {
+        if (!is_array($this->getRequest()->getParam('options_source', null))) {
+            $this->_getSession()->addError($this->__('Please select options sources to update'));
+            $this->_redirect('*/*/index', array('_current' => true));
+            return false;
+        }
+        return true;
     }
     
     public function massDeleteAction()
@@ -176,22 +183,13 @@ class BL_CustomGrid_Options_SourceController extends Mage_Adminhtml_Controller_A
                 Mage::getSingleton('customgrid/options_source')->load($sourceId)->delete();
             }
             
-            $this->_getSession()->addSuccess($this->__('Total of %d options source(s) have been deleted.', count($sourcesIds)));
+            $this->_getSession()
+                ->addSuccess($this->__('Total of %d options source(s) have been deleted.', count($sourcesIds)));
         } catch (Exception $e) {
             $this->_getSession()->addError($e->getMessage());
         }
         
         $this->getResponse()->setRedirect($this->getUrl('*/*/index'));
-    }
-    
-    protected function _validateSources()
-    {
-        if (!is_array($this->getRequest()->getParam('options_source', null))) {
-            $this->_getSession()->addError($this->__('Please select options sources to update'));
-            $this->_redirect('*/*/index', array('_current' => true));
-            return false;
-        }
-        return true;
     }
     
     protected function _isAllowed()

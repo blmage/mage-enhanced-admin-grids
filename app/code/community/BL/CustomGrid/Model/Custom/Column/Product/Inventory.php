@@ -3,41 +3,44 @@
 class BL_CustomGrid_Model_Custom_Column_Product_Inventory
     extends BL_CustomGrid_Model_Custom_Column_Simple_Table
 {
-    protected $_useConfigMode = false;
-    
-    public function finalizeConfig()
+    protected function _prepareConfig()
     {
-        parent::finalizeConfig();
-        $helper = Mage::helper('customgrid');
+        $helper = $this->_getBaseHelper();
+        
+        $notes = array(
+            'use_config_filter' => 'Choose "Yes" to filter on products that use system configuration values or not.'
+                . ' Else, the filter type will depend on the type of the field',
+            'use_config_prefix' => 'Prefix that will be prepended to the values coming from the system configuration',
+            'use_config_suffix' => 'Suffix that will be appended to the values coming from the system configuration',
+            'warning' => 'Sorting does not take system configuration values into account, so that products may not be'
+                . ' sorted consistently',
+        );
         
         if ($this->getIsUseConfigField()) {
-            $this->addCustomParam('use_config_filter', array(
+            $this->addCustomizationParam('use_config_filter', array(
                 'label'        => $helper->__('Filter on "Use Config"'),
-                'description'  => $helper->__('Choose "Yes" to filter values that either use config or not. Else, the filter type will depend on the type of the field'),
+                'description'  => $helper->__($notes['use_config_filter']),
                 'type'         => 'select',
                 'source_model' => 'adminhtml/system_config_source_yesno',
                 'value'        => 0,
             ), 10);
             
-            $this->addCustomParam('use_config_prefix', array(
+            $this->addCustomizationParam('use_config_prefix', array(
                 'label'       => $helper->__('Config Values Prefix'),
-                'description' => $helper->__('Prefix that will be prepended to the values coming from config'),
+                'description' => $helper->__($notes['use_config_prefix']),
                 'type'        => 'text',
                 'value'       => '',
             ), 20);
             
-            $this->addCustomParam('use_config_suffix', array(
+            $this->addCustomizationParam('use_config_suffix', array(
                 'label'       => $helper->__('Config Values Suffix'),
-                'description' => $helper->__('Suffix that will be appended to the values coming from config'),
+                'description' => $helper->__($notes['use_config_suffix']),
                 'type'        => 'text',
                 'value'       => '',
             ), 30);
             
-            if (!$this->getWarning()) {
-                $this->setWarning($helper->__('Sorting does not take config values into account, so that products that use config may not be sorted consistently'));
-            }
-            
-            $this->setCustomParamsWindowConfig(array('height' => 280), true);
+            $this->setWarning($helper->__($notes['warning']));
+            $this->setCustomizationWindowConfig(array('height' => 280), true);
         }
         
         return $this;
@@ -48,110 +51,114 @@ class BL_CustomGrid_Model_Custom_Column_Product_Inventory
         return 'cataloginventory/stock_item';
     }
     
-    public function getJoinConditionMainField()
+    public function getJoinConditionMainFieldName()
     {
         return 'entity_id';
     }
     
-    public function getJoinConditionTableField()
+    public function getJoinConditionTableFieldName()
     {
         return 'product_id';
     }
     
-    public function getTableFieldName($forceBase=false)
-    {
-        return (!$this->_useConfigMode || $forceBase
-            ? $this->getModelParam('table_field_name')
-            : $this->getUseConfigFieldName());
-    }
-    
     public function getIsUseConfigField()
     {
-        return (bool) $this->getModelParam('is_use_config_field');
+        return (bool) $this->getConfigParam('is_use_config_field');
     }
     
     public function getUseConfigFieldName()
     {
-        if (!$name = $this->getModelParam('use_config_field_name')) {
-            $name = 'use_config_' . $this->getTableFieldName(true);
-        }
-        return $name;
+        return (!$fieldName = $this->getConfigParam('use_config_field_name'))
+            ? 'use_config_' . $this->getTableFieldName(true)
+            : $fieldName;
     }
     
     public function getUseConfigSystemPath()
     {
-        if (!$path = $this->getModelParam('system_config_path')) {
-            return 'cataloginventory/item_options/' . $this->getTableFieldName();
-        }
-        return $path;
+        return (!$path = $this->getConfigParam('system_config_path'))
+            ? 'cataloginventory/item_options/' . $this->getTableFieldName()
+            : $path;
     }
     
     public function getFieldType()
     {
-        return $this->getModelParam('field_type');
+        return $this->getConfigParam('field_type');
     }
     
-    public function getAdditionalJoinConditions($alias, $params, $block, $collection, $mainAlias, $tableAlias)
+    protected function _getAdditionalJoinConditions($columnIndex, array $params,
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock, Varien_Data_Collection_Db $collection, $mainAlias, $tableAlias)
     {
         list($adapter, $qi) = $this->_getCollectionAdapter($collection, true);
-        // @todo stock_id is usually hard-coded, should we provide it as a customization parameter anyway ?
-        return array($adapter->quoteInto($qi($tableAlias.'.stock_id').' = ?', 1));
+        // @todo "stock_id" is usually hard-coded, should we provide it as a customization parameter anyway ?
+        return array($adapter->quoteInto($qi($tableAlias . '.stock_id') . ' = ?', 1));
     }
     
-    public function addFieldToGridCollection($alias, $params, $block, $collection)
+    protected function _addFieldToSelect(Varien_Db_Select $select, $columnIndex, $tableAlias, array $params,
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock, Varien_Data_Collection_Db $collection)
     {
-        // Add main field in all cases
-        parent::addFieldToGridCollection($alias, $params, $block, $collection);
+        $helper = $this->_getCollectionHelper();
+        list($adapter, $qi) = $this->_getCollectionAdapter($collection, true);
         
-        // Add use_config field if needed
+        $fieldName = $this->getTableFieldName();
+        $select->columns(array($columnIndex => $tableAlias . '.' . $fieldName), $tableAlias);
+        $helper->addFilterToCollectionMap($collection, $qi($tableAlias . '.' . $fieldName), $columnIndex);
+        
         if ($this->getIsUseConfigField()) {
-            $this->_useConfigMode = true;
-            parent::addFieldToGridCollection($alias.'_cpi_uc', $params, $block, $collection);
-            $this->_useConfigMode = false;
+            $fieldName = $this->getUseConfigFieldName();
+            $columnIndex .= '_cpi_uc';
+            $select->columns(array($columnIndex => $tableAlias . '.' . $fieldName), $tableAlias);
+            $helper->addFilterToCollectionMap($collection, $qi($tableAlias . '.' . $fieldName), $columnIndex);
         }
+        
+        return $this;
     }
     
-    public function addFilterToGridCollection($collection, $column)
+    public function addFilterToGridCollection($collection, Mage_Adminhtml_Block_Widget_Grid_Column $columnBlock)
     {
-        $field   = ($column->getFilterIndex() ? $column->getFilterIndex() : $column->getIndex());
-        $cond    = $column->getFilter()->getCondition();
-        $flagKey = $column->getBlcgTableFlagKey();
-        $params  = $column->getBlcgFilterParams();
+        $fieldName  = ($columnBlock->getFilterIndex() ? $columnBlock->getFilterIndex() : $columnBlock->getIndex());
+        $tableAlias = $columnBlock->getBlcgTableAlias();
+        $condition  = $columnBlock->getFilter()->getCondition();
+        $params = $columnBlock->getBlcgFilterParams();
         
-        if ($field && is_array($cond) && $flagKey
-            && isset(self::$_tablesAppliedFlags[$flagKey])
-            && ($tableAlias = $collection->getFlag(self::$_tablesAppliedFlags[$flagKey]))) {
+        if ($fieldName && is_array($condition) && $tableAlias) {
             list($adapter, $qi) = $this->_getCollectionAdapter($collection, true);
             
             if (is_array($params) && $this->_extractBoolParam($params, 'use_config_filter', false)) {
-                if (isset($cond['eq'])) {
+                if (isset($condition['eq'])) {
                     $collection->getSelect()
-                        ->where($qi($tableAlias.'.'.$this->getUseConfigFieldName()).' = '.$adapter->quoteInto('?', (bool) $cond['eq']));
+                        ->where(
+                            $qi($tableAlias . '.' . $this->getUseConfigFieldName())
+                            . ' = '
+                            . $adapter->quoteInto('?', (bool) $condition['eq'])
+                        );
                 }
             } else {
                 if ($column->getCanUseConfig()) {
                     $conditionBase = new Zend_Db_Expr(
                         'IF('
-                        .$qi($tableAlias.'.'.$this->getUseConfigFieldName()).','
-                        .$adapter->quoteInto('?', Mage::getStoreConfig($this->getUseConfigSystemPath())).','
-                        .$qi($tableAlias.'.'.$this->getTableFieldName())
-                        .')'
+                        . $qi($tableAlias . '.' . $this->getUseConfigFieldName()) . ','
+                        . $adapter->quoteInto('?', Mage::getStoreConfig($this->getUseConfigSystemPath())) . ','
+                        . $qi($tableAlias . '.' . $this->getTableFieldName())
+                        . ')'
                     );
                 } else {
-                    $conditionBase = $qi($tableAlias.'.'.$this->getTableFieldName());
+                    $conditionBase = $qi($tableAlias . '.' . $this->getTableFieldName());
                 }
                 
                 if ($this->getFieldType() == 'decimal') {
-                    if (isset($cond['from']) && isset($cond['to'])) {
+                    if (isset($condition['from']) && isset($condition['to'])) {
                         $collection->getSelect()
                             ->where(
                                 $conditionBase
-                                .' BETWEEN '.$adapter->quoteInto('?', floatval($cond['from']))
-                                .' AND '.$adapter->quoteInto('?', floatval($cond['to']))
+                                . ' BETWEEN '
+                                . $adapter->quoteInto('?', floatval($condition['from']))
+                                . ' AND '
+                                . $adapter->quoteInto('?', floatval($condition['to']))
                             );
                     }
-                } elseif (isset($cond['eq'])) {
-                    $collection->getSelect()->where($conditionBase.' = '.$adapter->quoteInto('?', $cond['eq']));
+                } elseif (isset($condition['eq'])) {
+                    $collection->getSelect()
+                        ->where($conditionBase . ' = ' . $adapter->quoteInto('?', $condition['eq']));
                 }
             }
         }
@@ -159,28 +166,30 @@ class BL_CustomGrid_Model_Custom_Column_Product_Inventory
         return $this;
     }
     
-    public function shouldInvalidateFilters($grid, $column, $params, $rendererTypes)
+    public function shouldInvalidateFilters(BL_CustomGrid_Model_Grid $gridModel,
+        BL_CustomGrid_Model_Grid_Column $columnModel, array $params, array $renderers)
     {
-        if (!parent::shouldInvalidateFilters($grid, $column, $params, $rendererTypes)) {
+        if (!parent::shouldInvalidateFilters($gridModel, $columnModel, $params, $renderers)) {
             if ($this->getIsUseConfigField()) {
-                return ($this->_extractBoolParam($params['old'], 'use_config_filter')
-                    XOR $this->_extractBoolParam($params['new'], 'use_config_filter'));
+                return ($this->_extractBoolParam($params['previous'], 'use_config_filter')
+                    XOR $this->_extractBoolParam($params['current'],  'use_config_filter'));
             }
             return false;
         }
         return true;
     }
     
-    protected function _getConditionalGridValues($params)
+    protected function _getConditionalBlockValues(array $params)
     {
+        $helper = $this->_getBaseHelper();
         $values = array();
         $fieldType = $this->getFieldType();
         
         if (($fieldType == 'options')
-            && ($sourceModel = Mage::getModel($this->getModelParam('source_model')))
-            && is_callable(array($sourceModel, 'toOptionArray'))) {
+            && ($sourceModel = Mage::getModel($this->getConfigParam('source_model')))
+            && method_exists($sourceModel, 'toOptionArray')) {
             $optionsArray = $sourceModel->toOptionArray();
-            $optionsHash  = Mage::helper('customgrid')->getOptionsHashFromOptionsArray($optionsArray);
+            $optionsHash  = $helper->getOptionsHashFromOptionsArray($optionsArray);
             
             $values = array(
                 'filter'  => 'customgrid/widget_grid_column_filter_select',
@@ -188,11 +197,12 @@ class BL_CustomGrid_Model_Custom_Column_Product_Inventory
                 'options_hash' => $optionsHash,
             );
         }
+        
         if ($this->_extractBoolParam($params, 'use_config_filter', false)) {
             $values['filter']  = 'customgrid/widget_grid_column_filter_select';
             $values['options'] = array(
-                array('value' => 1, 'label' => Mage::helper('customgrid')->__('Use Config')),
-                array('value' => 0, 'label' => Mage::helper('customgrid')->__('Do Not Use Config')),
+                array('value' => 1, 'label' => $helper->__('Use Config')),
+                array('value' => 0, 'label' => $helper->__('Do Not Use Config')),
             );
         } elseif ($fieldType == 'boolean') {
             $values['filter'] = 'customgrid/widget_grid_column_filter_yesno';
@@ -205,23 +215,23 @@ class BL_CustomGrid_Model_Custom_Column_Product_Inventory
         return $values;
     }
     
-    protected function _getForcedGridValues($block, $model, $id, $alias, $params, $store, $renderer=null)
+    protected function _getForcedBlockValues(Mage_Adminhtml_Block_Widget_Grid $gridBlock,
+        BL_CustomGrid_Model_Grid $gridModel, $columnBlockId, $columnIndex, array $params, Mage_Core_Model_Store $store)
     {
         return array_merge(
             array(
                 'renderer'   => 'customgrid/widget_grid_column_renderer_product_inventory',
                 'field_name' => $this->getTableFieldName(),
                 'field_type' => $this->getFieldType(),
-                'can_use_config'      => $this->getIsUseConfigField(),
-                'use_config_index'    => $alias.'_cpi_uc',
-                'use_config_prefix'   => $this->_extractStringParam($params, 'use_config_prefix', ''),
-                'use_config_suffix'   => $this->_extractStringParam($params, 'use_config_suffix', ''),
-                'system_config_path'  => $this->getUseConfigSystemPath(),
-                'blcg_table_flag_key' => $this->getAppliedFlagKey($alias, $params, $block, $block->getCollection(), $this->getTableName()),
-                'blcg_filter_params'  => $params,
+                'can_use_config'     => $this->getIsUseConfigField(),
+                'use_config_index'   => $columnIndex . '_cpi_uc',
+                'use_config_prefix'  => $this->_extractStringParam($params, 'use_config_prefix', ''),
+                'use_config_suffix'  => $this->_extractStringParam($params, 'use_config_suffix', ''),
+                'system_config_path' => $this->getUseConfigSystemPath(),
+                'blcg_filter_params' => $params,
                 'filter_condition_callback' => array($this, 'addFilterToGridCollection'),
             ),
-            $this->_getConditionalGridValues($params)
+            $this->_getConditionalBlockValues($params)
         );
     }
 }

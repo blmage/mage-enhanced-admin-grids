@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -28,13 +28,13 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Options
                         $option['value'],
                         $keepPath,
                         $separator,
-                        (!$first ? $path.$separator : '').$option['label'],
+                        (!$first ? $path . $separator : '') . $option['label'],
                         false
                     )
                 );
             } elseif (!is_null($option['value']) && ($option['value'] !== '')) {
-                $options[$option['value']] = ($keepPath ? $path.$separator : '') . $option['label'];
-            } // Don't display empty values
+                $options[$option['value']] = ($keepPath ? $path . $separator : '') . $option['label'];
+            }
         }
         
         return $options;
@@ -42,36 +42,38 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Options
     
     public function render(Varien_Object $row)
     {
-        $keepPath   = (bool) $this->getColumn()->getDisplayFullPath();
-        $separator  = $this->getColumn()->getOptionsSeparator();
-        $imploded   = (bool) $this->getColumn()->getImplodedValues();
-        $implodeSep = $this->getColumn()->getImplodedSeparator();
+        $keepPath  = (bool) $this->getColumn()->getDisplayFullPath();
+        $separator = $this->getColumn()->getOptionsSeparator();
+        $options   = $this->_collectOptions($this->getColumn()->getOptions(), $keepPath, $separator);
+        $imploded  = (bool) $this->getColumn()->getImplodedValues();
+        $implodedSeparator = $this->getColumn()->getImplodedSeparator();
         $showMissingOptionValues = (bool) $this->getColumn()->getShowMissingOptionValues();
-        $options    = $this->_collectOptions($this->getColumn()->getOptions(), $keepPath, $separator);
         
         if (!empty($options) && is_array($options)) {
             $value = $row->getData($this->getColumn()->getIndex());
+            
             if ($imploded) {
-                $value = explode($implodeSep, $value);
+                $value = explode($implodedSeparator, $value);
             }
             if (is_array($value)) {
-                $res = array();
+                $result = array();
                 
                 foreach ($value as $item) {
                     if (isset($options[$item])) {
-                        $res[] = $options[$item];
+                        $result[] = $options[$item];
                     } elseif ($showMissingOptionValues) {
-                        $res[] = $item;
+                        $result[] = $item;
                     }
                 }
                 
-                return implode(', ', $res);
+                return implode(', ', $result);
             } elseif (isset($options[$value])) {
                 return $options[$value];
             } elseif ($showMissingOptionValues) {
                 return $value;
             }
-            return '';
         }
+        
+        return '';
     }
 }

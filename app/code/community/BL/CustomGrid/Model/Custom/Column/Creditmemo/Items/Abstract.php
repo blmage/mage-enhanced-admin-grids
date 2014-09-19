@@ -16,9 +16,10 @@
 abstract class BL_CustomGrid_Model_Custom_Column_Creditmemo_Items_Abstract
     extends BL_CustomGrid_Model_Custom_Column_Sales_Items_Abstract
 {
-    public function addItemsToGridCollection($alias, $params, $block, $collection, $firstTime)
+    public function addItemsToGridCollection($columnIndex, array $params,
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock, Varien_Data_Collection_Db $collection, $firstTime)
     {
-        if (!$firstTime && !$block->blcg_isExport()) {
+        if (!$firstTime && !$gridBlock->blcg_isExport()) {
             $creditmemosIds = array();
             $ordersIds = array();
             
@@ -33,44 +34,46 @@ abstract class BL_CustomGrid_Model_Custom_Column_Creditmemo_Items_Abstract
                 ->load();
             
             $orders = $this->_getOrdersCollection($ordersIds);
-            $ordersItems = $this->_getOrdersItemsCollection($ordersIds, false, 'blcg_custom_column_creditmemo_items_list_order_items_collection');
+            $eventName = 'blcg_custom_column_creditmemo_items_list_order_items_collection';
+            $ordersItems = $this->_getOrdersItemsCollection($ordersIds, false, $eventName);
+            $propertyName = 'sales/order_creditmemo::_items';
+            $itemsProperty =  Mage::helper('customgrid/reflection')->getModelReflectionProperty($propertyName, true);
             
-            $creditmemoReflection = new ReflectionClass('Mage_Sales_Model_Order_Creditmemo');
-            $itemsProperty = $creditmemoReflection->getProperty('_items');
-            
-            if (!method_exists($itemsProperty, 'setAccessible')) {
-                // PHP < 5.3.0
-                $itemsProperty = Mage::getSingleton('customgrid/reflection_property_sales_order_creditmemo_items');
-            } else {
-                $itemsProperty->setAccessible(true);
-            }
-            
-            foreach ($collection as $creditmemo) {
-                $creditmemoId = $creditmemo->getId();
-                $orderId = $creditmemo->getOrderId();
-                $creditmemoItems = clone $items;
-                
-                if ($order = $orders->getItemById($orderId)) {
-                    $creditmemo->setOrder($order);
-                }
-                
-                foreach ($creditmemoItems as $item) {
-                    if ($item->getParentId() != $creditmemoId) {
-                        $creditmemoItems->removeItemByKey($item->getId());
-                    } else {
-                        $item->setCreditmemo($creditmemo);
-                        
-                        if ($orderItem = $ordersItems->getItemById($item->getOrderItemId())) {
-                            $item->setOrderItem($orderItem);
+            if ($itemsProperty) {
+                foreach ($collection as $creditmemo) {
+                    $orderId = $creditmemo->getOrderId();
+                    $creditmemoId = $creditmemo->getId();
+                    $creditmemoItems = clone $items;
+                    
+                    if ($order = $orders->getItemById($orderId)) {
+                        $creditmemo->setOrder($order);
+                    }
+                    
+                    foreach ($creditmemoItems as $item) {
+                        if ($item->getParentId() != $creditmemoId) {
+                            $creditmemoItems->removeItemByKey($item->getId());
+                        } else {
+                            $item->setCreditmemo($creditmemo);
                             
-                            if ($order) {
-                                $orderItem->setOrder($order);
+                            if ($orderItem = $ordersItems->getItemById($item->getOrderItemId())) {
+                                $item->setOrderItem($orderItem);
+                                
+                                if ($order) {
+                                    $orderItem->setOrder($order);
+                                }
                             }
                         }
                     }
+                    
+                    $itemsProperty->setValue($creditmemo, $creditmemoItems);
+                }
+            } else {
+                foreach ($collection as $creditmemo) {
+                    $creditmemo->setData('_blcg_items_init_error', true);
                 }
                 
-                $itemsProperty->setValue($creditmemo, $creditmemoItems);
+                Mage::getSingleton('customgrid/session')
+                    ->addError(Mage::helper('customgrid')->__('An error occured while initializing items'));
             }
         }
         return $this;

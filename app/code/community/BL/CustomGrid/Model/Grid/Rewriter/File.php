@@ -16,16 +16,16 @@
 class BL_CustomGrid_Model_Grid_Rewriter_File
     extends BL_CustomGrid_Model_Grid_Rewriter_Abstract
 {
-    protected function _rewriteGrid($blcgClass, $originalClass, $gridType)
+    protected function _rewriteGrid($blcgClass, $originalClass, $blockType)
     {
         $classParts = explode('_', str_replace($this->_getBlcgClassPrefix(), '', $blcgClass));
-        $fileName   = array_pop($classParts) . '.php';
-        $rewriteDir = dirname(__FILE__).'/../../../Block/Rewrite/'.implode('/', $classParts);
+        $fileName = array_pop($classParts) . '.php';
+        $rewriteFolder = dirname(__FILE__) . '/../../../Block/Rewrite/' . implode('/', $classParts);
         
         $ioFile = new Varien_Io_File();
         $ioFile->setAllowCreateFolders(true);
-        $ioFile->checkAndCreateFolder($rewriteDir);
-        $ioFile->cd($rewriteDir);
+        $ioFile->checkAndCreateFolder($rewriteFolder);
+        $ioFile->cd($rewriteFolder);
         
         // Use open() to initialize Varien_Io_File::$_iwd
         // Prevents a warning when chdir() is used without error control in Varien_Io_File::read()
@@ -71,10 +71,10 @@ class BL_CustomGrid_Model_Grid_Rewriter_File
 
 ';
         
-        $content .= $this->_getRewriteCode($blcgClass, $originalClass, $gridType);
+        $content .= $this->_getRewriteCode($blcgClass, $originalClass, $blockType);
         
         if (!$ioFile->write($fileName, $content)) {
-            Mage::throwException();
+            Mage::throwException(Mage::helper('customgrid')->__('Could not write to the file'));
         }
         
         return $this;

@@ -34,7 +34,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 ?>
@@ -65,13 +65,13 @@ $_gridModel  = $this->helper('customgrid/grid')->getGridModelFromBlock($this);;
         <?php endif ?>
 
         <div id="<?php echo $this->getId() ?>">
-            <?php echo $this->getChildHtml('bl_custom_grid_grid_columns_config') ?>
+            <?php echo $this->getChildHtml('blcg_grid_config') ?>
     <?php else: ?>
         <?php echo $this->getMessagesBlock()->getGroupedHtml() ?>
-        <?php echo $this->getChildHtml('bl_custom_grid_grid_columns_config') ?>
+        <?php echo $this->getChildHtml('blcg_grid_config') ?>
     <?php endif; ?>
 
-<?php if ($_gridModel && $_gridModel->getPinnableHeader()): ?>
+<?php if ($_gridModel && $_gridModel->getPinHeader()): ?>
 <div class="blcg-grid-pinned-actions-block-placeholder"></div>
 <div class="blcg-grid-pinnable-actions-block">
 <?php endif ?>
@@ -105,7 +105,7 @@ $_gridModel  = $this->helper('customgrid/grid')->getGridModelFromBlock($this);;
 
             <?php if ($_gridModel): ?>
             <select name="<?php echo $this->getVarNameLimit() ?>" onchange="<?php echo $this->getJsObjectName() ?>.loadByElement(this)">
-                <?php foreach ($_gridModel->getPaginationValues() as $_value): ?>
+                <?php foreach ($_gridModel->getAppliablePaginationValues() as $_value): ?>
                 <option value="<?php echo $_value ?>"<?php if($this->getCollection()->getPageSize()==$_value): ?> selected="selected"<?php endif; ?>><?php echo $_value ?></option>
                 <?php endforeach ?>
             </select>
@@ -146,12 +146,12 @@ $_gridModel  = $this->helper('customgrid/grid')->getGridModelFromBlock($this);;
         </tr>
     </table>
 <?php endif; ?>
-<?php echo $this->getChildHtml('bl_custom_grid_grid_columns_filters') ?>
+<?php echo $this->getChildHtml('blcg_grid_columns_filters') ?>
 <?php if($this->getMassactionBlock()->isAvailable()): ?>
 <?php echo $this->getMassactionBlockHtml() ?>
 <?php endif ?>
 
-<?php if ($_gridModel && $_gridModel->getPinnableHeader()): ?>
+<?php if ($_gridModel && $_gridModel->getPinHeader()): ?>
 </div>
 <?php endif ?>
 
@@ -268,10 +268,10 @@ $_gridModel  = $this->helper('customgrid/grid')->getGridModelFromBlock($this);;
 </script>
 <?php endif; ?>
 
-<?php if ($_gridModel && $_gridModel->getPinnableHeader()): ?>
+<?php if ($_gridModel && $_gridModel->getPinHeader()): ?>
 <script type="text/javascript">
 //<![CDATA[
-    <?php echo $this->helper('core')->uniqHash('blcgPinner_') ?> = new blcg.Grid.ActionsPinner('<?php echo $this->getId() ?>', '<?php echo $this->getId() ?>_table');
+<?php echo $this->helper('core')->uniqHash('blcgPinner_') ?> = new blcg.Grid.ActionsPinner('<?php echo $this->getId() ?>', '<?php echo $this->getId() ?>_table');
 //]]>
 </script>
 <?php endif ?>
@@ -280,4 +280,4 @@ $_gridModel  = $this->helper('customgrid/grid')->getGridModelFromBlock($this);;
 <?php if ($this->helper('customgrid')->isAjaxRequest()): ?>
     <?php echo $this->getMessagesBlock()->setIsAjaxMode(true)->toHtml() ?>
 <?php endif ?>
-<?php echo $this->getChildHtml('bl_custom_grid_grid_columns_editor') ?>
+<?php echo $this->getChildHtml('blcg_grid_columns_editor') ?>

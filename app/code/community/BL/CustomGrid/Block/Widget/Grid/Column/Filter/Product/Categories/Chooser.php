@@ -34,16 +34,13 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Product_Categories_Chooser
     extends Mage_Adminhtml_Block_Catalog_Category_Tree
 {
-    protected $_categoryIds;
-    protected $_selectedNodes = null;
-    
     public function __construct()
     {
         parent::__construct();
@@ -51,27 +48,12 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Product_Categories_Chooser
         $this->setTemplate('bl/customgrid/widget/grid/column/filter/product/categories/chooser.phtml');
     }
     
-    public function getApplyButtonHtml()
-    {
-        if ($this->getJsObject()) {
-            return $this->getLayout()->createBlock('adminhtml/widget_button')
-                ->setData(array(
-                    'label'   => $this->__('Choose'),
-                    'onclick' => 'blcgApplyCategories();',
-                    'class'   => 'scalable save',
-                    'type'    => 'button',
-                ))->toHtml();
-        } else {
-            return '';
-        }
-    }
-    
     public function getCategoryIds()
     {
-        if (!is_array($this->_getData('category_ids'))) {
-            $this->setData('category_ids', array());
+        if (!is_array($categoryIds = $this->_getData('category_ids'))) {
+            $this->setData('category_ids', ($categoryIds = array()));
         }
-        return $this->_getData('category_ids');
+        return $categoryIds;
     }
     
     public function getIdsString()
@@ -82,9 +64,11 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Product_Categories_Chooser
     public function getRootNode()
     {
         $root = $this->getRoot();
+        
         if ($root && in_array($root->getId(), $this->getCategoryIds())) {
             $root->setChecked(true);
         }
+        
         return $root;
     }
     
@@ -94,22 +78,21 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Product_Categories_Chooser
             return $this->getNode($parentNodeCategory, $recursionLevel);
         }
         
-        $root = Mage::registry('root');
+        $root = Mage::registry('blcg_wgcfpcc_root');
         
         if (is_null($root)) {
             $storeId = (int) $this->getRequest()->getParam('store');
             
             if ($storeId) {
-                $store = Mage::app()->getStore($storeId);
+                $store  = Mage::app()->getStore($storeId);
                 $rootId = $store->getRootCategoryId();
             }
             else {
                 $rootId = Mage_Catalog_Model_Category::TREE_ROOT_ID;
             }
             
-            $ids = $this->getSelectedCategoriesPathIds($rootId);
-            $tree = Mage::getResourceSingleton('catalog/category_tree')
-                ->loadByIds($ids, false, false);
+            $ids  = $this->getSelectedCategoriesPathIds($rootId);
+            $tree = Mage::getResourceSingleton('catalog/category_tree')->loadByIds($ids, false, false);
             
             if ($this->getCategory()) {
                 $tree->loadEnsuredNodes($this->getCategory(), $tree->getNodeById($rootId));
@@ -121,10 +104,10 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Product_Categories_Chooser
             if ($root && ($rootId != Mage_Catalog_Model_Category::TREE_ROOT_ID)) {
                 $root->setIsVisible(true);
             } elseif ($root && ($root->getId() == Mage_Catalog_Model_Category::TREE_ROOT_ID)) {
-                $root->setName(Mage::helper('catalog')->__('Root'));
+                $root->setName($this->helper('catalog')->__('Root'));
             }
             
-            Mage::register('root', $root);
+            Mage::register('blcg_wgcfpcc_root', $root);
         }
         
         return $root;
@@ -132,7 +115,7 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Product_Categories_Chooser
     
     protected function _getNodeJson($node, $level=1)
     {
-        $item     = parent::_getNodeJson($node, $level);
+        $item = parent::_getNodeJson($node, $level);
         $isParent = $this->_isParentSelectedCategory($node);
         
         if ($isParent) {
@@ -150,6 +133,7 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Product_Categories_Chooser
         foreach ($this->_getSelectedNodes() as $selected) {
             if ($selected) {
                 $pathIds = explode('/', $selected->getPathId());
+                
                 if (in_array($node->getId(), $pathIds)) {
                     return true;
                 }
@@ -160,16 +144,20 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Product_Categories_Chooser
     
     protected function _getSelectedNodes()
     {
-        if (is_null($this->_selectedNodes)) {
-            $this->_selectedNodes = array();
-            $root = $this->getRoot();
-            foreach ($this->getCategoryIds() as $categoryId) {
-                if ($root) {
-                    $this->_selectedNodes[] = $root->getTree()->getNodeById($categoryId);
+        if (!$this->hasData('selected_nodes')) {
+            $selectedNodes = array();
+            
+            if ($root = $this->getRoot()) {
+                $tree = $root->getTree();
+                
+                foreach ($this->getCategoryIds() as $categoryId) {
+                    $selectedNodes[] = $tree->getNodeById($categoryId);
                 }
             }
+            
+            $this->setData('selected_nodes', $selectedNodes);
         }
-        return $this->_selectedNodes;
+        return $this->_getData('selected_nodes');
     }
     
     public function getCategoryChildrenJson($categoryId)
@@ -182,22 +170,18 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Product_Categories_Chooser
         }
         
         $children = array();
+        
         foreach ($node->getChildren() as $child) {
             $children[] = $this->_getNodeJson($child);
         }
         
-        return Mage::helper('core')->jsonEncode($children);
-    }
-    
-    public function getLoadTreeUrl($expanded=null)
-    {
-        return $this->getUrl('customgrid/custom_grid_column_filter/categoriesJson', array('_current' => true));
+        return $this->helper('core')->jsonEncode($children);
     }
     
     public function getSelectedCategoriesPathIds($rootId=false)
     {
         $ids = array();
-        $helper = Mage::helper('customgrid');
+        $helper = $this->helper('customgrid');
         $from16 = $helper->isMageVersionGreaterThan(1, 5);
         $categoryIds = $this->getCategoryIds();
         
@@ -220,5 +204,25 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Product_Categories_Chooser
         }
         
         return $ids;
+    }
+    
+    public function getLoadTreeUrl($expanded=null)
+    {
+        return $this->getUrl('customgrid/grid_column_filter/categoriesJson', array('_current' => true));
+    }
+    
+    public function getApplyButtonHtml()
+    {
+        return !$this->getJsObjectName()
+            ? ''
+            : $this->getLayout()
+                  ->createBlock('adminhtml/widget_button')
+                  ->setData(array(
+                      'label'   => $this->__('Choose'),
+                      'onclick' => 'blcgApplyCategories();',
+                      'class'   => 'scalable save',
+                      'type'    => 'button',
+                  ))
+                  ->toHtml();
     }
 }

@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -19,9 +19,8 @@ class BL_CustomGrid_Block_Options_Source_Edit_Tab_Custom
 {
     protected function _prepareForm()
     {
-        $source = Mage::registry('current_options_source');
-        
-        $form = new Varien_Data_Form();
+        $source = Mage::registry('blcg_options_source');
+        $form   = new Varien_Data_Form();
         $fieldset = $form->addFieldset('custom_list', array('legend' => $this->__('Custom List')));
         
         $fieldset->addField('options', 'text', array(
@@ -31,9 +30,8 @@ class BL_CustomGrid_Block_Options_Source_Edit_Tab_Custom
             'value' => $source->getData('options'),
         ));
         
-        $form->getElement('options')->setRenderer(
-            $this->getLayout()->createBlock('customgrid/options_source_edit_tab_custom_list')
-        );
+        $form->getElement('options')
+            ->setRenderer($this->getLayout()->createBlock('customgrid/options_source_edit_tab_custom_list'));
         
         $this->setForm($form);
     }

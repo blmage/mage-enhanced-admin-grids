@@ -9,22 +9,35 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class BL_CustomGrid_Helper_Grid
     extends Mage_Core_Helper_Abstract
 {
+    /**
+     * Whether the current Magento version is greater or equal to 1.6
+     * 
+     * @var bool|null
+     */
     protected $_checkFrom16 = null;
     
-    protected $_baseVerifyCallbacks = array(
+    /**
+     * Base verification callbacks by verification types and block type
+     * 
+     * @var array
+     */
+    protected $_baseVerificationCallbacks = array(
         'block' => array(
+            // Those block verifications are certainly more often troublesome than they are useful
+            /*
             'adminhtml/catalog_product_grid'  => '_verifyCatalogProductGridBlock',
             'adminhtml/sales_order_grid'      => '_verifySalesOrderGridBlock',
             'adminhtml/sales_invoice_grid'    => '_verifySalesInvoiceGridBlock',
             'adminhtml/sales_shipment_grid'   => '_verifySalesShipmentGridBlock',
             'adminhtml/sales_creditmemo_grid' => '_verifySalesCreditmemoGridBlock',
+            */
         ),
         'collection' => array(
             'adminhtml/catalog_product_grid'  => '_verifyCatalogProductGridCollection',
@@ -33,22 +46,90 @@ class BL_CustomGrid_Helper_Grid
             'adminhtml/sales_shipment_grid'   => '_verifySalesShipmentGridCollection',
             'adminhtml/sales_creditmemo_grid' => '_verifySalesCreditmemoGridCollection',
         ),
-    );
-    protected $_additionalVerifyCallbacks = array(
+    ); // @todo should verification callbacks be set by grid type code ?
+    
+    /**
+     * Additional verification callbacks by verification types and block type
+     * 
+     * @var array
+     */
+    protected $_additionalVerificationCallbacks = array(
         'block' => array(),
         'collection' => array(),
     );
     
-    public function addVerifyGridElementCallback($type, $blockType, $callback, $params=array(), $addNative=true)
+    /**
+     * Return the columns that are actually displayable for the given grid block
+     * 
+     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
+     * @return array
+     */
+    public function getGridBlockDisplayableColumns(Mage_Adminhtml_Block_Widget_Grid $gridBlock)
     {
-         $this->_additionalVerifyCallbacks[$type][$blockType][] = array(
+        $columns = $gridBlock->getColumns();
+        
+        foreach ($columns as $key => $column) {
+            if ($column->getBlcgFilterOnly()) {
+                unset($columns[$key]);
+            }
+        }
+        
+        return $columns;
+    }
+    
+    /**
+     * Return the grid model from the given grid block
+     * 
+     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
+     * @return BL_CustomGrid_Model_Grid|null
+     */
+    public function getGridModelFromBlock(Mage_Adminhtml_Block_Widget_Grid $gridBlock)
+    {
+        return (Mage::helper('customgrid')->isRewritedGridBlock($gridBlock) ? $gridBlock->blcg_getGridModel() : null);
+    }
+    
+    /**
+     * Return whether the given grid block is based on EAV entities
+     * 
+     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
+     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @return bool
+     */
+    public function isEavEntityGrid(Mage_Adminhtml_Block_Widget_Grid $gridBlock, BL_CustomGrid_Model_Grid $gridModel)
+    {
+        return ($gridBlock->getCollection() instanceof Mage_Eav_Model_Entity_Collection_Abstract);
+    }
+    
+    /**
+     * Register an additional verification callback for the given block type
+     * 
+     * @param string $type Verification type (either "block" or "collection")
+     * @param string $blockType Grid block type
+     * @param callable $callback Verification callback
+     * @param array $params Callback parameters
+     * @param bool $addNative Whether the native callback parameters should be appended to the callback call
+     * @return this
+     */
+    public function addVerificationCallback($type, $blockType, $callback, array $params=array(), $addNative=true)
+    {
+        if (!isset($this->_additionalVerificationCallbacks[$type][$blockType])) {
+            $this->_additionalVerificationCallbacks[$type][$blockType] = array();
+        }
+        
+        $this->_additionalVerificationCallbacks[$type][$blockType][] = array(
             'callback'   => $callback,
             'params'     => $params,
-            'add_native' => $addNative,
+            'add_native' => (bool) $addNative,
         );
+        
         return $this;
     }
     
+    /**
+     * Whether grid block verifications should be based on Magento 1.6+
+     * 
+     * @return bool
+     */
     public function shouldCheckFrom16()
     {
         if (is_null($this->_checkFrom16)) {
@@ -57,28 +138,39 @@ class BL_CustomGrid_Helper_Grid
         return $this->_checkFrom16;
     }
     
-    protected function _verifyGridElement($type, $blockType, $element, $model)
+    /**
+     * Verify that the given grid element (either block or collection) corresponds to what is expected in order to
+     * safely apply further treatments (such as applying custom columns)
+     * By default, it is verified that both the block and collection inherit from their corresponding core classes
+     * 
+     * @param string $type Verification type
+     * @param string $blockType Grid block type
+     * @param mixed $element Verified element (either block or collection)
+     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @return bool
+     */
+    protected function _verifyGridElement($type, $blockType, $element, BL_CustomGrid_Model_Grid $gridModel)
     {
         $checkFrom16 = $this->shouldCheckFrom16();
         $isVerified  = true;
         
-        if (isset($this->_baseVerifyCallbacks[$type][$blockType])) {
+        if (isset($this->_baseVerificationCallbacks[$type][$blockType])) {
             $isVerified = (bool) call_user_func(
-                array($this, $this->_baseVerifyCallbacks[$type][$blockType]),
+                array($this, $this->_baseVerificationCallbacks[$type][$blockType]),
                 $element,
-                $model,
+                $gridModel,
                 $checkFrom16
             );
         }
-        if ($isVerified && isset($this->_additionalVerifyCallbacks[$type][$blockType])) {
-            foreach ($this->_additionalVerifyCallbacks[$type][$blockType] as $callback) {
+        if ($isVerified && isset($this->_additionalVerificationCallbacks[$type][$blockType])) {
+            foreach ($this->_additionalVerificationCallbacks[$type][$blockType] as $callback) {
                 $isVerified = (bool) call_user_func_array(
                     $callback['callback'],
                     array_merge(
                         array_values($callback['params']),
-                        ($callback['add_native']? array($element, $model, $checkFrom16) : array())
-                    )
-                );
+                        ($callback['add_native']? array($element, $gridModel, $checkFrom16) : array())
+                    ));
+                
                 if (!$isVerified) {
                     break;
                 }
@@ -88,20 +180,37 @@ class BL_CustomGrid_Helper_Grid
         return $isVerified;
     }
     
-    public function verifyGridBlock($block, $model)
+    /**
+     * Verify that the given grid block corresponds to what is expected in order to safely apply further treatments
+     * (such as applying custom columns)
+     * 
+     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
+     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @return bool
+     */
+    public function verifyGridBlock(Mage_Adminhtml_Block_Widget_Grid $gridBlock, BL_CustomGrid_Model_Grid $gridModel)
     {
-        if (($block instanceof Mage_Adminhtml_Block_Widget_Grid)
-            && Mage::helper('customgrid')->isRewritedGrid($block)) {
-            return $this->_verifyGridElement('block', $model->getBlockType(), $block, $model);
+        if (($gridBlock instanceof Mage_Adminhtml_Block_Widget_Grid)
+            && Mage::helper('customgrid')->isRewritedGridBlock($gridBlock)) {
+            return $this->_verifyGridElement('block', $gridModel->getBlockType(), $gridBlock, $gridModel);
         }
         return false;
     }
     
-    public function verifyGridCollection($block, $model)
+    /**
+     * Verify that the collection from the given grid block corresponds to what is expected in order to safely apply
+     * further treatments (such as applying custom columns)
+     * 
+     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
+     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @return bool
+     */
+    public function verifyGridCollection(Mage_Adminhtml_Block_Widget_Grid $gridBlock,
+        BL_CustomGrid_Model_Grid $gridModel)
     {
-        if (($collection = $block->getCollection())
+        if (($collection = $gridBlock->getCollection())
             && ($collection instanceof Varien_Data_Collection_Db)) {
-            return $this->_verifyGridElement('collection', $model->getBlockType(), $collection, $model);
+            return $this->_verifyGridElement('collection', $gridModel->getBlockType(), $collection, $gridModel);
         }
         return false;
     }
@@ -169,31 +278,5 @@ class BL_CustomGrid_Helper_Grid
             return ($collection instanceof Mage_Sales_Model_Resource_Order_Creditmemo_Grid_Collection);
         }
         return ($collection instanceof Mage_Sales_Model_Mysql4_Order_Creditmemo_Grid_Collection);
-    }
-    
-    public function isEavEntityGrid($block, $model)
-    {
-        return ($block->getCollection() instanceof Mage_Eav_Model_Entity_Collection_Abstract);
-    }
-    
-    public function getGridBlockDisplayableColumns($block)
-    {
-        $columns = $block->getColumns();
-        
-        foreach ($columns as $key => $column) {
-            if ($column->getBlcgFilterOnly()) {
-                unset($columns[$key]);
-            }
-        }
-        
-        return $columns;
-    }
-    
-    public function getGridModelFromBlock($block)
-    {
-        if (Mage::helper('customgrid')->isRewritedGrid($block)) {
-            return $block->blcg_getGridModel();
-        }
-        return null;
     }
 }

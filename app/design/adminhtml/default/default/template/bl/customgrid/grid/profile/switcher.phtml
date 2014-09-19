@@ -1,0 +1,40 @@
+<?php
+/**
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
+ *
+ * @category   BL
+ * @package    BL_CustomGrid
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+?>
+<p class="switcher blcg-profile-switcher">
+    <label for="blcg_profile_switcher"><?php echo $this->__('Choose Profile:') ?></label>
+    <select name="blcg_profile_switcher" id="blcg_profile_switcher" onchange="return blcgSwitchProfile(this);">
+    <?php foreach ($this->getProfiles() as $_profile): ?>
+        <option<?php if ($_profile->isCurrent()): ?> selected="selected"<?php endif ?> value="<?php echo $_profile->getId() ?>"><?php echo $this->htmlEscape($_profile->getName()) ?></option>
+    <?php endforeach ?>
+    </select>
+</p>
+<script type="text/javascript">
+//<![CDATA[
+function blcgSwitchProfile(select)
+{
+    var switchUrl = '<?php echo $this->getSwitchUrl() ?>';
+    switchUrl = switchUrl.replace('<?php echo $this->getProfileIdPlaceholder() ?>', select.value);
+    
+    if (confirm('<?php echo $this->jsQuoteEscape($this->__('Please confirm profile switching. All data that hasn\'t been saved will be lost.')) ?>')) {
+        setLocation(switchUrl);
+        return true;
+    }
+    
+    select.value = '<?php echo $this->getCurrentGridProfile()->getId() ?>';
+    return false;
+}
+//]]>
+</script>

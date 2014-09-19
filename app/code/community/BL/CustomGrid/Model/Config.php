@@ -9,11 +9,11 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_Config extends Varien_Object
+class BL_CustomGrid_Model_Config
 {
     const CACHE_KEY = 'bl_customgrid_config';
     
@@ -24,31 +24,33 @@ class BL_CustomGrid_Model_Config extends Varien_Object
     protected $_xmlConfigs = null;
     
     /**
-    * Load whole customgrid configuration, retrieve a sub part
-    * 
-    * @param string $type Configuration part type
-    * @return Varien_Simplexml_Config
-    */
+     * Load the whole customgrid XML configuration, return the specified sub part
+     * 
+     * @param string $type Type of the sub part to return
+     * @return Varien_Simplexml_Config
+     */
     public function getXmlConfig($type)
     {
         if (is_null($this->_xmlConfigs)) {
             $cachedXml = Mage::app()->loadCache(self::CACHE_KEY);
+            
             if ($cachedXml) {
                 $xmlConfig = new Varien_Simplexml_Config($cachedXml);
             } else {
-                $config = new Varien_Simplexml_Config();
-                $config->loadString('<?xml version="1.0"?><customgrid></customgrid>');
-                Mage::getConfig()->loadModulesConfiguration('customgrid.xml', $config);
-                $xmlConfig = $config;
+                $xmlConfig = new Varien_Simplexml_Config();
+                $xmlConfig->loadString('<?xml version="1.0"?><customgrid></customgrid>');
+                Mage::getConfig()->loadModulesConfiguration('customgrid.xml', $xmlConfig);
+                
                 if (Mage::app()->useCache('config')) {
                     Mage::app()->saveCache(
-                        $config->getXmlString(),
+                        $xmlConfig->getXmlString(),
                         self::CACHE_KEY,
                         array(Mage_Core_Model_Config::CACHE_TAG)
                     );
                 }
             }
-            // Split config in main parts
+            
+            // Split config into the main sub parts
             $this->_xmlConfigs = array(
                 self::TYPE_GRID_TYPES 
                     => new Varien_Simplexml_Config($xmlConfig->getNode('grid_types')),

@@ -9,91 +9,78 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class BL_CustomGrid_Model_Grid_Type_Product
     extends BL_CustomGrid_Model_Grid_Type_Abstract
 {
-    protected $_attributes = null;
-    protected $_mustCaptureExportedCollection = false;
-    
-    public function isAppliableToGrid($type, $rewritingClassName)
+    protected function _getSupportedBlockTypes()
     {
-        return (($type == 'adminhtml/catalog_product_grid')
-            || ($type == 'adminhtml/catalog_category_tab_product')
-            || ($type == 'adminhtml/catalog_product_edit_tab_related')
-            || ($type == 'adminhtml/catalog_product_edit_tab_upsell')
-            || ($type == 'adminhtml/catalog_product_edit_tab_crosssell'));
+        return array(
+            'adminhtml/catalog_product_grid',
+            'adminhtml/catalog_category_tab_product',
+            'adminhtml/catalog_product_edit_tab_related',
+            'adminhtml/catalog_product_edit_tab_upsell',
+            'adminhtml/catalog_product_edit_tab_crosssell',
+        );
     }
     
-    public function canExport($type)
+    public function canExport($blockType)
     {
-        // @todo implement export for category products tab
-        return ($type == 'adminhtml/catalog_product_grid');
+        // @todo fix and enable export for the other supported block types
+        return (($blockType == 'adminhtml/catalog_product_grid') || !$this->isSupportedBlockType($blockType));
     }
     
-    protected function _getColumnsLockedValues($type)
+    protected function _getColumnsLockedValues($blockType)
     {
         return array(
             'is_salable' => array(
-                'renderer'      => '',
-                'config_values' => array(
-                    'filter'   => false,
-                    'sortable' => false,
-                ),
+                'renderer' => '',
+                'config_values' => array('filter' => false, 'sortable' => false),
             ),
         );
     }
     
-    public function canHaveAttributeColumns($type)
+    public function canHaveAttributeColumns($blockType)
     {
         return true;
     }
     
-    protected function _isAvailableAttribute($type, $attribute)
+    protected function _isAvailableAttribute($blockType, Mage_Eav_Model_Entity_Attribute $attribute)
     {
-        if (parent::_isAvailableAttribute($type, $attribute)) {
-            // @todo for this and editability, put allowed models rather than excluded ones ?
+        if (parent::_isAvailableAttribute($blockType, $attribute)) {
             $excludedModels = array(
                 'catalog/product_attribute_backend_media',
                 'catalog/product_attribute_backend_recurring',
                 'catalog/product_attribute_backend_tierprice',
             );
-            if (($attribute->getFrontend()->getInputType() != 'gallery')
-                && !in_array($attribute->getBackendModel(), $excludedModels)) {
-                return true;
-            }
+            
+            return ($attribute->getFrontend()->getInputType() != 'gallery')
+                && !in_array($attribute->getBackendModel(), $excludedModels);
         }
         return false;
     }
     
-    protected function _getAvailableAttributes($type)
+    protected function _getAvailableAttributes($blockType)
     {
-        $attributes = Mage::getModel('catalog/product')->getResource()
+        $attributes = Mage::getResourceModel('catalog/product')
             ->loadAllAttributes()
             ->getAttributesByCode();
-        $keptAttributes = array();
+        
+        $availableAttributes = array();
         
         foreach ($attributes as $attribute) {
-            if ($this->_isAvailableAttribute($type, $attribute)) {
-                $keptAttributes[$attribute->getAttributeCode()] = $attribute;
+            if ($this->_isAvailableAttribute($blockType, $attribute)) {
+                $availableAttributes[$attribute->getAttributeCode()] = $attribute;
             }
         }
         
-        return $keptAttributes;
+        return $availableAttributes;
     }
     
-    public function checkUserEditPermissions($type, $model, $block=null, $params=array())
-    {
-        if (parent::checkUserEditPermissions($type, $model, $block, $params)) {
-            return Mage::getSingleton('admin/session')->isAllowed('catalog/products');
-        }
-        return false;
-    }
-    
-    protected function _getEditableFields($type)
+    protected function _getEditableFields($blockType)
     {
         return array(
             'qty' => array(
@@ -101,67 +88,44 @@ class BL_CustomGrid_Model_Grid_Type_Product
                 'required'        => true,
                 'render_reload'   => false,
                 'form_class'      => 'validate-number',
-                'edit_block_type' => 'customgrid/widget_grid_form_static_product_inventory',
+                'edit_block_type' => 'customgrid/widget_grid_editor_form_static_product_inventory',
                 'inventory_field' => 'qty',
             ),
         );
     }
     
-    protected function _checkEntityEditableField($type, $config, $params, $entity)
+    protected function _checkAttributeEditability($blockType, Mage_Eav_Model_Entity_Attribute $attribute)
     {
-        if (parent::_checkEntityEditableField($type, $config, $params, $entity)) {
-            if ($config['id'] == 'qty') {
-                if (!Mage::helper('core')->isModuleEnabled('Mage_CatalogInventory')) {
-                    Mage::throwException(Mage::helper('customgrid')->__('The "Mage_CatalogInventory" module is disabled'));
-                }
-                if ($entity->isComposite()) {
-                    Mage::throwException(Mage::helper('customgrid')->__('The quantity is not editable for composite products'));
-                }
-                if ($entity->getInventoryReadonly()) {
-                    Mage::throwException(Mage::helper('customgrid')->__('The quantity is read-only for this product'));
-                }
-                if (!$this->_getProductInventoryData($entity, 'manage_stock', true)) {
-                    Mage::throwException(Mage::helper('customgrid')->__('The quantity is not editable for this product'));
-                }
-            }
-        }
-        return true;
-    }
-    
-    protected function _getAdditionalEditableAttributes($type)
-    {
-        return array(
-            'sku' => Mage::getResourceModel('catalog/product')->getAttribute('sku'),
-        );
-    }
-    
-    protected function _checkAttributeEditability($type, $attribute)
-    {
-        if (parent::_checkAttributeEditability($type, $attribute)) {
+        if (parent::_checkAttributeEditability($blockType, $attribute)) {
             return ($attribute->getFrontend()->getInputType() != 'media_image');
         }
         return false;
     }
     
-    protected function _prepareEditableAttributeCommonConfig($type, $code, $attribute, $config)
+    protected function _getAdditionalEditableAttributes($blockType)
     {
-        if ($attribute->getFrontendInput() == 'weight') {
-            $config['in_grid'] = true;
-        }
-        
-        return array_merge(
-            parent::_prepareEditableAttributeCommonConfig($type, $code, $attribute, $config),
-            array(
-                'edit_block_type' => 'product',
-                'layout_handles'  => array(
-                    'custom_grid_editor_handle_editor',
-                    'custom_grid_editor_handle_product',
-                ),
-            )
-        );
+        return array('sku' => Mage::getResourceModel('catalog/product')->getAttribute('sku'));
     }
     
-    protected function _getBaseEditableAttributeFields($type)
+    protected function _prepareEditableAttributeCommonConfig($blockType, $code,
+        Mage_Eav_Model_Entity_Attribute $attribute, BL_CustomGrid_Model_Grid_Edit_Config $config)
+    {
+        if ($attribute->getFrontendInput() == 'weight') {
+            $config->setInGrid(true);
+        }
+        
+        $config->addData(array(
+            'edit_block_type' => 'product',
+            'layout_handles'  => array(
+                'blcg_grid_editor_handle_editor',
+                'blcg_grid_editor_handle_product',
+            ),
+        ));
+        
+        return parent::_prepareEditableAttributeCommonConfig($blockType, $code, $attribute, $config);
+    }
+    
+    protected function _getBaseEditableAttributeFields($blockType)
     {
         return array(
             'name' => array(
@@ -180,12 +144,12 @@ class BL_CustomGrid_Model_Grid_Type_Product
         );
     }
     
-    public function getAdditionalEditParams($type, $grid)
+    public function getAdditionalEditParams($blockType, Mage_Adminhtml_Block_Widget_Grid $gridBlock)
     {
-        return array('store_id' => $grid->blcg_getStore()->getId());
+        return array('store_id' => $gridBlock->blcg_getStore()->getId());
     }
     
-    protected function _getEntityRowIdentifiersKeys($type)
+    protected function _getEntityRowIdentifiersKeys($blockType)
     {
         return array('entity_id');
     }
@@ -195,113 +159,161 @@ class BL_CustomGrid_Model_Grid_Type_Product
         return Mage_Catalog_Model_Abstract::DEFAULT_STORE_ID;
     }
     
-    protected function _loadEditedEntity($type, $config, $params)
+    protected function _getProductInventoryData($product, $field, $useConfigDefault=false)
     {
-        if (isset($params['ids']['entity_id'])) {
+        if ($product->getStockItem()) {
+            if (!$useConfigDefault
+                || ($product->getStockItem()->getData('use_config_' . $field) == 0)) {
+                return $product->getStockItem()->getDataUsingMethod($field);
+            }
+        }
+        return Mage::getStoreConfig(Mage_CatalogInventory_Model_Stock_Item::XML_PATH_ITEM . $field);
+    }
+    
+    protected function _loadEditedEntity($blockType, BL_CustomGrid_Object $config, array $params, $entityId)
+    {
+        $storeId = $this->_getDefaultStoreId();
+        
+        if (isset($params['additional'])) {
             if (isset($params['additional']['column_store_id'])) {
                 $storeId = $params['additional']['column_store_id'];
             } elseif (isset($params['additional']['store_id'])) {
                 $storeId = $params['additional']['store_id'];
-            } else {
-                $storeId = 0;
             }
-            
-            Mage::getSingleton('cms/wysiwyg_config')->setStoreId($storeId);
-            
-            return Mage::getModel('catalog/product')
-                ->setStoreId($storeId)
-                ->setData('_edit_mode', true)
-                ->load($params['ids']['entity_id']);
         }
-        return null;
+        
+        Mage::getSingleton('cms/wysiwyg_config')->setStoreId($storeId);
+        
+        return Mage::getModel('catalog/product')
+            ->setStoreId($storeId)
+            ->setData('_edit_mode', true)
+            ->load($entityId);
     }
     
-    protected function _getEditedEntityRegistryKeys($type, $config, $params, $entity)
+    protected function _getEditedEntityRegistryKeys($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
         return array('current_product', 'product');
     }
     
-    protected function _checkEntityEditableAttribute($type, $config, $params, $entity)
+    protected function _checkEntityEditableField($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
-        if (parent::_checkEntityEditableAttribute($type, $config, $params, $entity)) {
+        if (parent::_checkEntityEditableField($blockType, $config, $params, $entity)) {
+            if ($config->getId() == 'qty') {
+                $helper = $this->_getHelper();
+                
+                if (!Mage::helper('core')->isModuleEnabled('Mage_CatalogInventory')) {
+                    Mage::throwException($helper->__('The "Mage_CatalogInventory" module is disabled'));
+                }
+                if ($entity->isComposite()) {
+                    Mage::throwException($helper->__('The quantity is not editable for composite products'));
+                }
+                if ($entity->getInventoryReadonly()) {
+                    Mage::throwException($helper->__('The quantity is read-only for this product'));
+                }
+                if (!$this->_getProductInventoryData($entity, 'manage_stock', true)) {
+                    Mage::throwException($helper->__('The quantity is not editable for this product'));
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+    
+    protected function _checkEntityEditableAttribute($blockType, BL_CustomGrid_Object $config, array $params, $entity)
+    {
+        if (parent::_checkEntityEditableAttribute($blockType, $config, $params, $entity)) {
+            $helper = $this->_getHelper();
+            $isEditable = false;
+            $attributeCode = $config->getData('config/attribute')->getAttributeCode();
             $productAttributes = $entity->getAttributes();
-            $searchedCode = $config['config']['attribute']->getAttributeCode();
-            $isEditable   = false;
             
             foreach ($productAttributes as $attribute) {
-                if ($attribute->getAttributeCode() == $searchedCode) {
+                if ($attribute->getAttributeCode() == $attributeCode) {
                     $isEditable = true;
                     break;
                 }
             }
             
             if ($entity->hasLockedAttributes()) {
-                if (in_array($searchedCode, $entity->getLockedAttributes())) {
-                    Mage::throwException(Mage::helper('customgrid')->__('This attribute is locked'));
+                if (in_array($attributeCode, $entity->getLockedAttributes())) {
+                    Mage::throwException($helper->__('This attribute is locked'));
                 }
             }
-            
-            if (($entity->getStoreId() != 0)
+            if (($entity->getStoreId() != $this->_getDefaultStoreId())
                 && !in_array($entity->getStoreId(), $entity->getStoreIds())) {
-                Mage::throwException(Mage::helper('customgrid')->__('The product is not associated to the corresponding website'));
+                Mage::throwException($helper->__('The product is not associated to the corresponding website'));
             }
+            // @todo all MAP stuff from 1.6, and handle attributes with "Use config"
             
             if ($isEditable) {
                 if ($entity->getTypeId() == Mage_Catalog_Model_Product_Type::TYPE_BUNDLE) {
-                    // @todo all MAP stuff from 1.6, and handle attributes with "Use config" (such as gift_message_available too)
-                    if (in_array($searchedCode, array('price', 'sku', 'special_price', 'tier_price', 'weight'))) {
-                        Mage::throwException(Mage::helper('customgrid')->__('This attribute is not editable for bundle products'));
+                    if (in_array($attributeCode, array('sku', 'weight', 'price', 'special_price', 'tier_price'))) {
+                        Mage::throwException($helper->__('This attribute is not editable for bundle products'));
                     }
                 }
                 return true;
-            } else {
-                Mage::throwException(Mage::helper('customgrid')->__('This attribute is not editable for this product'));
             }
+            
+            Mage::throwException($helper->__('This attribute is not editable for this product'));
         }
         return false;
     }
     
-    protected function _mustUseDefaultValueForSave($config, $params, $formName=null)
+    protected function _getEditRequiredAclPermissions($blockType)
     {
-        $formName = (is_null($formName) ? $config['config']['attribute']->getAttributeCode() : $formName);
-        return (isset($params['global']['use_default'])
-                && is_array($default = $params['global']['use_default'])
-                && in_array($formName, $default));
+        return 'catalog/products';
     }
     
-    protected function _mustUseDefaultValueForAttribute($attribute, $entity)
+    protected function _getUseDefaultValueForAttribute(Mage_Eav_Model_Entity_Attribute $attribute, $entity)
     {
         if (!$attribute->isScopeGlobal() && $entity->getStoreId()) {
+            /**
+             * This method ensures that the attributes (other than the edited one) using default values
+             * for the current store (= values from higher scopes), will keep this behaviour after save.
+             */
             $attributeCode = $attribute->getAttributeCode();
             $defaultValue  = $entity->getAttributeDefaultValue($attributeCode);
             
             if (!$entity->getExistsStoreValueFlag($attributeCode)) {
                 return true;
-            } elseif (Mage::helper('customgrid')->isMageVersionGreaterThan(1, 4)
-                      && ($entity->getData($attributeCode) == $defaultValue)
-                      && ($entity->getStoreId() != $this->_getDefaultStoreId())) {
+            } elseif ($this->_getHelper()->isMageVersionGreaterThan(1, 4)
+                && ($entity->getData($attributeCode) == $defaultValue)
+                && ($entity->getStoreId() != $this->_getDefaultStoreId())) {
                 return false;
-            }
-            if (($defaultValue === false)
+            } elseif (($defaultValue === false)
                 && !$attribute->getIsRequired()
-                && $product->getData($attributeCode)) {
+                && $entity->getData($attributeCode)) {
                 return false;
             }
+            
             return ($defaultValue === false);
         }
         return false;
     }
     
-    protected function _prepareDefaultValues($config, $entity)
+    protected function _getUseDefaultValueForSave(BL_CustomGrid_Object $config, array $params, $formName=null)
+    {
+        if (is_null($formName)) {
+            $formName = $config->getData('config/attribute')->getAttributeCode();
+        }
+        return isset($params['global'])
+            && isset($params['global']['use_default'])
+            && is_array($useDefaultFor = $params['global']['use_default'])
+            && in_array($formName, $useDefaultFor);
+    }
+    
+    protected function _prepareDefaultValues(BL_CustomGrid_Object $config, $entity)
     {
         $attributes = $entity->getAttributes();
+        $editedAttributeCode = $config->getData('config/attribute')->getAttributeCode();
         
         foreach ($attributes as $attribute) {
             $attributeCode = $attribute->getAttributeCode();
-            if ($config['config']['attribute']->getAttributeCode() == $attributeCode) {
+            
+            if ($attributeCode == $editedAttributeCode) {
                 continue;
             }
-            if ($this->_mustUseDefaultValueForAttribute($attribute, $entity)) {
+            if ($this->_getUseDefaultValueForAttribute($attribute, $entity)) {
                 $entity->setData($attributeCode, false);
             }
         }
@@ -309,28 +321,9 @@ class BL_CustomGrid_Model_Grid_Type_Product
         return $this;
     }
     
-    protected function _getEditedAttributeValue($type, $config, $params, $entity, $formName)
+    protected function _applyEditedFieldValue($blockType, BL_CustomGrid_Object $config, array $params, $entity, $value)
     {
-        if ($this->_mustUseDefaultValueForSave($config, $params)) {
-            // Use "false" to indicate default value (just as base behaviour)
-            return false;
-        } else {
-            return parent::_getEditedAttributeValue($type, $config, $params, $entity, $formName);
-        }
-    }
-    
-    protected function _filterEditedAttributeValue($type, $config, $params, $entity, $value)
-    {
-        if (!$this->_mustUseDefaultValueForSave($config, $params)) {
-            return parent::_filterEditedAttributeValue($type, $config, $params, $entity, $value);
-        }
-        // Don't filter when using default value, else it may turn to another value than "false"
-        return $value;
-    }
-    
-    protected function _applyEditedFieldValue($type, $config, $params, $entity, $value)
-    {
-        if ($config['id'] == 'qty') {
+        if ($config->getId() == 'qty') {
             $productId = $entity->getId();
             $stockItem = Mage::getModel('cataloginventory/stock_item');
             $stockItem->setData(array());
@@ -338,68 +331,87 @@ class BL_CustomGrid_Model_Grid_Type_Product
             
             if (isset($params['original_inventory_qty'])
                 && (strlen($params['original_inventory_qty']) > 0)) {
-                $stockItem->setQtyCorrection($item->getQty()-$originalQty);
+                $stockItem->setQtyCorrection($item->getQty() - $originalQty);
             }
             
             $stockItem->setQty($value);
             $entity->setData('_blcg_gtp_stock_item', $stockItem);
             return $this;
         }
-        return parent::_applyEditedFieldValue($type, $config, $params, $entity, $value);
+        return parent::_applyEditedFieldValue($blockType, $config, $params, $entity, $value);
     }
     
-    protected function _beforeApplyEditedAttributeValue($type, $config, $params, $entity, &$value)
+    protected function _saveEditedFieldValue($blockType, BL_CustomGrid_Object $config, array $params, $entity, $value)
     {
-        if (Mage::app()->isSingleStoreMode()) {
-            $entity->setWebsiteIds(array(Mage::app()->getStore(true)->getWebsite()->getId()));
-        }
-        if (isset($params['global']['url_key_create_redirect'])) {
-            $entity->setData('save_rewrites_history', (bool) $params['global']['url_key_create_redirect']);
-        }
-        if ($config['config']['attribute']->getBackendModel() == 'catalog/product_attribute_backend_boolean') {
-            $test = 1;
-        }
-        
-        // As we edit only one value once, force using default value when needed
-        $this->_prepareDefaultValues($config, $entity);
-        return parent::_beforeApplyEditedAttributeValue($type, $config, $params, $entity, $value);
-    }
-    
-    protected function _applyEditedAttributeValue($type, $config, $params, $entity, $value)
-    {
-        parent::_applyEditedAttributeValue($type, $config, $params, $entity, $value);
-        $entity->validate(); // @todo catch exceptions and format them ? (not yet done in core)
-        return $this;
-    }
-    
-    protected function _saveEditedFieldValue($type, $config, $params, $entity, $value)
-    {
-        if ($config['id'] == 'qty') {
+        if ($config->getId() == 'qty') {
             if ($stockItem = $entity->getData('_blcg_gtp_stock_item')) {
                 $stockItem->save();
             }
             return $this;
         }
-        return parent::_saveEditedFieldValue($type, $config, $params, $entity, $value);
+        return parent::_saveEditedFieldValue($blockType, $config, $params, $entity, $value);
     }
     
-    protected function _afterSaveEditedAttributeValue($type, $config, $params, $entity, $value, $result)
+    protected function _getEditedAttributeValue($blockType, BL_CustomGrid_Object $config, array $params, $entity,
+        $formName)
     {
-        if ($this->_mustUseDefaultValueForSave($config, $params)) {
-            // Force product reload if default value was used, to ensure getting the good (default) value for rendering
-            $config['config']['render_reload'] = true;
+        if ($this->_getUseDefaultValueForSave($config, $params)) {
+            // Use "false" to indicate default value (just as base behaviour)
+            return false;
         }
-        /*
-        @todo from 1.5, but what about giving the choice to the user ? and for which attributes ?
-        (not just all, as it is certainly not useful in most of the cases)
-        // Mage::getModel('catalogrule/rule')->applyAllRulesToProduct($productId);
-        */
-        return parent::_afterSaveEditedAttributeValue($type, $config, $params, $entity, $value, $result);
+        return parent::_getEditedAttributeValue($blockType, $config, $params, $entity, $formName);
     }
     
-    protected function _getSavedFieldValueForRender($type, $config, $params, $entity)
+    protected function _filterEditedAttributeValue($blockType, BL_CustomGrid_Object $config, array $params, $entity,
+        $value)
     {
-        if ($config['id'] == 'qty') {
+        if (!$this->_getUseDefaultValueForSave($config, $params)) {
+            return parent::_filterEditedAttributeValue($blockType, $config, $params, $entity, $value);
+        }
+        // Don't filter when using default value, else it may turn to another value than false
+        return $value;
+    }
+    
+    protected function _beforeApplyEditedAttributeValue($blockType, BL_CustomGrid_Object $config, array $params,
+        $entity, &$value)
+    {
+        if (Mage::app()->isSingleStoreMode()) {
+            $entity->setWebsiteIds(array(Mage::app()->getStore(true)->getWebsite()->getId()));
+        }
+        if (isset($params['global']) && isset($params['global']['url_key_create_redirect'])) {
+            $entity->setData('save_rewrites_history', (bool) $params['global']['url_key_create_redirect']);
+        }
+        
+        // As we edit only one value once, force using default values for any attribute that require it
+        $this->_prepareDefaultValues($config, $entity);
+        return parent::_beforeApplyEditedAttributeValue($blockType, $config, $params, $entity, $value);
+    }
+    
+    protected function _applyEditedAttributeValue($blockType, BL_CustomGrid_Object $config, array $params, $entity,
+        $value)
+    {
+        parent::_applyEditedAttributeValue($blockType, $config, $params, $entity, $value);
+        $entity->validate();
+        return $this;
+    }
+    
+    protected function _afterSaveEditedAttributeValue($blockType, BL_CustomGrid_Object $config, array $params, $entity,
+        $value, $result)
+    {
+        if ($this->_getUseDefaultValueForSave($config, $params)) {
+            // Force product reload if default value was used, to ensure getting the good (value for rendering
+            $config->setData('config/render_reload', true);
+        }
+        /**
+         * @todo from 1.5 (but what about giving the choice to the user ? - with an attributes list)
+         * Mage::getModel('catalogrule/rule')->applyAllRulesToProduct($productId);
+         */
+        return parent::_afterSaveEditedAttributeValue($blockType, $config, $params, $entity, $value, $result);
+    }
+    
+    protected function _getSavedFieldValueForRender($blockType, BL_CustomGrid_Object $config, array $params, $entity)
+    {
+        if ($config->getId() == 'qty') {
             if ($stockItem = $entity->getStockItem()) {
                 // Reload stock item to get the updated value
                 $stockItem->setProductId(null)->assignProduct($entity);
@@ -407,42 +419,33 @@ class BL_CustomGrid_Model_Grid_Type_Product
             $value = $this->_getProductInventoryData($entity, 'qty')*1;
             return (strval($value) !== '' ? $value : 0);
         }
-        return parent::_getSavedFieldValueForRender($type, $config, $params, $entity);
+        return parent::_getSavedFieldValueForRender($blockType, $config, $params, $entity);
     }
     
-    protected function _getProductInventoryData($product, $field, $useDefaultConfig=false)
+    public function beforeGridPrepareCollection(Mage_Adminhtml_Block_Widget_Grid $gridBlock, $firstTime=true)
     {
-        if ($product->getStockItem()) {
-            if (!$useDefaultConfig
-                || ($product->getStockItem()->getData('use_config_'.$field) == 0)) {
-                return $product->getStockItem()->getDataUsingMethod($field);
-            }
-        }
-        return Mage::getStoreConfig(Mage_CatalogInventory_Model_Stock_Item::XML_PATH_ITEM . $field);
-    }
-    
-    public function beforeGridPrepareCollection($grid, $firstTime=true)
-    {
-        $this->_mustCaptureExportedCollection = !$firstTime;
+        $this->setMustCaptureExportedCollection(!$firstTime);
         return $this;
     }
     
-    public function afterGridPrepareCollection($grid, $firstTime=true)
+    public function afterGridPrepareCollection(Mage_Adminhtml_Block_Widget_Grid $gridBlock, $firstTime=true)
     {
-        $this->_mustCaptureExportedCollection = false;
+        $this->setMustCaptureExportedCollection(false);
         return $this;
     }
     
-    public function afterGridSetCollection($grid, $collection)
+    public function afterGridSetCollection(Mage_Adminhtml_Block_Widget_Grid $gridBlock, 
+        Varien_Data_Collection $collection)
     {
-        if ($this->_mustCaptureExportedCollection) {
-            $clone = clone $collection;
-            $grid->blcg_setExportedCollection($clone);
+        if ($this->getMustCaptureExportedCollection()) {
+            $clonedCollection = clone $collection;
+            $gridBlock->blcg_setExportedCollection($clonedCollection);
         }
         return $this;
     }
     
-    public function afterGridExportLoadCollection($grid, $collection)
+    public function afterGridExportLoadCollection(Mage_Adminhtml_Block_Widget_Grid $gridBlock, 
+        Varien_Data_Collection $collection)
     {
         if ($collection instanceof Mage_Catalog_Model_Resource_Eav_Mysql4_Product_Collection) {
             $collection->addWebsiteNamesToResult();

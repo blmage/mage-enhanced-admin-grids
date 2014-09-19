@@ -24,15 +24,15 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Country_Eu
         
         $code = $this->_getValue($row);
         $searches  = array('{is_eu_country}', '{country_code}', '{country_name}');
-        $replaces  = array($this->__('No'), $code, $code);
+        $replacements = array($this->__('No'), $code, $code);
         $countries = $this->getColumn()->getAllCountries();
         
         if (is_array($countries) && isset($countries[$code])) {
-            $replaces[0] = $this->__($countries[$code]->getIsEu() ? 'Yes' : 'No');
-            $replaces[2] = $countries[$code]->getName();
+            $replacements[0] = $this->__($countries[$code]->getIsEu() ? 'Yes' : 'No');
+            $replacements[2] = $countries[$code]->getName();
         }
         
-        return str_replace($searches, $replaces, $displayFormat);
+        return str_replace($searches, $replacements, $displayFormat);
     }
     
     public function render(Varien_Object $row)
@@ -42,9 +42,8 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Country_Eu
     
     public function renderExport(Varien_Object $row)
     {
-        if (($displayFormat = strval($this->getColumn()->getExportDisplayFormat())) !== '') {
-            return $this->_render($row, $displayFormat);
-        }
-        return $this->render($row);
+        return (($displayFormat = strval($this->getColumn()->getExportDisplayFormat())) !== '')
+            ? $this->_render($row, $displayFormat)
+            : $this->render($row);
     }
 }

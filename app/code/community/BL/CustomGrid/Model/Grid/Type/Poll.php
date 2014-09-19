@@ -9,32 +9,24 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class BL_CustomGrid_Model_Grid_Type_Poll
     extends BL_CustomGrid_Model_Grid_Type_Abstract
 {
-    public function isAppliableToGrid($type, $rewritingClassName)
+    protected function _getSupportedBlockTypes()
     {
-        return ($type == 'adminhtml/poll_grid');
+        return 'adminhtml/poll_grid';
     }
     
-    public function checkUserEditPermissions($type, $model, $block=null, $params=array())
-    {
-        if (parent::checkUserEditPermissions($type, $model, $block, $params)) {
-            return Mage::getSingleton('admin/session')->isAllowed('cms/poll');
-        }
-        return false;
-    }
-    
-    public function getPollStoreIds($type, $config, $params, $entity)
+    public function getPollStoreIds($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
         return ($entity && $entity->getId() ? $entity->getStoreIds() : array());
     }
     
-    protected function _getBaseEditableFields($type)
+    protected function _getBaseEditableFields($blockType)
     {
         $helper = Mage::helper('poll');
         
@@ -48,12 +40,12 @@ class BL_CustomGrid_Model_Grid_Type_Poll
                 'type'        => 'select',
                 'form_values' => array(
                     array(
-                        'value'     => 1,
-                        'label'     => Mage::helper('poll')->__('Closed'),
+                        'value' => 1,
+                        'label' => $helper->__('Closed'),
                     ),
                     array(
-                        'value'     => 0,
-                        'label'     => Mage::helper('poll')->__('Open'),
+                        'value' => 0,
+                        'label' => $helper->__('Open'),
                     ),
                 ),
             ),
@@ -73,21 +65,26 @@ class BL_CustomGrid_Model_Grid_Type_Poll
         return $fields;
     }
     
-    protected function _getEntityRowIdentifiersKeys($type)
+    protected function _getEntityRowIdentifiersKeys($blockType)
     {
         return array('poll_id');
     }
     
-    protected function _loadEditedEntity($type, $config, $params)
+    protected function _loadEditedEntity($blockType, BL_CustomGrid_Object $config, array $params, $entityId)
     {
-        if (isset($params['ids']['poll_id'])) {
-            return Mage::getModel('poll/poll')->load($params['ids']['poll_id']);
-        }
-        return null;
+        return Mage::getModel('poll/poll')->load($entityId);
     }
     
-    protected function _getLoadedEntityName($type, $config, $params, $entity)
+    protected function _getLoadedEntityName($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
         return $entity->getPollTitle();
     }
+    
+    protected function _getEditRequiredAclPermissions($blockType)
+    {
+        return 'cms/poll';
+    }
+    
+    // @todo check store assignation when single-store mode (hidden store_ids by default)
+    // @todo make a known-to-work-with table with grid types and single-store / multiple-store modes + Magento versions
 }

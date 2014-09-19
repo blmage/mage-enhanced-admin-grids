@@ -9,18 +9,18 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class BL_CustomGrid_Block_Options_Source_Edit_Tab_General
     extends Mage_Adminhtml_Block_Widget_Form
+    implements Mage_Adminhtml_Block_Widget_Tab_Interface
 {
     protected function _prepareForm()
     {
-        $source = Mage::registry('current_options_source');
-        
-        $form = new Varien_Data_Form();
+        $source = Mage::registry('blcg_options_source');
+        $form   = new Varien_Data_Form();
         $fieldset = $form->addFieldset('general', array('legend' => $this->__('General')));
         
         if (!$source->getId()) {
@@ -46,5 +46,25 @@ class BL_CustomGrid_Block_Options_Source_Edit_Tab_General
         
         $form->setValues($source->getData());
         $this->setForm($form);
+    }
+    
+    public function getTabLabel()
+    {
+        return $this->__('General');
+    }
+    
+    public function getTabTitle()
+    {
+        return $this->__('General');
+    }
+    
+    public function canShowTab()
+    {
+        return true;
+    }
+    
+    public function isHidden()
+    {
+        return false;
     }
 }

@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -19,9 +19,9 @@ class BL_CustomGrid_Block_Options_Source_Grid
     public function __construct()
     {
         parent::__construct();
-        $this->setId('BLCG_OptionsSourceGrid')
-            ->setSaveParametersInSession(true)
-            ->setUseAjax(false);
+        $this->setId('BLCG_OptionsSourceGrid');
+        $this->setUseAjax(false);
+        $this->setSaveParametersInSession(true);
     }
     
     protected function _prepareCollection()
@@ -61,23 +61,19 @@ class BL_CustomGrid_Block_Options_Source_Grid
                 'actions' => array(
                     array(
                         'caption' => $this->__('Edit'),
-                        'url'     => array(
-                            'base' => '*/*/edit',
-                        ),
+                        'url'     => array('base' => '*/*/edit',),
                         'field'   => 'id',
                     ),
                     array(
                         'caption' => $this->__('Delete'),
                         'confirm' => $this->__('Are you sure?'),
-                        'url'     => array(
-                            'base' => '*/*/delete',
-                        ),
+                        'url'     => array('base' => '*/*/delete',),
                         'field'   => 'id'
-                    )
+                    ),
                 ),
-                'filter'    => false,
-                'sortable'  => false,
-                'index'     => 'id',
+                'filter'   => false,
+                'sortable' => false,
+                'index'    => 'id',
         ));
         
         return parent::_prepareColumns();

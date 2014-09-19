@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -18,30 +18,30 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Text
 {
     public function getCondition()
     {
-        $helper = Mage::helper('core/string');
+        $helper = $this->helper('core/string');
         $value  = $this->getValue();
         $length = $helper->strlen($value);
-        $expr   = '';
+        $expression = '';
         
-        $singleWc   = $this->getColumn()->getSingleWildcard();
-        $multipleWc = $this->getColumn()->getMultipleWildcard();
+        $singleWildcard = $this->getColumn()->getSingleWildcard();
+        $multipleWildcard = $this->getColumn()->getMultipleWildcard();
         
         for ($i=0; $i<$length; $i++) {
             $char = $helper->substr($value, $i, 1);
             
-            if ($char === $singleWc) {
-                $expr .= '_';
-            } elseif ($char === $multipleWc) {
-                $expr .= '%';
+            if ($char === $singleWildcard) {
+                $expression .= '_';
+            } elseif ($char === $multipleWildcard) {
+                $expression .= '%';
             } elseif (($char === '%') || ($char === '_')) {
-                $expr .= '\\'.$char;
+                $expression .= '\\' . $char;
             } elseif ($char == '\\') {
-                $expr .= '\\\\';
+                $expression .= '\\\\';
             } else {
-                $expr .= $char;
+                $expression .= $char;
             }
         }
         
-        return array('like' => (!$this->getColumn()->getExactFilter() ? '%'.$expr.'%' : $expr));
+        return array('like' => (!$this->getColumn()->getExactFilter() ? '%' . $expression . '%' : $expression));
     }
 }

@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -18,41 +18,45 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Product_Categories
 {
     public function getHtml()
     {
-        $html = '';
-        
         if ($this->getColumn()->getBooleanFilter()) {
-            $hasValue  = !is_null($this->getValue());
-            $mustExist = ($hasValue && (bool)$this->getValue());
-            $html .=  '<select name="'.$this->_getHtmlName().'" id="'.$this->_getHtmlId().'" class="no-changes">'
+            $mustExist = (!is_null($value = $this->getValue()) ? (bool) $value : null);
+            $existentSelected = ($mustExist === true  ? ' selected="selected"' : '');
+            $nonExistentSelected = ($mustExist === false  ? ' selected="selected"' : '');
+            
+            $html = '<select name="' . $this->_getHtmlName() . '" id="' . $this->_getHtmlId() . '" class="no-changes">'
                 . '<option value=""></option>'
-                . '<option value="1"'.($hasValue && $mustExist  ? ' selected="selected"' : '').'>'.$this->__('With').'</option>'
-                . '<option value="0"'.($hasValue && !$mustExist ? ' selected="selected"' : '').'>'.$this->__('Without').'</option>'
+                . '<option value="1"' . $existentSelected . '>' .$this->__('With') . '</option>'
+                . '<option value="0"' . $nonExistentSelected . '>' .$this->__('Without') . '</option>'
                 . '</select>';
         } else {
-            $htmlId = Mage::helper('core')->uniqHash($this->_getHtmlId());
-            $jsId   = Mage::helper('core')->uniqHash('blcgCategoriesFilter');
-            $url    = $this->getUrl('customgrid/custom_grid_column_filter/categories', array('js_object' => $jsId));
-            $window = Mage::helper('core')->jsonEncode(array(
-                'width'        => '700px',
-                'height'       => '480px',
-                'title'        => $this->__('Choose Categories To Filter'),
-                'draggable'    => true,
-                'resizable'    => true,
+            $htmlId = $this->helper('core')->uniqHash($this->_getHtmlId());
+            $jsId = $this->helper('core')->uniqHash('blcgCategoriesFilter');
+            $windowUrl = $this->getUrl('customgrid/grid_column_filter/categories', array('js_object_name' => $jsId));
+            $windowJsonConfig = $this->helper('core')->jsonEncode(array(
+                'width'  => '700px',
+                'height' => '480px',
+                'title'  => $this->__('Choose Categories To Filter'),
+                'draggable' => true,
+                'resizable' => true,
                 'recenterAuto' => false,
             ));
             
             $ids = array_filter(array_unique(explode(',', $this->getValue())));
             sort($ids, SORT_NUMERIC);
-            $output = implode(', ', $ids);
+            $idsString = implode(', ', $ids);
             
             $html = '<div class="blcg-categories-filter">'
-                . '<span class="label">'.$this->__('IDs: ').'</span>'
-                . '<span class="blcg-filter-value" id="'.$htmlId.'_container">'.$output.'</span>'
-                . '<input type="hidden" name="'.$this->_getHtmlName().'" id="'.$htmlId.'" value="'.$this->htmlEscape($this->getValue()).'" />'
-                . '<span class="blcg-filter-button" id="'.$htmlId.'_button"></span>'
+                    . '<span class="label">' . $this->__('IDs:') . ' </span>'
+                    . '<span class="blcg-filter-value" id="' . $htmlId . '_container">' . $idsString . '</span>'
+                    . '<input type="hidden" name="' . $this->_getHtmlName() . '" id="' . $htmlId . '"'
+                    . ' value="' . $this->htmlEscape($this->getValue()) . '" />'
+                    . '<span class="blcg-filter-button" id="' . $htmlId . '_button"></span>'
                 . '</div>'
                 . '<script type="text/javascript">'
-                . $jsId.' = new blcg.Filter.Categories("'.$htmlId.'", "'.$htmlId.'_button", "'.$htmlId.'_container", "'.$url.'", "ids", '.$window.');'
+                . "\n" . '//<![CDATA[' . "\n"
+                . $jsId.' = new blcg.Grid.Filter.Categories("' . $htmlId . '", "' . $htmlId . '_button", '
+                    . '"' . $htmlId . '_container", "' . $windowUrl . '", "ids", '.$windowJsonConfig.');'
+                 . "\n" . '//]]>' . "\n"
                 . '</script>';
         }
         

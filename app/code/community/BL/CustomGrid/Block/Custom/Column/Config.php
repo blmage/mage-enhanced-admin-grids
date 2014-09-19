@@ -9,12 +9,12 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class BL_CustomGrid_Block_Custom_Column_Config
-    extends Mage_Adminhtml_Block_Widget_Form_Container
+    extends BL_CustomGrid_Block_Widget_Form_Container
 {
     public function __construct()
     {
@@ -25,29 +25,50 @@ class BL_CustomGrid_Block_Custom_Column_Config
         $this->_mode = 'config';
         $this->_headerText = $this->getCustomColumn()->getName();
         
-        $this->removeButton('reset');
-        $this->removeButton('back');
-        $this->_updateButton('save', 'label', $this->__('Apply Configuration'));
-        $this->_updateButton('save', 'id', 'insert_button');
-        $this->_updateButton('save', 'onclick', 'blcgCustomColumnForm.insertParams()');
+        $this->_removeButtons(array('reset', 'back'));
         
-        $this->_formScripts[] = 'blcgCustomColumnForm = new blcg.CustomColumn.Form("custom_column_config_options_form", "'
-            . $this->getRequest()->getParam('renderer_target_id') . '");';
-    }
-    
-    public function getCustomColumn()
-    {
-        if (!$column = Mage::registry('current_custom_column')) {
-            Mage::throwException($this->__('Custom column is not specified'));
-        }
-        return $column;
+        $this->_updateButton('save', null, array(
+            'id'         => 'blcg_custom_column_config_insert_button',
+            'label'      => $this->__('Apply Configuration'),
+            'onclick'    => $this->getJsObjectName() . '.insertParams();',
+            'sort_order' => 0,
+        ));
     }
     
     protected function _beforeToHtml()
     {
+        $this->_formScripts[] =  $this->getJsObjectName() . ' = new blcg.Grid.CustomColumn.ConfigForm('
+            . '"blcg_custom_column_config_form", "' . $this->getConfigTargetId() . '");';
+        
         if ($formBlock = $this->getChild('form')) {
-            $formBlock->setConfigParams($this->getConfigParams());
+            $formBlock->setConfigValues($this->getConfigValues());
         }
+        
         return parent::_beforeToHtml();
+    }
+    
+    public function getUseDefaultForm()
+    {
+        return false;
+    }
+    
+    public function getCustomColumn()
+    {
+        return Mage::registry('blcg_custom_column');
+    }
+    
+    public function getJsObjectName()
+    {
+        return 'blcgCustomColumnConfigForm';
+    }
+    
+    public function getConfigTargetId()
+    {
+        return $this->getDataSetDefault('config_target_id', '');
+    }
+    
+    public function getConfigValues()
+    {
+        return $this->getDataSetDefault('config_values', array());
     }
 }

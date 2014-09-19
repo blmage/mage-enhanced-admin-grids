@@ -21,20 +21,21 @@ class BL_CustomGrid_Model_Custom_Column_Shipment_Items_Custom
         return true;
     }
     
-    public function getItemValues()
+    protected function _getItemBaseValues()
     {
-        if (!$this->hasData('item_values')) {
-            $baseValues = array(
-                'name'     => 'Name',
-                'sku'      => 'SKU',
-                'quantity' => 'Qty',
-            );
-            $this->setData('item_values', $this->_getItemValuesList($baseValues, array(), 'blcg_custom_column_shipment_items_custom_values'));
-        }
-        return $this->_getData('item_values');
+        return array(
+            'name'     => 'Name',
+            'sku'      => 'SKU',
+            'quantity' => 'Qty',
+        );
     }
     
-    protected function _getGridColumnRenderer()
+    protected function _getItemValuesEventName()
+    {
+        return 'blcg_custom_column_shipment_items_custom_values';
+    }
+    
+    protected function _getColumnBlockRenderer()
     {
         return 'customgrid/widget_grid_column_renderer_shipment_items_custom';
     }

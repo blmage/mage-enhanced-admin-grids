@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -22,6 +22,7 @@ class BL_CustomGrid_Block_System_Config_Form_Field_Grid_Exceptions
             'label' => $this->__('Block Type'),
             'style' => 'width:200px',
         ));
+        
         $this->addColumn('rewriting_class_name', array(
             'label' => $this->__('Rewriting Class'),
             'style' => 'width:200px',

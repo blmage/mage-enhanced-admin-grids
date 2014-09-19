@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -26,8 +26,8 @@ $tables = array(
 );
 
 /**
-* New tables
-*/
+ * New tables
+ */
 
 // Note: the "grid_profile" one and related columns from "grid_role" / "grid_user" are for potential further use
 
@@ -78,8 +78,8 @@ CONSTRAINT `FK_CUSTOM_GRID_GRID_USER_DEFAULT_PROFILE` FOREIGN KEY (`default_prof
 ");
 
 /**
-* New columns for "customgrid_grid" table
-*/
+ * New columns for "customgrid_grid" table
+ */
 
 $connection->addColumn(
     $tables['grid'],
@@ -118,8 +118,8 @@ $connection->addColumn(
 );
 
 /**
-* Columns changes for "customgrid_grid" table
-*/
+ * Columns changes for "customgrid_grid" table
+ */
 
 if ($connection->tableColumnExists($tables['grid'], 'default_direction')) {
     $connection->changeColumn(
@@ -140,8 +140,8 @@ if ($connection->tableColumnExists($tables['grid'], 'default_filters')) {
 }
 
 /**
-* New column for "customgrid_column" table
-*/
+ * New column for "customgrid_column" table
+ */
 
 // This one is for potential further use
 
@@ -167,8 +167,8 @@ $connection->addColumn(
 );
 
 /**
-* Column changes for "customgrid_column" table
-*/
+ * Column changes for "customgrid_column" table
+ */
 
 if ($connection->tableColumnExists($tables['grid_column'], 'origin')) {
     $connection->changeColumn(

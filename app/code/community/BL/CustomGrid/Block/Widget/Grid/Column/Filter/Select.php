@@ -9,27 +9,27 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Select
     extends Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Abstract
 {
-    const BOOLEAN_FILTER_VALUE_WITH    = 'with';
+    const BOOLEAN_FILTER_VALUE_WITH = 'with';
     const BOOLEAN_FILTER_VALUE_WITHOUT = 'without';
     
     protected function _getOptions()
     {
-        if ((bool)$this->getColumn()->getBooleanFilter()) {
+        if ($this->getColumn()->getBooleanFilter()) {
             return array(
                 array(
                     'value' => self::BOOLEAN_FILTER_VALUE_WITH,
-                    'label' => Mage::helper('customgrid')->__('With'),
+                    'label' => $this->helper('customgrid')->__('With'),
                 ),
                 array(
                     'value' => self::BOOLEAN_FILTER_VALUE_WITHOUT,
-                    'label' => Mage::helper('customgrid')->__('Without'),
+                    'label' => $this->helper('customgrid')->__('Without'),
                 ),
             );
         } else {
@@ -45,19 +45,26 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Select
     
     protected function _renderOption($option, $value, $removeEmpty=true)
     {
+        $html = '';
+        
         if (is_array($option['value'])) {
-            $html = '<optgroup label="'.$this->escapeHtml($option['label']).'">';
+            $html = '<optgroup label="' . $this->htmlEscape($option['label']) . '">';
+            
             foreach ($option['value'] as $subOption) {
                 $html .= $this->_renderOption($subOption, $value);
             }
+            
             $html .= '</optgroup>';
-            return $html;
         } else {
             if (!$removeEmpty || (!is_null($option['value']) && ($option['value'] !== ''))) {
-                $selected = (($option['value'] == $value) && !is_null($value) ? ' selected="selected"' : '' );
-                return '<option value="'. $this->escapeHtml($option['value']).'"'.$selected.'>'.$this->escapeHtml($option['label']).'</option>';
-            } // Don't take empty value from options source (as we could not filter on it btw - at least basically)
+                $html = '<option value="' . $this->htmlEscape($option['value'])
+                    . '"' . (($option['value'] == $value) && !is_null($value) ? ' selected="selected"' : '' ) . '>'
+                    . $this->htmlEscape($option['label'])
+                    . '</option>';
+            }
         }
+        
+        return $html;
     }
     
     protected function _isExistingOptionValue($options, $value)
@@ -76,22 +83,19 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Select
     
     public function getHtml()
     {
-        $html    = '<select name="'.$this->_getHtmlName().'" id="'.$this->_getHtmlId().'" class="no-changes">';
-        $value   = $this->getValue();
-        $empty   = array(
-            'value' => '',
-            'label' => '',
-        );
         $options = $this->_getOptions();
-       
+        $value = $this->getValue();
+        $html  = '<select name="' . $this->_getHtmlName() . '" id="' . $this->_getHtmlId() . '" class="no-changes">';
+        
         if (!empty($options)) {
-            $html .= $this->_renderOption($empty, $value, false);
+            $html .= $this->_renderOption(array('value' => '', 'label' => ''), $value, false);
+            
             foreach ($this->_getOptions() as $option){
                 $html .= $this->_renderOption($option, $value);
             }
         }
         
-        $html.='</select>';
+        $html .= '</select>';
         return $html;
     }
     
@@ -100,27 +104,29 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Select
         if (is_null($value = $this->getValue())) {
             return null;
         }
-        if ((bool)$this->getColumn()->getBooleanFilter()) {
+        
+        if ($this->getColumn()->getBooleanFilter()) {
             if ($value == self::BOOLEAN_FILTER_VALUE_WITH) {
                 return array('neq' => '');
             } elseif ($value == self::BOOLEAN_FILTER_VALUE_WITHOUT) {
                 return array(array('null' => 1), array('eq' => ''));
             }
         } elseif ($this->_isExistingOptionValue($this->_getOptions(), $value)) {
-            if ((bool)$this->getColumn()->getImplodedValues()) {
+            if ($this->getColumn()->getImplodedValues()) {
                 $separator = $this->getColumn()->getImplodedSeparator();
-                // No regexes available for database conditions
+                
+                // No regex keyword available for addFieldToFilter() on all versions
                 return array(
                     array('eq' => $value),
-                    array('like' => $value.$separator.'%'),
-                    array('like' => '%'.$separator.$value.$separator.'%'),
-                    array('like' => '%'.$separator.$value)
+                    array('like' => $value . $separator . '%'),
+                    array('like' => '%' . $separator . $value . $separator . '%'),
+                    array('like' => '%' . $separator . $value)
                 );
             } else {
                 return array('eq' => $this->getValue());
             }
-        } else {
-            return null;
         }
+        
+        return null;
     }
 }

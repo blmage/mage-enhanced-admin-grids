@@ -6,7 +6,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  *
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -14,13 +14,44 @@
 
 .blcg-clearer { clear:both; }
 .blcg-tooltip { padding:4px 8px; background:#fff; border:1px solid #000; }
+.blcg-no-display { display:none !important; }
+.blcg-loading { width:100%; height:100%; background:url(images/loader.gif) no-repeat 50% 50%; box-sizing:border-box; -moz-box-sizing:border-box; -webkit-box-sizing:border-box; }
+.blcg-use-config-wrapper { margin-top:3px; }
+.blcg-use-config-wrapper label { margin-left:3px; }
+.blcg-form-note-text { line-height:14px; font-size:11px; }
+.blcg-form-note-text ul { list-style:decimal inside none; }
+.blcg-form-note-text li { margin:0; }
+
+/* PROFILES BAR */
+
+.blcg-grid-profiles-bar { width:100%; height:36px;  margin:0 0 1px;overflow:hidden; background:#f1f1f1; border-bottom:1px solid #ccc; }
+.blcg-grid-profiles-bar:after { display:block; clear:both; content:"."; font-size:0; line-height:0; height:0; overflow:hidden; }
+.blcg-grid-profiles-bar-fixed-part { float:right; width:430px; padding:9px 0 0; overflow:hidden; }
+.blcg-grid-profiles-bar-arrow { width:13px; height:13px; cursor:pointer; background:transparent no-repeat 0 0;  }
+.blcg-grid-profiles-bar-arrow.blcg-disabled { background-position:0 -13px; }
+.blcg-grid-profiles-bar-arrow-up { float:right; margin:5px 0 0; background-image:url(images/arrow_up.gif); }
+.blcg-grid-profiles-bar-arrow-down { float:right; margin:5px 6px 0 0; background-image:url(images/arrow_down.gif); }
+.blcg-grid-profiles-bar-actions,
+.blcg-custom-grid-config-switch { float:right; margin-right:6px; text-align:right; }
+.blcg-grid-profiles-bar-actions select { width:140px; margin-top:1px; }
+.blcg-grid-profiles-list-state { float:right; width:40px; line-height:24px; text-align:center; }
+.blcg-grid-profiles-list-wrapper { float:left; height:36px; overflow:hidden; }
+.blcg-grid-profiles-list { position:relative; display:block; white-space:nowrap; }
+.blcg-grid-profiles-list:after { clear:both; display:block; content:"."; height:0; line-height:0; overflow:hidden; font-size:0; }
+.blcg-grid-profiles-list li { float:left; display:block; height:27px; line-height:30px; margin:8px 0 0 8px; padding:0 10px; background:#e2e2e2; border:1px solid #ccc; border-width:1px 1px 0; cursor:pointer; }
+.blcg-grid-profiles-list li.blcg-base { font-style:italic; }
+.blcg-grid-profiles-list li.blcg-selected { height:27px; background:#fff; border-color:#ccc; }
+.blcg-grid-profiles-list li.blcg-current { height:24px; line-height:26px; border-bottom:3px solid #fcce77; }
+.blcg-grid-profiles-list li.blcg-clipped { visibility:hidden; }
+.blcg-grid-profiles-list-actions li { display:block; float:left; }
+.blcg-grid-profiles-bar-arrow,
+.blcg-grid-profiles-list li { user-select:none; -moz-user-select:none; -webkit-user-select:none; -ms-user-select:none; }
 
 /* MESSAGES LIST */
 
-.blcg-messages-wrapper { position:fixed; right:0; bottom:0; width:100%; z-index:10; }
+.blcg-messages-wrapper { position:fixed; right:0; bottom:0; width:100%;  z-index:10; }
 .blcg-messages-tabs { height:32px; margin-right:16px; }
 .blcg-messages-tab { float:right; display:block; height:32px; line-height:34px; margin-left:8px; padding:0 10px 0 30px; font-weight:bold; border-style:solid; border-width:1px 1px 0; background-repeat:no-repeat; background-position:6px center; cursor:pointer; }
-.blcg-messages-tab.no-display { display:none; }
 .blcg-messages-lists { clear:both; }
 .blcg-messages-list-wrapper { max-height:200px; overflow-y:auto; border-width:1px 0 0; border-style:solid; }
 .blcg-messages-list { padding:8px 12px; }
@@ -49,7 +80,6 @@ button.blcg-customize span { padding-left:20px; background-image:url(images/ico_
 button.blcg-grid-infos span { padding-left:20px; background-image:url(images/ico_infos.gif); }
 button.blcg-additional span { padding-left:20px; background-image:url(images/ico_arrow_down.gif); }
 button.blcg-export span { padding-left:20px; background-image:url(images/ico_export.gif); }
-.blcg-custom-grid-config-switch { margin:0 0 6px; text-align:right; }
 
 /* ADDITIONAL FEATURES BLOCK */
 
@@ -68,8 +98,9 @@ button.blcg-export span { padding-left:20px; background-image:url(images/ico_exp
 /* COLUMNS LIST */
 
 .blcg-custom-grid-config { margin:0 0 6px; }
+.blcg-custom-grid-config .massaction { border-top:0; }
 .blcg-custom-grid-config .grid table tr:hover,
-.blcg-custom-grid-config .grid table tr.dnd_whileDrag { background-color:#fcf5dd; } 
+.blcg-custom-grid-config .grid table tr.blcg-dnd-whileDrag { background-color:#fcf5dd; } 
 .blcg-custom-grid-config .grid table td { vertical-align:middle; }
 .blcg-custom-grid-config .grid table .blcg-drag-handle { padding-left:9px; padding-right:9px;  background:url(images/up-down.gif) no-repeat center center; cursor:move; }
 .blcg-custom-grid-config .grid table .blcg-store-select { margin:0; }
@@ -206,6 +237,7 @@ ul.blcg-custom-columns-help-features li { height:16px; padding:0 0 0 16px; line-
 .entry-edit fieldset.blcg-editor-fieldset,
 .blcg-popup-window .entry-edit .fieldset,
 .entry-edit .fieldset.blcg-editor-fieldset { border-top:0; border-color:#666; }
+.blcg-popup-window .blcg_message .messages { margin:12px 0 0; }
 
 /* For IE */
 * html .blcg_nw { background-color:transparent; background-image:none; filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src="./window/top-left.png", sizingMethod="crop"); }
@@ -229,4 +261,5 @@ ul.blcg-custom-columns-help-features li { height:16px; padding:0 0 0 16px; line-
 #sales_shipment_grid .grid .order-tables tr.headings,
 #sales_creditmemo_grid .grid .order-tables tr.headings { background:url(../../images/sort_row_bg.gif) repeat-x scroll 0 50% transparent !important; }
 
+#customgrid_global.config .note { width:100%; min-width:268px; }
 #customgrid_rewriters_file.config .comment span { font-family:Courier New,Courier,Arial,Helvetica,sans-serif; }

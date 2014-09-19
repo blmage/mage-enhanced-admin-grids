@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -20,61 +20,67 @@ class BL_CustomGrid_Block_Options_Source_Edit
     {
         parent::__construct();
         $this->setTemplate('bl/customgrid/options/source/edit.phtml');
-        $this->setId('options_source_edit');
-    }
-    
-    public function getOptionsSource()
-    {
-        return Mage::registry('current_options_source');
+        $this->setId('blcg_options_source_edit');
     }
     
     protected function _prepareLayout()
     {
         $source = $this->getOptionsSource();
         
-        $this->setChild('back_button',
-            $this->getLayout()->createBlock('adminhtml/widget_button')
+        $this->setChild(
+            'back_button',
+            $this->getLayout()
+                ->createBlock('adminhtml/widget_button')
                 ->setData(array(
                     'label'   => $this->__('Back'),
-                    'onclick' => 'setLocation(\''.$this->getUrl('*/*/').'\')',
+                    'onclick' => 'setLocation(\'' . $this->getUrl('*/*/') . '\')',
                     'class'   => 'back',
                 ))
         );
         
-        $this->setChild('reset_button',
-            $this->getLayout()->createBlock('adminhtml/widget_button')
+        $this->setChild(
+            'reset_button',
+            $this->getLayout()
+                ->createBlock('adminhtml/widget_button')
                 ->setData(array(
                     'label'   => $this->__('Reset'),
-                    'onclick' => 'setLocation(\''.$this->getUrl('*/*/*', array('_current' => true)).'\')',
+                    'onclick' => 'setLocation(\'' . $this->getUrl('*/*/*', array('_current' => true)) . '\')',
                 ))
         );
         
-        $this->setChild('save_button',
-            $this->getLayout()->createBlock('adminhtml/widget_button')
+        $this->setChild(
+            'save_button',
+            $this->getLayout()
+                ->createBlock('adminhtml/widget_button')
                 ->setData(array(
                     'label'   => $this->__('Save'),
-                    'onclick' => 'optionsSourceForm.submit()',
+                    'onclick' => 'blcgOptionsSourceForm.submit()',
                     'class'   => 'save',
                 ))
         );
         
-        $this->setChild('save_and_edit_button',
-            $this->getLayout()->createBlock('adminhtml/widget_button')
+        $this->setChild(
+            'save_and_edit_button',
+            $this->getLayout()
+                ->createBlock('adminhtml/widget_button')
                 ->setData(array(
                     'label'   => $this->__('Save and Continue Edit'),
-                    'onclick' => 'saveAndContinueEdit(\''.$this->getSaveAndContinueUrl().'\')',
+                    'onclick' => 'saveAndContinueEdit(\'' . $this->getSaveAndContinueUrl() . '\')',
                     'class'   => 'save',
                 ))
         );
         
         if ($source->getId()) {
-            $this->setChild('delete_button',
-                $this->getLayout()->createBlock('adminhtml/widget_button')
-                        ->setData(array(
-                            'label'   => $this->__('Delete'),
-                            'onclick' => 'confirmSetLocation(\''.$this->__('Are you sure?').'\', \''.$this->getDeleteUrl().'\')',
-                            'class'   => 'delete',
-                        ))
+            $this->setChild(
+                'delete_button',
+                $this->getLayout()
+                    ->createBlock('adminhtml/widget_button')
+                    ->setData(array(
+                        'label'   => $this->__('Delete'),
+                        'onclick' => 'confirmSetLocation(\''
+                            . $this->__('Are you sure?').'\', \'' . $this->getDeleteUrl() . '\')',
+                        'class'   => 'delete',
+                    ))
             );
         }
         
@@ -83,10 +89,41 @@ class BL_CustomGrid_Block_Options_Source_Edit
     
     protected function _beforeToHtml()
     {
-        if ($tabsBlock = $this->getChild('options_source_tabs')) {
+        if ($tabsBlock = $this->getChild('blcg.options_source.edit.tabs')) {
             $tabsBlock->setActiveTab($this->getSelectedTabId());
         }
         return parent::_beforeToHtml();
+    }
+    
+    public function getOptionsSource()
+    {
+        return Mage::registry('blcg_options_source');
+    }
+    
+    public function getOptionsSourceId()
+    {
+        return $this->getOptionsSource()->getId();
+    }
+    
+    public function getOptionsSourceType()
+    {
+        return (!$type = $this->getOptionsSource()->getType())
+            ? $this->getRequest()->getParam('type', null)
+            : $type;
+    }
+    
+    public function getHeader()
+    {
+        $header = '';
+        $optionsSource = $this->getOptionsSource();
+        
+        if ($optionsSource->getId()) {
+            $header = $this->htmlEscape($optionsSource->getName());
+        } else {
+            $header = $this->__('New Options Source');
+        }
+        
+        return $header;
     }
     
     public function getBackButtonHtml()
@@ -129,34 +166,9 @@ class BL_CustomGrid_Block_Options_Source_Edit
         ));
     }
     
-    public function getOptionsSourceId()
-    {
-        return $this->getOptionsSource()->getId();
-    }
-    
     public function getDeleteUrl()
     {
         return $this->getUrl('*/*/delete', array('_current' => true));
-    }
-    
-    public function getHeader()
-    {
-        $header = '';
-        if ($this->getOptionsSource()->getId()) {
-            $header = $this->htmlEscape($this->getOptionsSource()->getName());
-        }
-        else {
-            $header = $this->__('New Options Source');
-        }
-        return $header;
-    }
-    
-    public function getOptionsSourceType()
-    {
-        if (!($type = $this->getOptionsSource()->getType()) && $this->getRequest()) {
-            $type = $this->getRequest()->getParam('type', null);
-        }
-        return $type;
     }
     
     public function getSelectedTabId()

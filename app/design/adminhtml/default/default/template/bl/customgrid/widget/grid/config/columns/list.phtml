@@ -1,0 +1,278 @@
+<?php
+/**
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
+ *
+ * @category   BL
+ * @package    BL_CustomGrid
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+?>
+<?php
+    $_htmlId     = $this->getHtmlId();
+    $_helper     = $this->helper('customgrid');
+    $_stringHelper = $this->helper('customgrid/string');
+    $_alignments = $this->getColumnAlignments();
+    $_origins    = $this->getColumnOrigins();
+?>
+<div id="<?php echo $_htmlId ?>-grid" class="grid">
+    <?php echo $this->getCollectionRenderersJsHtml() ?>
+    <?php if ($this->canHaveAttributeColumns()): ?>
+        <?php echo $this->getAttributeRenderersJsHtml() ?>
+    <?php endif ?>
+    <div class="hor-scroll">
+        <table id="<?php echo $this->getTableCssId() ?>" class="data" cellspacing="0">
+            <?php if ($this->getUseDragNDrop()): ?><col width="20" /><?php endif ?>
+            <col class="a-center" width="50" />
+            <col class="a-center" width="50" />
+            <?php if ($this->canDisplayEditablePart()): ?>
+                <col class="a-center" width="50" />
+            <?php endif ?>
+            <col class="a-center" width="50" />
+            <col class="a-center" width="80" />
+            <col width="18%" />
+            <col width="18%" />
+            <col />
+            <col />
+            <col width="18%" />
+            <col width="100" />
+            <col width="100" />
+            <col width="100" />
+            <col width="50" />
+            <col width="6%" />
+            <thead>
+                <tr class="headings nodrop">
+                    <?php if ($this->getUseDragNDrop()): ?><th></th><?php endif ?>
+                    <th><span class="nobr"><?php echo $this->__('Visible') ?></span></th>
+                    <th><span class="nobr"><?php echo $this->__('Filter') ?></span></th>
+                    <?php if ($this->canDisplayEditablePart()): ?>
+                        <th><span class="nobr"><?php echo $this->__('Editable') ?></span></th>
+                    <?php endif ?>
+                    <th><span class="nobr"><?php echo $this->__('System') ?></span></th>
+                    <th><span class="nobr"><?php echo $this->__('Origin') ?></span></th>
+                    <th><span class="nobr"><?php echo $this->__('Column ID') ?></span></th>
+                    <th><span class="nobr"><?php echo $this->__('Field Name') ?></span></th>
+                    <th><span class="nobr"><?php echo $this->__('Rendering') ?></span></th>
+                    <th><span class="nobr"><?php echo $this->__('Store View') ?></span></th>
+                    <th><span class="nobr"><?php echo $this->__('Column Header') ?></span></th>
+                    <th><span class="nobr"><?php echo $this->__('Width') ?></span></th>
+                    <th><span class="nobr"><?php echo $this->__('Alignment') ?></span></th>
+                    <th><span class="nobr"><?php echo $this->__('# Order') ?></span></th>
+                    <th><span class="nobr"><?php echo $this->__('Missing') ?></span></th>
+                    <th><span class="nobr"><?php echo $this->__('Actions') ?></span></th>
+                </tr>
+            </thead>
+            <tbody id="<?php echo $this->getTableRowsCssId() ?>">
+            <?php $_i=0; foreach ($this->getColumns() as $_column): ?>
+                <?php
+                    $_columnId = $_column->getId();
+                    $_columnBlockId = $_column->getBlockId();
+                ?>
+                <tr id="<?php echo $this->getTableRowCssId($_columnId) ?>" class="<?php echo $_htmlId ?>-table-column <?php echo (++$_i%2==0 ? 'even' : 'odd') ?>">
+                    <?php if ($this->getUseDragNDrop()): ?>
+                        <td class="blcg-drag-handle">&nbsp;</td>
+                    <?php endif ?>
+                    <td class="a-center">
+                        <input name="columns[<?php echo $_columnId ?>][is_visible]" id="<?php echo $this->getVisibleCheckboxCssId($_columnId) ?>" class="blcg-visible-checkbox" type="checkbox" value="1" <?php if ($_column->isVisible()): ?>checked="checked"<?php endif ?> />
+                    </td>
+                    <td class="a-center">
+                        <input name="columns[<?php echo $_columnId ?>][filter_only]" id="<?php echo $this->getFilterOnlyCheckboxCssId($_columnId) ?>" class="blcg-filter-only-checkbox" type="checkbox" value="1" <?php if ($_column->isOnlyFilterable()): ?>checked="checked"<?php endif ?> />
+                    </td>
+                    <?php if ($this->canDisplayEditablePart()): ?>
+                        <td class="a-center" id="<?php echo $this->getEditableContainerCssId($_columnId) ?>">
+                            <?php if ($this->canChooseEditableColumns()): ?>
+                                <?php if ($_column->isAttribute() || $_column->isEditable()): ?>
+                                    <input name="columns[<?php echo $_columnId ?>][editable]" <?php if (!$_column->isEditable()): ?>disabled="disabled"<?php endif ?> id="<?php echo $this->getEditableCheckboxCssId($_columnId) ?>" class="editable-checkbox" type="checkbox" value="1" <?php if ($_column->isEditAllowed()): ?>checked="checked"<?php endif ?> />
+                                <?php endif ?>
+                            <?php else: ?>
+                                <span class="nobr"><?php if ($_column->isEditable() && $_column->isEditAllowed()): ?><?php echo $this->__('Yes') ?><?php else: ?><?php echo $this->__('No') ?><?php endif ?></span>
+                            <?php endif ?>
+                        </td>
+                    <?php endif ?>
+                    <td class="a-center">
+                        <?php echo ($_column->isSystem() ? $this->__('Yes') : $this->__('No')) ?>
+                    </td>
+                    <td>
+                        <?php echo (isset($_origins[$_column->getOrigin()]) ? $_origins[$_column->getOrigin()] : $this->__('Unknown')) ?>
+                    </td>
+                    <td>
+                        <?php if ($_column->isAttribute() || $_column->isCustom()): ?>
+                            <em><?php echo $this->__('Auto-generated') ?></em>
+                        <?php else: ?>
+                            <?php echo $_columnBlockId ?>
+                        <?php endif ?>
+                    </td>
+                    <td>
+                        <?php if ($_column->isAttribute()): ?>
+                            <?php if ($_column->isMissing()): ?>
+                                <em><?php echo $this->htmlEscape($_column->getIndex()) ?></em>
+                            <?php else: ?>
+                                <?php echo $this->getAttributesSelectHtml($_column) ?>
+                            <?php endif ?>
+                        <?php else: ?>
+                            <div class="nobr">
+                                <?php echo $_column->getIndex() ?>
+                                <?php if (($_customColumn = $_column->getCustomColumnModel()) && $_customColumn->getAllowCustomization()): ?>
+                                    <input type="hidden" id="<?php echo $this->getCustomColumnConfigTargetCssId($_columnId) ?>" name="columns[<?php echo $_columnId ?>][customization_params]" value="<?php echo $_stringHelper->htmlDoubleEscape($_column->getCustomizationParams()) ?>" />
+                                    <span class="blcg-custom-column-config-button" id="<?php echo $this->getCustomColumnConfigButtonCssId($_columnId) ?>" title="<?php echo $this->__('Configuration') ?>"></span>
+<script type="text/javascript">
+//<![CDATA[
+new blcg.Grid.CustomColumn.ConfigButton(
+    '<?php echo $_column->getIndex() ?>',
+    '<?php echo $this->getCustomColumnConfigButtonCssId($_columnId) ?>',
+    '<?php echo $this->getCustomColumnConfigTargetCssId($_columnId) ?>',
+    '<?php echo $this->getCustomColumnConfigUrl() ?>',
+    <?php echo $this->helper('core')->jsonEncode($_customColumn->getCustomizationWindowConfig()) ?>
+);
+//]]>
+</script>
+                                <?php endif ?>
+                            </div>
+                        <?php endif ?>
+                    </td>
+                    <td>
+                        <?php if ($_column->isAttribute()): ?>
+                            <?php if (!$_column->isMissing()): ?>
+                                <span class="blcg-attribute-config-button" id="<?php echo $this->getAttributeRendererConfigButtonCssId($_columnId) ?>" style="display:none;"><?php echo $this->__('Configuration') ?></span>
+                            <?php endif ?>
+                        <?php elseif ($_column->isCollection() || ($_customColumn && $_customColumn->getAllowRenderers())): ?>
+                            <?php echo $this->getCollectionRenderersSelectHtml($_column) ?>
+                        <?php endif ?>
+                    </td>
+                    <td>
+                        <?php if ($_column->isAttribute() || ($_customColumn && $_customColumn->getAllowStore())): ?>
+                            <?php echo $this->getStoreSelectHtml($_column) ?>
+                        <?php endif ?>
+                    </td>
+                    <td>
+                        <?php if ($_value = $this->getColumnLockedValue($_columnBlockId, 'header')): ?>
+                            <span class="nobr"><?php echo $this->htmlEscape($_value) ?></span>
+                        <?php else: ?>
+                            <input name="columns[<?php echo $_columnId ?>][header]" class="input-text" type="text" value="<?php echo $this->htmlEscape($_column->getHeader()) ?>" />
+                        <?php endif ?>
+                    </td>
+                    <td>
+                        <?php if ($_value = $this->getColumnLockedValue($_columnId, 'width')): ?>
+                            <span class="nobr"><?php echo $this->htmlEscape($_value) ?></span>
+                        <?php else: ?>
+                            <input name="columns[<?php echo $_columnId ?>][width]" class="input-text" type="text" value="<?php echo $this->htmlEscape($_column->getWidth()) ?>" />
+                        <?php endif ?>
+                    </td>
+                    <td>
+                        <?php if ($_value = $this->getColumnLockedValue($_columnId, 'align')): ?>
+                            <?php if (isset($_alignments[$_value])): ?>
+                                <span class="nobr"><?php echo $this->htmlEscape($_alignments[$_value]) ?></span>
+                            <?php endif ?>
+                        <?php else: ?>
+                            <select name="columns[<?php echo $_columnId ?>][align]" class="select validate-select">
+                            <?php foreach ($_alignments as $_value => $_label): ?>
+                                <option value="<?php echo $this->htmlEscape($_value) ?>"<?php if ($_value == $_column->getAlign()): ?> selected="selected"<?php endif ?>>
+                                    <?php echo $this->htmlEscape($_label) ?>
+                                </option>
+                            <?php endforeach ?>
+                            </select>
+                        <?php endif ?>
+                    </td>
+                    <td>
+                        <input name="columns[<?php echo $_columnId ?>][order]" id="<?php echo $this->getOrderInputCssId($_columnId) ?>" class="input-text validate-number" type="text" <?php if ($this->getUseDragNDrop()): ?>readonly="readonly" value="<?php echo $_i*$this->getColumnsOrderPitch() ?>"<?php else: ?>value="<?php echo $this->htmlEscape($_column->getOrder()) ?>"<?php endif ?> />
+                    </td>
+                    <td class="a-center">
+                        <?php echo ($_column->isMissing() ? '<strong>'.$this->__('Yes').'</strong>' : $this->__('No')) ?>
+                    </td>
+                    <td>
+                        <?php if ($_column->isAttribute() || $_column->isCustom() || $_column->isMissing()): ?>
+                            <a href="#" onclick="<?php echo $this->getConfigJsObjectName() ?>.deleteColumn(<?php echo $_columnId ?>); return false;"><?php echo $this->__('Delete') ?></a>
+                        <?php endif ?>
+                    </td>
+                </tr>
+            <?php endforeach ?>
+            <?php $_maxDndOrder = $_i*$this->getColumnsOrderPitch() ?>
+            </tbody>
+        </table>
+    </div>
+</div>
+<script type="text/javascript">
+//<![CDATA[
+<?php if ($this->canHaveAttributeColumns()): ?>
+
+var blcgAttributeSelectTemplate = <?php echo $this->getAttributesSelectHtml() ?>;
+
+var blcgAlignmentSelectTemplate = '<select name="columns[{{id}}][align]" class="select validate-select">'
+<?php foreach ($_alignments as $_value => $_label): ?>
++ '<option value="<?php echo $this->jsQuoteEscape($this->htmlEscape($_value)) ?>"><?php echo $this->jsQuoteEscape($this->htmlEscape($_label)) ?></option>'
+<?php endforeach ?>
++ '</select>';
+
+var blcgStoreSelectTemplate = <?php echo $this->getStoreSelectHtml() ?>;
+
+<?php echo $this->getConfigJsObjectName() ?> = new blcg.Grid.ColumnsConfigForm(
+    '<?php echo $_htmlId ?>',
+    '<?php echo $_htmlId ?>-table-column',
+    '<?php echo $this->getSaveUrl() ?>',
+    '<?php echo $this->getReapplyDefaultFilterUrl() ?>',
+    {
+        newRowId: '<?php echo $this->getTableRowCssId() ?>',
+        orderInputId: '<?php echo $this->getOrderInputCssId() ?>',
+        newRowClassNames: ['<?php echo $_htmlId ?>-table-column'],
+        newRowColumns: [
+            <?php if ($this->getUseDragNDrop()): ?>{template: '&nbsp;', classNames: ['blcg-drag-handle']},<?php endif ?>
+            {template: '<input name="columns[{{id}}][is_visible]" id="<?php echo $this->getVisibleCheckboxCssId() ?>"" value="1" class="blcg-visible-checkbox" type="checkbox" checked="checked" />', classNames: ['a-center']},
+            {template: '<input name="columns[{{id}}][filter_only]" id="<?php echo $this->getFilterOnlyCheckboxCssId() ?>" value="1" class="blcg-filter-only-checkbox" type="checkbox" />', classNames: ['a-center']},
+            <?php if ($this->canDisplayEditablePart()): ?>
+            {template: '<?php if ($this->canChooseEditableColumns()): ?><input name="columns[{{id}}][editable]" disabled="disabled" id="<?php echo $this->getEditableCheckboxCssId() ?>" class="editable-checkbox" type="checkbox" value="1" checked="checked" /><?php else: ?><span class="nobr"><?php echo $this->jsQuoteEscape($this->__('Yes')) ?></span><?php endif ?>', id: '<?php echo $this->getEditableContainerCssId() ?>', classNames: ['a-center']},
+            <?php endif ?>
+            {template: '<?php echo $this->jsQuoteEscape($this->__('No')) ?>', classNames: ['a-center']},
+            {template: '<?php echo $this->jsQuoteEscape($this->__('Attribute')) ?>'},
+            {template: '<em><?php echo $this->jsQuoteEscape($this->__('Auto-generated')) ?></em>'},
+            {template: blcgAttributeSelectTemplate},
+            {template: '<span class="blcg-attribute-config-button" id="<?php echo $this->getAttributeRendererConfigButtonCssId() ?>" style="display:none;"><?php echo $this->jsQuoteEscape($this->__('Configuration')) ?></span>'},
+            {template: blcgStoreSelectTemplate},
+            {template: '<input name="columns[{{id}}][header]" class="input-text" type="text" />'},
+            {template: '<input name="columns[{{id}}][width]" class="input-text" type="text" />'},
+            {template: blcgAlignmentSelectTemplate},
+            {template: '<input name="columns[{{id}}][order]" id="<?php echo $this->getOrderInputCssId() ?>" class="input-text validate-number" <?php if ($this->getUseDragNDrop()): ?>readonly="readonly"<?php endif ?> type="text" value="{{order}}" />'},
+            {template: '<?php echo $this->jsQuoteEscape($this->__('No')) ?>', classNames: ['a-center']},
+            {template: '<a href="#" onclick="<?php echo $this->getConfigJsObjectName() ?>.deleteColumn({{id}}); return false;"><?php echo $this->jsQuoteEscape($this->__('Delete')) ?></a><script type="text\/javascript"><?php echo $this->getARSMJsObjectName() ?>.initializeSelects();<\/script>'}
+        ],
+        maxOrder: <?php echo ($this->getUseDragNDrop() ? $_maxDndOrder : $this->getColumnsMaxOrder()) ?>, 
+        orderPitch: <?php echo $this->getColumnsOrderPitch() ?>, 
+        useDnd: <?php if ($this->getUseDragNDrop()): ?>true<?php else: ?>false<?php endif ?>,
+        gridObjectName: '<?php echo $this->jsQuoteEscape($this->getGridJsObjectName()) ?>',
+        additionalSaveParams: <?php echo $this->getAdditionalParamsJsonConfig() ?>,
+        filterResetRequestValue: '<?php echo $this->jsQuoteEscape($this->getFilterResetRequestValue()) ?>'
+    }
+);
+
+<?php echo $this->getARSMJsObjectName() ?>.initializeSelects();
+
+<?php else: ?>
+
+<?php echo $this->getConfigJsObjectName() ?> = new blcg.Grid.ColumnsConfigForm(
+    '<?php echo $_htmlId ?>',
+    '<?php echo $_htmlId ?>-table-column',
+    '<?php echo $this->getSaveUrl() ?>',
+    '<?php echo $this->getReapplyDefaultFilterUrl() ?>',
+    {
+        newRowId: '<?php echo $this->getTableRowCssId() ?>',
+        orderInputId: '<?php echo $this->getOrderInputCssId() ?>',
+        newRowClassNames: [],
+        newRowColumns: [],
+        maxOrder: <?php echo ($this->getUseDragNDrop() ? $_maxDndOrder : $this->getColumnsMaxOrder()) ?>, 
+        orderPitch: <?php echo $this->getColumnsOrderPitch() ?>,
+        useDnd: <?php if ($this->getUseDragNDrop()): ?>true<?php else: ?>false<?php endif ?>,
+        gridObjectName: '<?php echo $this->jsQuoteEscape($this->getGridJsObjectName()) ?>',
+        additionalSaveParams: <?php echo $this->getAdditionalParamsJsonConfig() ?>,
+        filterResetRequestValue: '<?php echo $this->jsQuoteEscape($this->getFilterResetRequestValue()) ?>'
+    }
+);
+
+<?php endif ?>
+
+<?php echo $this->getCRSMJsObjectName() ?>.initializeSelects();
+//]]>
+</script>

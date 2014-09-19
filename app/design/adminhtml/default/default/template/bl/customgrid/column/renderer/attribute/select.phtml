@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 ?>
@@ -19,9 +19,27 @@
         <option value="<?php echo $this->htmlEscape($_attribute->getAttributeCode()) ?>"<?php if ($this->getAttributeCode() == $_attribute->getAttributeCode()): ?> selected="selected"<?php endif ?>><?php echo $this->htmlEscape($_attribute->getAttributeCode()) ?></option>
     <?php endforeach ?>
     </select>
-</div>
-<?php if ($this->getParamsTargetId() != ''): ?>
-    <script type="text/javascript">    
-        <?php echo $this->getJsObjectName() ?> = new blcg.Renderer.Attribute.Select('<?php echo $this->getSelectId() ?>', <?php echo $this->getAttributesJsonConfig() ?>, <?php echo $this->getRenderersJsonConfig() ?>, '<?php echo $this->getConfigButtonId() ?>', '<?php echo $this->getParamsTargetId() ?>', '<?php echo $this->getConfigUrl() ?>', <?php echo $this->getEditableJsonConfig() ?>);
-    </script>
+    <?php if ($this->getRendererTargetName()): ?>
+        <input type="hidden" name="<?php echo $this->getRendererTargetName() ?>" id="<?php echo $this->getRendererTargetId() ?>" value="<?php echo $this->getRendererParams() ?>" />
+        <?php if (!$this->getUseExternalConfigButton()): ?>
+            <span class="blcg-attribute-config-button" id="<?php echo $this->getConfigButtonId() ?>" style="display:none;"><?php echo $this->__('Configuration') ?></span>
+        <?php endif ?>
+        <?php if ($_jsObjectName = $this->getSelectsManagerJsObjectName()): ?>
+<script type="text/javascript">
+<?php if (!$this->getOutputAsJs()): ?>
+//<![CDATA[
 <?php endif ?>
+<?php echo $_jsObjectName ?>.registerSelect(
+    '<?php echo $this->getSelectId() ?>',
+    '<?php echo $this->getConfigButtonId() ?>',
+    '<?php echo $this->getRendererTargetId() ?>',
+    false,
+    <?php echo $this->getEditableJsonConfig() ?>
+);
+<?php if (!$this->getOutputAsJs()): ?>
+//]]>
+<?php endif ?>
+</script>
+        <?php endif?>
+    <?php endif ?>
+</div>

@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -21,17 +21,22 @@ class Bl_CustomGrid_Block_Widget_Grid_Column_Filter_Price
     
     public function getHtml()
     {
-        $html  = '<div class="range">';
-        
-        $html .= '<div class="range-line"><span class="label">'
-            . Mage::helper('adminhtml')->__('From')
-            .':</span> <input type="text" name="'.$this->_getHtmlName().'[from]" id="'.$this->_getHtmlId().'_from" value="'.$this->getEscapedValue('from').'" class="input-text no-changes"/></div>';
-        $html .= '<div class="range-line"><span class="label">'
-            . Mage::helper('adminhtml')->__('To')
-            .' : </span><input type="text" name="'.$this->_getHtmlName().'[to]" id="'.$this->_getHtmlId().'_to" value="'.$this->getEscapedValue('to').'" class="input-text no-changes"/></div>';
+        $html = '<div class="range"><div class="range-line">'
+                . '<span class="label">' . $this->helper('adminhtml')->__('From') . ':</span> '
+                . '<input type="text" name="' . $this->_getHtmlName() . '[from]" id="' . $this->_getHtmlId() . '_from" '
+                .  'value="' . $this->getEscapedValue('from') . '" class="input-text no-changes"/>'
+            . '</div>'
+            . '<div class="range-line">'
+                . '<span class="label">' . $this->helper('adminhtml')->__('To') . ' : </span>'
+                . '<input type="text" name="' . $this->_getHtmlName() . '[to]" id="' . $this->_getHtmlId().'_to" '
+                . 'value="' . $this->getEscapedValue('to') . '" class="input-text no-changes"/>'
+            . '</div>';
         
         if ($this->getDisplayCurrencySelect()) {
-            $html .= '<div class="range-line"><span class="label">' . Mage::helper('adminhtml')->__('In').' : </span>' . $this->_getCurrencySelectHtml() . '</div>';
+            $html .= '<div class="range-line">'
+                . '<span class="label">' . $this->helper('adminhtml')->__('In') . ' : </span>'
+                . $this->_getCurrencySelectHtml()
+                . '</div>';
         }
         
         $html .= '</div>';
@@ -40,11 +45,10 @@ class Bl_CustomGrid_Block_Widget_Grid_Column_Filter_Price
     
     protected function _getColumnOriginalCurrency()
     {
-        if ($code = $this->getColumn()->getOriginalCurrencyCode()) {
-            return $code;
-        }
         // Only a fixed currency code is usable for filtering
-        return false;
+        return ($code = $this->getColumn()->getOriginalCurrencyCode())
+            ? $code
+            : false;
     }
     
     public function getDisplayCurrencySelect()
@@ -60,21 +64,6 @@ class Bl_CustomGrid_Block_Widget_Grid_Column_Filter_Price
         return $this->_currencyModel;
     }
     
-    protected function _getCurrencySelectHtml()
-    {
-        if (!$value = $this->_getColumnOriginalCurrency()) {
-            return '';
-        }
-        $html = '<select name="'.$this->_getHtmlName().'[currency]" id="'.$this->_getHtmlId().'_currency">';
-        
-        foreach ($this->_getCurrencyList() as $currency) {
-            $html .= '<option value="'.$currency.'" '.($currency == $value ? 'selected="selected"' : '').'>'.$currency.'</option>';
-        }
-        
-        $html .= '</select>';
-        return $html;
-    }
-    
     protected function _getCurrencyList()
     {
         if (is_null($this->_currencyList)) {
@@ -83,16 +72,41 @@ class Bl_CustomGrid_Block_Widget_Grid_Column_Filter_Price
         return $this->_currencyList;
     }
     
+    protected function _getRate($from, $to)
+    {
+        return $this->_getCurrencyModel()->load($from)->getAnyRate($to);
+    }
+    
+    protected function _getCurrencySelectHtml()
+    {
+        if (!$value = $this->_getColumnOriginalCurrency()) {
+            return '';
+        }
+        
+        $html = '<select name="' . $this->_getHtmlName() . '[currency]" id="' . $this->_getHtmlId() . '_currency">';
+        
+        foreach ($this->_getCurrencyList() as $currency) {
+            $html .= '<option value="' . $this->htmlEscape($currency) . '" '
+                . ($currency == $value ? 'selected="selected"' : '') . '>' . $this->htmlEscape($currency) . '</option>';
+        }
+        
+        $html .= '</select>';
+        return $html;
+    }
+    
     public function getValue($index=null)
     {
         if ($index) {
             return $this->getData('value', $index);
         }
+        
         $value = $this->_getData('value');
         
-        if ((isset($value['from']) && strlen($value['from']) > 0) 
-            || (isset($value['to']) && strlen($value['to']) > 0)) {
-            return $value;
+        if (is_array($value)) {
+            if ((isset($value['from']) && strlen($value['from']) > 0) 
+                || (isset($value['to']) && strlen($value['to'])  > 0)) {
+                return $value;
+            }
         }
         
         return null;
@@ -120,10 +134,5 @@ class Bl_CustomGrid_Block_Widget_Grid_Column_Filter_Price
         }
         
         return $value;
-    }
-    
-    protected function _getRate($from, $to)
-    {
-        return $this->_getCurrencyModel()->load($from)->getAnyRate($to);
     }
 }

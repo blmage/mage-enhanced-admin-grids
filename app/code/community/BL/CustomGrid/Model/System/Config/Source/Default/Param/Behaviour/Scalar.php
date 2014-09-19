@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -18,17 +18,18 @@ class BL_CustomGrid_Model_System_Config_Source_Default_Param_Behaviour_Scalar
     public function toOptionArray()
     {
         $helper = Mage::helper('customgrid');
+        
         return array(
             array(
-                'value' => BL_CustomGrid_Model_Grid::GRID_DEFAULT_PARAM_DEFAULT,
+                'value' => BL_CustomGrid_Model_Grid::DEFAULT_PARAM_DEFAULT,
                 'label' => $helper->__('Default (Last Set Value is Used)'),
             ),
             array(
-                'value' => BL_CustomGrid_Model_Grid::GRID_DEFAULT_PARAM_FORCE_ORIGINAL,
+                'value' => BL_CustomGrid_Model_Grid::DEFAULT_PARAM_FORCE_ORIGINAL,
                 'label' => $helper->__('Force Original Value'),
             ),
             array(
-                'value' => BL_CustomGrid_Model_Grid::GRID_DEFAULT_PARAM_FORCE_CUSTOM,
+                'value' => BL_CustomGrid_Model_Grid::DEFAULT_PARAM_FORCE_CUSTOM,
                 'label' => $helper->__('Force Custom Value'),
             ),
         );

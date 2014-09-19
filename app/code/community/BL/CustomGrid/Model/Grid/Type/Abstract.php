@@ -9,73 +9,42 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends Varien_Object
+abstract class BL_CustomGrid_Model_Grid_Type_Abstract
+    extends BL_CustomGrid_Object
 {
-    /**
-    * Available attributes per block type
-    * 
-    * @var array
-    */
-    protected $_attributes     = array();
-    /**
-    * Locked collection columns values
-    * 
-    * @var array
-    */
-    protected $_lockedValues   = array();
-    /**
-    * Available export types
-    * 
-    * @var array
-    */
-    protected $_exportTypes    = array();
-    /**
-    * Editable values per block type
-    * 
-    * @var array
-    */
-    protected $_editableValues = array();
-    /**
-    * Available custom columns
-    * 
-    * @var array
-    */
-    protected $_customColumns  = null;
-    /**
-    * Custom columns groups
-    * 
-    * @var array
-    */
-    protected $_columnsGroups  = array();
-    /**
-    * Available custom columns per block type
-    * 
-    * @var array
-    */
-    protected $_blocksColumns  = array();
-    
-    const EDITABLE_TYPE_FIELD           = 'static';
-    const EDITABLE_TYPE_ATTRIBUTE       = 'attribute';
+    const EDITABLE_TYPE_FIELD = 'static';
+    const EDITABLE_TYPE_ATTRIBUTE = 'attribute';
     const EDITABLE_TYPE_ATTRIBUTE_FIELD = 'attribute_field';
     
     /**
-    * Return whether this grid type can be used to handle given custom grid
-    * 
-    * @param string $type Grid block type
-    * @param string $rewritingClassName Name of the class rewriting given block type
-    * @return bool
-    */
-    abstract public function isAppliableToGrid($type, $rewritingClassName);
+     * Return base helper
+     *
+     * @return BL_CustomGrid_Helper_Data
+     */
+    protected function _getHelper()
+    {
+        return Mage::helper('customgrid');
+    }
     
+    /**
+     * Return layout model
+     *
+     * @return Mage_Core_Model_Layout
+     */
     protected function _getLayout()
     {
         return Mage::getSingleton('core/layout');
     }
     
+    /**
+     * Return current request object
+     *
+     * @return Mage_Core_Controller_Request_Http
+     */
     protected function _getRequest()
     {
         $controller = Mage::app()->getFrontController();
@@ -90,132 +59,185 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends Varien_Object
     }
     
     /**
-    * Return whether given grid model matches given grid block type and ID
-    * 
-    * @param string $blockType Grid block type
-    * @param string $blockId Grid block ID
-    * @param BL_CustomGrid_Model_Grid $model Grid Model
-    * @return bool
-    */
-    public function matchGridBlock($blockType, $blockId, $model)
-    {
-        return (($blockType == $model->getBlockType()) && ($blockId == $model->getBlockId()));
-    }
-    
-    /**
-    * Return locked values for grid columns (user won't be able to change them)
-    * Here are the possible array keys to use :
-    * - "header"   : header title
-    * - "width"    : width
-    * - "align"    : alignment (must correspond to BL_CustomGrid_Model_Grid aligment constants)
-    * - "renderer" : code of the collection renderer  to force using,
-    *                if the key is set but does not correspond to any renderer, then no renderer will be choosable at all
-    * - "renderer_label" : if no renderer can be choosen and forced renderer is not found, 
-    *                      this label will be displayed instead of renderer select
-    * - "config_values"  : array of other locked values to put in column config array,
-    *                      when corresponding column is added to grid
-    * 
-    * @param string $type Grid block type
-    * @return array
-    */
-    protected function _getColumnsLockedValues($type)
+     * Return which block types this grid type can handle
+     * 
+     * @return string|array
+     */
+    protected function _getSupportedBlockTypes()
     {
         return array();
     }
     
     /**
-    * Return locked values for grid columns (user won't be able to change them)
-    * Wrapper for _getColumnsLockedValues(), with cache
-    * 
-    * @param string $type Grid block type
-    * @return array
-    */
-    public function getColumnsLockedValues($type)
+     * Return which block types this grid type can handle
+     * Wrapper for _getSupportedBlockTypes(), with cache
+     * 
+     * @return array
+     */
+    public function getSupportedBlockTypes()
     {
-        if (!isset($this->_lockedValues[$type])) {
-            $values = $this->_getColumnsLockedValues($type);
-            $this->_lockedValues[$type] = (is_array($values) ? $values : array());
+        if (!$this->hasData('supported_block_types')) {
+            if (!is_array($blockTypes = $this->_getSupportedBlockTypes())) {
+                $blockTypes = array($blockTypes);
+            }
+            $this->setData('supported_block_types', $blockTypes);
         }
-        return $this->_lockedValues[$type];
+        return $this->_getData('supported_block_types');
     }
     
     /**
-    * Return locked values for a given column (user won't be able to change them)
-    * 
-    * @param string $type Grid block type
-    * @param string $columnId Column ID
-    * @return array
-    */
-    public function getColumnLockedValues($type, $columnId)
+     * Return whether the given block type is "officially" supported by this grid type
+     * 
+     * @param string $blockType Grid block type
+     * @return bool
+     */
+    public function isSupportedBlockType($blockType)
     {
-        $values = $this->getColumnsLockedValues($type);
-        return (isset($values[$columnId]) ? $values[$columnId] : false);
+        return in_array($blockType, $this->getSupportedBlockTypes(), true);
     }
     
     /**
-    * Return whether attribute columns are available
-    * 
-    * @param string $type Grid block type
-    * @return bool
-    */
-    public function canHaveAttributeColumns($type)
+     * Return whether this grid type can be used to handle given grid block
+     * 
+     * @param string $blockType Grid block type
+     * @param string $rewritingClassName Name of the class currently rewriting the given block type (if any)
+     * @return bool
+     */
+    public function isAppliableToGridBlock($blockType, $rewritingClassName='')
+    {
+        return $this->isSupportedBlockType($blockType);
+    }
+    
+    /**
+     * Return whether given grid model matches given grid block type and ID
+     * 
+     * @param string $blockType Grid block type
+     * @param string $blockId Grid block ID
+     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @return bool
+     */
+    public function matchGridBlock($blockType, $blockId, BL_CustomGrid_Model_Grid $gridModel)
+    {
+        return (($blockType == $gridModel->getBlockType()) && ($blockId == $gridModel->getBlockId()));
+    }
+    
+    /**
+     * Return locked values for grid columns (user won't be able to change them)
+     * Here are the possible array keys to use :
+     * - "header"
+     * - "width"
+     * - "align" (must correspond to BL_CustomGrid_Model_Grid alignment constants)
+     * - "renderer" : code of the collection renderer that should be forced,
+     *                if the key is set but does not correspond to any renderer,
+     *                then no renderer will be choosable nor used
+     * - "renderer_label" : if no renderer can be choosen and the given forced renderer can not be found,
+     *                      this label will be displayed
+     * - "config_values"  : array of other locked values that will be used for the corresponding call to
+     *                      Mage_Adminhtml_Block_Widget_Grid::addColumn()
+     * 
+     * @param string $blockType Grid block type
+     * @return array
+     */
+    protected function _getColumnsLockedValues($blockType)
+    {
+        return array();
+    }
+    
+    /**
+     * Return locked values for grid columns (user won't be able to change them)
+     * Wrapper for _getColumnsLockedValues(), with cache
+     * 
+     * @param string $blockType Grid block type
+     * @return array
+     */
+    public function getColumnsLockedValues($blockType)
+    {
+        if (!$this->hasData('columns_locked_values')
+            || !is_array($typeValues = $this->getData('columns_locked_values/' . $blockType))) {
+            $typeValues = $this->_getColumnsLockedValues($blockType);
+            $this->setData('columns_locked_values/' . $blockType, $typeValues);
+        }
+        return $typeValues;
+    }
+    
+    /**
+     * Return locked values for given column
+     * 
+     * @param string $blockType Grid block type
+     * @param string $columnBlockId Column block ID
+     * @return array
+     */
+    public function getColumnLockedValues($blockType, $columnBlockId)
+    {
+        $values = $this->getColumnsLockedValues($blockType);
+        return (isset($values[$columnBlockId]) ? $values[$columnBlockId] : false);
+    }
+    
+    /**
+     * Return whether attribute columns are available
+     * 
+     * @param string $blockType Grid block type
+     * @return bool
+     */
+    public function canHaveAttributeColumns($blockType)
     {
         return false;
     }
     
     /**
-    * Return whether given attribute can be considered as available
-    * 
-    * @param string $type Grid block type
-    * @param Mage_Eav_Model_Entity_Attribute $attribute Attribute model
-    * @return bool
-    */
-    protected function _isAvailableAttribute($type, $attribute)
+     * Return whether given attribute can be considered as available
+     * 
+     * @param string $blockType Grid block type
+     * @param Mage_Eav_Model_Entity_Attribute $attribute Attribute model
+     * @return bool
+     */
+    protected function _isAvailableAttribute($blockType, Mage_Eav_Model_Entity_Attribute $attribute)
     {
-        return ((!$attribute->hasIsVisible() || $attribute->getIsVisible())
-                && ($attribute->getBackend()->getType() != 'static')
-                && $attribute->getFrontend()->getInputType());
+        return (!$attribute->hasIsVisible() || $attribute->getIsVisible())
+            && $attribute->getFrontend()->getInputType()
+            && ($attribute->getBackend()->getType() != 'static');
     }
     
     /**
-    * Return available attributes
-    * 
-    * @param string $type Grid block type
-    * @return array
-    */
-    protected function _getAvailableAttributes($type)
+     * Return available attributes for given block type
+     * 
+     * @param string $blockType Grid block type
+     * @return array
+     */
+    protected function _getAvailableAttributes($blockType)
     {
         return array();
     }
     
     /**
-    * Return available attributes
-    * Wrapper for _getAvailableAttributes(), with cache
-    * 
-    * @param string $type Grid block type
-    * @return array
-    */
-    public function getAvailableAttributes($type, $withEditableFlag=false)
+     * Return available attributes
+     * Wrapper for _getAvailableAttributes(), with cache
+     * 
+     * @param string $blockType Grid block type
+     * @param bool $withEditableFlag Whether editable flag should be set on attribute models
+     * @return array
+     */
+    public function getAvailableAttributes($blockType, $withEditableFlag=false)
     {
-        if (!isset($this->_attributes[$type])) {
-            $attributes = $this->_getAvailableAttributes($type);
+        if (!$this->hasData('available_attributes')
+            || !is_array($attributes = $this->getData('available_attributes/' . $blockType))) {
+            $attributes = $this->_getAvailableAttributes($blockType);
             $response   = new Varien_Object(array('attributes' => $attributes));
             
             Mage::dispatchEvent('blcg_grid_type_available_attributes', array(
                 'response'   => $response,
                 'type_model' => $this,
-                'block_type' => $type,
+                'block_type' => $blockType,
             ));
             
-            $this->_attributes[$type] = $response->getAttributes();
+            $this->setData('available_attributes/' . $blockType, $attributes);
         }
         
-        $attributes = $this->_attributes[$type];
-        
         if ($withEditableFlag) {
-            $editable = $this->getEditableAttributes($type);
+            $editableAttributes = $this->getEditableAttributes($blockType);
+            
             foreach ($attributes as $attribute) {
-                $attribute->setEditableValues(isset($editable[$attribute->getAttributeCode()]));
+                $attribute->setIsEditable(isset($editableAttributes[$attribute->getAttributeCode()]));
             }
         }
         
@@ -223,81 +245,85 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends Varien_Object
     }
     
     /**
-    * Return whether grid results are exportable with this module
-    * 
-    * @param string $type Grid block type
-    * @return bool
-    */
-    public function canExport($type)
+     * Return whether grid results are exportable
+     * 
+     * @param string $blockType Grid block type
+     * @return bool
+     */
+    public function canExport($blockType)
     {
         return true;
     }
     
     /**
-    * Return available export types
-    * 
-    * @param string $type Grid block type
-    * @return array
-    */
-    protected function _getExportTypes($type)
+     * Return available export types
+     * 
+     * @param string $blockType Grid block type
+     * @return array
+     */
+    protected function _getExportTypes($blockType)
     {
         return array(
             'csv' => array(
-                'url'   => 'customgrid/custom_grid/exportCsv',
-                'label' => Mage::helper('customgrid')->__('CSV'),
+                'route' => 'customgrid/grid/exportCsv',
+                'label' => $this->_getHelper()->__('CSV'),
             ),
             'xml' => array(
-                'url'   => 'customgrid/custom_grid/exportExcel', 
-                'label' => Mage::helper('customgrid')->__('Excel'),
+                'route' => 'customgrid/grid/exportExcel', 
+                'label' => $this->_getHelper()->__('Excel'),
             ),
         );
     }
     
     /**
-    * Return available export types
-    * Wrapper for _getExportTypes(), with cache and some values preparation
-    * 
-    * @param string $gridType Grid block type
-    * @return array
-    */
-    public function getExportTypes($gridType)
+     * Return available export types
+     * Wrapper for _getExportTypes(), with cache and some values preparation
+     * 
+     * @param string $blockType Grid block type
+     * @return array
+     */
+    public function getExportTypes($blockType)
     {
-        if (!isset($this->_exportTypes[$gridType])) {
+        if (!$this->hasData('export_types')
+            || !is_array($exportTypes = $this->getData('export_types/' . $blockType))) {
             $exportTypes = array();
-            foreach ($this->_getExportTypes($gridType) as $type) {
-                if (is_array($type)) {
-                    $params = array('_current' => true);
+            
+            foreach ($this->_getExportTypes($blockType) as $exportType) {
+                if (is_array($exportType)) {
+                    $urlParams = array('_current' => true);
                     
-                    if (isset($type['params']) && is_array($type['params'])) {
-                        $params = array_merge($params, $type['params']);
+                    if (isset($exportType['url_params']) && is_array($exportType['url_params'])) {
+                        $urlParams = array_merge($urlParams, $exportType['url_params']);
                     }
                     
-                    $exportTypes[] = new Varien_Object(array(
-                        'url'   => Mage::helper('adminhtml')->getUrl($type['url'], $params),
-                        'label' => $type['label']
+                    $exportTypes[] = new BL_CustomGrid_Object(array(
+                        'route' => $exportType['route'],
+                        'url'   => Mage::helper('adminhtml')->getUrl($exportType['route'], $urlParams),
+                        'label' => $exportType['label'],
                     ));
                 }
             }
-            $this->_exportTypes[$gridType] = $exportTypes;
+            
+            $this->setData('export_types/' . $blockType, $exportTypes);
         }
-        return $this->_exportTypes[$gridType];
+        return $exportTypes;
     }
     
     /**
-    * Return whether request corresponds to an export request from our module for handled grid
-    * 
-    * @param Mage_Core_Controller_Request_Http $request Request object
-    * @param string $gridType Grid block type
-    * @return bool
-    */
-    public function isExportRequest($request, $gridType)
+     * Return whether given request corresponds to an export request from this extension
+     * 
+     * @param string $blockType Grid block type
+     * @param Mage_Core_Controller_Request_Http $request Request object
+     * @return bool
+     */
+    public function isExportRequest($blockType, Mage_Core_Controller_Request_Http $request)
     {
-        $action = $request->getModuleName()
+        $route = $request->getModuleName()
             . '/' . $request->getControllerName()
             . '/' . $request->getActionName();
-            
-        foreach ($this->_getExportTypes($gridType) as $type) {
-            if ($type['url'] == $action) {
+        
+        foreach ($this->getExportTypes($blockType) as $exportType) {
+            if ($exportType->getRoute() == $route) {
                 return true;
             }
         }
@@ -305,306 +331,347 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends Varien_Object
         return false;
     }
     
+    /**
+     * Custom columns sort callback
+     *
+     * @param BL_CustomGrid_Model_Custom_Column_Abstract $a One custom column
+     * @param BL_CustomGrid_Model_Custom_Column_Abstract $b Another custom column
+     * @return int
+     */
     protected function _sortCustomColumns($a, $b)
     {
         return strcmp($a->getName(), $b->getName());
     }
     
+    /**
+     * Return additional custom columns (on top of those defined in the XML configuration)
+     *
+     * @return array
+     */
     protected function _getAdditionalCustomColumns()
     {
         return array();
     }
     
-    protected function _getCustomColumns()
+    /**
+     * Return available custom columns
+     * Wrapper for _getCustomColumns(), with filtering possibilities
+     *
+     * @param string|null $blockType Grid block type (if null, all custom columns will be returned)
+     * @param string $rewritingClassName Grid rewriting class name
+     * @param bool $nullIfNone Whether null should be returned instead of an empty array, if appropriate
+     * @return array|null
+     */
+    public function getCustomColumns($blockType=null, $rewritingClassName='', $nullIfNone=false)
     {
-        if (is_null($this->_customColumns)) {
-            // Initialize custom columns from the different available sources
-            $xmlColumns =  Mage::getSingleton('customgrid/grid_type')
-                ->getTypeCustomColumnsByCode($this->getCode());
-            
+        if (!$this->hasData('custom_columns')) {
+            $code = $this->getCode();
+            $configColumns = Mage::getSingleton('customgrid/grid_type_config')->getCustomColumnsByTypeCode($code);
             $response = new Varien_Object(array('columns' => array()));
+            
             Mage::dispatchEvent('blcg_grid_type_additional_columns', array(
                 'response'   => $response,
                 'type_model' => $this,
             ));
             
-            $this->_customColumns = array_filter(
+            $customColumns = array_filter(
                 array_merge(
                     $this->_getAdditionalCustomColumns(),
-                    $xmlColumns,
+                    $configColumns,
                     $response->getColumns()
                 ),
-                create_function('$m', 'return ($m instanceof BL_CustomGrid_Model_Custom_Column_Abstract);')
+                create_function('$value', 'return ($value instanceof BL_CustomGrid_Model_Custom_Column_Abstract);')
             );
             
-            uasort($this->_customColumns, array($this, '_sortCustomColumns'));
-            
-            // Initialize corresponding groups
-            $defaultGroupId = 1;
-            $currentGroupId = 2;
-            $this->_columnsGroups = array();
-            
-            foreach ($this->_customColumns as $column) {
-                if ($column->hasGroup()) {
-                    if (!$groupId = array_search($column->getGroup(), $this->_columnsGroups)) {
-                        $groupId = 'g'.$currentGroupId++;
-                        $this->_columnsGroups[$groupId] = $column->getGroup();
-                    }
-                    $column->setGroupId($groupId);
-                } else {
-                    $column->setGroupId('g'.$defaultGroupId);
-                }
-            }
-            
-            uasort($this->_columnsGroups, 'strcmp');
-            $this->_columnsGroups['g1'] = Mage::helper('customgrid')->__('Others');
-            $this->_blocksColumns = array();
+            uasort($customColumns, array($this, '_sortCustomColumns'));
+            $this->setData('custom_columns', $customColumns);
+            $this->getCustomColumnsGroups(); // force the initialization of the columns groups
         }
-        return $this->_customColumns;
-    }
-    
-    public function getCustomColumns($blockType=null, $rewritingClassName='', $emptyArray=true)
-    {
+        
         if (is_null($blockType)) {
-            return $this->_getCustomColumns();
-        }
-        if (!isset($this->_blocksColumns[$blockType])) {
-            $this->_blocksColumns[$blockType] = array();
-        }
-        if (!isset($this->_blocksColumns[$blockType][$rewritingClassName])) {
-            $this->_blocksColumns[$blockType][$rewritingClassName] = array();
+            $customColumns = $this->_getData('custom_columns');
+        } else {
+            $blockKey = $blockType . '/' . ($rewritingClassName !== '' ? (string) $rewritingClassName : '!');
             
-            foreach ($this->_getCustomColumns() as $id => $column) {
-                if ($column->isAvailable($blockType, $rewritingClassName)) {
-                    $this->_blocksColumns[$blockType][$rewritingClassName][$id] = $column;
+            if (!$this->hasData('block_type_custom_columns')
+                || !is_array($customColumns = $this->getData('block_type_custom_columns/' . $blockKey))) {
+                $customColumns = array();
+                
+                foreach ($this->_getData('custom_columns') as $code => $customColumn) {
+                    if ($customColumn->isAvailable($blockType, $rewritingClassName)) {
+                        $customColumns[$code] = $customColumn;
+                    }
                 }
-            }
-            
-            if (empty($this->_blocksColumns[$blockType][$rewritingClassName])) {
-                $this->_blocksColumns[$blockType][$rewritingClassName] = false;
+                
+                $this->setData('block_type_custom_columns/' . $blockKey, $customColumns);
             }
         }
-        return ($this->_blocksColumns[$blockType][$rewritingClassName]
-            ? $this->_blocksColumns[$blockType][$rewritingClassName]
-            : ($emptyArray ? array() : null));
+        
+        return (!empty($customColumns) ? $customColumns : ($nullIfNone ? null : array()));
     }
     
+    /**
+     * Return custom column by code
+     *
+     * @param string $code Custom column code
+     * @return BL_CustomGrid_Model_Custom_Column_Abstract|null
+     */
     public function getCustomColumn($code)
     {
-        $columns = $this->_getCustomColumns();
-        return (isset($columns[$code]) ? $columns[$code] : null);
+        $customColumns = $this->getCustomColumns();
+        return (isset($customColumns[$code]) ? $customColumns[$code] : null);
     }
     
+    /**
+     * Return available custom columns groups
+     *
+     * @return array
+     */
     public function getCustomColumnsGroups()
     {
-        $this->_getCustomColumns();
-        return $this->_columnsGroups;
+        if (!$this->hasData('custom_columns_groups')) {
+            // Initialize columns groups
+            $defaultGroupId = 1;
+            $currentGroupId = 2;
+            $groups = array();
+            
+            foreach ($this->getCustomColumns() as $customColumn) {
+                if ($customColumn->hasGroup()) {
+                    if (!$groupId = array_search($customColumn->getGroup(), $groups)) {
+                        $groupId = 'g' . $currentGroupId++;
+                        $groups[$groupId] = $customColumn->getGroup();
+                    }
+                    $customColumn->setGroupId($groupId);
+                } else {
+                    $customColumn->setGroupId('g' . $defaultGroupId);
+                }
+            }
+            
+            uasort($groups, 'strcmp');
+            $groups['g1'] = $this->_getHelper()->__('Others');
+            $this->setData('custom_columns_groups', $groups);
+        }
+        return $this->_getData('custom_columns_groups');
     }
     
+    /**
+     * Return whether custom columns are available
+     *
+     * @param string $blockType Grid block type
+     * @param string $rewritingClassName Grid rewriting class name
+     * @return bool
+     */
     public function canHaveCustomColumns($blockType, $rewritingClassName='')
     {
-        return is_array($this->getCustomColumns($blockType, $rewritingClassName, false));
+        return is_array($this->getCustomColumns($blockType, $rewritingClassName, true));
     }
     
     /**
-    * @todo refactor all the editor methods - certainly accept [exclusive or not] callbacks for each action (found in each field config)
-    *       this will be at least needed by custom columns system
-    */
+     * @todo refactor all the editor methods - certainly accept callbacks for each action
+     * (exclusive or not, found in each field config). This will be at least needed by custom columns system.
+     */
     
     /**
-    * Return action URL for given field
-    * 
-    * @param string $type Grid block type
-    * @param string $id Field ID
-    * @param array $config Field config
-    * @param string $route Action route
-    * @return string
-    */
-    protected function _getFieldUrl($type, $id, $config, $route)
+     * Return action URL for given field
+     * 
+     * @param string $blockType Grid block type
+     * @param string $id Field ID
+     * @param BL_CustomGrid_Model_Grid_Edit_Config $config Field config
+     * @param string $route Action route
+     * @return string
+     */
+    protected function _getFieldActionUrl($blockType, $id, BL_CustomGrid_Model_Grid_Edit_Config $config, $route)
     {
-        return Mage::helper('adminhtml')
-            ->getUrl($route, array(
+        return Mage::helper('adminhtml')->getUrl(
+            $route,
+            array(
                 'grid_type'   => $this->getCode(),
-                'block_type'  => Mage::helper('core')->urlEncode($type),
+                'block_type'  => Mage::helper('core')->urlEncode($blockType),
                 'id'          => $id,
                 'origin'      => self::EDITABLE_TYPE_FIELD,
-                'is_external' => (!$config['in_grid'] ? 1 : 0),
-            ));
-    }
-    
-    /**
-    * Return edit URL for given field
-    * 
-    * @param string $type Grid block type
-    * @param string $id Field ID
-    * @param array $config Field config
-    * @return string
-    */
-    protected function _getFieldEditUrl($type, $id, $config)
-    {
-        return $this->_getFieldUrl(
-            $type, $id, $config,
-            'customgrid/custom_grid_editor/edit' . ($config['in_grid'] ? 'InGrid' : '')
+                'is_external' => (!$config->getInGrid() ? 1 : 0),
+            )
         );
     }
     
     /**
-    * Return save URL for given field
-    * 
-    * @param string $type Grid block type
-    * @param string $id Field ID
-    * @param array $config Field config
-    * @return string
-    */
-    protected function _getFieldSaveUrl($type, $id, $config)
+     * Return edit URL for given field
+     * 
+     * @param string $blockType Grid block type
+     * @param string $id Field ID
+     * @param BL_CustomGrid_Model_Grid_Edit_Config $config Field config
+     * @return string
+     */
+    protected function _getFieldEditUrl($blockType, $id, BL_CustomGrid_Model_Grid_Edit_Config $config)
     {
-        return $this->_getFieldUrl(
-            $type, $id, $config,
-            'customgrid/custom_grid_editor/save'
+        return $this->_getFieldActionUrl(
+            $blockType,
+            $id,
+            $config,
+            'customgrid/grid_editor/edit' . ($config->getInGrid() ? 'InGrid' : '')
         );
     }
     
     /**
-    * Return action URL for given attribute
-    * 
-    * @param string $type Grid block type
-    * @param string $code Attribute code
-    * @param Mage_Eav_Model_Entity_Attribute $attribute Attribute object
-    * @param array $config Attribute config
-    * @param string $route Action route
-    * @return string
-    */
-    protected function _getAttributeUrl($type, $code, $attribute, $config, $route)
+     * Return save URL for given field
+     * 
+     * @param string $blockType Grid block type
+     * @param string $id Field ID
+     * @param BL_CustomGrid_Model_Grid_Edit_Config $config Field config
+     * @return string
+     */
+    protected function _getFieldSaveUrl($blockType, $id, BL_CustomGrid_Model_Grid_Edit_Config $config)
     {
-        return Mage::helper('adminhtml')
-            ->getUrl($route, array(
+        return $this->_getFieldActionUrl($blockType, $id, $config, 'customgrid/grid_editor/save');
+    }
+    
+    /**
+     * Return action URL for given attribute
+     * 
+     * @param string $blockType Grid block type
+     * @param string $code Attribute code
+     * @param Mage_Eav_Model_Entity_Attribute $attribute Attribute object
+     * @param BL_CustomGrid_Model_Grid_Edit_Config $config Attribute config
+     * @param string $route Action route
+     * @return string
+     */
+    protected function _getAttributeActionUrl($blockType, $code, Mage_Eav_Model_Entity_Attribute $attribute,
+        BL_CustomGrid_Model_Grid_Edit_Config $config, $route)
+    {
+        return Mage::helper('adminhtml')->getUrl(
+            $route,
+            array(
                 'grid_type'   => $this->getCode(),
-                'block_type'  => Mage::helper('core')->urlEncode($type),
+                'block_type'  => Mage::helper('core')->urlEncode($blockType),
                 'id'          => $code,
                 'origin'      => self::EDITABLE_TYPE_ATTRIBUTE,
-                'is_external' => (!$config['in_grid'] ? 1 : 0),
-            ));
-    }
-    
-    /**
-    * Return edit URL for given attribute
-    * 
-    * @param string $type Grid block type
-    * @param string $code Attribute code
-    * @param Mage_Eav_Model_Entity_Attribute $attribute Attribute object
-    * @param array $config Attribute config
-    * @return string
-    */
-    protected function _getAttributeEditUrl($type, $code, $attribute, $config)
-    {
-        return $this->_getAttributeUrl(
-            $type, $code, $attribute, $config,
-            'customgrid/custom_grid_editor/edit' . ($config['in_grid'] ? 'InGrid' : '')
+                'is_external' => (!$config->getInGrid() ? 1 : 0),
+            )
         );
     }
     
     /**
-    * Return save URL for given attribute
-    * 
-    * @param string $type Grid block type
-    * @param string $code Attribute code
-    * @param Mage_Eav_Model_Entity_Attribute $attribute Attribute object
-    * @param array $config Attribute config
-    * @return string
-    */
-    protected function _getAttributeSaveUrl($type, $code, $attribute, $config)
+     * Return edit URL for given attribute
+     * 
+     * @param string $blockType Grid block type
+     * @param string $code Attribute code
+     * @param Mage_Eav_Model_Entity_Attribute $attribute Attribute object
+     * @param BL_CustomGrid_Model_Grid_Edit_Config $config Attribute config
+     * @return string
+     */
+    protected function _getAttributeEditUrl($blockType, $code, Mage_Eav_Model_Entity_Attribute $attribute,
+        BL_CustomGrid_Model_Grid_Edit_Config $config)
     {
-        return $this->_getAttributeUrl(
-            $type, $code, $attribute, $config,
-            'customgrid/custom_grid_editor/save'
+        return $this->_getAttributeActionUrl(
+            $blockType,
+            $code,
+            $attribute,
+            $config,
+            'customgrid/grid_editor/edit' . ($config->getInGrid() ? 'InGrid' : '')
         );
     }
     
     /**
-    * Return base editable fields configs
-    * 
-    * @param string $type Grid block type
-    * @return array
-    */
-    protected function _getBaseEditableFields($type)
+     * Return save URL for given attribute
+     * 
+     * @param string $blockType Grid block type
+     * @param string $code Attribute code
+     * @param Mage_Eav_Model_Entity_Attribute $attribute Attribute object
+     * @param BL_CustomGrid_Model_Grid_Edit_Config $config Attribute config
+     * @return string
+     */
+    protected function _getAttributeSaveUrl($blockType, $code, Mage_Eav_Model_Entity_Attribute $attribute,
+        BL_CustomGrid_Model_Grid_Edit_Config $config)
+    {
+        return $this->_getAttributeActionUrl(
+            $blockType,
+            $code,
+            $attribute,
+            $config,
+            'customgrid/grid_editor/save'
+        );
+    }
+    
+    /**
+     * Return base editable fields configs
+     * 
+     * @param string $blockType Grid block type
+     * @return array
+     */
+    protected function _getBaseEditableFields($blockType)
     {
         return array();
     }
     
     /**
-    * Return all editable fields configs
-    * 
-    * @param string $type Grid block type
-    * @return array
-    */
-    protected function _getEditableFields($type)
+     * Return all editable fields configs
+     * 
+     * @param string $blockType Grid block type
+     * @return array
+     */
+    protected function _getEditableFields($blockType)
     {
         $response = new Varien_Object(array('fields' => array()));
         
         Mage::dispatchEvent('blcg_grid_type_additional_editable_fields', array(
             'response'   => $response,
             'type_model' => $this,
-            'block_type' => $type,
+            'block_type' => $blockType,
         ));
         
-        return array_merge(
-            $this->_getBaseEditableFields($type),
-            $response->getFields()
-        );
+        return array_merge($this->_getBaseEditableFields($blockType), $response->getFields());
     }
     
     /**
-    * Return whether given attribute is editable
-    * 
-    * @param string $type Grid block type
-    * @param Mage_Eav_Model_Entity_Attribute $attribute Attribute object
-    * @return bool
-    */
-    protected function _checkAttributeEditability($type, $attribute)
+     * Return whether given attribute is editable
+     * 
+     * @param string $blockType Grid block type
+     * @param Mage_Eav_Model_Entity_Attribute $attribute Attribute object
+     * @return bool
+     */
+    protected function _checkAttributeEditability($blockType, Mage_Eav_Model_Entity_Attribute $attribute)
     {
-        return ((!$attribute->hasIsVisible() || $attribute->getIsVisible())
-            && $attribute->getFrontend()->getInputType());
+        return $attribute->getFrontend()->getInputType()
+            && (!$attribute->hasIsVisible() || $attribute->getIsVisible());
     }
     
     /**
-    * Return additional editable attributes
-    * = attributes that are not necessarily intended to be available for display
-    * (to use when needed by corresponding attribute fields)
-    * 
-    * @param string $type Grid block type
-    * @return array
-    */
-    protected function _getAdditionalEditableAttributes($type)
+     * Return additional editable attributes
+     * = attributes that are not necessarily intended to be available for display
+     * (to be used when needed by corresponding attribute fields)
+     * 
+     * @param string $blockType Grid block type
+     * @return array
+     */
+    protected function _getAdditionalEditableAttributes($blockType)
     {
         return array();
     }
     
     /**
-    * Return all editable attributes
-    * 
-    * @param string $type Grid block type
-    * @return array
-    */
-    protected function _getEditableAttributes($type)
+     * Return all editable attributes
+     * 
+     * @param string $blockType Grid block type
+     * @return array
+     */
+    protected function _getEditableAttributes($blockType)
     {
         $response = new Varien_Object(array('attributes' => array()));
+        
         Mage::dispatchEvent('blcg_grid_type_additional_editable_attributes', array(
             'response'   => $response,
             'type_model' => $this,
-            'block_type' => $type,
+            'block_type' => $blockType,
         ));
         
         $attributes = array_merge(
-            $this->getAvailableAttributes($type),
-            $this->_getAdditionalEditableAttributes($type),
+            $this->getAvailableAttributes($blockType),
+            $this->_getAdditionalEditableAttributes($blockType),
             $response->getAttributes()
         );
         
-        if (empty($attributes)) {
-            return array();
-        }
         foreach ($attributes as $code => $attribute) {
-            if (!$this->_checkAttributeEditability($type, $attribute)) {
+            if (!$this->_checkAttributeEditability($blockType, $attribute)) {
                 unset($attributes[$code]);
             }
         }
@@ -613,73 +680,91 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends Varien_Object
     }
     
     /**
-    * Build the sub configs arrays for given editable value config
-    * 
-    * @param string $type Grid block type
-    * @param string $id Value ID
-    * @param array $config Value config
-    * @param array $subConfigs Which sub configs to build (key = config key, value = array of parameters)
-    * @return array
-    */
-    protected function _buildEditableValueSubConfigs($type, $id, $config, $subConfigs)
+     * Return editable sub configs
+     * 
+     * @return array
+     */
+    protected function _getEditableSubConfigs()
+    {
+        return array(
+            'form'     => array('camelize' => false),
+            'window'   => array('camelize' => true),
+            'renderer' => array('camelize' => false),
+        );
+    }
+    
+    /**
+     * Build the sub configs arrays for given editable value config
+     * 
+     * @param string $blockType Grid block type
+     * @param string $id Value ID
+     * @param BL_CustomGrid_Model_Grid_Edit_Config $config Value config
+     * @param array $subConfigs Which sub configs must be built (key = config key, value = array of parameters)
+     * @return this
+     */
+    protected function _buildEditableValueSubConfigs($blockType, $id, BL_CustomGrid_Model_Grid_Edit_Config $config,
+        array $subConfigs)
     {
         $helper = Mage::helper('customgrid/string');
-        foreach ($subConfigs as $configKey => $params) {
-            $length = strlen($configKey);
-            if (!isset($config[$configKey])) {
-                $config[$configKey] = array();
-            }
-            foreach ($config as $key => $value) {
-                if (!isset($subConfigs[$key])) {
-                    if (substr($key, 0, $length) == $configKey) {
-                        unset($config[$key]);
-                        $key = substr($key, $length+1);
-                        if ($params['camelize']) {
-                            $key = $helper->camelize($key);
-                        }
-                        if (!isset($config[$configKey][$key])) {
-                            $config[$configKey][$key] = $value;
-                        }
+        
+        foreach ($subConfigs as $subKey => $subParams) {
+            $subKeyLength = strlen($subKey);
+            
+            foreach ($config->getData() as $key => $value) {
+                if (!isset($subConfigs[$key])
+                    && (substr($key, 0, $subKeyLength) === $subKey)) {
+                    $config->unsetData($key);
+                    $key = substr($key, $subKeyLength+1);
+                    
+                    if ($subParams['camelize']) {
+                        $key = $helper->camelize($key);
+                    }
+                    
+                    $subValue = $config->getDataSetDefault($subKey, array());
+                    
+                    if (!isset($subValue[$key])) {
+                        $subValue[$key] = $value;
+                        $config->setDataUsingMethod($subKey, $subValue);
                     }
                 }
             }
         }
-        return $config;
-    }
-    
-    /**
-    * Prepare common config values of given editable field
-    * 
-    * @param string $type Grid block type
-    * @param string $id Field ID
-    * @param array $config Field config
-    * @return array
-    */
-    protected function _prepareEditableFieldCommonConfig($type, $id, $config)
-    {
-        if ($config['type'] == 'editor') {
-            $config['layout_handles'][] = 'custom_grid_editor_handle_editor';
-        } elseif ($config['type'] == 'date') {
-            $config['render_reload'] = true;
-            $config['must_filter']   = true;
-        }
-        return $config;
-    }
-    
-    /**
-    * Build given editable field full config from given (maybe incomplete) config
-    * 
-    * @param string $type Grid block type
-    * @param string $id Field ID
-    * @param array $config Field config
-    * @return array
-    */
-    protected function _buildEditableFieldConfig($type, $id, $config)
-    {
-        if (!is_array($config)) {
-            $config = array();
-        }
         
+        return $this;
+    }
+    
+    /**
+     * Prepare common config values for given editable field
+     * 
+     * @param string $blockType Grid block type
+     * @param string $id Field ID
+     * @param BL_CustomGrid_Model_Grid_Edit_Config $config Field config
+     * @return this
+     */
+    protected function _prepareEditableFieldCommonConfig($blockType, $id,
+        BL_CustomGrid_Model_Grid_Edit_Config $config)
+    {
+        if ($config->getType() == 'editor') {
+            $handles = $config->getDataSetDefault('layout_handles', array());
+            $handles[] = 'blcg_grid_editor_handle_editor';
+            $config->setLayoutHandles($handles);
+        } elseif ($config->getType() == 'date') {
+            $config->setMustFilter(true);
+            $config->setRenderReload(true);
+        }
+        return $this;
+    }
+    
+    /**
+     * Build given editable field's complete config object from given base config
+     * 
+     * @param string $blockType Grid block type
+     * @param string $id Field ID
+     * @param array $config Base field config
+     * @return BL_CustomGrid_Model_Grid_Edit_Config
+     */
+    protected function _buildEditableFieldConfig($blockType, $id, array $config)
+    {
         // Complete current config with minimum required values
         $config += array(
             /*
@@ -687,18 +772,20 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends Varien_Object
             */
             'type'              => 'text',        // Field (form) type
             'required'          => false,         // Is field required ?
-            'field_name'        => $id,           // Field name (to retrieve from entity)
-            'in_grid'           => true,          // Can field be edited directly in the grid ?
-            'edit_block_type'   => 'default',     // Type of the edit form block (shortcuts available for this module)
+            'field_name'        => $id,           // Field name (used to retrieve its value from edited entity)
+            'in_grid'           => true,          // Can the field be edited directly in the grid ?
+            'edit_block_type'   => 'default',     // Type of the edit form block (shortcuts available for EAG)
             'render_block_type' => 'default',     // Same thing for saved values rendering
             'ids_key'           => 'identifiers', // Key where to put entities identifiers in request data
             'additional_key'    => 'additional',  // Key where to put additional values in request data
             'values_key'        => 'values',      // Key where to put edited values in request data
-            'must_filter'       => false,         // Must edited values be filtered before save ?
+            'must_filter'       => false,         // Must the edited values be filtered before saving them ?
             'filter_type'       => null,          // Field type to use for values filtering (if null, main type is used)
             'filter_params'     => array(),       // Parameters to use for values filtering
-            'render_reload'     => false,         // Must entity be reloaded after save ? (so suitable value can be retrieved for rendering)
-            'column_params'     => array(),       // Additional column parameters (put in additional values - override existing ones)
+            'render_reload'     => false,         // Must the entity be reloaded after save ?
+                                                  // (so that suitable values can be retrieved for rendering)
+            'column_params'     => array(),       // Additional column parameters
+                                                  // (will be put in request's additional values)
             'layout_handles'    => array(),       // Layout handles to apply for external edit
             
             /*
@@ -712,64 +799,71 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends Varien_Object
             'form_title' => (isset($config['form_label']) ? $config['form_label'] : ''),
             
             /*
-            JS window values (for "external edit") (automatically put in "window" array if preceded by "window_")
-            Below  : default values for edit, that change from default ones
-            Accept : all values accepted by corresponding JS class, keys must correspond (automatically camel-cased)
+            JS window values (for "external" edit) (automatically put in "window" array if preceded by "window_")
+            Below  : default values for edit, that differ from JS config base ones
+            Accept : all values accepted by corresponding JS class
+            (keys must correspond, knowing that they will automatically be camel-cased)
             */
             'window_width'         => '80%',
             'window_height'        => '80%',
             'window_draggable'     => true,
             'window_resizable'     => true,
             'window_recenter_auto' => false,
-            'window_title'         => Mage::helper('customgrid')->__('Edit Value'),
+            'window_title'         => $this->_getHelper()->__('Edit Value'),
             
             /*
             Renderer values (automatically put in "renderer" array if preceded by "renderer_")
             Below  : default empty parameters array, as an example
-            Accept : all values needed/used by current renderer block
+            Accept : all values needed / used by the renderer block that will be used
             */
             'renderer_params' => array(),
         );
         
-        // Finish to prepare config
-        $config = $this->_buildEditableValueSubConfigs(
-            $type, $id,
-            $this->_prepareEditableFieldCommonConfig($type, $id, $config),
-            array(
-                'form'     => array('camelize' => false),
-                'window'   => array('camelize' => true),
-                'renderer' => array('camelize' => false),
-            )
-        );
-        if (!isset($config['edit_url'])) {
-            $config['edit_url'] = $this->_getFieldEditUrl($type, $id, $config);
+        $config = Mage::getModel('customgrid/grid_edit_config', $config);
+        $this->_prepareEditableFieldCommonConfig($blockType, $id, $config);
+        $this->_buildEditableValueSubConfigs($blockType, $id, $config, $this->_getEditableSubConfigs());
+        
+        if (!$config->hasEditUrl()) {
+            $config->setEditUrl($this->_getFieldEditUrl($blockType, $id, $config));
         }
-        if (!isset($config['save_url'])) {
-            $config['save_url'] = $this->_getFieldSaveUrl($type, $id, $config);
+        if (!$config->hasSaveUrl()) {
+            $config->setSaveUrl($this->_getFieldSaveUrl($blockType, $id, $config));
         }
-        if ($config['in_grid']) {
-            unset($config['window']);
+        if ($config->getInGrid()) {
+            $config->unsetData('window');
         }
         
         return $config;
     }
     
     /**
-    * Return the base config for given editable attribute
-    * 
-    * @param string $type Grid block type
-    * @param string $code Attribute code
-    * @param Mage_Eav_Model_Entity_Attribute $attribute Attribute object
-    * @return array
-    */
-    protected function _getEditableAttributeBaseConfig($type, $code, $attribute)
+     * Return whether given attribute can be edited in grid
+     * 
+     * @param string $blockType Grid block type
+     * @param Mage_Eav_Model_Entity_Attribute $attribute Attribute object
+     * @return bool
+     */
+    protected function _checkAttributeInGridEditability($blockType, Mage_Eav_Model_Entity_Attribute $attribute)
     {
-        // All those values pretty much correspond to the editable fields configs ones ("missing" ones are induced)
+        return in_array(
+            $attribute->getFrontend()->getInputType(),
+            array('date', 'multiselect', 'price', 'select', 'text')
+        );
+    }
+    
+    /**
+     * Return the base config for given editable attribute
+     * 
+     * @param string $blockType Grid block type
+     * @param string $code Attribute code
+     * @param Mage_Eav_Model_Entity_Attribute $attribute Attribute object
+     * @return array
+     */
+    protected function _getEditableAttributeBaseConfig($blockType, $code, Mage_Eav_Model_Entity_Attribute $attribute)
+    {
+        // All those values pretty much correspond to the editable field config ones ("missing" ones are induced)
         return array(
-            'in_grid' => in_array(
-                    $attribute->getFrontend()->getInputType(), 
-                    array('date', 'multiselect', 'price', 'select', 'text')
-                ),
+            'in_grid'           => $this->_checkAttributeInGridEditability($blockType, $attribute),
             'edit_block_type'   => 'default',
             'render_block_type' => 'default',
             'ids_key'           => 'identifiers',
@@ -787,243 +881,351 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends Varien_Object
             'window_draggable'     => true,
             'window_resizable'     => true,
             'window_recenter_auto' => false,
-            'window_title'         => Mage::helper('customgrid')->__('Edit Value'),
+            'window_title'         => $this->_getHelper()->__('Edit Value'),
             
             'renderer_params' => array(),
         );
     }
     
     /**
-    * Prepare common config values of given editable attribute
-    * 
-    * @param string $type Grid block type
-    * @param string $code Attribute code
-    * @param Mage_Eav_Model_Entity_Attribute $attribute Attribute object
-    * @param array $config Field config
-    * @return array
-    */
-    protected function _prepareEditableAttributeCommonConfig($type, $code, $attribute, $config)
+     * Prepare common config values for given editable attribute
+     * 
+     * @param string $blockType Grid block type
+     * @param string $code Attribute code
+     * @param Mage_Eav_Model_Entity_Attribute $attribute Attribute object
+     * @param BL_CustomGrid_Model_Grid_Edit_Config $config Attribute config
+     * @return this
+     */
+    protected function _prepareEditableAttributeCommonConfig($blockType, $code,
+        Mage_Eav_Model_Entity_Attribute $attribute, BL_CustomGrid_Model_Grid_Edit_Config $config)
     {
         if ($attribute->getBackend()->getType() == 'datetime') {
-            $config['render_reload'] = true;
-            $config['must_filter']   = true;
-            $config['filter_type']   = 'date';
+            $config->setMustFilter(true);
+            $config->setFilterType('date');
+            $config->setRenderReload(true);
         }
-        return $config;
+        return $this;
     }
     
     /**
-    * Build given editable attribute full config
-    * 
-    * @param string $type Grid block type
-    * @param string $code Attribute code
-    * @param Mage_Eav_Model_Entity_Attribute $attribute Attribute object
-    * @return array
-    */
-    protected function _buildEditableAttributeConfig($type, $code, $attribute)
+     * Build given editable attribute's complete config object
+     * 
+     * @param string $blockType Grid block type
+     * @param string $code Attribute code
+     * @param Mage_Eav_Model_Entity_Attribute $attribute Attribute object
+     * @return BL_CustomGrid_Model_Grid_Edit_Config
+     */
+    protected function _buildEditableAttributeConfig($blockType, $code, Mage_Eav_Model_Entity_Attribute $attribute)
     {
-        $config = array_merge(
-            $this->_getEditableAttributeBaseConfig($type, $code, $attribute),
-            array('attribute' => $attribute)
-        );
+        $config = $this->_getEditableAttributeBaseConfig($blockType, $code, $attribute);
+        $config = Mage::getModel('customgrid/grid_edit_config', $config);
+        $config->setAttribute($attribute);
         
-        $config = $this->_buildEditableValueSubConfigs(
-            $type, $code,
-            $this->_prepareEditableAttributeCommonConfig($type, $code, $attribute, $config),
-            array(
-                'window'   => array('camelize' => true),
-                'renderer' => array('camelize' => false),
-            )
-        );
+        $this->_prepareEditableAttributeCommonConfig($blockType, $code, $attribute, $config);
+        $this->_buildEditableValueSubConfigs($blockType, $code, $config, $this->_getEditableSubConfigs());
         
-        if (!isset($config['edit_url'])) {
-            $config['edit_url'] = $this->_getAttributeEditUrl($type, $code, $attribute, $config);
+        if (!$config->hasEditUrl()) {
+            $config->setEditUrl($this->_getAttributeEditUrl($blockType, $code, $attribute, $config));
         }
-        if (!isset($config['save_url'])) {
-            $config['save_url'] = $this->_getAttributeSaveUrl($type, $code, $attribute, $config);
+        if (!$config->hasSaveUrl()) {
+            $config->setSaveUrl($this->_getAttributeSaveUrl($blockType, $code, $attribute, $config));
         }
-        if ($config['in_grid']) {
-            unset($config['window']);
+        if ($config->getInGrid()) {
+            $config->unsetData('window');
         }
         
         return $config;
     }
     
     /**
-    * Return base editable attribute fields configs
-    * (= all columns that do correspond to an attribute)
-    * Used keys :
-    * - "attribute" : corresponding attribute code
-    * - "config" : array of config values that should override attribute's ones
-    * 
-    * @param string $type Grid block type
-    * @return array
-    */
-    protected function _getBaseEditableAttributeFields($type)
+     * Return base editable attribute fields configs
+     * (= all grid / collection columns that do correspond to an attribute, but were not added via EAG)
+     * Used keys :
+     * - "attribute" : corresponding attribute code
+     * - "config" : array of config values that should override editable attribute's config ones
+     * 
+     * @param string $blockType Grid block type
+     * @return array
+     */
+    protected function _getBaseEditableAttributeFields($blockType)
     {
         return array();
     }
     
     /**
-    * Return all editable attribute fields configs
-    * 
-    * @param string $type Grid block type
-    * @return array
-    */
-    protected function _getEditableAttributeFields($type)
+     * Return all editable attribute fields configs
+     * 
+     * @param string $blockType Grid block type
+     * @return array
+     */
+    protected function _getEditableAttributeFields($blockType)
     {
         $response = new Varien_Object(array('attribute_fields' => array()));
+        
         Mage::dispatchEvent('blcg_grid_type_additional_editable_attribute_fields', array(
             'response'   => $response,
             'type_model' => $this,
-            'block_type' => $type,
+            'block_type' => $blockType,
         ));
         
-        return array_merge(
-            $this->_getBaseEditableAttributeFields($type),
-            $response->getAttributeFields()
-        );
+        return array_merge($this->_getBaseEditableAttributeFields($blockType), $response->getAttributeFields());
     }
     
     /**
-    * Return editable values configs
-    * 
-    * @param string $type Grid block type
-    * @param string $origin Values origin (if null, all values will be returned)
-    * @return array
-    */
-    public function getEditableValues($type, $origin=null)
+     * Build given editable attribute field's complete config object from given base config
+     * May return null if the base config is invalid (eg if the corresponding attribute does not exist / is not editable)
+     * 
+     * @param string $blockType Grid block type
+     * @param string $id Field ID
+     * @param array $config Field config
+     * @param array $attributes Attributes editable configs
+     * @return BL_CustomGrid_Model_Grid_Edit_Config|null
+     */
+    protected function _buildEditableAttributeFieldConfig($blockType, $id, array $config, array $attributes)
     {
-        if (!isset($this->_editableValues[$type])) {
+        if (isset($config['attribute'])
+            && isset($attributes[$config['attribute']])) {
+            $overridenConfig = (isset($config['config']) ? $config['config'] : array());
+            $config = clone $attributes[$config['attribute']];
+            $config->mergeData($overridenConfig); 
+            $this->_buildEditableValueSubConfigs($blockType, $id, $config, $this->_getEditableSubConfigs());
+            return $config;
+        }
+        return null;
+    }
+    
+    /**
+     * Return editable values configs
+     * 
+     * @param string $blockType Grid block type
+     * @param string|null $origin Values origin (if null, all values will be returned)
+     * @return array
+     */
+    public function getEditableValues($blockType, $origin=null)
+    {
+        if (!$this->hasData('editable_values')
+            || !is_array($editableValues = $this->getData('editable_values/' . $blockType))) {
             // Build all base configs
-            $fields = $this->_getEditableFields($type);
-            foreach ($fields as $id => $field) {
-               $fields[$id] = $this->_buildEditableFieldConfig($type, $id, $field);
-            }
+            $fields = $this->_getEditableFields($blockType);
+            $attributes = $this->_getEditableAttributes($blockType);
+            $attributeFields = $this->_getEditableAttributeFields($blockType);
             
-            $attributes = $this->_getEditableAttributes($type);
+            foreach ($fields as $id => $field) {
+               $fields[$id] = $this->_buildEditableFieldConfig($blockType, $id, $field);
+            }
             foreach ($attributes as $code => $attribute) {
-                $attributes[$code] = $this->_buildEditableAttributeConfig($type, $code, $attribute);
+                $attributes[$code] = $this->_buildEditableAttributeConfig($blockType, $code, $attribute);
+            }
+            foreach ($attributeFields as $id => $attributeField) {
+                $config = $this->_buildEditableAttributeFieldConfig($blockType, $id, $attributeField, $attributes);
+                
+                if (!is_object($config)) {
+                    unset($attributeFields[$id]);
+                } else {
+                    $attributeFields[$id] = $config;
+                }
             }
             
             // Dispatch events for each kind of editable values
             $fieldsResponse = new Varien_Object(array('fields' => $fields));
             $attributesResponse = new Varien_Object(array('attributes' => $attributes));
-            $attributeFieldsResponse = new Varien_Object(array('attribute_fields' => $this->_getEditableAttributeFields($type)));
+            $attributeFieldsResponse = new Varien_Object(array('attribute_fields' => $attributeFields));
             
             Mage::dispatchEvent('blcg_grid_type_editable_fields', array(
                 'response'   => $fieldsResponse,
                 'type_model' => $this,
-                'block_type' => $type,
+                'block_type' => $blockType,
             ));
             Mage::dispatchEvent('blcg_grid_type_editable_attributes', array(
                 'response'   => $attributesResponse,
                 'type_model' => $this,
-                'block_type' => $type,
+                'block_type' => $blockType,
             ));
             Mage::dispatchEvent('blcg_grid_type_editable_attribute_fields', array(
                 'response'   => $attributeFieldsResponse,
                 'type_model' => $this,
-                'block_type' => $type,
+                'block_type' => $blockType,
             ));
             
-            // Cache the results
-            $this->_editableValues[$type] = array(
-                self::EDITABLE_TYPE_FIELD           => $fieldsResponse->getFields(),
-                self::EDITABLE_TYPE_ATTRIBUTE       => $attributesResponse->getAttributes(),
+            $editableValues = array(
+                self::EDITABLE_TYPE_FIELD => $fieldsResponse->getFields(),
+                self::EDITABLE_TYPE_ATTRIBUTE => $attributesResponse->getAttributes(),
                 self::EDITABLE_TYPE_ATTRIBUTE_FIELD => $attributeFieldsResponse->getAttributeFields(),
             );
-        }
-        if (!is_null($origin)) {
-            if (isset($this->_editableValues[$type][$origin])) {
-                return $this->_editableValues[$type][$origin];
-            } else {
-                return array();
-            }
-        } else {
-            return $this->_editableValues[$type];
-        }
-    }
-    
-    /**
-    * Return editable fields configs
-    * 
-    * @param string $type Grid block type
-    * @return array
-    */
-    public function getEditableFields($type)
-    {
-        return $this->getEditableValues($type, self::EDITABLE_TYPE_FIELD);
-    }
-    
-    /**
-    * Return editable attributes configs
-    * 
-    * @param string $type Grid block type
-    * @return array
-    */
-    public function getEditableAttributes($type)
-    {
-        return $this->getEditableValues($type, self::EDITABLE_TYPE_ATTRIBUTE);
-    }
-    
-    /**
-    * Return editable attribute fields configs
-    * 
-    * @param string $type Grid block type
-    * @return array
-    */
-    public function getEditableAttributeFields($type)
-    {
-        return $this->getEditableValues($type, self::EDITABLE_TYPE_ATTRIBUTE_FIELD);
-    }
-    
-    /**
-    * Apply editable values configs to given grid columns
-    * 
-    * @param string $type Grid block type
-    * @param array $columns Grid columns
-    * @param BL_CustomGrid_Model_Grid $gridModel Custom grid model
-    * @return array
-    */
-    public function applyEditableConfigsToColumns($type, $columns, $gridModel)
-    {
-        // Keep only interesting/consistent values
-        $keptKeys = array(
-            'in_grid',
-            'ids_key',
-            'additional_key',
-            'edit_url', 
-            'save_url',
-            'window',
-            'column_params'
-        );
-        
-        foreach ($columns as $columnId => $column) {
-            $column['editable'] = false;
             
-            if ($gridModel->isAttributeColumnOrigin($column['origin'])) {
-                // Editable attributes
-                if ($this->isEditableAttribute($type, $column['index'])) {
-                    $columns[$columnId]['editable'] = $this->getEditableAttribute($type, $column['index'], $keptKeys);
-                    if (isset($column['store_id']) && $column['store_id']
-                        && !isset($columns[$columnId]['editable']['column_params']['column_store_id'])) {
-                        // Apply column's store ID (if not admin) to columns params, to allow editing values by store view
-                        $columns[$columnId]['editable']['column_params']['column_store_id'] = $column['store_id'];
+            $this->setData('editable_values/' . $blockType, $editableValues);
+        }
+        
+        return !is_null($origin)
+            ? (isset($editableValues[$origin]) ? $editableValues[$origin] : array())
+            : $editableValues;
+    }
+    
+    /**
+     * Return editable fields configs
+     * 
+     * @param string $blockType Grid block type
+     * @return array
+     */
+    public function getEditableFields($blockType)
+    {
+        return $this->getEditableValues($blockType, self::EDITABLE_TYPE_FIELD);
+    }
+    
+    /**
+     * Return editable attributes configs
+     * 
+     * @param string $blockType Grid block type
+     * @return array
+     */
+    public function getEditableAttributes($blockType)
+    {
+        return $this->getEditableValues($blockType, self::EDITABLE_TYPE_ATTRIBUTE);
+    }
+    
+    /**
+     * Return editable attribute fields configs
+     * 
+     * @param string $blockType Grid block type
+     * @return array
+     */
+    public function getEditableAttributeFields($blockType)
+    {
+        return $this->getEditableValues($blockType, self::EDITABLE_TYPE_ATTRIBUTE_FIELD);
+    }
+    
+    /**
+     * Return editable value config
+     * 
+     * @param string $blockType Grid block type
+     * @param string $id Value ID
+     * @param string $origin Value origin
+     * @return BL_CustomGrid_Model_Grid_Edit_Config
+     */
+    public function getEditableValue($blockType, $id, $origin)
+    {
+        $editableValues = $this->getEditableValues($blockType, $origin);
+        return (isset($editableValues[$id]) ? $editableValues[$id] : null);
+    }
+    
+    /**
+     * Return editable field config
+     * 
+     * @param string $blockType Grid block type
+     * @param string $id Field ID
+     * @return BL_CustomGrid_Model_Grid_Edit_Config
+     */
+    public function getEditableField($blockType, $id)
+    {
+       return $this->getEditableValue($blockType, $id, self::EDITABLE_TYPE_FIELD);
+    }
+    
+    /**
+     * Return editable attribute config
+     * 
+     * @param string $blockType Grid block type
+     * @param string $code Attribute code
+     * @return BL_CustomGrid_Model_Grid_Edit_Config
+     */
+    public function getEditableAttribute($blockType, $code)
+    {
+        return $this->getEditableValue($blockType, $code, self::EDITABLE_TYPE_ATTRIBUTE);
+    }
+    
+    /**
+     * Return editable attribute field config
+     * 
+     * @param string $blockType Grid block type
+     * @param string $id Field ID
+     * @return BL_CustomGrid_Model_Grid_Edit_Config
+     */
+    public function getEditableAttributeField($blockType, $id)
+    {
+        return $this->getEditableValue($blockType, $id, self::EDITABLE_TYPE_ATTRIBUTE_FIELD);
+    }
+    
+    /**
+     * Return whether given value is editable
+     * 
+     * @param string $blockType Grid block type
+     * @param string $id Value ID
+     * @param string $origin Value origin
+     * @return bool
+     */
+    public function isEditableValue($blockType, $id, $origin)
+    {
+        return array_key_exists($id, $this->getEditableValues($blockType, $origin));
+    }
+    
+    /**
+     * Return whether given field is editable
+     * 
+     * @param string $blockType Grid block type
+     * @param string $id Field ID
+     * @return bool
+     */
+    public function isEditableField($blockType, $id)
+    {
+        return $this->isEditableValue($blockType, $id, self::EDITABLE_TYPE_FIELD);
+    }
+    
+    /**
+     * Return whether given attribute is editable
+     * 
+     * @param string $blockType Grid block type
+     * @param string $code Attribute code
+     * @return bool
+     */
+    public function isEditableAttribute($blockType, $code)
+    {
+        return $this->isEditableValue($blockType, $code, self::EDITABLE_TYPE_ATTRIBUTE);
+    }
+    
+    /**
+     * Return whether given attribute field is editable
+     * 
+     * @param string $blockType Grid block type
+     * @param string $id Field ID
+     * @return bool
+     */
+    public function isEditableAttributeField($blockType, $id)
+    {
+        return $this->isEditableValue($blockType, $id, self::EDITABLE_TYPE_ATTRIBUTE_FIELD);
+    }
+    
+    /**
+     * Apply editable values configs to given grid columns
+     * 
+     * @param string $blockType Grid block type
+     * @param array $columns Grid columns
+     * @return array
+     */
+    public function applyEditConfigsToColumns($blockType, array $columns)
+    {
+        foreach ($columns as $columnBlockId => $column) {
+            $editConfig = null;
+            
+            if ($column->isAttribute()) {
+                // Attribute columns
+                if ($editConfig = $this->getEditableAttribute($blockType, $column->getIndex())) {
+                    if ($column->hasStoreId()
+                        && !$editConfig->hasData('column_params/column_store_id')) {
+                        // Apply column's store ID to allow editing values for the corresponding store view
+                        $editConfig->setData('column_params/column_store_id', $column->getStoreId());
                     }
                 }
-            } else {
-                // Editable (attribute) fields
-                if ($this->isEditableField($type, $columnId)) {
-                    $columns[$columnId]['editable'] = $this->getEditableField($type, $columnId, $keptKeys);
-                } elseif ($this->isEditableAttributeField($type, $columnId)){
-                    $columns[$columnId]['editable'] = $this->getEditableAttributeField($type, $columnId, $keptKeys, true, false);
+            } elseif (!$column->isCustom()) {
+                // Grid and collection columns
+                if (!$editConfig = $this->getEditableField($blockType, $columnBlockId)) {
+                    $editConfig = $this->getEditableAttributeField($blockType, $columnBlockId);
                 }
             }
             
-            if (isset($columns[$columnId]['editable'])
-                && is_array($columns[$columnId]['editable'])) {
-                $columns[$columnId]['editable']['column_params']['column_id'] = $column['column_id'];
+            if ($editConfig instanceof BL_CustomGrid_Model_Grid_Edit_Config) {
+                $editConfig->setData('column_params/column_id', $column->getId());
+                $column->setEditConfig($editConfig);
+            } else {
+                $column->setEditConfig(false);
             }
         }
         
@@ -1031,1223 +1233,1269 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends Varien_Object
     }
     
     /**
-    * Return editable value config
-    * 
-    * @param string $type Grid block type
-    * @param string $id Value ID
-    * @param string $origin Value origin
-    * @param array $onlyKeys If set, only those config keys will be returned
-    * @return array
-    */
-    public function getEditableValue($type, $id, $origin, $onlyKeys=null)
-    {
-        $editable = $this->getEditableValues($type, $origin);
-        return (isset($editable[$id]) 
-            ? (is_array($onlyKeys) ? array_intersect_key($editable[$id], array_flip($onlyKeys)) : $editable[$id])
-            : null);
-    }
-    
-    /**
-    * Return editable field config
-    * 
-    * @param string $type Grid block type
-    * @param string $id Field ID
-    * @param array $onlyKeys If set, only those config keys will be returned
-    * @return array
-    */
-    public function getEditableField($type, $id, $onlyKeys=null)
-    {
-       return $this->getEditableValue($type, $id, self::EDITABLE_TYPE_FIELD, $onlyKeys);
-    }
-    
-    /**
-    * Return editable attribute config
-    * 
-    * @param string $type Grid block type
-    * @param string $code Attribute code
-    * @param array $onlyKeys If set, only those config keys will be returned
-    * @return array
-    */
-    public function getEditableAttribute($type, $code, $onlyKeys=null)
-    {
-        return $this->getEditableValue($type, $code, self::EDITABLE_TYPE_ATTRIBUTE, $onlyKeys);
-    }
-    
-    /**
-    * Return editable attribute field config
-    * 
-    * @param string $type Grid block type
-    * @param string $id Field ID
-    * @param array $onlyKeys If set, only those config keys will be returned
-    * @param bool $attribute Whether corresponding attribute config should be returned
-    * @param mixed $default Default value to return if attribute field or corresponding attribute doesn't exist
-    * @return array
-    */
-    public function getEditableAttributeField($type, $id, $onlyKeys=null, $attribute=false, $default=null)
-    {
-        if ($config = $this->getEditableValue($type, $id, self::EDITABLE_TYPE_ATTRIBUTE_FIELD)) {
-            if (isset($config['attribute'])
-                && $this->isEditableAttribute($type, $config['attribute'])) {
-                return array_merge_recursive(
-                    $this->getEditableAttribute($type, $config['attribute'], $onlyKeys),
-                    (isset($config['config']) ? $config['config'] : array())
-                );
-            }
-        }
-        return $default;
-    }
-    
-    /**
-    * Return whether given value is editable
-    * 
-    * @param string $type Grid block type
-    * @param string $id Value ID
-    * @param string $origin Value origin
-    * @return bool
-    */
-    public function isEditableValue($type, $id, $origin)
-    {
-        return array_key_exists($id, $this->getEditableValues($type, $origin));
-    }
-    
-    /**
-    * Return whether given field is editable
-    * 
-    * @param string $type Grid block type
-    * @param string $id Field ID
-    * @return bool
-    */
-    public function isEditableField($type, $id)
-    {
-        return $this->isEditableValue($type, $id, self::EDITABLE_TYPE_FIELD);
-    }
-    
-    /**
-    * Return whether given attribute is editable
-    * 
-    * @param string $type Grid block type
-    * @param string $code Attribute code
-    * @return bool
-    */
-    public function isEditableAttribute($type, $code)
-    {
-        return $this->isEditableValue($type, $code, self::EDITABLE_TYPE_ATTRIBUTE);
-    }
-    
-    /**
-    * Return whether given attribute field is editable
-    * 
-    * @param string $type Grid block type
-    * @param string $id Field ID
-    * @return bool
-    */
-    public function isEditableAttributeField($type, $id)
-    {
-        return $this->isEditableValue($type, $id, self::EDITABLE_TYPE_ATTRIBUTE_FIELD);
-    }
-    
-    /**
-    * Return value edit additional parameters
-    * 
-    * @param string $type Grid block type
-    * @param Mage_Adminhtml_Block_Widget_Grid $grid Grid block
-    * @return array
-    */
-    public function getAdditionalEditParams($type, $grid)
+     * Return value edit additional parameters
+     * 
+     * @param string $blockType Grid block type
+     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
+     * @return array
+     */
+    public function getAdditionalEditParams($blockType, Mage_Adminhtml_Block_Widget_Grid $gridBlock)
     {
         return array();
     }
     
     /**
-    * Extract edit values from given request
-    * 
-    * @param string $type Grid block type
-    * @param array $config Edited value config
-    * @param Mage_Core_Controller_Request_Http $request Request object
-    * @return array
-    */
-    protected function _extractRequestEditValues($type, $config, $request)
+     * Extract edit values from given request
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Object $config Edited value config
+     * @param Mage_Core_Controller_Request_Http $request Request object
+     * @return array
+     */
+    protected function _extractRequestEditValues($blockType, BL_CustomGrid_Object $config,
+        Mage_Core_Controller_Request_Http $request)
     {
-        $idsKey        = $config['config']['ids_key'];
-        $additionalKey = $config['config']['additional_key'];
-        $valuesKey     = $config['config']['values_key'];
+        $idsKey = $config->getDataSetDefault('config/ids_key', 'identifiers');
+        $valuesKey = $config->getData('config/values_key', 'values');
+        $additionalKey = $config->getData('config/additional_key', 'additional');
+        $usedKeys = array_flip(array($idsKey, $valuesKey, $additionalKey));
         
         $params = array(
             'ids'        => $request->getParam($idsKey, array()),
-            'additional' => $request->getParam($additionalKey, array()),
             'values'     => $request->getParam($valuesKey, array()),
-            'global'     => array_diff_key($request->getParams(), array_flip(array($idsKey, $additionalKey, $valuesKey))),
+            'additional' => $request->getParam($additionalKey, array()),
+            'global'     => array_diff_key($request->getParams(), $usedKeys),
         );
         
-        return array_map(create_function('$a', 'return (is_array($a) ? $a : array());'), $params);
+        return array_map(create_function('$v', 'return (is_array($v) ? $v : array());'), $params);
     }
     
     /**
-    * Return entity identifiers keys
-    * 
-    * @param string $type Grid block type
-    * @return array
-    */
-    protected function _getEntityRowIdentifiersKeys($type)
+     * Return entity identifiers keys
+     * 
+     * @param string $blockType Grid block type
+     * @return array
+     */
+    protected function _getEntityRowIdentifiersKeys($blockType)
     {
         return array('id');
     }
     
     /**
-    * Return entity identifier from given row
-    * 
-    * @param string $type Grid block type
-    * @param Varien_Object $row Entity row
-    * @param string $key Identifier key
-    * @return mixed
-    */
-    protected function _getEntityRowIdentifier($type, Varien_Object $row, $key)
+     * Return entity identifier from given row
+     * 
+     * @param string $blockType Grid block type
+     * @param Varien_Object $row Entity row
+     * @param string $key Identifier key
+     * @return mixed
+     */
+    protected function _getEntityRowIdentifier($blockType, Varien_Object $row, $key)
     {
         return $row->getData($key);
     }
     
     /**
-    * Return entity identifiers from given row
-    * 
-    * @param string $type Grid block type
-    * @param Varien_Object $row Entity row
-    * @return array
-    */
-    public function getEntityRowIdentifiers($type, Varien_Object $row)
+     * Return entity identifiers from given row
+     * 
+     * @param string $blockType Grid block type
+     * @param Varien_Object $row Entity row
+     * @return array
+     */
+    public function getEntityRowIdentifiers($blockType, Varien_Object $row)
     {
         $identifiers = array();
-        foreach ($this->_getEntityRowIdentifiersKeys($type) as $key) {
-            $identifiers[$key] = $this->_getEntityRowIdentifier($type, $row, $key);
+        
+        foreach ($this->_getEntityRowIdentifiersKeys($blockType) as $key) {
+            $identifiers[$key] = $this->_getEntityRowIdentifier($blockType, $row, $key);
         }
+        
         return $identifiers;
     }
     
     /**
-    * Load edited entity
-    * 
-    * @param string $type Grid block type
-    * @param array $config Edited value config
-    * @param array $params Edit parameters
-    * @return mixed
-    */
-    protected function _loadEditedEntity($type, $config, $params)
+     * Return edited entity identifiers
+     * (null if none was found in cirrent request parameters, single value if appropriate, else array)
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Object $config Edited value config
+     * @param array $params Edit parameters
+     * @return mixed
+     */
+    protected function _getEditedEntityIdentifiers($blockType, BL_CustomGrid_Object $config, array $params)
+    {
+        $identifiers = array();
+        
+        if (isset($params['ids'])) {
+            foreach ($this->_getEntityRowIdentifiersKeys($blockType) as $key) {
+                if (isset($params['ids'][$key])) {
+                    $identifiers[$key] = $params['ids'][$key];
+                }
+            }
+        }
+        if (empty($identifiers)) {
+            $identifiers = null;
+        } elseif (count($identifiers) == 1) {
+            $identifiers = end($identifiers);
+        }
+        
+        return $identifiers;
+    }
+    
+    /**
+     * Load edited entity
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Object $config Edited value config
+     * @param array $params Edit parameters
+     * @param mixed $entityId Entity ID
+     * @return mixed
+     */
+    protected function _loadEditedEntity($blockType, BL_CustomGrid_Object $config, array $params, $entityId)
     {
         return null;
     }
     
     /**
-    * Reload edited entity
-    * 
-    * @param string $type Grid block type
-    * @param array $config Edited value config
-    * @param array $params Edit parameters
-    * @param mixed $entity Edited entity
-    * @return mixed
-    */
-    protected function _reloadEditedEntity($type, $config, $params, $entity)
+     * Reload edited entity
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Object $config Edited value config
+     * @param array $params Edit parameters
+     * @param mixed $entity Edited entity
+     * @return mixed
+     */
+    protected function _reloadEditedEntity($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
         return $entity->load($entity->getId());
     }
     
     /**
-    * Return whether edited entity has been successfully loaded
-    * 
-    * @param string $type Grid block type
-    * @param array $config Edited value config
-    * @param array $params Edit parameters
-    * @param mixed $entity Edited entity
-    * @return bool
-    */
-    protected function _isEditedEntityLoaded($type, $config, $params, $entity)
+     * Return whether edited entity has been successfully loaded
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Object $config Edited value config
+     * @param array $params Edit parameters
+     * @param mixed $entity Edited entity
+     * @param mixed $entityId Edited entity ID
+     * @return bool
+     */
+    protected function _isEditedEntityLoaded($blockType, BL_CustomGrid_Object $config, array $params, $entity,
+        $entityId)
     {
-        return (is_object($entity) ? ($entity->getId() ? true : false) : false);
+        return (is_object($entity) ? (bool) $entity->getId() : false);
     }
     
     /**
-    * Return keys to use to register edited entity
-    * 
-    * @param string $type Grid block type
-    * @param array $config Edited value config
-    * @param array $params Edit parameters
-    * @param mixed $entity Edited entity
-    * @return array
-    */
-    protected function _getEditedEntityRegistryKeys($type, $config, $params, $entity)
+     * Return registry keys where to put edited entity
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Object $config Edited value config
+     * @param array $params Edit parameters
+     * @param mixed $entity Edited entity
+     * @return array
+     */
+    protected function _getEditedEntityRegistryKeys($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
         return array();
     }
     
     /**
-    * Register edited entity
-    * 
-    * @param string $type Grid block type
-    * @param array $config Edited value config
-    * @param array $params Edit parameters
-    * @param mixed $entity Edited entity
-    * @return this
-    */
-    protected function _registerEditedEntity($type, $config, $params, $entity)
+     * Register edited entity
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Object $config Edited value config
+     * @param array $params Edit parameters
+     * @param mixed $entity Edited entity
+     * @return this
+     */
+    protected function _registerEditedEntity($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
-        foreach ($this->_getEditedEntityRegistryKeys($type, $config, $params, $entity) as $key) {
+        foreach ($this->_getEditedEntityRegistryKeys($blockType, $config, $params, $entity) as $key) {
             Mage::register($key, $entity);
         }
         return $this;
     }
     
     /**
-    * Return edited entity name
-    * 
-    * @param string $type Grid block type
-    * @param array $config Edited value config
-    * @param array $params Edit parameters
-    * @param mixed $entity Edited entity
-    * @return string
-    */
-    protected function _getLoadedEntityName($type, $config, $params, $entity)
+     * Return edited entity name
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Object $config Edited value config
+     * @param array $params Edit parameters
+     * @param mixed $entity Edited entity
+     * @return string
+     */
+    protected function _getLoadedEntityName($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
         return $entity->getName();
     }
     
     /**
-    * Return whether given field is editable for given entity
-    * 
-    * @param string $type Grid block type
-    * @param array $config Edited value config
-    * @param array $params Edit parameters
-    * @param mixed $entity Edited entity
-    * @return bool
-    */
-    protected function _checkEntityEditableField($type, $config, $params, $entity)
+     * Return whether given field is editable for given entity
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Object $config Edited value config
+     * @param array $params Edit parameters
+     * @param mixed $entity Edited entity
+     * @return bool
+     */
+    protected function _checkEntityEditableField($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
         return true;
     }
     
     /**
-    * Return whether given attribute is editable for given entity
-    * 
-    * @param string $type Grid block type
-    * @param array $config Edited value config
-    * @param array $params Edit parameters
-    * @param mixed $entity Edited entity
-    * @return bool
-    */
-    protected function _checkEntityEditableAttribute($type, $config, $params, $entity)
+     * Return whether given attribute is editable for given entity
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Object $config Edited value config
+     * @param array $params Edit parameters
+     * @param mixed $entity Edited entity
+     * @return bool
+     */
+    protected function _checkEntityEditableAttribute($blockType, BL_CustomGrid_Object $config,
+        array $params, $entity)
     {
         return true;
     }
     
     /**
-    * Return whether givne value is editable for given entity
-    * 
-    * @param string $type Grid block type
-    * @param array $config Edited value config
-    * @param array $params Edit parameters
-    * @param mixed $entity Edited entity
-    * @return bool
-    */
-    protected function _checkEntityEditableValue($type, $config, $params, $entity)
+     * Return whether given value is editable for given entity
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Object $config Edited value config
+     * @param array $params Edit parameters
+     * @param mixed $entity Edited entity
+     * @return bool
+     */
+    protected function _checkEntityEditableValue($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
-        if ($config['origin'] == self::EDITABLE_TYPE_FIELD) {
-            return $this->_checkEntityEditableField($type, $config, $params, $entity);
-        } elseif ($config['origin'] == self::EDITABLE_TYPE_ATTRIBUTE) {
-            return $this->_checkEntityEditableAttribute($type, $config, $params, $entity);
-        } else {
-            return false;
+        $editable = false;
+        
+        if ($config->getOrigin() == self::EDITABLE_TYPE_FIELD) {
+            $editable = $this->_checkEntityEditableField($blockType, $config, $params, $entity);
+        } elseif ($config->getOrigin() == self::EDITABLE_TYPE_ATTRIBUTE) {
+            $editable = $this->_checkEntityEditableAttribute($blockType, $config, $params, $entity);
         }
+        
+        return $editable;
     }
     
     /**
-    * Return field edit block instance
-    * 
-    * @param string $type Grid block type
-    * @param array $config Edited field config
-    * @param array $params Edit parameters
-    * @param mixed $entity Edited entity
-    * @return Mage_Core_Block_Abstract
-    */
-    protected function _getFieldEditBlock($type, $config, $params, $entity)
+     * Return field edit block instance
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Object $config Edited field config
+     * @param array $params Edit parameters
+     * @param mixed $entity Edited entity
+     * @return Mage_Core_Block_Abstract
+     */
+    protected function _getFieldEditBlock($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
-        $blockType = $config['config']['edit_block_type'];
-        if (strpos($blockType, '/') === false) {
-            $blockType = 'customgrid/widget_grid_form_static_'.$blockType;
+        $editBlockType = $config->getData('config/edit_block_type');
+        
+        if (strpos($editBlockType, '/') === false) {
+            $editBlockType = 'customgrid/widget_grid_editor_form_static_' . $editBlockType;
         }
-        return $this->_getLayout()->createBlock($blockType, '', array(
-            'edited_entity'      => $entity,
-            'edited_entity_name' => $this->_getLoadedEntityName($type, $config, $params, $entity),
-            'edited_value'       => $config,
-            'edited_config'      => $config['config'],
-            'edited_in_grid'     => $config['config']['in_grid'],
-            'edit_params'        => $params,
-            'grid_block_type'    => $type,
-        ));
+        
+        return $this->_getLayout()->createBlock(
+            $editBlockType,
+            '',
+            array(
+                'edited_entity'      => $entity,
+                'edited_entity_name' => $this->_getLoadedEntityName($blockType, $config, $params, $entity),
+                'edited_value'       => $config,
+                'edit_config'        => $config->getConfig(),
+                'edited_in_grid'     => (bool) $config->getDataSetDefault('config/in_grid', false),
+                'edit_params'        => $params,
+                'grid_block_type'    => $blockType,
+            )
+        );
     }
     
     /**
-    * Prepare field edit block before display
-    * 
-    * @param string $type Grid block type
-    * @param array $config Edited field config
-    * @param array $params Edit parameters
-    * @param mixed $entity Edited entity
-    * @param Mage_Core_Block_Abstract $block Edit block
-    * @return Mage_Core_Block_Abstract
-    */
-    protected function _prepareFieldEditBlock($type, $config, $params, $entity, $block)
+     * Prepare field edit block instance before display
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Object $config Edited field config
+     * @param array $params Edit parameters
+     * @param mixed $entity Edited entity
+     * @param Mage_Core_Block_Abstract $editBlock Edit block instance
+     * @return this
+     */
+    protected function _prepareFieldEditBlock($blockType, BL_CustomGrid_Object $config, array $params, $entity,
+        Mage_Core_Block_Abstract $editBlock)
     {
-        return $block;
+        return $this;
     }
     
     /**
-    * Return layout handles to apply for given field edit
-    * (only used for external edit)
-    * 
-    * @param string $type Grid block type
-    * @param array $config Edited field config
-    * @param array $params Edit parameters
-    * @param mixed $entity Edited entity
-    * @return array
-    */
-    protected function _getFieldEditLayoutHandles($type, $config, $params, $entity)
+     * Return layout handles to apply for given field edit
+     * (only used for external edit)
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Object $config Edited field config
+     * @param array $params Edit parameters
+     * @param mixed $entity Edited entity
+     * @return array
+     */
+    protected function _getFieldEditLayoutHandles($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
-        return $config['config']['layout_handles'];
+        return $config->getDataSetDefault('config/layout_handles', array());
     }
     
     /**
-    * Return attribute edit block instance
-    * 
-    * @param string $type Grid block type
-    * @param array $config Edited attribute config
-    * @param array $params Edit parameters
-    * @param mixed $entity Edited entity
-    * @return Mage_Core_Block_Abstract
-    */
-    protected function _getAttributeEditBlock($type, $config, $params, $entity)
+     * Return attribute edit block instance
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Object $config Edited attribute config
+     * @param array $params Edit parameters
+     * @param mixed $entity Edited entity
+     * @return Mage_Core_Block_Abstract
+     */
+    protected function _getAttributeEditBlock($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
-        $blockType = $config['config']['edit_block_type'];
-        if (strpos($blockType, '/') === false) {
-            $blockType = 'customgrid/widget_grid_form_attribute_'.$blockType;
+        $editBlockType = $config->getData('config/edit_block_type');
+        
+        if (strpos($editBlockType, '/') === false) {
+            $editBlockType = 'customgrid/widget_grid_editor_form_attribute_' . $editBlockType;
         }
-        return $this->_getLayout()->createBlock($blockType, '', array(
-            'edited_entity'      => $entity,
-            'edited_entity_name' => $this->_getLoadedEntityName($type, $config, $params, $entity),
-            'edited_attribute'   => $config['config']['attribute'],
-            'edited_value'       => $config,
-            'edited_config'      => $config['config'],
-            'edited_in_grid'     => $config['config']['in_grid'],
-            'edit_params'        => $params,
-            'grid_block_type'    => $type,
-        ));
+        
+        return $this->_getLayout()->createBlock(
+            $editBlockType,
+            '',
+            array(
+                'edited_entity'      => $entity,
+                'edited_entity_name' => $this->_getLoadedEntityName($blockType, $config, $params, $entity),
+                'edited_attribute'   => $config->getData('config/attribute'),
+                'edited_value'       => $config,
+                'edit_config'        => $config->getConfig(),
+                'edited_in_grid'     => (bool) $config->getDataSetDefault('config/in_grid', false),
+                'edit_params'        => $params,
+                'grid_block_type'    => $blockType,
+            )
+        );
     }
     
     /**
-    * Prepare attribute edit block before display
-    * 
-    * @param string $type Grid block type
-    * @param array $config Edited attribute config
-    * @param array $params Edit parameters
-    * @param mixed $entity Edited entity
-    * @param Mage_Core_Block_Abstract $block Edit block
-    * @return Mage_Core_Block_Abstract
-    */
-    protected function _prepareAttributeEditBlock($type, $config, $params, $entity, $block)
+     * Prepare attribute edit block instance before display
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Object $config Edited attribute config
+     * @param array $params Edit parameters
+     * @param mixed $entity Edited entity
+     * @param Mage_Core_Block_Abstract $editBlock Edit block instance
+     * @return this
+     */
+    protected function _prepareAttributeEditBlock($blockType, BL_CustomGrid_Object $config, array $params, $entity,
+        Mage_Core_Block_Abstract $editBlock)
     {
-        return $block;
+        return $this;
     }
     
     /**
-    * Return layout handles to apply for given attribute edit
-    * (only used for external edit)
-    * 
-    * @param string $type Grid block type
-    * @param array $config Edited attribute config
-    * @param array $params Edit parameters
-    * @param mixed $entity Edited entity
-    * @return array
-    */
-    protected function _getAttributeEditLayoutHandles($type, $config, $params, $entity)
+     * Return layout handles to apply for given attribute edit
+     * (only used for external edit)
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Object $config Edited attribute config
+     * @param array $params Edit parameters
+     * @param mixed $entity Edited entity
+     * @return array
+     */
+    protected function _getAttributeEditLayoutHandles($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
-        return $config['config']['layout_handles'];
+        return $config->getDataSetDefault('config/layout_handles', array());
     }
     
     /**
-    * Return value edit block instance
-    * 
-    * @param string $type Grid block type
-    * @param array $config Edited value config
-    * @param array $params Edit parameters
-    * @param mixed $entity Edited entity
-    * @return Mage_Core_Block_Abstract
-    */
-    protected function _getValueEditBlock($type, $config, $params, $entity)
+     * Return value edit block instance
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Object $config Edited value config
+     * @param array $params Edit parameters
+     * @param mixed $entity Edited entity
+     * @return Mage_Core_Block_Abstract
+     */
+    protected function _getValueEditBlock($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
-        if ($config['origin'] == self::EDITABLE_TYPE_FIELD) {
-            if ($block = $this->_getFieldEditBlock($type, $config, $params, $entity)) {
-                return $this->_prepareFieldEditBlock($type, $config, $params, $entity, $block);
-            } else {
-                return null;
+        $editBlock = null;
+        
+        if ($config->getOrigin() == self::EDITABLE_TYPE_FIELD) {
+            if ($editBlock = $this->_getFieldEditBlock($blockType, $config, $params, $entity)) {
+                $this->_prepareFieldEditBlock($blockType, $config, $params, $entity, $editBlock);
             }
-        } elseif ($config['origin'] == self::EDITABLE_TYPE_ATTRIBUTE) {
-            if ($block = $this->_getAttributeEditBlock($type, $config, $params, $entity)) {
-                return $this->_prepareAttributeEditBlock($type, $config, $params, $entity, $block);
-            } else {
-                return null;
+        } elseif ($config->getOrigin() == self::EDITABLE_TYPE_ATTRIBUTE) {
+            if ($editBlock = $this->_getAttributeEditBlock($blockType, $config, $params, $entity)) {
+                $this->_prepareAttributeEditBlock($blockType, $config, $params, $entity, $editBlock);
             }
-        } else {
-            return null;
         }
+        
+        return $editBlock;
     }
     
     /**
-    * Return layout handles to apply for given value edit
-    * (only used for external edit)
-    * 
-    * @param string $type Grid block type
-    * @param array $config Edited value config
-    * @param array $params Edit parameters
-    * @param mixed $entity Edited entity
-    * @return array
-    */
-    protected function _getValueEditLayoutHandles($type, $config, $params, $entity)
+     * Return layout handles to apply for given value edit
+     * (only used for external edit)
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Object $config Edited value config
+     * @param array $params Edit parameters
+     * @param mixed $entity Edited entity
+     * @return array
+     */
+    protected function _getValueEditLayoutHandles($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
-        if ($config['origin'] == self::EDITABLE_TYPE_FIELD) {
-            return $this->_getFieldEditLayoutHandles($type, $config, $params, $entity);
-        } elseif ($config['origin'] == self::EDITABLE_TYPE_ATTRIBUTE) {
-            return $this->_getAttributeEditLayoutHandles($type, $config, $params, $entity);
-        } else {
-            return array();
+        $handles = array();
+        
+        if ($config->getOrigin() == self::EDITABLE_TYPE_FIELD) {
+            $handles = $this->_getFieldEditLayoutHandles($blockType, $config, $params, $entity);
+        } elseif ($config->getOrigin() == self::EDITABLE_TYPE_ATTRIBUTE) {
+            $handles = $this->_getAttributeEditLayoutHandles($blockType, $config, $params, $entity);
         }
+        
+        return $handles;
     }
     
     /**
-    * Check if user has ACL permissions to edit values
-    * 
-    * @param string $type Grid block type
-    * @param BL_CustomGrid_Model_Grid Grid model
-    * @param Mage_Adminhtml_Block_Widget_Grid $grid Grid block instance (when known)
-    * @param array $params Edit parameters (when grid block not known)
-    * @return bool
-    */
-    public function checkUserEditPermissions($type, $model, $block=null, $params=array())
+     * Return the ACL permissions required to edit values
+     * 
+     * @param string $blockType Grid block type
+     * @return string|array
+     */
+    protected function _getEditRequiredAclPermissions($blockType)
     {
-        return $model->checkUserActionPermission(BL_CustomGrid_Model_Grid::GRID_ACTION_EDIT_COLUMNS_VALUES);
+        return null;
     }
     
     /**
-    * Check if user can edit given value
-    * 
-    * @param string $type Grid block type
-    * @param array $config Edited value config
-    * @param array $params Edit parameters
-    * @param mixed $entity Edited entity
-    * @param BL_CustomGrid_Model_Grid $model Custom grid model
-    * @return bool
-    */
-    protected function _canEditValue($type, $config, $params, $entity, $model)
+     * Check if user has ACL permissions to edit values
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @param Mage_Adminhtml_Block_Widget_Grid|null $gridBlock Grid block instance
+     * @param array $params Edit parameters (by default, set when grid block is not given)
+     * @return bool
+     */
+    public function checkUserEditPermissions($blockType, BL_CustomGrid_Model_Grid $gridModel,
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock=null, array $params=array())
     {
-        if ($this->isEditableValue($type, $config['id'], $config['origin'])) {
-            if (isset($params['additional']['column_id'])
-                && ($column = $model->getColumnFromDbId($params['additional']['column_id']))
-                && $column['allow_edit']) {
-                return $this->checkUserEditPermissions($type, $model, null, $params);
+        $isAllowed = $gridModel->checkUserActionPermission(BL_CustomGrid_Model_Grid::ACTION_EDIT_COLUMNS_VALUES);
+        
+        if ($isAllowed && !is_null($permissions = $this->_getEditRequiredAclPermissions($blockType))) {
+            $session = Mage::getSingleton('admin/session');
+            $permissions = (is_array($permissions) ? $permissions : array($permissions));
+            
+            foreach ($permissions as $permission) {
+                if (!$session->isAllowed($permission)) {
+                    $isAllowed = false;
+                    break;
+                }
             }
+        }
+        
+        return $isAllowed;
+    }
+    
+    /**
+     * Check if given value edit is allowed
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Object $config Edited value config
+     * @param array $params Edit parameters
+     * @param mixed $entity Edited entity
+     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @return bool
+     */
+    protected function _canEditValue($blockType, BL_CustomGrid_Object $config, array $params, $entity,
+        BL_CustomGrid_Model_Grid $gridModel)
+    {
+        if (isset($params['additional'])
+            && isset($params['additional']['column_id'])
+            && ($column = $gridModel->getColumnById($params['additional']['column_id']))
+            && $column->isEditAllowed()) {
+            return $this->checkUserEditPermissions($blockType, $gridModel, null, $params);
         }
         return false;
     }
     
     /**
-    * Return value edit block corresponding to given value and request,
-    * either as instance or HTML
-    * 
-    * @param string $type Grid block type
-    * @param string $id Value ID
-    * @param string $origin Value origin
-    * @param Mage_Core_Controller_Request_Http $request Request object
-    * @param BL_CustomGrid_Model_Grid $model Custom grid model
-    * @param bool $asHtml Whether block HTML should be returned instead of its instance
-    * @param bool $addHandles Whether suitable layout handles should be applied
-    * @return mixed
-    */
-    public function getValueEditBlock($type, $id, $origin, $request, $model, $asHtml=true, $addHandles=false)
+     * Return value edit block corresponding to given value and request,
+     * either as instance or HTML output
+     * 
+     * @param string $blockType Grid block type
+     * @param string $id Value ID
+     * @param string $origin Value origin
+     * @param Mage_Core_Controller_Request_Http $request Request object
+     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @param bool $asHtml Whether block HTML oputput should be returned instead of the block instance
+     * @param bool $addLayoutHandles Whether suitable layout handles should be applied
+     * @return mixed
+     */
+    public function getValueEditBlock($blockType, $id, $origin, Mage_Core_Controller_Request_Http $request,
+        BL_CustomGrid_Model_Grid $gridModel, $asHtml=true, $addLayoutHandles=false)
     {
-        if ($config = $this->getEditableValue($type, $id, $origin)) {
-            $valueConfig = compact('id', 'origin', 'config');
-            $editParams  = $this->_extractRequestEditValues($type, $valueConfig, $request);
-            $entity      = $this->_loadEditedEntity($type, $valueConfig, $editParams);
-            
-            if ($this->_isEditedEntityLoaded($type, $valueConfig, $editParams, $entity)) {
-                $this->_registerEditedEntity($type, $valueConfig, $editParams, $entity);
-                
-                if ($this->_canEditValue($type, $valueConfig, $editParams, $entity, $model)
-                    && $this->_checkEntityEditableValue($type, $valueConfig, $editParams, $entity)) {
-                    if ($block = $this->_getValueEditBlock($type, $valueConfig, $editParams, $entity)) {
-                        if ($addHandles) {
-                            /*
-                            Use our observer to add layout handles just before layout load :
-                            it will ensure that "default" handle (and even most of others, if not all)
-                            will be handled before our new ones, which is what we need
-                            */
-                            Mage::getSingleton('customgrid/observer')->addAdditionalLayoutHandle(
-                                $this->_getValueEditLayoutHandles($type, $valueConfig, $editParams, $entity)
-                            );
-                        }
-                        return ($asHtml ? $block->toHtml() : $block);
-                    } else {
-                        Mage::throwException(Mage::helper('customgrid')->__('The value edit block could not be retrieved'));
-                    }
-                } else {
-                    Mage::throwException(Mage::helper('customgrid')->__('This value is not editable'));
-                }
-            } else {
-                Mage::throwException(Mage::helper('customgrid')->__('The edited entity could not be loaded'));
-            }
-        } else {
-            Mage::throwException(Mage::helper('customgrid')->__('This value is not editable'));
+        if (!$config = $this->getEditableValue($blockType, $id, $origin)) {
+            Mage::throwException($this->getHelper()->__('This value is not editable'));
         }
+        
+        $editConfig = new BL_CustomGrid_Object(compact('id', 'origin', 'config'));
+        $editParams = $this->_extractRequestEditValues($blockType, $editConfig, $request);
+        $entityId   = $this->_getEditedEntityIdentifiers($blockType, $editConfig, $editParams);
+        $entity     = $this->_loadEditedEntity($blockType, $editConfig, $editParams, $entityId);
+        
+        if (!$this->_isEditedEntityLoaded($blockType, $editConfig, $editParams, $entity, $entityId)) {
+            Mage::throwException($this->_getHelper()->__('The edited entity could not be loaded'));
+        } else {
+            $this->_registerEditedEntity($blockType, $editConfig, $editParams, $entity);
+        }
+        if (!$this->_canEditValue($blockType, $editConfig, $editParams, $entity, $gridModel)
+            || !$this->_checkEntityEditableValue($blockType, $editConfig, $editParams, $entity)) {
+            Mage::throwException($this->_getHelper()->__('This value is not editable'));
+        }
+        if (!$editBlock = $this->_getValueEditBlock($blockType, $editConfig, $editParams, $entity)) {
+            Mage::throwException($this->_getHelper()->__('The value edit block could not be retrieved'));
+        }
+        if ($addLayoutHandles) {
+            /*
+            Use our observer to add layout handles just before layout load :
+            it will ensure that "default" handle (and even most of others, if not all)
+            will be handled before our own ones, which is what we actually need
+            */
+            $layoutHandles = $this->_getValueEditLayoutHandles($blockType, $editConfig, $editParams, $entity);
+            
+            if (!is_array($layoutHandles)) {
+                $layoutHandles = array($layoutHandles);
+            }
+            
+            Mage::getSingleton('customgrid/observer')->registerAdditionalLayoutHandles($layoutHandles);
+        }
+        
+        return ($asHtml ? $editBlock->toHtml() : $editBlock);
     }
     
     /**
-    * Dispatch given save event
-    * 
-    * @param string $type Grid block type
-    * @param array $config Edited field config
-    * @param array $params Edit parameters
-    * @param mixed $entity Edited entity
-    * @param mixed $value Edited field val
-    * @param string $eventName Dispatched event name
-    * @return this
-    */
-    protected function _dispatchSaveEvent($type, $config, $params, $entity, $value, $eventName)
+     * Dispatch given save event
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Object $config Edited field config
+     * @param array $params Edit parameters
+     * @param mixed $entity Edited entity
+     * @param mixed $value Edited field value
+     * @param string $eventName Dispatched event name
+     * @param array $additional Additional parameters
+     * @return this
+     */
+    protected function _dispatchSaveEvent($blockType, BL_CustomGrid_Object $config, array $params, $entity, $value,
+        $eventName, array $additional=array())
     {
-        Mage::dispatchEvent($eventName, array(
-            'type_model'  => $this,
-            'block_type'  => $type,
-            'edit_config' => $config,
-            'edit_params' => $params,
-            'entity'      => $entity,
-            'value'       => $value
-        ));
+        $eventData = array_merge(
+            $additional,
+            array(
+                'type_model'  => $this,
+                'block_type'  => $blockType,
+                'edit_config' => $config,
+                'edit_params' => $params,
+                'entity'      => $entity,
+                'value'       => $value,
+            )
+        );
+        
+        Mage::dispatchEvent($eventName, $eventData);
         return $this;
     }
     
     /**
-    * Filter given edited value
-    * 
-    * @param string $type Grid block type
-    * @param array $config Edited value config
-    * @param array $params Edit parameters
-    * @param mixed $entity Edited entity
-    * @param mixed $value Value to filter
-    * @param string $filterType Kind of filter to apply
-    * @param array $filterParams Filter parameters
-    * @return mixed
-    */
-    protected function _filterEditedValue($type, $config, $params, $entity, $value, $filterType, $filterParams)
+     * Filter given edited value
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Object $config Edited value config
+     * @param array $params Edit parameters
+     * @param mixed $entity Edited entity
+     * @param mixed $value Value to filter
+     * @param string $filterType Kind of filter to apply
+     * @param array $filterParams Filter parameters
+     * @return mixed
+     */
+    protected function _filterEditedValue($blockType, BL_CustomGrid_Object $config, array $params, $entity, $value,
+        $filterType, array $filterParams)
     {
-        switch ($filterType) {
-            case 'date';
-                $value = Mage::helper('customgrid/editor')->filterDateValue($value);
-                break;
+        if ($filterType == 'date') {
+            $value = Mage::helper('customgrid/editor')->filterDateValue($value);
         }
         return $value;
     }
     
     /**
-    * Return edited field value
-    * 
-    * @param string $type Grid block type
-    * @param array $config Edited field config
-    * @param array $params Edit parameters
-    * @param mixed $entity Edited entity
-    * @param string $formName Shortcut for value's form name
-    * @return mixed
-    */
-    protected function _getEditedFieldValue($type, $config, $params, $entity, $formName)
+     * Return edited field value
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Object $config Edited field config
+     * @param array $params Edit parameters
+     * @param mixed $entity Edited entity
+     * @param string $formName Value form name
+     * @return mixed
+     */
+    protected function _getEditedFieldValue($blockType, BL_CustomGrid_Object $config, array $params, $entity, $formName)
     {
-        if (isset($params['values'][$formName])) {
+        if (isset($params['values']) && isset($params['values'][$formName])) {
             return $params['values'][$formName];
-        } else {
-            Mage::throwException(Mage::helper('customgrid')->__('No value given'));
         }
+        Mage::throwException($this->_getHelper()->__('No value given'));
     }
     
     /**
-    * Filter edited field value
-    * 
-    * @param string $type Grid block type
-    * @param array $config Edited field config
-    * @param array $params Edit parameters
-    * @param mixed $entity Edited entity
-    * @param mixed $value Edited field value
-    * @return mixed
-    */
-    protected function _filterEditedFieldValue($type, $config, $params, $entity, $value)
+     * Filter edited field value
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Object $config Edited field config
+     * @param array $params Edit parameters
+     * @param mixed $entity Edited entity
+     * @param mixed $value Edited field value
+     * @return mixed
+     */
+    protected function _filterEditedFieldValue($blockType, BL_CustomGrid_Object $config, array $params, $entity, $value)
     {
-        $filterType   = $config['config'][(isset($config['config']['filter_type']) ? 'filter_type' : 'type')];
-        $filterParams = $config['config']['filter_params'];
-        return $this->_filterEditedValue($type, $config, $params, $entity, $value, $filterType, $filterParams);
+        if (!$filterType = $config->getData('config/filter_type')) {
+            $filterType = $config->getData('config/type');
+        }
+        $filterParams = $config->getDataSetDefault('config/filter_params', array());
+        return $this->_filterEditedValue($blockType, $config, $params, $entity, $value, $filterType, $filterParams);
     }
     
     /**
-    * Do some actions before field value is applied to edited entity (such as filtering when needed)
-    * 
-    * @param string $type Grid block type
-    * @param array $config Edited field config
-    * @param array $params Edit parameters
-    * @param mixed $entity Edited entity
-    * @param mixed $value Edited field value
-    * @return this
-    */
-    protected function _beforeApplyEditedFieldValue($type, $config, $params, $entity, &$value)
+     * Do some actions before field value is applied to edited entity (such as filtering when needed)
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Object $config Edited field config
+     * @param array $params Edit parameters
+     * @param mixed $entity Edited entity
+     * @param mixed $value Edited field value
+     * @return this
+     */
+    protected function _beforeApplyEditedFieldValue($blockType, BL_CustomGrid_Object $config, array $params, $entity,
+        &$value)
     {
-        if ($config['config']['must_filter']) {
-            $value = $this->_filterEditedFieldValue($type, $config, $params, $entity, $value);
+        if ($config->getData('config/must_filter')) {
+            $value = $this->_filterEditedFieldValue($blockType, $config, $params, $entity, $value);
         }
         return $this;
     }
     
     /**
-    * Apply edited field value to edited entity
-    * 
-    * @param string $type Grid block type
-    * @param array $config Edited field config
-    * @param array $params Edit parameters
-    * @param mixed $entity Edited entity
-    * @param mixed $value Edited field value
-    * @return this
-    */
-    protected function _applyEditedFieldValue($type, $config, $params, $entity, $value)
+     * Apply edited field value to edited entity
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Object $config Edited field config
+     * @param array $params Edit parameters
+     * @param mixed $entity Edited entity
+     * @param mixed $value Edited field value
+     * @return this
+     */
+    protected function _applyEditedFieldValue($blockType, BL_CustomGrid_Object $config, array $params, $entity, $value)
     {
-        $entity->setData($config['config']['field_name'], $value);
+        $entity->setData($config->getData('config/field_name'), $value);
         return $this;
     }
     
     /**
-    * Do some actions before field value is saved
-    * 
-    * @param string $type Grid block type
-    * @param array $config Edited field config
-    * @param array $params Edit parameters
-    * @param mixed $entity Edited entity
-    * @param mixed $value Edited field value
-    * @return this
-    */
-    protected function _beforeSaveEditedFieldValue($type, $config, $params, $entity, $value)
+     * Do some actions before field value is saved
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Object $config Edited field config
+     * @param array $params Edit parameters
+     * @param mixed $entity Edited entity
+     * @param mixed $value Edited field value
+     * @return this
+     */
+    protected function _beforeSaveEditedFieldValue($blockType, BL_CustomGrid_Object $config, array $params, $entity,
+        $value)
     {
-        $this->_dispatchSaveEvent($type, $config, $params, $entity, $value, 'blcg_grid_type_before_save_field_value');
+        $this->_dispatchSaveEvent(
+            $blockType,
+            $config,
+            $params,
+            $entity,
+            $value,
+            'blcg_grid_type_before_save_field_value'
+        );
         return $this;
     }
     
     /**
-    * Save edited entity
-    * 
-    * @param string $type Grid block type
-    * @param array $config Edited field config
-    * @param array $params Edit parameters
-    * @param mixed $entity Edited entity
-    * @param mixed $value Edited field value
-    * @return bool
-    */
-    protected function _saveEditedFieldValue($type, $config, $params, $entity, $value)
+     * Save edited entity
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Object $config Edited field config
+     * @param array $params Edit parameters
+     * @param mixed $entity Edited entity
+     * @param mixed $value Edited field value
+     * @return bool
+     */
+    protected function _saveEditedFieldValue($blockType, BL_CustomGrid_Object $config, array $params, $entity, $value)
     {
         $entity->save();
         return true;
     }
     
     /**
-    * Do some actions after field value is saved (such as reloading when needed)
-    * 
-    * @param string $type Grid block type
-    * @param array $config Edited field config
-    * @param array $params Edit parameters
-    * @param mixed $entity Edited entity
-    * @param mixed $value Edited field value
-    * @param bool $result Save result
-    * @return this
-    */
-    protected function _afterSaveEditedFieldValue($type, $config, $params, $entity, $value, $result)
+     * Do some actions after field value is saved (such as reloading when needed)
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Model_Object $config Edited field config
+     * @param array $params Edit parameters
+     * @param mixed $entity Edited entity
+     * @param mixed $value Edited field value
+     * @param bool $result Save result
+     * @return this
+     */
+    protected function _afterSaveEditedFieldValue($blockType, BL_CustomGrid_Object $config, array $params, $entity,
+        $value, $result)
     {
-        if ($config['config']['render_reload']) {
-            $this->_reloadEditedEntity($type, $config, $params, $entity);
+        if ($config->getData('config/render_reload')) {
+            $this->_reloadEditedEntity($blockType, $config, $params, $entity);
         }
-        $this->_dispatchSaveEvent($type, $config, $params, $entity, $value, 'blcg_grid_type_after_save_field_value');
-        return $this;
+        
+        return $this->_dispatchSaveEvent(
+            $blockType,
+            $config,
+            $params,
+            $entity,
+            $value,
+            'blcg_grid_type_after_save_field_value',
+            array('result' => $result)
+        );
     }
     
     /**
-    * Return edited attribute value
-    * 
-    * @param string $type Grid block type
-    * @param array $config Edited attribute config
-    * @param array $params Edit parameters
-    * @param mixed $entity Edited entity
-    * @param string $formName Shortcut for value's form name
-    * @return mixed
-    */
-    protected function _getEditedAttributeValue($type, $config, $params, $entity, $formName)
+     * Return edited attribute value
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Object $config Edited attribute config
+     * @param array $params Edit parameters
+     * @param mixed $entity Edited entity
+     * @param string $formName Value form name
+     * @return mixed
+     */
+    protected function _getEditedAttributeValue($blockType, BL_CustomGrid_Object $config, array $params, $entity,
+        $formName)
     {
-        if (isset($params['values'][$formName])) {
+        if (isset($params['values']) && isset($params['values'][$formName])) {
             return $params['values'][$formName];
-        } else {
-            Mage::throwException(Mage::helper('customgrid')->__('No value given'));
         }
+        Mage::throwException($this->_getHelper()->__('No value given'));
     }
     
     /**
-    * Filter edited attribute value
-    * 
-    * @param string $type Grid block type
-    * @param array $config Edited attribute config
-    * @param array $params Edit parameters
-    * @param mixed $entity Edited entity
-    * @param mixed $value Edited attribute value
-    * @return mixed
-    */
-    protected function _filterEditedAttributeValue($type, $config, $params, $entity, $value)
+     * Filter edited attribute value
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Object $config Edited attribute config
+     * @param array $params Edit parameters
+     * @param mixed $entity Edited entity
+     * @param mixed $value Edited attribute value
+     * @return mixed
+     */
+    protected function _filterEditedAttributeValue($blockType, BL_CustomGrid_Object $config, array $params, $entity,
+        $value)
     {
-        $filterType   = $config['config']['filter_type'];
-        $filterType   = ($filterType ? $filterType : $config['config']['attribute']->getFrontend()->getInputType());
-        $filterParams = $config['config']['filter_params'];
-        return $this->_filterEditedValue($type, $config, $params, $entity, $value, $filterType, $filterParams);
+        if (!$filterType = $config->getData('config/filter_type')) {
+            $filterType = $config->getData('config/attribute')
+                ->getFrontend()
+                ->getInputType();
+        }
+        $filterParams = $config->getDataSetDefault('config/filter_params', array());
+        return $this->_filterEditedValue($blockType, $config, $params, $entity, $value, $filterType, $filterParams);
     }
     
     /**
-    * Do some actions before attribute value is applied to edited entity (such as filtering when needed)
-    * 
-    * @param string $type Grid block type
-    * @param array $config Edited attribute config
-    * @param array $params Edit parameters
-    * @param mixed $entity Edited entity
-    * @param mixed $value Edited attribute value
-    * @return this
-    */
-    protected function _beforeApplyEditedAttributeValue($type, $config, $params, $entity, &$value)
+     * Do some actions before attribute value is applied to edited entity (such as filtering when needed)
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Object $config Edited attribute config
+     * @param array $params Edit parameters
+     * @param mixed $entity Edited entity
+     * @param mixed $value Edited attribute value
+     * @return this
+     */
+    protected function _beforeApplyEditedAttributeValue($blockType, BL_CustomGrid_Object $config, array $params,
+        $entity, &$value)
     {
-        if ($config['config']['must_filter']) {
-            $value = $this->_filterEditedAttributeValue($type, $config, $params, $entity, $value);
+        if ($config->getData('config/must_filter')) {
+            $value = $this->_filterEditedAttributeValue($blockType, $config, $params, $entity, $value);
         }
         return $this;
     }
     
     /**
-    * Apply edited attribute value to edited entity
-    * 
-    * @param string $type Grid block type
-    * @param array $config Edited attribute config
-    * @param array $params Edit parameters
-    * @param mixed $entity Edited entity
-    * @param mixed $value Edited attribute value
-    * @return this
-    */
-    protected function _applyEditedAttributeValue($type, $config, $params, $entity, $value)
+     * Apply edited attribute value to edited entity
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Object $config Edited attribute config
+     * @param array $params Edit parameters
+     * @param mixed $entity Edited entity
+     * @param mixed $value Edited attribute value
+     * @return this
+     */
+    protected function _applyEditedAttributeValue($blockType, BL_CustomGrid_Object $config, array $params, $entity,
+        $value)
     {
-        $entity->setData($config['config']['attribute']->getAttributeCode(), $value);
+        $entity->setData($config->getData('config/attribute')->getAttributeCode(), $value);
         return $this;
     }
     
     /**
-    * Do some actions before attribute value is saved
-    * 
-    * @param string $type Grid block type
-    * @param array $config Edited attribute config
-    * @param array $params Edit parameters
-    * @param mixed $entity Edited entity
-    * @param mixed $value Edited attribute value
-    * @return this
-    */
-    protected function _beforeSaveEditedAttributeValue($type, $config, $params, $entity, $value)
+     * Do some actions before attribute value is saved
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Object $config Edited attribute config
+     * @param array $params Edit parameters
+     * @param mixed $entity Edited entity
+     * @param mixed $value Edited attribute value
+     * @return this
+     */
+    protected function _beforeSaveEditedAttributeValue($blockType, BL_CustomGrid_Object $config, array $params,
+        $entity, $value)
     {
-        $this->_dispatchSaveEvent($type, $config, $params, $entity, $value, 'blcg_grid_type_before_save_attribute_value');
-        return $this;
+        return $this->_dispatchSaveEvent(
+            $blockType,
+            $config,
+            $params,
+            $entity,
+            $value,
+            'blcg_grid_type_before_save_attribute_value'
+        );
     }
     
     /**
-    * Save edited entity
-    * 
-    * @param string $type Grid block type
-    * @param array $config Edited attribute config
-    * @param array $params Edit parameters
-    * @param mixed $entity Edited entity
-    * @param mixed $value Edited attribute value
-    * @return bool
-    */
-    protected function _saveEditedAttributeValue($type, $config, $params, $entity, $value)
+     * Save edited entity
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Model_Object $config Edited attribute config
+     * @param array $params Edit parameters
+     * @param mixed $entity Edited entity
+     * @param mixed $value Edited attribute value
+     * @return bool
+     */
+    protected function _saveEditedAttributeValue($blockType, BL_CustomGrid_Object $config, array $params, $entity,
+        $value)
     {
         $entity->save();
         return true;
     }
     
     /**
-    * Do some actions after field value is saved (such as reloading when needed)
-    * 
-    * @param string $type Grid block type
-    * @param array $config Edited field config
-    * @param array $params Edit parameters
-    * @param mixed $entity Edited entity
-    * @param mixed $value Edited field value
-    * @param bool $result Save result
-    * @return this
-    */
-    protected function _afterSaveEditedAttributeValue($type, $config, $params, $entity, $value, $result)
+     * Do some actions after field value is saved (such as reloading when needed)
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Object $config Edited field config
+     * @param array $params Edit parameters
+     * @param mixed $entity Edited entity
+     * @param mixed $value Edited field value
+     * @param bool $result Save result
+     * @return this
+     */
+    protected function _afterSaveEditedAttributeValue($blockType, BL_CustomGrid_Object $config, array $params,
+        $entity, $value, $result)
     {
-        if ($config['config']['render_reload']) {
-            $this->_reloadEditedEntity($type, $config, $params, $entity);
+        if ($config->getData('config/render_reload')) {
+            $this->_reloadEditedEntity($blockType, $config, $params, $entity);
         }
-        $this->_dispatchSaveEvent($type, $config, $params, $entity, $value, 'blcg_grid_type_after_save_attribute_value');
-        return $this;
+        
+        return $this->_dispatchSaveEvent(
+            $blockType,
+            $config,
+            $params,
+            $entity,
+            $value,
+            'blcg_grid_type_after_save_attribute_value',
+            array('result' => $result)
+        );
     }
     
     /**
-    * Save edited value
-    * 
-    * @param string $type Grid block type
-    * @param array $config Edited value config
-    * @param array $params Edit parameters
-    * @param mixed $entity Edited entity
-    * @return bool
-    */
-    protected function _saveEditedValue($type, $config, $params, $entity)
+     * Save edited value
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Object $config Edited value config
+     * @param array $params Edit parameters
+     * @param mixed $entity Edited entity
+     * @return bool
+     */
+    protected function _saveEditedValue($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
-        if ($config['origin'] == self::EDITABLE_TYPE_FIELD) {
-            $value  = $this->_getEditedFieldValue(
-                $type,
+        $result = false;
+        
+        if ($config->getOrigin() == self::EDITABLE_TYPE_FIELD) {
+            $value = $this->_getEditedFieldValue(
+                $blockType,
                 $config,
                 $params,
                 $entity,
-                $config['config']['form']['name']
+                $config->getData('config/form/name')
             );
             
-            $result = $this->_beforeApplyEditedFieldValue($type, $config, $params, $entity, $value)
-                ->_applyEditedFieldValue($type, $config, $params, $entity, $value)
-                ->_beforeSaveEditedFieldValue($type, $config, $params, $entity, $value)
-                ->_saveEditedFieldValue($type, $config, $params, $entity, $value);
+            $result = $this->_beforeApplyEditedFieldValue($blockType, $config, $params, $entity, $value)
+                ->_applyEditedFieldValue($blockType, $config, $params, $entity, $value)
+                ->_beforeSaveEditedFieldValue($blockType, $config, $params, $entity, $value)
+                ->_saveEditedFieldValue($blockType, $config, $params, $entity, $value);
             
-            $this->_afterSaveEditedFieldValue($type, $config, $params, $entity, $value, $result);
-            return $result;
-        } elseif ($config['origin'] == self::EDITABLE_TYPE_ATTRIBUTE) {
-            $value  = $this->_getEditedAttributeValue(
-                $type,
+            $this->_afterSaveEditedFieldValue($blockType, $config, $params, $entity, $value, $result);
+            
+        } elseif ($config->getOrigin() == self::EDITABLE_TYPE_ATTRIBUTE) {
+            $value = $this->_getEditedAttributeValue(
+                $blockType,
                 $config,
                 $params,
                 $entity,
-                $config['config']['attribute']->getAttributeCode()
+                $config->getData('config/attribute')->getAttributeCode()
             );
             
-            $result = $this->_beforeApplyEditedAttributeValue($type, $config, $params, $entity, $value)
-                ->_applyEditedAttributeValue($type, $config, $params, $entity, $value)
-                ->_beforeSaveEditedAttributeValue($type, $config, $params, $entity, $value)
-                ->_saveEditedAttributeValue($type, $config, $params, $entity, $value);
+            $result = $this->_beforeApplyEditedAttributeValue($blockType, $config, $params, $entity, $value)
+                ->_applyEditedAttributeValue($blockType, $config, $params, $entity, $value)
+                ->_beforeSaveEditedAttributeValue($blockType, $config, $params, $entity, $value)
+                ->_saveEditedAttributeValue($blockType, $config, $params, $entity, $value);
             
-            $this->_afterSaveEditedAttributeValue($type, $config, $params, $entity, $value, $result);
-            return $result;
-        } else {
-            return false;
-        }
-    }
-    
-    /**
-    * Return saved field value, ready for a future rendering
-    * 
-    * @param string $type Grid block type
-    * @param array $config Edited field config
-    * @param array $params Edit parameters
-    * @param mixed $entity Edited entity
-    * @return mixed
-    */
-    protected function _getSavedFieldValueForRender($type, $config, $params, $entity)
-    {
-        return $entity->getData($config['config']['field_name']);
-    }
-    
-    /**
-    * Return renderer block instance for saved field value
-    * 
-    * @param string $type Grid block type
-    * @param array $config Edited field config
-    * @param array $params Edit parameters
-    * @param mixed $entity Edited entity
-    * @param mixed $value Prepared field value
-    * @return Mage_Core_Block_Abstract
-    */
-    protected function _getSavedFieldValueRendererBlock($type, $config, $params, $entity, $value)
-    {
-        $blockType = $config['config']['render_block_type'];
-        if (strpos($blockType, '/') === false) {
-            $blockType = 'customgrid/widget_grid_editor_renderer_static_'.$blockType;
-        }
-        return $this->_getLayout()->createBlock($blockType, '', array(
-            'edited_entity'    => $entity,
-            'edited_value'     => $config,
-            'edited_config'    => $config['config'],
-            'renderable_value' => $value,
-            'edit_params'      => $params,
-            'grid_block_type'  => $type,
-        ));
-    }
-    
-    /**
-    * Prepare field value renderer block before display
-    * 
-    * @param string $type Grid block type
-    * @param array $config Edited field config
-    * @param array $params Edit parameters
-    * @param mixed $entity Edited entity
-    * @param mixed $value Prepared field value
-    * @param Mage_Core_Block_Abstract $block Renderer block instance
-    * @return Mage_Core_Block_Abstract
-    */
-    protected function _prepareSavedFieldValueRendererBlock($type, $config, $params, $entity, $value, $block)
-    {
-        return $block;
-    }
-    
-    /**
-    * Return saved field value, adapted for a render in grids
-    * 
-    * @param string $type Grid block type
-    * @param array $config Edited field config
-    * @param array $params Edit parameters
-    * @param mixed $entity Edited entity
-    * @return mixed
-    */
-    protected function _getRenderableSavedFieldValue($type, $config, $params, $entity)
-    {
-        $value = $this->_getSavedFieldValueForRender($type, $config, $params, $entity);
-        if ($block = $this->_getSavedFieldValueRendererBlock($type, $config, $params, $entity, $value)) {
-            $block = $this->_prepareSavedFieldValueRendererBlock($type, $config, $params, $entity, $value, $block);
-            return $block->toHtml();
-        } else {
-            return Mage::helper('customgrid')->__('<em>Updated</em>');
-        }
-    }
-    
-    /**
-    * Return saved attribute value, ready for a future rendering
-    * 
-    * @param string $type Grid block type
-    * @param array $config Edited attribute config
-    * @param array $params Edit parameters
-    * @param mixed $entity Edited entity
-    * @return mixed
-    */
-    protected function _getSavedAttributeValueForRender($type, $config, $params, $entity)
-    {
-        return $config['config']['attribute']->getFrontend()->getValue($entity);
-    }
-    
-    /**
-    * Return renderer block instance for saved attribute value
-    * 
-    * @param string $type Grid block type
-    * @param array $config Edited attribute config
-    * @param array $params Edit parameters
-    * @param mixed $entity Edited entity
-    * @param mixed $value Prepared attribute value
-    * @return Mage_Core_Block_Abstract
-    */
-    protected function _getSavedAttributeValueRendererBlock($type, $config, $params, $entity, $value)
-    {
-        $blockType = $config['config']['render_block_type'];
-        if (strpos($blockType, '/') === false) {
-            $blockType = 'customgrid/widget_grid_editor_renderer_attribute_'.$blockType;
-        }
-        return $this->_getLayout()->createBlock($blockType, '', array(
-            'edited_entity'    => $entity,
-            'edited_attribute' => $config['config']['attribute'],
-            'edited_value'     => $config,
-            'edited_config'    => $config['config'],
-            'renderable_value' => $value,
-            'edit_params'      => $params,
-            'grid_block_type'  => $type,
-        ));
-    }
-    
-    /**
-    * Prepare attribute value renderer block before display
-    * 
-    * @param string $type Grid block type
-    * @param array $config Edited attribute config
-    * @param array $params Edit parameters
-    * @param mixed $entity Edited entity
-    * @param mixed $value Prepared attribute value
-    * @param Mage_Core_Block_Abstract $block Renderer block instance
-    * @return Mage_Core_Block_Abstract
-    */
-    protected function _prepareSavedAttributeValueRendererBlock($type, $config, $params, $entity, $value, $block)
-    {
-        return $block;
-    }
-    
-    /**
-    * Return saved attribute value, adapted for a render in grids
-    * 
-    * @param string $type Grid block type
-    * @param array $config Edited attribute config
-    * @param array $params Edit parameters
-    * @param mixed $entity Edited entity
-    * @return mixed
-    */
-    protected function _getRenderableSavedAttributeValue($type, $config, $params, $entity)
-    {
-        $value = $this->_getSavedAttributeValueForRender($type, $config, $params, $entity);
-        if ($block = $this->_getSavedAttributeValueRendererBlock($type, $config, $params, $entity, $value)) {
-            $block = $this->_prepareSavedAttributeValueRendererBlock($type, $config, $params, $entity, $value, $block);
-            return $block->toHtml();
-        } else {
-            return Mage::helper('customgrid')->__('<em>Updated</em>');
-        }
-    }
-    
-    /**
-    * Return saved value, adapted for a render in grids
-    * 
-    * @param string $type Grid block type
-    * @param array $config Edited value config
-    * @param array $params Edit parameters
-    * @param mixed $entity Edited entity
-    * @return mixed
-    */
-    protected function _getRenderableSavedValue($type, $config, $params, $entity)
-    {
-        if ($config['origin'] == self::EDITABLE_TYPE_FIELD) {
-            return $this->_getRenderableSavedFieldValue($type, $config, $params, $entity);
-        } elseif ($config['origin'] == self::EDITABLE_TYPE_ATTRIBUTE) {
-            return $this->_getRenderableSavedAttributeValue($type, $config, $params, $entity);
-        } else {
-            return '';
-        }
-    }
-    
-    /**
-    * Save edited value depending on given value and request, and return a renderable one
-    * 
-    * @param string $type Grid block type
-    * @param string $id Value ID
-    * @param string $origin Value origin
-    * @param Mage_Core_Controller_Request_Http $request Request object
-    * @param BL_CustomGrid_Model_Grid $model Custom grid model
-    * @return mixed
-    */
-    public function saveEditedValue($type, $id, $origin, $request, $model)
-    {
-        if ($config = $this->getEditableValue($type, $id, $origin)) {
-            $valueConfig = compact('id', 'origin', 'config');
-            $editParams  = $this->_extractRequestEditValues($type, $valueConfig, $request);
-            $entity      = $this->_loadEditedEntity($type, $valueConfig, $editParams);
+            $this->_afterSaveEditedAttributeValue($blockType, $config, $params, $entity, $value, $result);
             
-            if ($this->_isEditedEntityLoaded($type, $valueConfig, $editParams, $entity)) {
-                $this->_registerEditedEntity($type, $valueConfig, $editParams, $entity);
-                
-                if ($this->_canEditValue($type, $valueConfig, $editParams, $entity, $model)
-                    && $this->_checkEntityEditableValue($type, $valueConfig, $editParams, $entity)) {
-                    if ($this->_saveEditedValue($type, $valueConfig, $editParams, $entity)) {
-                        return $this->_getRenderableSavedValue($type, $valueConfig, $editParams, $entity);
-                    } else {
-                        Mage::throwException(Mage::helper('customgrid')->__('The value could not be saved'));
-                    }
-                } else {
-                    Mage::throwException(Mage::helper('customgrid')->__('This value is not editable'));
-                }
-            } else {
-                Mage::throwException(Mage::helper('customgrid')->__('The edited entity could not be loaded'));
-            }
-        } else {
-            Mage::throwException(Mage::helper('customgrid')->__('This value is not editable'));
         }
+        
+        return $result;
     }
     
     /**
-    * Do some actions before grid is exported
-    * 
-    * @param string $format Export format
-    * @param Mage_Adminhtml_Block_Widget_Grid $grid Exported grid block, is null at first call (before grid block creation)
-    * @return this
-    */
-    public function beforeGridExport($format, $grid=null)
+     * Return saved field value, ready for a future rendering
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Object $config Edited field config
+     * @param array $params Edit parameters
+     * @param mixed $entity Edited entity
+     * @return mixed
+     */
+    protected function _getSavedFieldValueForRender($blockType, BL_CustomGrid_Object $config, array $params, $entity)
+    {
+        return $entity->getData($config->getData('config/field_name'));
+    }
+    
+    /**
+     * Return renderer block instance for saved field value
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Object $config Edited field config
+     * @param array $params Edit parameters
+     * @param mixed $entity Edited entity
+     * @param mixed $value Prepared field value
+     * @return Mage_Core_Block_Abstract
+     */
+    protected function _getSavedFieldValueRendererBlock($blockType, BL_CustomGrid_Object $config, array $params,
+        $entity, $value)
+    {
+        $renderBlockType = $config->getData('config/render_block_type');
+        
+        if (strpos($renderBlockType, '/') === false) {
+            $renderBlockType = 'customgrid/widget_grid_editor_renderer_static_' . $renderBlockType;
+        }
+        
+        return $this->_getLayout()->createBlock(
+            $renderBlockType,
+            '',
+            array(
+                'edited_entity'    => $entity,
+                'edited_value'     => $config,
+                'edit_config'      => $config->getConfig(),
+                'renderable_value' => $value,
+                'edit_params'      => $params,
+                'grid_block_type'  => $blockType,
+            )
+        );
+    }
+    
+    /**
+     * Prepare field value renderer block before display
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Object $config Edited field config
+     * @param array $params Edit parameters
+     * @param mixed $entity Edited entity
+     * @param mixed $value Prepared field value
+     * @param Mage_Core_Block_Abstract $rendererBlock Renderer block instance
+     * @return this
+     */
+    protected function _prepareSavedFieldValueRendererBlock($blockType, BL_CustomGrid_Object $config, array $params,
+        $entity, $value, Mage_Core_Block_Abstract $rendererBlock)
     {
         return $this;
     }
     
     /**
-    * Do some actions after grid is exported
-    * 
-    * @param string $format Export format
-    * @param Mage_Adminhtml_Block_Widget_Grid $grid Exported grid block
-    * @return this
-    */
-    public function afterGridExport($format, $grid)
+     * Return saved field value, adapted for a render directly in the grid
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Object $config Edited field config
+     * @param array $params Edit parameters
+     * @param mixed $entity Edited entity
+     * @return mixed
+     */
+    protected function _getRenderableSavedFieldValue($blockType, BL_CustomGrid_Object $config, array $params, $entity)
+    {
+        $value = $this->_getSavedFieldValueForRender($blockType, $config, $params, $entity);
+        
+        if ($rendererBlock = $this->_getSavedFieldValueRendererBlock($blockType, $config, $params, $entity, $value)) {
+            $this->_prepareSavedFieldValueRendererBlock($blockType, $config, $params, $entity, $value, $rendererBlock);
+            return $rendererBlock->toHtml();
+        }
+        
+        return $this->_getHelper()->__('<em>Updated</em>');
+    }
+    
+    /**
+     * Return saved attribute value, ready for a future rendering
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Object $config Edited attribute config
+     * @param array $params Edit parameters
+     * @param mixed $entity Edited entity
+     * @return mixed
+     */
+    protected function _getSavedAttributeValueForRender($blockType, BL_CustomGrid_Object $config, array $params,
+        $entity)
+    {
+        return $config->getData('config/attribute')
+            ->getFrontend()
+            ->getValue($entity);
+    }
+    
+    /**
+     * Return renderer block instance for saved attribute value
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Object $config Edited attribute config
+     * @param array $params Edit parameters
+     * @param mixed $entity Edited entity
+     * @param mixed $value Prepared attribute value
+     * @return Mage_Core_Block_Abstract
+     */
+    protected function _getSavedAttributeValueRendererBlock($blockType, BL_CustomGrid_Object $config, array $params,
+        $entity, $value)
+    {
+        $renderBlockType = $config->getData('config/render_block_type');
+        
+        if (strpos($renderBlockType, '/') === false) {
+            $renderBlockType = 'customgrid/widget_grid_editor_renderer_attribute_' . $renderBlockType;
+        }
+        
+        return $this->_getLayout()->createBlock(
+            $renderBlockType,
+            '',
+            array(
+                'edited_entity'    => $entity,
+                'edited_attribute' => $config->getData('config/attribute'),
+                'edited_value'     => $config,
+                'edit_config'      => $config->getConfig(),
+                'renderable_value' => $value,
+                'edit_params'      => $params,
+                'grid_block_type'  => $blockType,
+            )
+        );
+    }
+    
+    /**
+     * Prepare attribute value renderer block before display
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Object $config Edited attribute config
+     * @param array $params Edit parameters
+     * @param mixed $entity Edited entity
+     * @param mixed $value Prepared attribute value
+     * @param Mage_Core_Block_Abstract $rendererBlock Renderer block instance
+     * @return this
+     */
+    protected function _prepareSavedAttributeValueRendererBlock($blockType, BL_CustomGrid_Object $config,
+        array $params, $entity, $value, Mage_Core_Block_Abstract $rendererBlock)
     {
         return $this;
     }
     
     /**
-    * Do some actions before grid collection is prepared
-    * 
-    * @param Mage_Adminhtml_Block_Widget_Grid $grid Grid block
-    * @param bool $firstTime Whether this is the first (= incomplete) grid collection preparation
-    * @return this
-    */
-    public function beforeGridPrepareCollection($grid, $firstTime=true)
+     * Return saved attribute value, adapted for a render directly in the grid
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Object $config Edited attribute config
+     * @param array $params Edit parameters
+     * @param mixed $entity Edited entity
+     * @return mixed
+     */
+    protected function _getRenderableSavedAttributeValue($blockType, BL_CustomGrid_Object $config, array $params,
+        $entity)
+    {
+        $value = $this->_getSavedAttributeValueForRender($blockType, $config, $params, $entity);
+        
+        if ($block = $this->_getSavedAttributeValueRendererBlock($blockType, $config, $params, $entity, $value)) {
+            $this->_prepareSavedAttributeValueRendererBlock($blockType, $config, $params, $entity, $value, $block);
+            return $block->toHtml();
+        }
+        
+        return $this->_getHelper()->__('<em>Updated</em>');
+    }
+    
+    /**
+     * Return saved value, adapted for a render directly in the grid
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Object $config Edited value config
+     * @param array $params Edit parameters
+     * @param mixed $entity Edited entity
+     * @return mixed
+     */
+    protected function _getRenderableSavedValue($blockType, BL_CustomGrid_Object $config, array $params, $entity)
+    {
+        $value = '';
+        
+        if ($config->getOrigin() == self::EDITABLE_TYPE_FIELD) {
+            $value = $this->_getRenderableSavedFieldValue($blockType, $config, $params, $entity);
+        } elseif ($config->getOrigin() == self::EDITABLE_TYPE_ATTRIBUTE) {
+            $value = $this->_getRenderableSavedAttributeValue($blockType, $config, $params, $entity);
+        }
+        
+        return $value;
+    }
+    
+    /**
+     * Save edited value depending on given value and request, and return a corresponding renderable value
+     * 
+     * @param string $blockType Grid block type
+     * @param string $id Value ID
+     * @param string $origin Value origin
+     * @param Mage_Core_Controller_Request_Http $request Request object
+     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @return mixed
+     */
+    public function saveEditedValue($blockType, $id, $origin, Mage_Core_Controller_Request_Http $request,
+        BL_CustomGrid_Model_Grid $gridModel)
+    {
+        if (!$config = $this->getEditableValue($blockType, $id, $origin)) {
+            Mage::throwException($this->_getHelper()->__('This value is not editable'));
+        }
+        
+        $editConfig  = new BL_CustomGrid_Object(compact('id', 'origin', 'config'));
+        $editParams  = $this->_extractRequestEditValues($blockType, $editConfig, $request);
+        $entityId    = $this->_getEditedEntityIdentifiers($blockType, $editConfig, $editParams);
+        $entity      = $this->_loadEditedEntity($blockType, $editConfig, $editParams, $entityId);
+        
+        if (!$this->_isEditedEntityLoaded($blockType, $editConfig, $editParams, $entity, $entityId)) {
+            Mage::throwException($this->_getHelper()->__('The edited entity could not be loaded'));
+        }
+        
+        $this->_registerEditedEntity($blockType, $editConfig, $editParams, $entity);
+        
+        if (!$this->_canEditValue($blockType, $editConfig, $editParams, $entity, $gridModel)
+            || !$this->_checkEntityEditableValue($blockType, $editConfig, $editParams, $entity)) {
+            Mage::throwException($this->_getHelper()->__('This value is not editable'));
+        }
+        if (!$this->_saveEditedValue($blockType, $editConfig, $editParams, $entity)) {
+            Mage::throwException($this->_getHelper()->__('The value could not be saved'));
+        }
+        
+        return $this->_getRenderableSavedValue($blockType, $editConfig, $editParams, $entity);
+    }
+    
+    /**
+     * Do some actions before grid is exported
+     * 
+     * @param string $format Export format
+     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block, null at first call (before block creation)
+     * @return this
+     */
+    public function beforeGridExport($format, Mage_Adminhtml_Block_Widget_Grid $gridBlock=null)
     {
         return $this;
     }
     
     /**
-    * Do some actions after grid collection is prepared
-    * 
-    * @param Mage_Adminhtml_Block_Widget_Grid $grid Grid block
-    * @param bool $firstTime Whether this is the first (= incomplete) grid collection preparation
-    * @return this
-    */
-    public function afterGridPrepareCollection($grid, $firstTime=true)
+     * Do some actions after grid is exported
+     * 
+     * @param string $format Export format
+     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
+     * @return this
+     */
+    public function afterGridExport($format, Mage_Adminhtml_Block_Widget_Grid $gridBlock)
     {
         return $this;
     }
     
     /**
-    * Do some actions before given collection is set on given grid
-    * 
-    * @param Mage_Adminhtml_Block_Widget_Grid $grid Grid block
-    * @param Varien_Data_Collection $collection Set collection
-    * @return this
-    */
-    public function beforeGridSetCollection($grid, $collection)
+     * Do some actions before grid collection is prepared
+     * 
+     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
+     * @param bool $firstTime Whether this is the first (= incomplete) grid collection preparation
+     * @return this
+     */
+    public function beforeGridPrepareCollection(Mage_Adminhtml_Block_Widget_Grid $gridBlock, $firstTime=true)
+    {
+        return $this;
+    }
+    
+    /**
+     * Do some actions after grid collection is prepared
+     * 
+     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
+     * @param bool $firstTime Whether this is the first (= incomplete) grid collection preparation
+     * @return this
+     */
+    public function afterGridPrepareCollection(Mage_Adminhtml_Block_Widget_Grid $gridBlock, $firstTime=true)
+    {
+        return $this;
+    }
+    
+    /**
+     * Do some actions before given collection is set on given grid
+     * 
+     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
+     * @param Varien_Data_Collection $collection Grid collection
+     * @return this
+     */
+    public function beforeGridSetCollection(Mage_Adminhtml_Block_Widget_Grid $gridBlock,
+        Varien_Data_Collection $collection)
     {
         return $this;
     }
     
     
     /**
-    * Do some actions after given collection was set on given grid
-    * 
-    * @param Mage_Adminhtml_Block_Widget_Grid $grid Grid block
-    * @param Varien_Data_Collection $collection Set collection
-    * @return this
-    */
-    public function afterGridSetCollection($grid, $collection)
+     * Do some actions after given collection was set on given grid
+     * 
+     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
+     * @param Varien_Data_Collection $collection Grid collection
+     * @return this
+     */
+    public function afterGridSetCollection(Mage_Adminhtml_Block_Widget_Grid $gridBlock,
+        Varien_Data_Collection $collection)
     {
         return $this;
     }
     
     /**
-    * Do some actions before given grid loads given collection for export
-    * 
-    * @param Mage_Adminhtml_Block_Widget_Grid $grid Grid block
-    * @param Varien_Data_Collection $collection Loaded collection
-    * @return this
-    */
-    public function beforeGridExportLoadCollection($grid, $collection)
+     * Do some actions before given grid loads given collection for export
+     * 
+     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
+     * @param Varien_Data_Collection $collection Grid collection
+     * @return this
+     */
+    public function beforeGridExportLoadCollection(Mage_Adminhtml_Block_Widget_Grid $gridBlock,
+        Varien_Data_Collection $collection)
     {
         return $this;
     }
     
     /**
-    * Do some actions after given grid has loaded given collection for export
-    * 
-    * @param Mage_Adminhtml_Block_Widget_Grid $grid Grid block
-    * @param Varien_Data_Collection $collection Loaded collection
-    * @return this
-    */
-    public function afterGridExportLoadCollection($grid, $collection)
+     * Do some actions after given grid has loaded given collection for export
+     * 
+     * @param Mage_Adminhtml_Block_Widget_Grid $grid Grid block instance
+     * @param Varien_Data_Collection $collection Grid collection
+     * @return this
+     */
+    public function afterGridExportLoadCollection(Mage_Adminhtml_Block_Widget_Grid $gridBlock,
+        Varien_Data_Collection $collection)
     {
         return $this;
     }

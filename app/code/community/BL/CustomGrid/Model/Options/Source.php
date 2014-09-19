@@ -9,26 +9,25 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class BL_CustomGrid_Model_Options_Source
     extends Mage_Core_Model_Abstract
 {
-    protected $_optionsArray = null;
     static protected $_predefinedTypes = null;
     
-    const SOURCE_TYPE_CUSTOM_LIST = 'custom_list';
-    const SOURCE_TYPE_MAGE_MODEL  = 'mage_model';
+    const TYPE_CUSTOM_LIST = 'custom_list';
+    const TYPE_MAGE_MODEL  = 'mage_model';
     
-    const SOURCE_MODEL_TYPE_MODEL          = 'model';
-    const SOURCE_MODEL_TYPE_RESOURCE_MODEL = 'resource_model';
-    const SOURCE_MODEL_TYPE_SINGLETON      = 'singleton';
+    const MODEL_TYPE_MODEL          = 'model';
+    const MODEL_TYPE_RESOURCE_MODEL = 'resource_model';
+    const MODEL_TYPE_SINGLETON      = 'singleton';
     
-    const SOURCE_MODEL_RETURN_TYPE_OPTIONS_ARRAY = 'options_array';
-    const SOURCE_MODEL_RETURN_TYPE_OPTIONS_HASH  = 'options_hash';
-    const SOURCE_MODEL_RETURN_TYPE_VO_COLLECTION = 'vo_collection';
+    const RETURN_TYPE_OPTIONS_ARRAY = 'options_array';
+    const RETURN_TYPE_OPTIONS_HASH  = 'options_hash';
+    const RETURN_TYPE_VARIEN_OBJECT_COLLECTION = 'vo_collection';
     
     protected function _construct()
     {
@@ -37,89 +36,81 @@ class BL_CustomGrid_Model_Options_Source
         $this->setIdFieldName('source_id');
     }
     
-    public function _collectOptions()
+    protected function _getOptionsArray()
     {
-        if (is_null($this->_optionsArray)) {
-            $this->_optionsArray = array();
+        if (!$this->hasData('options_array')) {
+            $options = array();
             
-            if ($this->getType() == self::SOURCE_TYPE_CUSTOM_LIST) {
-                // Custom list
-                if (is_array($this->getOptions())) {
-                    // Build an option array from custom list's options
-                    foreach ($this->getOptions() as $option) {
-                        $this->_optionsArray[] = array(
-                            'value' => $option['value'],
-                            'label' => $option['label'],
-                        );
-                    }
+            if ($this->getType() == self::TYPE_CUSTOM_LIST) {
+                if (!is_array($options = $this->getOptions())) {
+                    $options = array();
                 }
-            } elseif ($this->getType() == self::SOURCE_TYPE_MAGE_MODEL) {
-                // Magento model
+            } elseif ($this->getType() == self::TYPE_MAGE_MODEL) {
                 try {
-                    if ($this->getModelType() == self::SOURCE_MODEL_TYPE_SINGLETON) {
+                    if ($this->getModelType() == self::MODEL_TYPE_SINGLETON) {
                         $model = Mage::getSingleton($this->getModelName());
-                    } elseif ($this->getModelType() == self::SOURCE_MODEL_TYPE_RESOURCE_MODEL) {
+                    } elseif ($this->getModelType() == self::MODEL_TYPE_RESOURCE_MODEL) {
                         $model = Mage::getResourceModel($this->getModelName());
                     } else {
                         $model = Mage::getModel($this->getModelName());
                     }
                     
-                    // Get options from given model's method
                     $result = call_user_func(array($model, $this->getMethod()));
                     
                     if (is_array($result) || ($result instanceof Traversable)) {
+                        $returnType = $this->_getData('return_type');
+                        $valueKey = $this->_getData('value_key');
+                        $labelKey = $this->_getData('label_key');
+                        
                         foreach ($result as $key => $value) {
-                            if ($this->_getData('return_type') == self::SOURCE_MODEL_RETURN_TYPE_OPTIONS_ARRAY) {
-                                // Take "options array"-looking values
+                            if ($returnType == self::RETURN_TYPE_OPTIONS_ARRAY) {
                                 if (is_array($value) && isset($value['value']) && isset($value['label'])) {
-                                    $this->_optionsArray[] = array(
+                                    $options[] = array(
                                         'value' => $value['value'],
                                         'label' => $value['label'],
                                     );
                                 }
-                            } elseif ($this->_getData('return_type') == self::SOURCE_MODEL_RETURN_TYPE_OPTIONS_HASH) {
-                                // Simply build options array from hash values
-                                $this->_optionsArray[] = array(
+                            } elseif ($returnType == self::RETURN_TYPE_OPTIONS_HASH) {
+                                $options[] = array(
                                     'value' => $key,
                                     'label' => $value,
                                 );
-                            } elseif ($this->_getData('return_type') == self::SOURCE_MODEL_RETURN_TYPE_VO_COLLECTION) {
-                                // Take values from Varien_Object instances
+                            } elseif ($returnType == self::RETURN_TYPE_VARIEN_OBJECT_COLLECTION) {
                                 if (is_object($value) && ($value instanceof Varien_Object)) {
-                                    $this->_optionsArray[] = array(
-                                        'value' => $value->getData($this->_getData('value_key')),
-                                        'label' => $value->getData($this->_getData('label_key')),
+                                    $options[] = array(
+                                        'value' => $value->getData($valueKey),
+                                        'label' => $value->getData($labelKey),
                                     );
                                 }
                             }
                         }
                     }
                 } catch (Exception $e) {
-                    // If an error occured (wrong model/method, ..), use empty array
+                    $options = array();
                 }
+                
+                $this->setData('options_array', $options);
             }
         }
-        return $this->_optionsArray;
+        return $this->_getData('options_array');
     }
     
     public function getOptionsArray()
     {
-        return $this->_collectOptions();
+        return $this->_getOptionsArray();
     }
     
     public function getOptionsHash()
     {
-        $result = $this->_collectOptions();
-        return Mage::helper('customgrid')->getOptionsHashFromOptionsArray($result);
+        return Mage::helper('customgrid')->getOptionsHashFromOptionsArray($this->_getOptionsArray());
     }
     
-    static protected function _getPredefinedTypes()
+    protected function _getPredefinedTypes()
     {
         $types  = array();
         $helper = Mage::helper('customgrid');
         
-        // Options arrays
-        $arrays = array(
+        $optionsArrays = array(
             'blcg_oa_yesno' => array(
                 'model' => 'customgrid/system_config_source_yesno',
                 'label' => $helper->__('Yes/No'),
@@ -130,10 +121,10 @@ class BL_CustomGrid_Model_Options_Source
             )
         );
         
-        foreach ($arrays as $id => $config) {
-            $types[$id] = array(
-                'name' => $config['label'],
-                'type' => 'mage_model',
+        foreach ($optionsArrays as $typeId => $config) {
+            $types[$typeId] = array(
+                'name'        => $config['label'],
+                'type'        => 'mage_model',
                 'model_name'  => $config['model'],
                 'model_type'  => 'model',
                 'method'      => 'toOptionArray',
@@ -146,10 +137,10 @@ class BL_CustomGrid_Model_Options_Source
         return $types;
     }
     
-    static public function getPredefinedTypes()
+    public function getPredefinedTypes()
     {
         if (!is_array(self::$_predefinedTypes)) {
-            $types    = self::_getPredefinedTypes();
+            $types = $this->_getPredefinedTypes();
             $response = new Varien_Object(array('types' => $types));
             Mage::dispatchEvent('blcg_options_source_predefined_types', array('response' => $response));
             
@@ -162,26 +153,26 @@ class BL_CustomGrid_Model_Options_Source
         return self::$_predefinedTypes;
     }
     
-    static public function getPredefinedType($id)
+    public function getPredefinedType($typeId)
     {
         $types = self::getPredefinedTypes();
-        return (isset($types[$id]) ? $types[$id] : null);
+        return (isset($types[$typeId]) ? $types[$typeId] : null);
     }
     
-    static public function getTypesAsOptionHash($withPredefined=false)
+    public function getTypesAsOptionHash($withPredefined=false)
     {
-        $types  = array(
-            self::SOURCE_TYPE_CUSTOM_LIST => Mage::helper('customgrid')->__('Custom List'),
-            self::SOURCE_TYPE_MAGE_MODEL  => Mage::helper('customgrid')->__('Magento Model'),
-        );
         $helper = Mage::helper('customgrid');
+        $types  = array(
+            self::TYPE_CUSTOM_LIST => $helper->__('Custom List'),
+            self::TYPE_MAGE_MODEL  => $helper->__('Magento Model'),
+        );
         
         if ($withPredefined) {
-            $predefined = self::getPredefinedTypes();
+            $predefinedTypes = self::getPredefinedTypes();
             
-            foreach ($predefined as $id => $type) {
-                if (!isset($types[$id])) {
-                    $types[$id] = $helper->__('%s (predefined)', $type['name']);
+            foreach ($predefinedTypes as $typeId => $type) {
+                if (!isset($types[$typeId])) {
+                    $types[$typeId] = $helper->__('%s (predefined)', $type['name']);
                 }
             }
         }
@@ -189,21 +180,21 @@ class BL_CustomGrid_Model_Options_Source
         return $types;
     }
     
-    static public function getModelTypesAsOptionHash()
+    public function getModelTypesAsOptionHash()
     {
         return array(
-            self::SOURCE_MODEL_TYPE_MODEL          => Mage::helper('customgrid')->__('Model'),
-            self::SOURCE_MODEL_TYPE_RESOURCE_MODEL => Mage::helper('customgrid')->__('Resource Model'),
-            self::SOURCE_MODEL_TYPE_SINGLETON      => Mage::helper('customgrid')->__('Singleton'),
+            self::MODEL_TYPE_MODEL          => Mage::helper('customgrid')->__('Model'),
+            self::MODEL_TYPE_RESOURCE_MODEL => Mage::helper('customgrid')->__('Resource Model'),
+            self::MODEL_TYPE_SINGLETON      => Mage::helper('customgrid')->__('Singleton'),
         );
     }
     
-    static public function getModelReturnTypesAsOptionHash()
+    public function getModelReturnTypesAsOptionHash()
     {
         return array(
-            self::SOURCE_MODEL_RETURN_TYPE_OPTIONS_ARRAY => Mage::helper('customgrid')->__('Options Array'),
-            self::SOURCE_MODEL_RETURN_TYPE_OPTIONS_HASH  => Mage::helper('customgrid')->__('Options Hash'),
-            self::SOURCE_MODEL_RETURN_TYPE_VO_COLLECTION => Mage::helper('customgrid')->__('Varien_Object Collection'),
+            self::RETURN_TYPE_OPTIONS_ARRAY => Mage::helper('customgrid')->__('Options Array'),
+            self::RETURN_TYPE_OPTIONS_HASH  => Mage::helper('customgrid')->__('Options Hash'),
+            self::RETURN_TYPE_VARIEN_OBJECT_COLLECTION => Mage::helper('customgrid')->__('Varien_Object Collection'),
         );
     }
 }

@@ -25,13 +25,14 @@ class BL_CustomGrid_Model_Grid_Rewriter_Eval
         return false;
     }
     
-    protected function _rewriteGrid($blcgClass, $originalClass, $gridType)
+    protected function _rewriteGrid($blcgClass, $originalClass, $blockType)
     {
         if (!$this->_isEvalDisabled()) {
             try {
-                eval($this->_getRewriteCode($blcgClass, $originalClass, $gridType));
+                eval($this->_getRewriteCode($blcgClass, $originalClass, $blockType));
             } catch (Exception $e) {
-                Mage::throwException(Mage::helper('customgrid')->__('An error occured while eval()ing the rewrite code : "%s"', $e->getMessage()));
+                $error = 'An error occured while eval()ing the rewrite code : "%s"';
+                Mage::throwException(Mage::helper('customgrid')->__($error, $e->getMessage()));
             }
         } else {
             Mage::throwException(Mage::helper('customgrid')->__('eval() is not available on your server'));

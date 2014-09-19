@@ -9,17 +9,25 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 abstract class BL_CustomGrid_Model_Custom_Column_Abstract
-    extends Varien_Object
+    extends BL_CustomGrid_Object
 {
-    protected $_gridHelper = 'customgrid/grid';
-    protected $_collectionHelper = 'customgrid/collection';
+    /**
+     * Generated collection flags
+     * 
+     * @var array
+     */
+    static protected $_uniqueFlags = array();
     
-    static protected $_uniqueFlags   = array();
+    /**
+     * Generated collection aliases
+     * 
+     * @var array
+     */
     static protected $_uniqueAliases = array();
     
     // Grid collection events on which to apply callbacks
@@ -35,134 +43,396 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract
     protected function _construct()
     {
         parent::_construct();
-        $this->initConfig();
-        
-        if (!$this->getFromCustomGridXml()) {
-            $this->finalizeConfig();
-        }
+        $this->_initializeConfig();
     }
     
+    /**
+     * Return base helper
+     * 
+     * @return BL_CustomGrid_Helper_Data
+     */
     protected function _getBaseHelper()
     {
         return Mage::helper('customgrid');
     }
     
+    /**
+     * Return grid block helper
+     * 
+     * @return BL_CustomGrid_Helper_Grid
+     */
     protected function _getGridHelper()
     {
-        return Mage::helper($this->_gridHelper);
+        return Mage::helper('customgrid/grid');
     }
     
+    /**
+     * Return grid collection helper
+     * 
+     * @return BL_CustomGrid_Helper_Collection
+     */
     protected function _getCollectionHelper()
     {
-        return Mage::helper($this->_collectionHelper);
+        return Mage::helper('customgrid/collection');
     }
     
-    protected function _getCollectionMainTableAlias($collection)
+    /**
+     * Return the alias used for the main table in the given collection
+     * 
+     * @param Varien_Data_Collection_Db $collection Database collection
+     * @return string
+     */
+    protected function _getCollectionMainTableAlias(Varien_Data_Collection_Db $collection)
     {
-        return $this->_getCollectionHelper()
-            ->getCollectionMainTableAlias($collection);
+        return $this->_getCollectionHelper()->getCollectionMainTableAlias($collection);
     }
     
-    protected function _getCollectionAdapter($collection, $withQiCallback=false)
+    /**
+     * Return the adapter model used by the given collection
+     * If requested, also return a shortcut callback to the adapter's quoteIdentifier() method
+     * 
+     * @param Varien_Data_Collection_Db $collection Database collection
+     * @param bool $withQiCallback Whether a callback to the adapter's quoteIdentifier() method should also be returned
+     * @return mixed Adapter model or an array with the adapter model and the callback
+     */
+    protected function _getCollectionAdapter(Varien_Data_Collection_Db $collection, $withQiCallback=false)
     {
         $helper  = $this->_getCollectionHelper();
         $adapter = $helper->getCollectionAdapter($collection);
-        
-        if (!$withQiCallback) {
-            return $adapter;
-        }
-        
-        return array(
-            $adapter,
-            $helper->getQuoteIdentifierCallback($adapter),
-        );
+        return (!$withQiCallback ? $adapter : array($adapter, $helper->getQuoteIdentifierCallback($adapter)));
     }
     
-    public function initConfig()
+    /**
+     * Prepare config data
+     * 
+     * @return this
+     */
+    protected function _prepareConfig()
     {
+        return $this;
+    }
+    
+    /**
+     * Initialize and prepare config data
+     * 
+     * @return this
+     */
+    protected function _initializeConfig()
+    {
+        // Initialize data keys
         $boolKeys = array(
             'allow_store',
             'allow_renderers',
             'allow_customization',
             'allow_editor',
         );
-        $arraysKeys = array(
+        
+        $arrayKeys = array(
             'allowed_versions',
             'excluded_versions',
             'allowed_blocks',
             'excluded_blocks',
             'allowed_rewrites',
             'excluded_rewrites',
-            'grid_params',
-            'model_params',
-            'custom_params_config',
-            'custom_params_window_config',
+            'config_params',
+            'block_params',
+            'customization_params',
+            'customization_window_config',
         );
         
-        foreach ($boolKeys as $key) {
-            $this->setDataUsingMethod($key, false);
-        }
-        foreach ($arraysKeys as $key) {
-            $this->setDataUsingMethod($key, array());
-        }
-        
+        $this->addData(array_fill_keys($boolKeys, false));
+        $this->addData(array_fill_keys($arrayKeys, array()));
+        $this->_prepareConfig();
         return $this;
     }
     
-    public function finalizeConfig()
-    {
-        return $this;
-    }
-    
-    protected function _addAvailabilityConfig($type, $value, $merge=false)
+    /**
+     * Set array value into data
+     * 
+     * @param string $key Data key
+     * @param mixed $value Config value (will be turned into an array if needed)
+     * @param bool $merge Whether the given value should be merged with the existing one
+     */
+    protected function _setConfigArrayValue($key, $value, $merge=false)
     {
         if (!is_array($value)) {
             $value = array($value);
         }
         if ($merge) {
-            if (!is_array($current = $this->getDataUsingMethod($type))) {
-                $current = array();
+             if (!is_array($currentValue = $this->_getData($key))) {
+                $currentValue = array();
             }
-            $value = array_merge($current, $value);
+            $value = array_merge($currentValue, $value);
         }
-        return $this->setDataUsingMethod($type, $value);
+        return $this->setData($key, $value);
     }
     
-    public function addAllowedVersions($versions, $merge=false)
+    /**
+     * Set or add allowed Magento versions patterns
+     * 
+     * @param mixed $versions Allowed Magento versions patterns
+     * @param bool $merge Whether given patterns should be merged with the existing ones
+     * @return this
+     */
+    public function setAllowedVersions($versions, $merge=false)
     {
-        return $this->_addAvailabilityConfig('allowed_versions', $versions, $merge);
+        return $this->_setConfigArrayValue('allowed_versions', $versions, $merge);
     }
     
-    public function addExcludedVersions($versions, $merge=false)
+    /**
+     * Set or add excluded Magento versions patterns
+     * 
+     * @param mixed $versions Excluded Magento versions patterns
+     * @param bool $merge Whether given patterns should be merged with the existing ones
+     * @return this
+     */
+    public function setExcludedVersions($versions, $merge=false)
     {
-        return $this->_addAvailabilityConfig('excluded_versions', $versions, $merge);
+        return $this->_setConfigArrayValue('excluded_versions', $versions, $merge);
     }
     
-    public function addAllowedBlocks($blocks, $merge=false)
+    /**
+     * Set or add allowed block types patterns
+     * 
+     * @param mixed $blocks Allowed block types patterns
+     * @param bool $merge Whether given patterns should be merged with the existing ones
+     * @return this
+     */
+    public function setAllowedBlocks($blocks, $merge=false)
     {
-        return $this->_addAvailabilityConfig('allowed_blocks', $blocks, $merge);
+        return $this->_setConfigArrayValue('allowed_blocks', $blocks, $merge);
     }
     
-    public function addExcludedBlocks($blocks, $merge=false)
+    /**
+     * Set or add excluded block types patterns
+     * 
+     * @param mixed $blocks Excluded block types patterns
+     * @param bool $merge Whether given patterns should be merged with the existing ones
+     * @return this
+     */
+    public function setExcludedBlocks($blocks, $merge=false)
     {
-        return $this->_addAvailabilityConfig('excluded_blocks', $blocks, $merge);
+        return $this->_setConfigArrayValue('excluded_blocks', $blocks, $merge);
     }
     
-    public function addAllowedRewrites($rewrites, $merge=false)
+    /**
+     * Set or add allowed rewriting class names patterns
+     * 
+     * @param mixed $rewrites Allowed rewriting class names patterns
+     * @param bool $merge Whether given patterns should be merged with the existing ones
+     * @return this
+     */
+    public function setAllowedRewrites($rewrites, $merge=false)
     {
-        return $this->_addAvailabilityConfig('allowed_rewrites', $rewrites, $merge);
+        return $this->_setConfigArrayValue('allowed_rewrites', $rewrites, $merge);
     }
     
-    public function addExcludedRewrites($rewrites, $merge=false)
+    /**
+     * Set or add excluded rewriting class names patterns
+     * 
+     * @param mixed $rewrites Excluded rewriting class names patterns
+     * @param bool $merge Whether given patterns should be merged with the existing ones
+     * @return this
+     */
+    public function setExcludedRewrites($rewrites, $merge=false)
     {
-        return $this->_addAvailabilityConfig('excluded_rewrites', $rewrites, $merge);
+        return $this->_setConfigArrayValue('excluded_rewrites', $rewrites, $merge);
     }
     
+    /**
+     * Set or add config params
+     * 
+     * @param array $params Config params
+     * @param bool $merge Whether given params should be merged with the existing ones
+     * @return this
+     */
+    public function setConfigParams(array $params, $merge=false)
+    {
+        return $this->_setConfigArrayValue('config_params', $params, $merge);
+    }
+    
+    /**
+     * Return config param value
+     * 
+     * @param string $key Param key
+     * @param mixed $default Value to return if given param is not set
+     * @return mixed
+     */
+    public function getConfigParam($key, $default=null)
+    {
+        return ($this->hasData('config_params/' . $key) ? $this->getData('config_params/' . $key) : $default);
+    }
+    
+    /**
+     * Set or add block params
+     * 
+     * @param array $params Block params
+     * @param bool $merge Whether given params should be merged with the existing ones
+     * @return this
+     */
+    public function setBlockParams(array $params, $merge=false)
+    {
+        return $this->_setConfigArrayValue('block_params', $params, $merge);
+    }
+    
+    /**
+     * Return block param value
+     * 
+     * @param string $key Param key
+     * @param mixed $default Value to return if given param is not set
+     * @return mixed
+     */
+    public function getBlockParam($key, $default=null)
+    {
+        return ($this->hasData('block_params/' . $key) ? $this->getData('block_params/' . $key) : $default);
+    }
+    
+    /**
+     * Customization params sort callback
+     * 
+     * @param BL_CustomGrid_Object $a One customization param
+     * @param BL_CustomGrid_Object $b Another customization param
+     * @return int
+     */
+    protected function _sortCustomizationParams(BL_CustomGrid_Object $a, BL_CustomGrid_Object $b)
+    {
+        $aOrder = $a->getSortOrder();
+        $bOrder = $b->getSortOrder();
+        return ($aOrder < $bOrder ? -1 : ($aOrder > $bOrder ? 1 : strcmp($a->getLabel(), $b->getLabel())));
+    }
+    
+    /**
+     * Return customization params
+     * 
+     * @param bool $sorted Whether params should be sorted
+     * @return array
+     */
+    public function getCustomizationParams($sorted=true)
+    {
+        $params = $this->_getData('customization_params');
+        
+        if ($sorted) {
+            uasort($params, array($this, '_sortCustomizationParams'));
+        }
+        
+        return $params;
+    }
+    
+    /**
+     * Return the minimum order used amongst all customization params
+     * 
+     * @return int
+     */
+    public function getCustomizationParamsMinSortOrder()
+    {
+        $minOrder  = null;
+        
+        foreach ($this->getCustomizationParamsConfig(false) as $param) {
+            $sortOrder = $param->getSortOrder();
+            $minOrder  = (is_null($minOrder) ? $sortOrder : min($minOrder, $sortOrder));
+        }
+        
+        return $minOrder;
+    }
+    
+    /**
+     * Return the maximum order used amongst all customization params
+     * 
+     * @return int
+     */
+    public function getCustomizationParamsMaxSortOrder()
+    {
+        $maxOrder  = null;
+        
+        foreach ($this->getCustomizationParamsConfig(false) as $param) {
+            $sortOrder = $param->getSortOrder();
+            $maxOrder  = (is_null($maxOrder) ? $sortOrder : max($maxOrder, $sortOrder));
+        }
+        
+        return $maxOrder;
+    }
+    
+    /**
+     * Add customization param
+     * 
+     * @param string $key Param key
+     * @param array $data Config values
+     * @param mixed $sortOrder Sort order (can be "first", "last" or an integer)
+     * @param bool $override Whether the existing param for the same key should be overriden (if appropriate)
+     * @return this
+     */
+    public function addCustomizationParam($key, array $data, $sortOrder='last', $override=true)
+    {
+        if ($override || !$this->getData('customization_params/' . $key)) {
+            if ($sortOrder === 'last') {
+                $data['sort_order'] = $this->getCustomizationParamsMaxSortOrder() +1;
+            } elseif ($sortOrder === 'first') {
+                $data['sort_order'] = $this->getCustomizationParamsMinSortOrder() -1;
+            } else {
+                $data['sort_order'] = (int) $sortOrder;
+            }
+            
+            $data['key'] = $key;
+            $data['visible'] = (isset($data['visible']) ? (bool) $data['visible'] : true);
+            
+            $param = new BL_CustomGrid_Object($data);
+            $this->setData('customization_params/' . $key, $param);
+        }
+        return $this;
+    }
+    
+    /**
+     * Set or add customization window config values
+     * 
+     * @param array $data Config values
+     * @param bool $merge Whether given values should be merged with the existing ones
+     * @return this
+     */
+    public function setCustomizationWindowConfig(array $data, $merge=false)
+    {
+        return $this->_setConfigArrayValue('customization_window_config', $data, $merge);
+    }
+    
+    /**
+     * Set custom column name
+     * 
+     * @param string $name Column name
+     * @return this
+     */
+    public function setName($name)
+    {
+        $this->setData('name', $name);
+        
+        if (!$this->getData('customization_window_config/title')) {
+            $this->setData(
+                'customization_window_config/title',
+                $this->_getBaseHelper()->__('Customization : %s', $name)
+            );
+        }
+        
+        return $this;
+    }
+    
+    /**
+     * Turn given availability pattern into a ready-to-use regex string
+     * ("*" matches any number of characters, "?" exactly one)
+     * 
+     * @param string $value Availability pattern
+     * @return string
+     */
     protected function _getAvailabilityRegex($value)
     {
         return str_replace(array('\\*', '\\?'), array('.*', '.'), '#' . preg_quote($value, '#') . '#i');
     }
     
+    /**
+     * Check availability patterns against reference value
+     * 
+     * @param mixed $values Availability patterns (if not an array or if empty, true will be returned)
+     * @param string $reference Reference value
+     * @param bool $excluded Whether the availability patterns concern excludable values
+     * @return bool If at least one pattern matched the reference value, false for excludable values, true otherwise
+     */
     protected function _checkAvailabilityValues($values, $reference, $excluded=false)
     {
         if (!is_array($values) || empty($values)) {
@@ -181,287 +451,462 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract
         return ($matched ? !$excluded : $excluded);
     }
     
+    /**
+     * Return whether the custom column is available for the given block type and rewriting class
+     * 
+     * @param string $blockType Grid block type
+     * @param string $rewritingClassName Grid rewriting class
+     * @return bool
+     */
     public function isAvailable($blockType, $rewritingClassName)
     {
         return ($this->_checkAvailabilityValues($this->getAllowedVersions(), Mage::getVersion())
             && $this->_checkAvailabilityValues($this->getExcludedVersions(), Mage::getVersion(), true)
-            && $this->_checkAvailabilityValues($this->getAllowedBlocks(), $blockType)
+            && $this->_checkAvailabilityValues($this->getAllowedBlocks(),  $blockType)
             && $this->_checkAvailabilityValues($this->getExcludedBlocks(), $blockType, true)
-            && $this->_checkAvailabilityValues($this->getAllowedRewrites(), $rewritingClassName)
+            && $this->_checkAvailabilityValues($this->getAllowedRewrites(),  $rewritingClassName)
             && $this->_checkAvailabilityValues($this->getExcludedRewrites(), $rewritingClassName, true));
     }
     
-    public function shouldInvalidateFilters($grid, $column, $params, $rendererTypes)
+    /**
+     * Return whether previous filters should be invalidated
+     * 
+     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @param BL_CustomGrid_Model_Grid_Column $columnModel Grid column model
+     * @param array $params Customization params values
+     * @param array $rendererTypes Previous and current renderer codes (keys: "old" and "current")
+     * @return bool
+     */
+    public function shouldInvalidateFilters(BL_CustomGrid_Model_Grid $gridModel,
+        BL_CustomGrid_Model_Grid_Column $columnModel, array $params, array $renderers)
     {
-        return ($rendererTypes['old'] != $rendererTypes['new']);
+        return ($renderers['previous'] !== $renderers['current']);
     }
     
-    public function setName($name)
-    {
-        $this->setData('name', $name);
-        $windowConfig = $this->_getData('custom_params_window_config');
-        
-        if (is_array($windowConfig) && !isset($windowConfig['title'])) {
-            $windowConfig['title'] = $this->_getBaseHelper()->__('Customization : %s', $name);
-            $this->setCustomParamsWindowConfig($windowConfig);
-        }
-        
-        return $this;
-    }
-    
-    protected function _setConfigParams($key, array $params, $merge=false)
-    {
-        if ($merge) {
-            $this->setData($key, array_merge($this->_getData($key), $params));
-        } else {
-            $this->setData($key, $params);
-        }
-        return $this;
-    }
-    
-    public function setGridParams(array $params, $merge=false)
-    {
-        return $this->_setConfigParams('grid_params', $params, $merge);
-    }
-    
-    public function getGridParam($key, $default=null)
-    {
-        $params = $this->getGridParams();
-        return (is_array($params) && isset($params[$key]) ? $params[$key] : $default);
-    }
-    
-    public function setModelParams(array $params, $merge=false)
-    {
-        return $this->_setConfigParams('model_params', $params, $merge);
-    }
-    
-    public function getModelParam($key, $default=null)
-    {
-        $params = $this->getModelParams();
-        return (is_array($params) && isset($params[$key]) ? $params[$key] : $default);
-    }
-    
-    public function getCustomParamsConfigMinOrder()
-    {
-        $order  = null;
-        
-        foreach ($this->getCustomParamsConfig(false) as $param) {
-            $order = (is_null($order) ? $param['sort_order'] : min($order, $param['sort_order']));
-        }
-        
-        return $order;
-    }
-    
-    public function getCustomParamsConfigMaxOrder()
-    {
-        $order  = null;
-        
-        foreach ($this->getCustomParamsConfig(false) as $param) {
-            $order = (is_null($order) ? $param['sort_order'] : max($order, $param['sort_order']));
-        }
-        
-        return $order;
-    }
-    
-    public function addCustomParam($key, $data, $sortOrder='last', $override=true)
-    {
-        $customParams = $this->getCustomParamsConfig();
-        
-        if ($override || !isset($customParams[$key])) {
-            if ($sortOrder === 'last') {
-                $data['sort_order'] = $this->getCustomParamConfigMaxOrder() + 1;
-            } elseif ($sortOrder === 'first') {
-                $data['sort_order'] = $this->getCustomParamConfigMinOrder() - 1;
-            } else {
-                $data['sort_order'] = $sortOrder;
-            }
-            $data['key'] = $key;
-            $data['visible'] = (isset($data['visible']) ? $data['visible'] : true);
-            $customParams[$key] = new Varien_Object($data);
-            $this->setCustomParamsConfig($customParams);
-        }
-        
-        return $this;
-    }
-    
-    protected function _sortCustomParamsConfig($a, $b)
-    {
-        $aOrder = (int)$a->getData('sort_order');
-        $bOrder = (int)$b->getData('sort_order');
-        return ($aOrder < $bOrder ? -1 : ($aOrder > $bOrder ? 1 : strcmp($a->getData('label'), $b->getData('label'))));
-    }
-    
-    public function getCustomParamsConfig($sorted=true)
-    {
-        $params = $this->_getData('custom_params_config');
-        
-        if ($sorted) {
-            uasort($params, array($this, '_sortCustomParamsConfig'));
-        }
-        
-        return $params;
-    }
-    
-    public function setCustomParamsWindowConfig(array $config, $merge=false)
-    {
-        return $this->_setConfigParams('custom_params_window_config', $config, $merge);
-    }
-    
+    /**
+     * Extract boolean value from array
+     * 
+     * @param array $params Params array
+     * @param string $key Value key
+     * @param mixed $default Default value to return if value is not set
+     * @return mixed
+     */
     protected function _extractBoolParam(array $params, $key, $default=false)
     {
-        return (isset($params[$key]) ? (bool)$params[$key] : $default);
+        return (isset($params[$key]) ? (bool) $params[$key] : $default);
     }
     
+    /**
+     * Extract integer value from array
+     * 
+     * @param array $params Params array
+     * @param string $key Value key
+     * @param mixed $default Default value to return if value is not set
+     * @param bool $notEmpty Whether the default value should be returned if the value is set but is an empty string
+     * @return mixed
+     */
     protected function _extractIntParam(array $params, $key, $default=null, $notEmpty=false)
     {
-        return (isset($params[$key]) ? ((!$notEmpty || (strval($params[$key]) !== '')) ? intval($params[$key]) : $default) : $default);
+        return isset($params[$key])
+            ? ((!$notEmpty || (strval($params[$key]) !== '')) ? (int) $params[$key] : $default)
+            : $default;
     }
     
+    /**
+     * Extract string value from array
+     * 
+     * @param array $params Params array
+     * @param string $key Value key
+     * @param mixed $default Default value to return if value is not set
+     * @param bool $notEmpty Whether the default value should be returned if the value is set but is an empty string
+     * @return mixed
+     */
     protected function _extractStringParam(array $params, $key, $default=null, $notEmpty=false)
     {
-        return (isset($params[$key]) ? ((!$notEmpty || (strval($params[$key]) !== '')) ? strval($params[$key]) : $default) : $default);
+        return isset($params[$key])
+            ? ((!$notEmpty || (strval($params[$key]) !== '')) ? strval($params[$key]) : $default)
+            : $default;
     }
     
-    protected function _getDefaultGridValues($block, $model, $id, $alias, $params, $store, $renderer=null)
-    {
-        return array('index' => $alias);
-    }
-    
-    protected function _getGridValues($block, $model, $id, $alias, $params, $store, $renderer=null)
-    {
-        return array();
-    }
-    
-    protected function _getForcedGridValues($block, $model, $id, $alias, $params, $store, $renderer=null)
-    {
-        return array();
-    }
-    
-    public function getGridValues($block, $model, $id, $alias, $params, $store, $renderer=null)
-    {
-        return array_merge(
-            $this->_getDefaultGridValues($block, $model, $id, $alias, $params, $store, $renderer),
-            $this->_getGridValues($block, $model, $id, $alias, $params, $store, $renderer),
-            (is_array($values = $this->getGridParams()) ? $values : array()),
-            (is_object($renderer) ? $renderer->getColumnGridValues($alias, $store, $model) : array()),
-            $this->_getForcedGridValues($block, $model, $id, $alias, $params, $store, $renderer)
-        );
-    }
-    
-    protected function _generateUniqueAlias($suffix, $existing)
+    /**
+     * Generate a string that is unique across all custom columns, basing on the values that already exist
+     * 
+     * @param string $suffix String suffix
+     * @param array $existing Already existing strings
+     * @return string
+     */
+    protected function _generateUniqueString($suffix, array $existing)
     {
         $class = get_class($this);
-        $alias = '_'.strtolower(preg_replace('#[^A-Z]#', '', $class).$suffix);
+        $alias = '_' . strtolower(preg_replace('#[^A-Z]#', '', $class) . $suffix);
         $base  = $alias;
         $index = 1;
         
         while (in_array($alias, $existing)) {
-            $alias = $base.'_'.$index++;
+            $alias = $base . '_' . $index++;
         }
         
         return $alias;
     }
     
+    /**
+     * Generate an unique string, suitable for collection flags (for consistency and safe uniqueness)
+     * 
+     * @param string $suffix String suffix
+     * @return string
+     */
     protected function _getUniqueCollectionFlag($suffix='')
     {
-        $alias = $this->_generateUniqueAlias($suffix.'_applied', self::$_uniqueFlags);
-        self::$_uniqueFlags[] = $alias;
-        return $alias;
+        $flag = $this->_generateUniqueString($suffix . '_applied', self::$_uniqueFlags);
+        self::$_uniqueFlags[] = $flag;
+        return $flag;
     }
     
+    /**
+     * Generate an unique string, suitable for table aliases (for consistency and safe uniqueness)
+     * 
+     * @param string $suffix String suffix
+     * @return string
+     */
     protected function _getUniqueTableAlias($suffix='')
     {
-        $alias = $this->_generateUniqueAlias($suffix, self::$_uniqueAliases);
+        $alias = $this->_generateUniqueString($suffix, self::$_uniqueAliases);
         self::$_uniqueAliases[] = $alias;
         return $alias;
     }
     
-    protected function _verifyBlock($block, $model, $id, $alias, $params, $store, $renderer=null)
+    /**
+     * Verify the sanity of the given grid block. By default, it checks that :
+     * - the block is actually rewrited by our extension
+     * - the block inherits from the base Magento class corresponding to its type
+     * (knowing that the second point is only checked if the grid helper handles it)
+     * Used to determine whether we can safely apply the custom column to the given grid block
+     * 
+     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
+     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @param string $columnBlockId Grid column block ID
+     * @param string $columnIndex Grid column index
+     * @param array $params Customization params values
+     * @return bool
+     */
+    protected function _verifyGridBlock(Mage_Adminhtml_Block_Widget_Grid $gridBlock,
+        BL_CustomGrid_Model_Grid $gridModel, $columnBlockId, $columnIndex, array $params)
     {
-        return $this->_getGridHelper()->verifyGridBlock($block, $model);
+        return $this->_getGridHelper()->verifyGridBlock($gridBlock, $gridModel);
     }
     
-    protected function _verifyCollection($block, $collection, $model, $id, $alias, $params, $store, $renderer=null)
+    /**
+     * Verify the sanity of the given grid collection
+     * By default, it checks that the collection inherits from the base Magento class corresponding to the block type
+     * (if the grid helper handles it)
+     * Used to determine whether we can safely apply the custom column to the given grid block
+     * 
+     * @param Varien_Data_Collection_Db $collection Grid collection
+     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
+     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @param string $columnBlockId Grid column block ID
+     * @param string $columnIndex Grid column index
+     * @param array $params Customization params values
+     * @return bool
+     */
+    protected function _verifyGridCollection(Varien_Data_Collection_Db $collection,
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock, BL_CustomGrid_Model_Grid $gridModel, $columnBlockId, $columnIndex,
+        array $params)
     {
-        return $this->_getGridHelper()->verifyGridCollection($block, $model);
+        return $this->_getGridHelper()->verifyGridCollection($gridBlock, $gridModel);
     }
     
-    protected function _handleApplyError($block, $model, $id, $alias, $params, $store, $renderer=null, $message='')
+    /**
+     * Handle errors that occur while applying the custom column to the grid block.
+     * By default, it adds the corresponding error message to the session
+     * 
+     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
+     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @param string $columnBlockId Grid column block ID
+     * @param string $columnIndex Grid column index
+     * @param array $params Customization parameters values
+     * @param string $message Error message
+     * @return this
+     */
+    protected function _handleApplyError(Mage_Adminhtml_Block_Widget_Grid $gridBlock,
+        BL_CustomGrid_Model_Grid $gridModel, $columnBlockId, $columnIndex, array $params, $message='')
     {
-        Mage::getSingleton('customgrid/session')
-            ->addError(Mage::helper('customgrid')->__('The "%s" custom column could not be applied : "%s"', $this->getName(), $message));
+        $name = $this->getName();
+        $message = $this->_getBaseHelper()->__('The "%s" custom column could not be applied : "%s"', $name, $message);
+        Mage::getSingleton('customgrid/session')->addError($message);
         return $this;
     }
     
-    public function prepareGridCollectionFiltersMap($model, $block, $collection, $filters)
+    /**
+     * Prepare the filters map for the given grid collection
+     * Used to prevent ambiguous filters and other problems of the same kind
+     * 
+     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
+     * @param Varien_Data_Collection_Db $collection Grid collection
+     * @param array $filters Current filters
+     * @return this
+     */
+    public function prepareGridCollectionFiltersMap(BL_CustomGrid_Model_Grid $gridModel,
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock, Varien_Data_Collection_Db $collection, array $filters)
     {
-        $this->_getCollectionHelper()->prepareGridCollectionFiltersMap($collection, $block, $model, $filters);
+        $this->_getCollectionHelper()->prepareGridCollectionFiltersMap($collection, $gridBlock, $gridModel, $filters);
         return $this;
     }
     
-    public function restoreGridCollectionFiltersMap($model, $block, $collection, $filters)
+    /**
+     * Restore the original filters map for the given grid collection, after it was previously prepared
+     * Used to prevent undesired side effects from the filters map preparation
+     * 
+     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
+     * @param Varien_Data_Collection_Db $collection Grid collection
+     * @param array $filters Current filters
+     * @return this
+     */
+    public function restoreGridCollectionFiltersMap(BL_CustomGrid_Model_Grid $gridModel,
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock, Varien_Data_Collection_Db $collection, array $filters)
     {
-        $this->_getCollectionHelper()->restoreGridCollectionFiltersMap($collection, $block, $model, $filters);
+        $this->_getCollectionHelper()->restoreGridCollectionFiltersMap($collection, $gridBlock, $gridModel, $filters);
         return $this;
     }
     
-    protected function _prepareGridCollection($collection, $block, $model, $id, $alias, $params, $store, $renderer=null)
+    /**
+     * Prepare the given grid collection to prevent any potential problem that could occur within it
+     * after the custom column will have been applied to it (such as ambiguous filters)
+     * 
+     * @param Varien_Data_Collection_Db $collection Grid collection
+     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
+     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @param string $columnBlockId Grid column block ID
+     * @param string $columnIndex Grid column index
+     * @param array $params Customization params values
+     * @param Mage_Core_Model_Store $store Column store
+     * @return this
+     */
+    protected function _prepareGridCollection(Varien_Data_Collection_Db $collection,
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock, BL_CustomGrid_Model_Grid $gridModel, $columnBlockId, $columnIndex,
+        array $params, Mage_Core_Model_Store $store)
     {
-        $block->blcg_addCollectionCallback(
-            self::GC_EVENT_BEFORE_SET_FILTERS,
-            array($this, 'prepareGridCollectionFiltersMap'),
-            array($model),
-            true
-        );
-        
-        if ($this->_getBaseHelper()->isMageVersionGreaterThan(1, 6)
-            && $this->_getGridHelper()->isEavEntityGrid($block, $model)) {
-            /**
-            * Fix for Mage_Eav_Model_Entity_Collection_Abstract::_renderOrders() on 1.7+,
-            * which does not handle well fields with table aliases
-            * (it forces the use of addAttributeToSort(), but then in our case possibly on mapped fields,
-            *  which are not / can not be recognized as attributes or static fields)
-            * Note that this does not affect filters applied on custom columns derived from BL_CustomGrid_Model_Custom_Column_Simple_Abstract,
-            * as it forces field orders on EAV entity grids
-            */
-            $block->blcg_addCollectionCallback(
-                self::GC_EVENT_AFTER_SET_FILTERS,
-                array($this, 'restoreGridCollectionFiltersMap'),
-                array($model),
+        if (!$gridBlock->getData('_blcg_added_collection_prepare_callbacks')) {
+            $gridBlock->blcg_addCollectionCallback(
+                self::GC_EVENT_BEFORE_SET_FILTERS,
+                array($this, 'prepareGridCollectionFiltersMap'),
+                array($gridModel),
                 true
             );
             
-            // @todo or it may not be needed at all to prepare the filters map for EAV entity collections ? (addAttributeToFilter() may do it by itself most of the time)
+            if ($this->_getBaseHelper()->isMageVersionGreaterThan(1, 6)
+                && $this->_getGridHelper()->isEavEntityGrid($gridBlock, $gridModel)) {
+                /**
+                 * Fix for Mage_Eav_Model_Entity_Collection_Abstract::_renderOrders() on 1.7+,
+                 * which fails to handle qualified field names, as it forces the use of addAttributeToSort() :
+                 * when this method is applied on mapped fields,
+                 * the fact that they are qualified makes them unrecognizable as attributes or static fields
+                 * Note that this does not affect filters applied on custom columns derived from
+                 * BL_CustomGrid_Model_Custom_Column_Simple_Abstract, as it forces field orders on EAV entity grids
+                 */
+                $gridBlock->blcg_addCollectionCallback(
+                    self::GC_EVENT_AFTER_SET_FILTERS,
+                    array($this, 'restoreGridCollectionFiltersMap'),
+                    array($gridModel),
+                    true
+                );
+            }
+            
+            $gridBlock->setData('_blcg_added_collection_prepare_callbacks', true);
         }
-        
         return $this;
     }
     
-    abstract protected function _applyToGridCollection($collection, $block, $model, $id, $alias, $params, $store, $renderer=null);
+    /**
+     * Apply the custom column to the given grid collection
+     * 
+     * @param Varien_Data_Collection_Db $collection Grid collection
+     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
+     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @param string $columnBlockId Grid column block ID
+     * @param string $columnIndex Grid column index
+     * @param array $params Customization params values
+     * @param Mage_Core_Model_Store $store Column store
+     * @return this
+     */
+    abstract protected function _applyToGridCollection(Varien_Data_Collection_Db $collection,
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock, BL_CustomGrid_Model_Grid $gridModel, $columnBlockId, $columnIndex,
+        array $params, Mage_Core_Model_Store $store);
     
-    protected function _applyToGridBlock($block, $model, $id, $alias, $params, $store, $renderer=null)
+    /**
+     * Apply the custom column to the given grid block
+     * 
+     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
+     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @param string $columnBlockId Grid column block ID
+     * @param string $columnIndex Grid column index
+     * @param array $params Customization params values
+     * @param Mage_Core_Model_Store $store Column store
+     * @return this
+     */
+    protected function _applyToGridBlock(Mage_Adminhtml_Block_Widget_Grid $gridBlock,
+        BL_CustomGrid_Model_Grid $gridModel, $columnBlockId, $columnIndex, array $params, Mage_Core_Model_Store $store)
     {
-        $this->_prepareGridCollection($block->getCollection(), $block, $model, $id, $alias, $params, $store, $renderer);
-        $this->_applyToGridCollection($block->getCollection(), $block, $model, $id, $alias, $params, $store, $renderer);
-        return $this;
+        return $this->_prepareGridCollection(
+                $gridBlock->getCollection(),
+                $gridBlock,
+                $gridModel,
+                $columnBlockId,
+                $columnIndex,
+                $params,
+                $store
+            )
+            ->_applyToGridCollection(
+                $gridBlock->getCollection(),
+                $gridBlock,
+                $gridModel,
+                $columnBlockId,
+                $columnIndex,
+                $params,
+                $store
+            );
     }
     
-    public function applyToGridBlock($block, $model, $id, $alias, $params, $store, $renderer=null)
+    /**
+     * Return default grid column block values
+     * (check BL_CustomGrid_Model_Custom_Column_Abstract::getBlockValues() for the priorities
+     *  of the different methods related to block values)
+     * 
+     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
+     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @param string $columnBlockId Grid column block ID
+     * @param string $columnIndex Grid column index
+     * @param array $params Customization params values
+     * @param Mage_Core_Model_Store $store Column store
+     * @return array
+     */
+    protected function _getDefaultBlockValues(Mage_Adminhtml_Block_Widget_Grid $gridBlock,
+        BL_CustomGrid_Model_Grid $gridModel, $columnBlockId, $columnIndex, array $params, Mage_Core_Model_Store $store)
+    {
+        return array('index' => $columnIndex);
+    }
+    
+    /**
+     * Return base grid column block values
+     * (check BL_CustomGrid_Model_Custom_Column_Abstract::getBlockValues() for the priorities
+     *  of the different methods related to block values)
+     * 
+     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
+     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @param string $columnBlockId Grid column block ID
+     * @param string $columnIndex Grid column index
+     * @param array $params Customization params values
+     * @param Mage_Core_Model_Store $store Column store
+     * @return array
+     */
+    protected function _getBlockValues(Mage_Adminhtml_Block_Widget_Grid $gridBlock,
+        BL_CustomGrid_Model_Grid $gridModel, $columnBlockId, $columnIndex, array $params, Mage_Core_Model_Store $store)
+    {
+        return array();
+    }
+    
+    /**
+     * Return forced grid column block values
+     * (you can check BL_CustomGrid_Model_Custom_Column_Abstract::getBlockValues() for the priorities
+     *  of the different methods related to block values)
+     * 
+     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
+     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @param string $columnBlockId Grid column block ID
+     * @param string $columnIndex Grid column index
+     * @param array $params Customization params values
+     * @param Mage_Core_Model_Store $store Column store
+     * @return array
+     */
+    protected function _getForcedBlockValues(Mage_Adminhtml_Block_Widget_Grid $gridBlock,
+        BL_CustomGrid_Model_Grid $gridModel, $columnBlockId, $columnIndex, array $params, Mage_Core_Model_Store $store)
+    {
+        return array();
+    }
+    
+    /**
+     * Return grid column block values
+     * 
+     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
+     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @param string $columnBlockId Grid column block ID
+     * @param string $columnIndex Grid column index
+     * @param array $params Customization params values
+     * @param Mage_Core_Model_Store $store Column store
+     * @param BL_CustomGrid_Object|null $renderer Column collection renderer (if any)
+     * @return array
+     */
+    public function getBlockValues(Mage_Adminhtml_Block_Widget_Grid $gridBlock,
+        BL_CustomGrid_Model_Grid $gridModel, $columnBlockId, $columnIndex, array $params, Mage_Core_Model_Store $store,
+        BL_CustomGrid_Object $renderer=null)
+    {
+        return array_merge(
+            $this->_getDefaultBlockValues($gridBlock, $gridModel, $columnBlockId, $columnIndex, $params, $store),
+            $this->_getBlockValues($gridBlock, $gridModel, $columnBlockId, $columnIndex, $params, $store),
+            (is_array($values = $this->getBlockParams()) ? $values : array()),
+            (is_object($renderer) ? $renderer->getColumnGridValues($columnIndex, $store, $gridModel) : array()),
+            $this->_getForcedBlockValues($gridBlock, $gridModel, $columnBlockId, $columnIndex, $params, $store)
+        );
+    }
+    
+    /**
+     * Apply the custom column to the given grid block, and return the corresponding grid column block values,
+     * or false if an error occured
+     * 
+     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
+     * @param BL_CustomGrid_Model_Grid $gridModel
+     * @param string $columnBlockId Grid column block ID
+     * @param string $columnIndex Grid column index
+     * @param array $params Customization parameters values
+     * @param Mage_Core_Model_Store $store Column store
+     * @param BL_CustomGrid_Object|null $renderer Column collection renderer (if any)
+     * @return array|false
+     */
+    public function applyToGridBlock(Mage_Adminhtml_Block_Widget_Grid $gridBlock,
+        BL_CustomGrid_Model_Grid $gridModel, $columnBlockId, $columnIndex, array $params, Mage_Core_Model_Store $store,
+        BL_CustomGrid_Object $renderer=null)
     {
         try {
-            if ($this->_verifyBlock($block, $model, $id, $alias, $params, $store, $renderer)) {
-                if ($this->_verifyCollection($block, $block->getCollection(), $model, $id, $alias, $params, $store, $renderer)) {
-                    $this->_applyToGridBlock($block, $model, $id, $alias, $params, $store, $renderer);
-                } else {
-                    Mage::throwException(Mage::helper('customgrid')->__('The block collection is not valid'));
-                }
-            } else {
-                Mage::throwException(Mage::helper('customgrid')->__('The block is not valid'));
+            if (!$this->_verifyGridBlock($gridBlock, $gridModel, $columnBlockId, $columnIndex, $params)) {
+                Mage::throwException($this->_getBaseHelper()->__('The grid block is not valid'));
             }
-            return $this->getGridValues($block, $model, $id, $alias, $params, $store, $renderer);
+            
+            $result = $this->_verifyGridCollection(
+                $gridBlock->getCollection(),
+                $gridBlock,
+                $gridModel,
+                $columnBlockId,
+                $columnIndex,
+                $params
+            );
+            
+            if (!$result) {
+                Mage::throwException($this->_getBaseHelper()->__('The grid collection is not valid'));
+            }
+            
+            return $this->_applyToGridBlock(
+                    $gridBlock,
+                    $gridModel,
+                    $columnBlockId,
+                    $columnIndex,
+                    $params,
+                    $store
+                )
+                ->getBlockValues(
+                    $gridBlock,
+                    $gridModel,
+                    $columnBlockId,
+                    $columnIndex,
+                    $params,
+                    $store,
+                    $renderer
+                );
+            
         } catch (Exception $e) {
-            $this->_handleApplyError($block, $model, $id, $alias, $params, $store, $renderer, $e->getMessage());
-            return false;
+            $this->_handleApplyError($gridBlock, $gridModel, $columnBlockId, $columnIndex, $params, $e->getMessage());
         }
+        return false;
     }
 }

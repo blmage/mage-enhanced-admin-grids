@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -23,14 +23,22 @@ abstract class BL_CustomGrid_Block_Column_Renderer_Config_Form_Abstract
         return $this->getRenderer()->getCode();
     }
     
-    public function addConfigFields($fieldset)
+    protected function _getFormAction()
+    {
+        return $this->getUrl('*/*/buildConfig');
+    }
+    
+    protected function _prepareFields(Varien_Data_Form_Element_Fieldset $fieldset)
     {
         $renderer = $this->getRenderer();
-        $module   = $renderer->getModule();
-        $this->_translationHelper = Mage::helper($module ? $module : 'customgrid');
+        
+        if ((!$module = $renderer->getModule())
+            || (!$this->_translationHelper = $this->helper($module))) {
+            $this->_translationHelper = $this->helper('customgrid');
+        }
         
         foreach ($renderer->getParameters() as $parameter) {
-            $this->_addConfigField($fieldset, $parameter);
+            $this->_addField($fieldset, $parameter);
         }
         
         return $this;

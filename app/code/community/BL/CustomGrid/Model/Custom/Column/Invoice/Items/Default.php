@@ -16,7 +16,7 @@
 class BL_CustomGrid_Model_Custom_Column_Invoice_Items_Default
     extends BL_CustomGrid_Model_Custom_Column_Invoice_Items_Abstract
 {
-    protected function _getGridColumnRenderer()
+    protected function _getColumnBlockRenderer()
     {
         return 'customgrid/widget_grid_column_renderer_invoice_items_default';
     }

@@ -9,23 +9,25 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 abstract class BL_CustomGrid_Model_Custom_Column_Order_Address_Abstract
     extends BL_CustomGrid_Model_Custom_Column_Simple_Table
 {
-    public function initConfig()
+    protected function _prepareConfig()
     {
-        parent::initConfig();
-        $this->addExcludedVersions('1.4.0.*');
+        $this->setExcludedVersions('1.4.0.*');
         return $this;
     }
     
-    public function getAppliedFlagKey($alias, $params, $block, $collection, $table)
+    abstract public function getAddressType();
+    
+    public function getAppliedFlagKey($columnIndex, array $params, Mage_Adminhtml_Block_Widget_Grid $gridBlock,
+        Varien_Data_Collection_Db $collection, $tableName)
     {
-        return $table.'/'.$this->getAddressType();
+        return $tableName . '/' . $this->getAddressType();
     }
     
     public function getTableName()
@@ -33,26 +35,25 @@ abstract class BL_CustomGrid_Model_Custom_Column_Order_Address_Abstract
         return 'sales/order_address';
     }
     
-    public function getJoinConditionMainField()
+    public function getJoinConditionMainFieldName()
     {
-        return (($field = parent::getJoinConditionMainField()) ? $field : 'entity_id');
+        return (($field = parent::getJoinConditionMainFieldName()) ? $field : 'entity_id');
     }
     
-    public function getJoinConditionTableField()
+    public function getJoinConditionTableFieldName()
     {
-        return (($field = parent::getJoinConditionTableField()) ? $field : 'parent_id');
+        return (($field = parent::getJoinConditionTableFieldName()) ? $field : 'parent_id');
     }
     
     public function getTableFieldName()
     {
-        return $this->getModelParam('address_field');
+        return $this->getConfigParam('address_field');
     }
     
-    abstract public function getAddressType();
-    
-    public function getAdditionalJoinConditions($alias, $params, $block, $collection, $mainAlias, $tableAlias)
+    protected function _getAdditionalJoinConditions($columnIndex, array $params,
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock, Varien_Data_Collection_Db $collection, $mainAlias, $tableAlias)
     {
         list($adapter, $qi) = $this->_getCollectionAdapter($collection, true);
-        return array($adapter->quoteInto($qi($tableAlias.'.address_type').' = ?', $this->getAddressType()));
+        return array($adapter->quoteInto($qi($tableAlias . '.address_type') . ' = ?', $this->getAddressType()));
     }
 }

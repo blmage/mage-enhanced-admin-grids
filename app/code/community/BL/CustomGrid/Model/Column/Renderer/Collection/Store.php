@@ -9,23 +9,24 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class BL_CustomGrid_Model_Column_Renderer_Collection_Store
     extends BL_CustomGrid_Model_Column_Renderer_Collection_Abstract
 {
-    public function getColumnGridValues($index, $store, $grid)
+    public function getColumnBlockValues($columnIndex, Mage_Core_Model_Store $store,
+        BL_CustomGrid_Model_Grid $gridModel)
     {
         return array(
-            'filter'          => 'customgrid/widget_grid_column_filter_store',
             'renderer'        => 'customgrid/widget_grid_column_renderer_store',
-            'skip_website'    => (bool) $this->_getData('skip_website'),
-            'skip_store'      => (bool) $this->_getData('skip_store'),
-            'skip_store_view' => (bool) $this->_getData('skip_store_view'),
-            'skip_all_views'  => (bool) $this->_getData('skip_all_views'),
-            'flat_value_key'  => $this->_getData('flat_value_key'),
+            'filter'          => 'customgrid/widget_grid_column_filter_store',
+            'skip_website'    => (bool) $this->getData('values/skip_website'),
+            'skip_store'      => (bool) $this->getData('values/skip_store'),
+            'skip_store_view' => (bool) $this->getData('values/skip_store_view'),
+            'skip_all_views'  => (bool) $this->getData('values/skip_all_views'),
+            'flat_value_key'  => $this->getData('values/flat_value_key'),
         );
     }
 }

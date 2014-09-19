@@ -10,40 +10,40 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 -->
 <customgrid>
     <grid_types>
-        <permissions_role_users type="customgrid/grid_type_permissions_role_user" module="customgrid">
+        <permissions_role_users model="customgrid/grid_type_permissions_role_user" module="customgrid">
             <name>Role Users</name>
-            <sort_order>5000</sort_order>
+            <sort_order>10000</sort_order>
         </permissions_role_users>
         
-        <cms_block type="customgrid/grid_type_cms_block" module="customgrid">
+        <cms_block model="customgrid/grid_type_cms_block" module="customgrid">
             <name>CMS Blocks</name>
-            <sort_order>5900</sort_order>
+            <sort_order>20000</sort_order>
         </cms_block>
         
-        <cms_page type="customgrid/grid_type_cms_page" module="customgrid">
+        <cms_page model="customgrid/grid_type_cms_page" module="customgrid">
             <name>CMS Pages</name>
-            <sort_order>6000</sort_order>
+            <sort_order>30000</sort_order>
         </cms_page>
         
-        <cms_widget type="customgrid/grid_type_cms_widget" module="customgrid">
+        <cms_widget model="customgrid/grid_type_cms_widget" module="customgrid">
             <name>CMS Widgets</name>
-            <sort_order>6100</sort_order>
+            <sort_order>40000</sort_order>
         </cms_widget>
         
-        <poll type="customgrid/grid_type_poll" module="customgrid">
+        <poll model="customgrid/grid_type_poll" module="customgrid">
             <name>Polls</name>
-            <sort_order>6200</sort_order>
+            <sort_order>50000</sort_order>
         </poll>
         
-        <product type="customgrid/grid_type_product" module="customgrid">
+        <product model="customgrid/grid_type_product" module="customgrid">
             <name>Products</name>
-            <sort_order>7000</sort_order>
+            <sort_order>60000</sort_order>
             <custom_columns>
                 <categories model="customgrid/custom_column_product_categories" module="customgrid">
                     <name>Categories</name>
@@ -58,9 +58,9 @@
                     <description>Displays the number of carts containing each product</description>
                     <group>Stats</group>
                     <allow_customization>1</allow_customization>
-                    <model_params>
-                        <mode>quotes</mode>
-                    </model_params>
+                    <config_params>
+                        <count_mode>quotes</count_mode>
+                    </config_params>
                 </carts_count>
                 
                 <number_in_carts model="customgrid/custom_column_product_stats_quote" module="customgrid">
@@ -68,9 +68,9 @@
                     <description>Displays the quantity of each product contained in carts</description>
                     <group>Stats</group>
                     <allow_customization>1</allow_customization>
-                    <model_params>
-                        <mode>products</mode>
-                    </model_params>
+                    <config_params>
+                        <count_mode>products</count_mode>
+                    </config_params>
                 </number_in_carts>
                 
                 <wishlists_count model="customgrid/custom_column_product_stats_wishlist" module="customgrid">
@@ -78,9 +78,9 @@
                     <description>Displays the number of wishlists containing each product</description>
                     <group>Stats</group>
                     <allow_customization>1</allow_customization>
-                    <model_params>
-                        <mode>wishlists</mode>
-                    </model_params>
+                    <config_params>
+                        <count_mode>wishlists</count_mode>
+                    </config_params>
                 </wishlists_count>
                 
                 <number_in_wishlists model="customgrid/custom_column_product_stats_wishlist" module="customgrid">
@@ -93,104 +93,104 @@
                     </availability>
                     <group>Stats</group>
                     <allow_customization>1</allow_customization>
-                    <model_params>
-                        <mode>products</mode>
-                    </model_params>
+                    <config_params>
+                        <count_mode>products</count_mode>
+                    </config_params>
                 </number_in_wishlists>
                 
                 <stock_manage_stock model="customgrid/custom_column_product_inventory" module="customgrid">
                     <name>Manage Stock</name>
                     <group>Inventory</group>
                     <allow_customization>1</allow_customization>
-                    <model_params>
+                    <config_params>
                         <table_field_name>manage_stock</table_field_name>
                         <is_use_config_field>1</is_use_config_field>
                         <field_type>boolean</field_type>
-                    </model_params>
+                    </config_params>
                 </stock_manage_stock>
                 
                 <stock_qty model="customgrid/custom_column_product_inventory" module="customgrid">
                     <name>Quantity</name>
                     <group>Inventory</group>
-                    <model_params>
+                    <config_params>
                         <table_field_name>qty</table_field_name>
                         <field_type>decimal</field_type>
-                    </model_params>
+                    </config_params>
                 </stock_qty>
                 
                 <stock_min_qty model="customgrid/custom_column_product_inventory" module="customgrid">
                     <name>Qty to become Out of Stock</name>
                     <group>Inventory</group>
                     <allow_customization>1</allow_customization>
-                    <model_params>
+                    <config_params>
                         <table_field_name>min_qty</table_field_name>
                         <is_use_config_field>1</is_use_config_field>
-                    </model_params>
+                    </config_params>
                 </stock_min_qty>
                 
                 <stock_min_sale_qty model="customgrid/custom_column_product_inventory" module="customgrid">
                     <name>Minimum Qty in Cart</name>
                     <group>Inventory</group>
                     <allow_customization>1</allow_customization>
-                    <model_params>
+                    <config_params>
                         <table_field_name>min_sale_qty</table_field_name>
                         <is_use_config_field>1</is_use_config_field>
                         <field_type>decimal</field_type>
-                    </model_params>
+                    </config_params>
                 </stock_min_sale_qty>
                 
                 <stock_max_sale_qty model="customgrid/custom_column_product_inventory" module="customgrid">
                     <name>Maximum Qty in Cart</name>
                     <group>Inventory</group>
                     <allow_customization>1</allow_customization>
-                    <model_params>
+                    <config_params>
                         <table_field_name>max_sale_qty</table_field_name>
                         <is_use_config_field>1</is_use_config_field>
                         <field_type>decimal</field_type>
-                    </model_params>
+                    </config_params>
                 </stock_max_sale_qty>
                 
                 <stock_is_qty_decimal model="customgrid/custom_column_product_inventory" module="customgrid">
                     <name>Qty Uses Decimals</name>
                     <group>Inventory</group>
-                    <model_params>
+                    <config_params>
                         <table_field_name>is_qty_decimal</table_field_name>
                         <field_type>boolean</field_type>
-                    </model_params>
+                    </config_params>
                 </stock_is_qty_decimal>
                 
                 <stock_backorders model="customgrid/custom_column_product_inventory" module="customgrid">
                     <name>Backorders</name>
                     <group>Inventory</group>
                     <allow_customization>1</allow_customization>
-                    <model_params>
+                    <config_params>
                         <table_field_name>backorders</table_field_name>
                         <is_use_config_field>1</is_use_config_field>
                         <field_type>options</field_type>
                         <source_model>cataloginventory/source_backorders</source_model>
-                    </model_params>
+                    </config_params>
                 </stock_backorders>
                 
                 <stock_notify_stock_qty model="customgrid/custom_column_product_inventory" module="customgrid">
                     <name>Notify for Quantity Below</name>
                     <group>Inventory</group>
                     <allow_customization>1</allow_customization>
-                    <model_params>
+                    <config_params>
                         <table_field_name>notify_stock_qty</table_field_name>
                         <is_use_config_field>1</is_use_config_field>
                         <field_type>decimal</field_type>
-                    </model_params>
+                    </config_params>
                 </stock_notify_stock_qty>
                 
                 <stock_qty_increments model="customgrid/custom_column_product_inventory" module="customgrid">
                     <name>Qty Increments</name>
                     <group>Inventory</group>
                     <allow_customization>1</allow_customization>
-                    <model_params>
+                    <config_params>
                         <table_field_name>qty_increments</table_field_name>
                         <is_use_config_field>1</is_use_config_field>
                         <field_type>decimal</field_type>
-                    </model_params>
+                    </config_params>
                 </stock_qty_increments>
                 
                 <stock_enable_qty_increments model="customgrid/custom_column_product_inventory" module="customgrid">
@@ -205,11 +205,11 @@
                             <v19>1.9.*</v19>
                         </excluded_versions>
                     </availability>
-                    <model_params>
+                    <config_params>
                         <table_field_name>enable_qty_increments</table_field_name>
                         <is_use_config_field>1</is_use_config_field>
                         <field_type>boolean</field_type>
-                    </model_params>
+                    </config_params>
                 </stock_enable_qty_increments>
                 
                 <stock_enable_qty_inc model="customgrid/custom_column_product_inventory" module="customgrid">
@@ -222,106 +222,101 @@
                             <v15>1.5.*</v15>
                         </excluded_versions>
                     </availability>
-                    <model_params>
+                    <config_params>
                         <table_field_name>enable_qty_increments</table_field_name>
                         <is_use_config_field>1</is_use_config_field>
                         <use_config_field_name>use_config_enable_qty_inc</use_config_field_name>
                         <field_type>boolean</field_type>
-                    </model_params>
+                    </config_params>
                 </stock_enable_qty_inc>
                 
                 <stock_is_in_stock model="customgrid/custom_column_product_inventory" module="customgrid">
                     <name>Stock Availability</name>
                     <group>Inventory</group>
-                    <model_params>
+                    <config_params>
                         <table_field_name>is_in_stock</table_field_name>
                         <field_type>boolean</field_type>
-                    </model_params>
+                    </config_params>
                 </stock_is_in_stock>
             </custom_columns>
         </product>
         
-        <customer type="customgrid/grid_type_customer" module="customgrid">
+        <customer model="customgrid/grid_type_customer" module="customgrid">
             <name>Customers</name>
-            <sort_order>8000</sort_order>
+            <sort_order>70000</sort_order>
         </customer>
         
-        <customer_group type="customgrid/grid_type_customer_group" module="customgrid">
+        <customer_group model="customgrid/grid_type_customer_group" module="customgrid">
             <name>Customer Groups</name>
-            <sort_order>8500</sort_order>
+            <sort_order>80000</sort_order>
         </customer_group>
         
-        <order_view_tab type="customgrid/grid_type_order_tab" module="customgrid">
+        <order_view_tab model="customgrid/grid_type_order_tab" module="customgrid">
             <name>Order View Tab</name>
-            <sort_order>9000</sort_order>
+            <sort_order>90000</sort_order>
         </order_view_tab>
         
-        <product_edit_tab type="customgrid/grid_type_product_tab" module="customgrid">
+        <product_edit_tab model="customgrid/grid_type_product_tab" module="customgrid">
             <name>Product Edit Tab</name>
-            <sort_order>10000</sort_order>
+            <sort_order>100000</sort_order>
         </product_edit_tab>
         
-        <product_widget_chooser type="customgrid/grid_type_product_widget_chooser" module="customgrid">
+        <product_widget_chooser model="customgrid/grid_type_product_widget_chooser" module="customgrid">
             <name>Products Widget Chooser</name>
-            <sort_order>10100</sort_order>
+            <sort_order>110000</sort_order>
         </product_widget_chooser>
         
-        <customer_edit_tab type="customgrid/grid_type_customer_tab" module="customgrid">
+        <customer_edit_tab model="customgrid/grid_type_customer_tab" module="customgrid">
             <name>Customer Edit Tab</name>
-            <sort_order>11000</sort_order>
+            <sort_order>120000</sort_order>
         </customer_edit_tab>
         
-        <checkout_agreement type="customgrid/grid_type_checkout_agreement" module="customgrid">
+        <checkout_agreement model="customgrid/grid_type_checkout_agreement" module="customgrid">
             <name>Terms and Conditions</name>
-            <sort_order>12000</sort_order>
+            <sort_order>130000</sort_order>
         </checkout_agreement>
         
-        <tax_rule type="customgrid/grid_type_tax_rule" module="customgrid">
+        <tax_rule model="customgrid/grid_type_tax_rule" module="customgrid">
             <name>Tax Rules</name>
-            <sort_order>13000</sort_order>
+            <sort_order>140000</sort_order>
         </tax_rule>
         
-        <tax_rate type="customgrid/grid_type_tax_rate" module="customgrid">
+        <tax_rate model="customgrid/grid_type_tax_rate" module="customgrid">
             <name>Tax Rates</name>
-            <sort_order>13100</sort_order>
+            <sort_order>150000</sort_order>
         </tax_rate>
         
-        <tax_class type="customgrid/grid_type_tax_class" module="customgrid">
+        <tax_class model="customgrid/grid_type_tax_class" module="customgrid">
             <name>Tax Classes</name>
-            <sort_order>13200</sort_order>
+            <sort_order>160000</sort_order>
         </tax_class>
         
-        <url_rewrite type="customgrid/grid_type_url_rewrite" module="customgrid">
-            <name>URL Rewrites</name>
-            <sort_order>14000</sort_order>
-        </url_rewrite>
-        
-        <catalog_search type="customgrid/grid_type_catalog_search" module="customgrid">
+        <catalog_search model="customgrid/grid_type_catalog_search" module="customgrid">
             <name>Search Terms</name>
-            <sort_order>15000</sort_order>
+            <sort_order>170000</sort_order>
         </catalog_search>
         
-        <product_review type="customgrid/grid_type_product_review" module="customgrid">
+        <product_review model="customgrid/grid_type_product_review" module="customgrid">
             <name>Reviews</name>
-            <sort_order>16000</sort_order>
+            <sort_order>180000</sort_order>
         </product_review>
         
-        <sitemap type="customgrid/grid_type_sitemap" module="customgrid">
+        <sitemap model="customgrid/grid_type_sitemap" module="customgrid">
             <name>Google Sitemap</name>
-            <sort_order>17000</sort_order>
+            <sort_order>190000</sort_order>
         </sitemap>
         
-        <sales_order type="customgrid/grid_type_order" module="customgrid">
+        <sales_order model="customgrid/grid_type_order" module="customgrid">
             <name>Orders</name>
-            <sort_order>30000</sort_order>
+            <sort_order>200000</sort_order>
             <custom_columns>
                 <store_id model="customgrid/custom_column_simple_duplicate" module="customgrid">
                     <name>Store View</name>
                     <group>Duplicated</group>
                     <allow_renderers>1</allow_renderers>
-                    <model_params>
-                        <duplicated_field>store_id</duplicated_field>
-                    </model_params>
+                    <config_params>
+                        <duplicated_field_name>store_id</duplicated_field_name>
+                    </config_params>
                 </store_id>
                 
                 <status_color model="customgrid/custom_column_order_status_color" module="customgrid">
@@ -336,24 +331,15 @@
                     <allow_customization>1</allow_customization>
                 </status_color>
                 
-                <customer_email model="customgrid/custom_column_order_base" module="customgrid">
-                    <name>Email</name>
-                    <group>Customer</group>
-                    <allow_renderers>1</allow_renderers>
-                    <model_params>
-                        <order_field>customer_email</order_field>
-                    </model_params>
-                </customer_email>
-                
                 <customer_group model="customgrid/custom_column_order_customer_group" module="customgrid">
                     <name>Group</name>
                     <group>Customer</group>
                     <allow_renderers>1</allow_renderers>
                     <allow_customization>1</allow_customization>
-                    <model_params>
+                    <config_params>
                         <order_field>customer_group_id</order_field>
-                    </model_params>
-                    <custom_params>
+                    </config_params>
+                    <customization_params>
                         <config>
                             <use_default_behaviour>
                                 <label>Use Default Behaviour</label>
@@ -365,36 +351,36 @@
                                 <value>0</value>
                             </use_default_behaviour>
                         </config>
-                    </custom_params>
+                    </customization_params>
                 </customer_group>
                 
                 <customer_dob model="customgrid/custom_column_order_base" module="customgrid">
                     <name>Date of Birth</name>
                     <group>Customer</group>
                     <allow_renderers>1</allow_renderers>
-                    <model_params>
+                    <config_params>
                         <order_field>customer_dob</order_field>
-                    </model_params>
+                    </config_params>
                 </customer_dob>
             </custom_columns>
         </sales_order>
         
-        <sales_invoice type="customgrid/grid_type_invoice" module="customgrid">
+        <sales_invoice model="customgrid/grid_type_invoice" module="customgrid">
             <name>Invoices</name>
-            <sort_order>40000</sort_order>
+            <sort_order>210000</sort_order>
         </sales_invoice>
         
-        <sales_shipment type="customgrid/grid_type_shipment" module="customgrid">
+        <sales_shipment model="customgrid/grid_type_shipment" module="customgrid">
             <name>Shipments</name>
-            <sort_order>50000</sort_order>
+            <sort_order>220000</sort_order>
         </sales_shipment>
         
-        <sales_creditmemo type="customgrid/grid_type_creditmemo" module="customgrid">
+        <sales_creditmemo model="customgrid/grid_type_creditmemo" module="customgrid">
             <name>Credit Memos</name>
-            <sort_order>50000</sort_order>
+            <sort_order>230000</sort_order>
         </sales_creditmemo>
         
-        <other type="customgrid/grid_type_other" module="customgrid">
+        <other model="customgrid/grid_type_other" module="customgrid">
             <name>Other</name>
             <sort_order>1000000000</sort_order>
         </other>
@@ -402,7 +388,7 @@
     
     <column_renderers>
         <collection>
-            <date type="customgrid/column_renderer_collection_date" module="customgrid">
+            <date model="customgrid/column_renderer_collection_date" module="customgrid">
                 <name>Date</name>
                 <description>Displays a formatted date</description>
                 <sort_order>10000</sort_order>
@@ -414,14 +400,14 @@
                         <label>Display Format</label>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>customgrid/system_config_source_date_format</source_model>
+                        <source_model>customgrid/column_renderer_source_date_format</source_model>
                         <sort_order>10</sort_order>
                         <value>medium</value>
                     </format>
                 </parameters>
             </date>
             
-            <datetime type="customgrid/column_renderer_collection_datetime" module="customgrid">
+            <datetime model="customgrid/column_renderer_collection_datetime" module="customgrid">
                 <name>Date + Time</name>
                 <description>Displays formatted date + time</description>
                 <sort_order>20000</sort_order>
@@ -433,7 +419,7 @@
                         <label>Display Format</label>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>customgrid/system_config_source_date_format</source_model>
+                        <source_model>customgrid/column_renderer_source_date_format</source_model>
                         <sort_order>10</sort_order>
                         <value>medium</value>
                     </format>
@@ -441,14 +427,14 @@
                         <label>Allow Filtering On Time</label>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <source_model>customgrid/system_config_source_yesno</source_model>
                         <sort_order>20</sort_order>
                         <value>0</value>
                     </filter_time>
                 </parameters>
             </datetime>
             
-            <number type="customgrid/column_renderer_collection_number" module="customgrid">
+            <number model="customgrid/column_renderer_collection_number" module="customgrid">
                 <name>Number</name>
                 <description>Displays a number</description>
                 <sort_order>30000</sort_order>
@@ -460,13 +446,13 @@
                         <label>Show Number Sign</label>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <source_model>customgrid/system_config_source_yesno</source_model>
                         <sort_order>10</sort_order>
                     </show_number_sign>
                 </parameters>
             </number>
             
-            <price type="customgrid/column_renderer_collection_price" module="customgrid">
+            <price model="customgrid/column_renderer_collection_price" module="customgrid">
                 <name>Price</name>
                 <description>Displays a price</description>
                 <sort_order>40000</sort_order>
@@ -478,7 +464,7 @@
                         <label>Original Currency</label>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>customgrid/column_renderer_collection_source_currency</source_model>
+                        <source_model>customgrid/column_renderer_source_collection_currency</source_model>
                         <sort_order>10</sort_order>
                     </original_currency>
                     <original_currency_column_type>
@@ -554,7 +540,7 @@
                         <label>Display Currency</label>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>customgrid/column_renderer_collection_source_currency</source_model>
+                        <source_model>customgrid/column_renderer_source_collection_currency</source_model>
                         <sort_order>50</sort_order>
                     </display_currency>
                     <display_currency_column_type>
@@ -630,20 +616,20 @@
                         <label>Apply Rates For Display</label>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <source_model>customgrid/system_config_source_yesno</source_model>
                         <sort_order>90</sort_order>
                         <value>0</value>
                     </apply_rates>
                 </parameters>
             </price>
             
-            <ip type="customgrid/column_renderer_collection_ip" module="customgrid">
+            <ip model="customgrid/column_renderer_collection_ip" module="customgrid">
                 <name>IP Address</name>
                 <description>Displays an IP address</description>
                 <sort_order>50000</sort_order>
             </ip>
             
-            <store type="customgrid/column_renderer_collection_store" module="customgrid">
+            <store model="customgrid/column_renderer_collection_store" module="customgrid">
                 <name>Store View</name>
                 <description>Displays a store view from its ID</description>
                 <sort_order>60000</sort_order>
@@ -655,28 +641,28 @@
                         <label>Skip Website Label</label>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <source_model>customgrid/system_config_source_yesno</source_model>
                         <sort_order>10</sort_order>
                     </skip_website>
                     <skip_store>
                         <label>Skip Store Label</label>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <source_model>customgrid/system_config_source_yesno</source_model>
                         <sort_order>20</sort_order>
                     </skip_store>
                     <skip_store_view>
                         <label>Skip Store View Label</label>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <source_model>customgrid/system_config_source_yesno</source_model>
                         <sort_order>30</sort_order>
                     </skip_store_view>
                     <skip_all_views>
                         <label>Skip "All Store Views" Label</label>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <source_model>customgrid/system_config_source_yesno</source_model>
                         <sort_order>40</sort_order>
                     </skip_all_views>
                     <flat_key>
@@ -689,7 +675,7 @@
                 </parameters>
             </store>
             
-            <country type="customgrid/column_renderer_collection_country" module="customgrid">
+            <country model="customgrid/column_renderer_collection_country" module="customgrid">
                 <name>Country</name>
                 <description>Displays a country name from its code</description>
                 <sort_order>70000</sort_order>
@@ -698,10 +684,10 @@
                 </config_window>
             </country>
             
-            <eu_country type="customgrid/column_renderer_collection_country_eu" module="customgrid">
+            <eu_country model="customgrid/column_renderer_collection_country_eu" module="customgrid">
                 <name>EU Country</name>
                 <description>Displays whether a country belongs to the EU</description>
-                <sort_order>75000</sort_order>
+                <sort_order>80000</sort_order>
                 <parameters>
                     <base_display_format>
                         <label>Base Display Format</label>
@@ -770,10 +756,10 @@
                 </parameters>
             </eu_country>
             
-            <options type="customgrid/column_renderer_collection_options" module="customgrid">
+            <options model="customgrid/column_renderer_collection_options" module="customgrid">
                 <name>Options</name>
                 <description>Displays a value from an options source</description>
-                <sort_order>80000</sort_order>
+                <sort_order>90000</sort_order>
                 <config_window>
                     <height>420</height>
                 </config_window>
@@ -789,7 +775,7 @@
                         <label>Options Source</label>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>customgrid/system_config_source_options_source</source_model>
+                        <source_model>customgrid/column_renderer_source_options_source</source_model>
                         <sort_order>20</sort_order>
                     </source_id>
                     <show_missing>
@@ -843,10 +829,10 @@
                 </parameters>
             </options>
             
-            <text type="customgrid/column_renderer_collection_text" module="customgrid">
+            <text model="customgrid/column_renderer_collection_text" module="customgrid">
                 <name>Text</name>
                 <description>Displays a text</description>
-                <sort_order>90000</sort_order>
+                <sort_order>100000</sort_order>
                 <config_window>
                     <height>530</height>
                 </config_window>
@@ -874,57 +860,57 @@
                         <type>text</type>
                         <sort_order>30</sort_order>
                     </multiple_wildcard>
-                    <truncate>
+                    <truncation_mode>
                         <label>Truncate text</label>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>customgrid/system_config_source_truncate_type</source_model>
+                        <source_model>customgrid/column_renderer_source_truncation_mode</source_model>
                         <sort_order>40</sort_order>
-                        <value>no</value>
-                    </truncate>
-                    <truncate_at>
+                        <value>none</value>
+                    </truncation_mode>
+                    <truncation_at>
                         <label>Truncate at n-th character</label>
                         <visible>1</visible>
                         <type>text</type>
                         <sort_order>50</sort_order>
                         <depends>
-                            <truncate>
+                            <truncation_mode>
                                 <values>
                                     <value1>text</value1>
                                     <value2>html</value2>
                                 </values>
-                            </truncate>
+                            </truncation_mode>
                         </depends>
-                    </truncate_at>
-                    <truncate_ending>
+                    </truncation_at>
+                    <truncation_ending>
                         <label>Truncate ending string</label>
                         <visible>1</visible>
                         <type>text</type>
                         <sort_order>60</sort_order>
                         <depends>
-                            <truncate>
+                            <truncation_mode>
                                 <values>
                                     <value1>text</value1>
                                     <value2>html</value2>
                                 </values>
-                            </truncate>
+                            </truncation_mode>
                         </depends>
-                    </truncate_ending>
-                    <truncate_exact>
+                    </truncation_ending>
+                    <exact_truncation>
                         <label>Truncate without breaking words</label>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
                         <sort_order>70</sort_order>
                         <depends>
-                            <truncate>
+                            <truncation_mode>
                                 <values>
                                     <value1>text</value1>
                                     <value2>html</value2>
                                 </values>
-                            </truncate>
+                            </truncation_mode>
                         </depends>
-                    </truncate_exact>
+                    </exact_truncation>
                     <escape_html>
                         <label>Escape HTML</label>
                         <visible>1</visible>
@@ -941,23 +927,23 @@
                         <sort_order>90</sort_order>
                         <value>0</value>
                     </nl2br>
-                    <parse_tags>
-                        <label>Parse CMS Tags</label>
-                        <description>Unless you know there is a difference, you can consider that blocks and pages templates processors are the same</description>
+                    <cms_template_processor>
+                        <label>CMS Template Processor</label>
+                        <description>Choose a processor if you want the CMS content to be treated. Unless you know there is a difference, you can consider that both block and page template processors are the same</description>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>customgrid/system_config_source_tags_parsing_mode</source_model>
+                        <source_model>customgrid/column_renderer_source_cms_template_processor</source_model>
                         <sort_order>100</sort_order>
-                        <value>0</value>
-                    </parse_tags>
+                        <value>none</value>
+                    </cms_template_processor>
                 </parameters>
             </text>
         </collection>
         
         <attribute>
-            <options type="customgrid/column_renderer_attribute_options" module="customgrid">
+            <options model="customgrid/column_renderer_attribute_options" module="customgrid">
                 <name>Options</name>
-                <sort_order>50000</sort_order>
+                <sort_order>10000</sort_order>
                 <config_window>
                     <height>390</height>
                 </config_window>
@@ -974,7 +960,7 @@
                         <description>This options source will be used if no options are found for choosen attribute</description>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>customgrid/system_config_source_options_source</source_model>
+                        <source_model>customgrid/column_renderer_source_options_source</source_model>
                         <sort_order>20</sort_order>
                     </default_source_id>
                     <force_default_source>
@@ -1014,16 +1000,16 @@
                 </parameters>
             </options>
             
-            <product_image type="customgrid/column_renderer_attribute_product_image" module="customgrid">
+            <product_image model="customgrid/column_renderer_attribute_product_image" module="customgrid">
                 <name>Product Image</name>
-                <sort_order>60000</sort_order>
+                <sort_order>20000</sort_order>
                 <config_window>
                     <height>560</height>
                 </config_window>
                 <parameters>
                     <display_images>
                         <label>Display Images</label>
-                        <description>If you choose "No", only images names will be displayed</description>
+                        <description>If you choose "No", only the images URLs will be displayed (otherwise, the URLs will be used as titles)</description>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
@@ -1032,7 +1018,7 @@
                     </display_images>
                     <display_images_urls>
                         <label>Display Complete Images URLs</label>
-                        <description>Images URLs are used as images titles, or as result if images are not displayed or on results export. If you choose "No", only the images paths within the media/catalog directory will be displayed</description>
+                        <description>If you choose "No", only the images paths within the media/catalog directory will be displayed</description>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
@@ -1041,7 +1027,7 @@
                     </display_images_urls>
                     <original_image_link>
                         <label>Original Image Link</label>
-                        <description>If you choose "Yes", the images / names will point to the original images URLs</description>
+                        <description>If you choose "Yes", the images / URLs will act as links to the original images</description>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
@@ -1049,14 +1035,14 @@
                     </original_image_link>
                     <image_width>
                         <label>Image Width</label>
-                        <description>If you specify an image width, then you should indicate an image height too</description>
+                        <description>When an image width is specified, the image height is also required</description>
                         <visible>1</visible>
                         <type>text</type>
                         <sort_order>40</sort_order>
                     </image_width>
                     <image_height>
                         <label>Image Height</label>
-                        <description>If you specify an image height, then you should indicate an image width too</description>
+                        <description>When an image height is specified, the image width is also required</description>
                         <visible>1</visible>
                         <type>text</type>
                         <sort_order>50</sort_order>
@@ -1082,10 +1068,10 @@
                 </parameters>
             </product_image>
             
-            <price type="customgrid/column_renderer_attribute_price" module="customgrid">
+            <price model="customgrid/column_renderer_attribute_price" module="customgrid">
                 <name>Price</name>
                 <description>Displays a price</description>
-                <sort_order>70000</sort_order>
+                <sort_order>30000</sort_order>
                 <config_window>
                     <height>500</height>
                 </config_window>
@@ -1094,7 +1080,7 @@
                         <label>Original Currency</label>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>customgrid/column_renderer_collection_source_currency</source_model>
+                        <source_model>customgrid/column_renderer_source_attribute_currency</source_model>
                         <sort_order>10</sort_order>
                     </original_currency>
                     <original_currency_column_type>
@@ -1170,7 +1156,7 @@
                         <label>Display Currency</label>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>customgrid/column_renderer_collection_source_currency</source_model>
+                        <source_model>customgrid/column_renderer_source_attribute_currency</source_model>
                         <sort_order>50</sort_order>
                     </display_currency>
                     <display_currency_column_type>
@@ -1253,9 +1239,9 @@
                 </parameters>
             </price>
             
-            <datetime type="customgrid/column_renderer_attribute_datetime" module="customgrid">
+            <datetime model="customgrid/column_renderer_attribute_datetime" module="customgrid">
                 <name>Date / Date + Time</name>
-                <sort_order>80000</sort_order>
+                <sort_order>40000</sort_order>
                 <config_window>
                     <height>200</height>
                 </config_window>
@@ -1264,7 +1250,7 @@
                         <label>Display Format</label>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>customgrid/system_config_source_date_format</source_model>
+                        <source_model>customgrid/column_renderer_source_date_format</source_model>
                         <sort_order>10</sort_order>
                         <value>medium</value>
                     </format>
@@ -1280,9 +1266,9 @@
                 </parameters>
             </datetime>
             
-            <number type="customgrid/column_renderer_attribute_number" module="customgrid">
+            <number model="customgrid/column_renderer_attribute_number" module="customgrid">
                 <name>Number</name>
-                <sort_order>90000</sort_order>
+                <sort_order>50000</sort_order>
                 <config_window>
                     <height>160</height>
                 </config_window>
@@ -1297,9 +1283,9 @@
                 </parameters>
             </number>
             
-            <text type="customgrid/column_renderer_attribute_text" module="customgrid">
+            <text model="customgrid/column_renderer_attribute_text" module="customgrid">
                 <name>Text</name>
-                <sort_order>100000</sort_order>
+                <sort_order>60000</sort_order>
                 <config_window>
                     <height>530</height>
                 </config_window>
@@ -1309,7 +1295,7 @@
                         <description>Choose "Yes" if the filter must match the entire value, and not just be contained within</description>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                        <source_model>customgrid/system_config_source_yesno</source_model>
                         <sort_order>10</sort_order>
                         <value>no</value>
                     </exact_filter>
@@ -1327,26 +1313,26 @@
                         <type>text</type>
                         <sort_order>30</sort_order>
                     </multiple_wildcard>
-                    <truncate>
+                    <truncation_mode>
                         <label>Truncate text</label>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>customgrid/system_config_source_truncate_type</source_model>
+                        <source_model>customgrid/column_renderer_source_truncation_mode</source_model>
                         <sort_order>40</sort_order>
-                        <value>no</value>
-                    </truncate>
+                        <value>none</value>
+                    </truncation_mode>
                     <truncate_at>
                         <label>Truncate at n-th character</label>
                         <visible>1</visible>
                         <type>text</type>
                         <sort_order>50</sort_order>
                         <depends>
-                            <truncate>
+                            <truncation_mode>
                                 <values>
                                     <value1>text</value1>
                                     <value2>html</value2>
                                 </values>
-                            </truncate>
+                            </truncation_mode>
                         </depends>
                     </truncate_at>
                     <truncate_ending>
@@ -1355,12 +1341,12 @@
                         <type>text</type>
                         <sort_order>60</sort_order>
                         <depends>
-                            <truncate>
+                            <truncation_mode>
                                 <values>
                                     <value1>text</value1>
                                     <value2>html</value2>
                                 </values>
-                            </truncate>
+                            </truncation_mode>
                         </depends>
                     </truncate_ending>
                     <truncate_exact>
@@ -1370,12 +1356,12 @@
                         <source_model>customgrid/system_config_source_yesno</source_model>
                         <sort_order>70</sort_order>
                         <depends>
-                            <truncate>
+                            <truncation_mode>
                                 <values>
                                     <value1>text</value1>
                                     <value2>html</value2>
                                 </values>
-                            </truncate>
+                            </truncation_mode>
                         </depends>
                     </truncate_exact>
                     <escape_html>
@@ -1394,15 +1380,15 @@
                         <sort_order>90</sort_order>
                         <value>0</value>
                     </nl2br>
-                    <parse_tags>
-                        <label>Parse CMS Tags</label>
-                        <description>Unless you know there is a difference, you can consider that blocks and pages templates processors are the same</description>
+                    <cms_template_processor>
+                        <label>CMS Template Processor</label>
+                        <description>Choose a processor if you want the CMS content to be treated. Unless you know there is a difference, you can consider that both block and page template processors are the same</description>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>customgrid/system_config_source_tags_parsing_mode</source_model>
+                        <source_model>customgrid/column_renderer_source_cms_template_processor</source_model>
                         <sort_order>100</sort_order>
-                        <value>0</value>
-                    </parse_tags>
+                        <value>none</value>
+                    </cms_template_processor>
                 </parameters>
             </text>
         </attribute>

@@ -10,7 +10,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 -->
@@ -26,7 +26,7 @@
             <label>Base Configuration</label>
             <tab>customgrid</tab>
             <frontend_type>text</frontend_type>
-            <sort_order>10000</sort_order>
+            <sort_order>10</sort_order>
             <show_in_default>1</show_in_default>
             <show_in_website>0</show_in_website>
             <show_in_store>0</show_in_store>
@@ -34,7 +34,7 @@
                 <global translate="label" module="customgrid">
                     <label>General</label>
                     <frontend_type>text</frontend_type>
-                    <sort_order>0</sort_order>
+                    <sort_order>10</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>0</show_in_website>
                     <show_in_store>0</show_in_store>
@@ -68,20 +68,10 @@
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
                         </exceptions_handling_mode>
-                        <force_grid_rewrites translate="label comment" module="customgrid">
-                            <label>Force Grid Rewrites</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
-                            <sort_order>40</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>0</show_in_website>
-                            <show_in_store>0</show_in_store>
-                            <comment><![CDATA[Test this option when the customization button does not appear whereas it should (usually, when this error message is shown: "The [grid type] grid was not rewrited").]]></comment>
-                        </force_grid_rewrites>
                         <store_parameter translate="label comment" module="customgrid">
                             <label>Store View ID Parameter</label>
                             <frontend_type>text</frontend_type>
-                            <sort_order>50</sort_order>
+                            <sort_order>40</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -91,7 +81,7 @@
                             <label>Use drag'n'drop for sorting columns</label>
                             <frontend_type>select</frontend_type>
                             <source_model>adminhtml/system_config_source_yesno</source_model>
-                            <sort_order>60</sort_order>
+                            <sort_order>50</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -99,29 +89,10 @@
                         </sort_with_dnd>
                     </fields>
                 </global>
-                <custom_columns translate="label" module="customgrid">
-                    <label>Custom Columns</label>
-                    <frontend_type>text</frontend_type>
-                    <sort_order>1000</sort_order>
-                    <show_in_default>1</show_in_default>
-                    <show_in_website>0</show_in_website>
-                    <show_in_store>0</show_in_store>
-                    <fields>
-                        <group_in_default_header translate="label" module="customgrid">
-                            <label>Add Group Name In Default Header</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
-                            <sort_order>10</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>0</show_in_website>
-                            <show_in_store>0</show_in_store>
-                        </group_in_default_header>
-                    </fields>
-                </custom_columns>
                 <customization_params translate="label" module="customgrid">
                     <label>Customization Parameters - Default Values</label>
                     <frontend_type>text</frontend_type>
-                    <sort_order>2000</sort_order>
+                    <sort_order>20</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>0</show_in_website>
                     <show_in_store>0</show_in_store>
@@ -169,7 +140,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
-                            <comment><![CDATA[This value will replace the original default value from the grids. If the default value (either this one or, if it is not set, the original) can not be found in the pagination values used for the current grid, the smallest available pagination value will be used by default]]></comment>
+                            <comment><![CDATA[This value will replace the original default value from the grids. If the custom default value can not be found in the pagination values used for the current grid, nor the original one (by fallback), then the smallest available pagination value will be used]]></comment>
                         </default_pagination_value>
                         <merge_base_pagination translate="label comment" module="customgrid">
                             <label>Merge Base Pagination Values</label>
@@ -192,10 +163,10 @@
                         </pin_header>
                     </fields>
                 </customization_params>
-                <custom_default_params translate="label" module="customgrid">
-                    <label>Custom Default Parameters Behaviour - Default Values</label>
+                <default_params_behaviours translate="label" module="customgrid">
+                    <label>Default Parameters Behaviours - Default Values</label>
                     <frontend_type>text</frontend_type>
-                    <sort_order>3000</sort_order>
+                    <sort_order>30</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>0</show_in_website>
                     <show_in_store>0</show_in_store>
@@ -251,46 +222,63 @@
                             <comment><![CDATA[Forcing or merging a value only applies when it does exist]]></comment>
                         </filter>
                     </fields>
-                </custom_default_params>
-                <!-- @todo with profiles system -->
-                <!--
+                </default_params_behaviours>
                 <profiles translate="label" module="customgrid">
-                    <label>Grids Profiles</label>
+                    <label>Profiles - Default Values</label>
                     <frontend_type>text</frontend_type>
-                    <sort_order>4000</sort_order>
+                    <sort_order>40</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>0</show_in_website>
                     <show_in_store>0</show_in_store>
                     <fields>
+                        <default_restricted translate="label comment" module="customgrid">
+                            <label>Restricted</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>customgrid/system_config_source_yesno</source_model>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <comment><![CDATA[Will be used for profiles created by users who do not have the permission to assign profiles to roles]]></comment>
+                        </default_restricted>
+                        <default_assigned_to translate="label comment" module="customgrid">
+                            <label>Assigned To</label>
+                            <frontend_type>multiselect</frontend_type>
+                            <source_model>customgrid/system_config_source_admin_role</source_model>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <comment><![CDATA[Will be used for profiles created by users who do not have the permission to assign profiles to roles]]></comment>
+                        </default_assigned_to>
                     </fields>
                 </profiles>
-                -->
-                <editor_sitemap translate="label" module="customgrid">
-                    <label>Editor - Grid Type : Google Sitemap</label>
+                <custom_columns translate="label" module="customgrid">
+                    <label>Custom Columns</label>
                     <frontend_type>text</frontend_type>
-                    <sort_order>100000</sort_order>
+                    <sort_order>5000</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>0</show_in_website>
                     <show_in_store>0</show_in_store>
                     <fields>
-                        <delete_file translate="label" module="customgrid">
-                            <label>Delete File Before Save</label>
+                        <group_in_default_header translate="label" module="customgrid">
+                            <label>Add Group Name In Default Header</label>
                             <frontend_type>select</frontend_type>
                             <source_model>adminhtml/system_config_source_yesno</source_model>
                             <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
-                        </delete_file>
+                        </group_in_default_header>
                     </fields>
-                </editor_sitemap>
+                </custom_columns>
             </groups>
         </customgrid>
         <customgrid_rewriters translate="label comment" module="customgrid">
             <label>Rewriters Configuration</label>
             <tab>customgrid</tab>
             <frontend_type>text</frontend_type>
-            <sort_order>10001</sort_order>
+            <sort_order>20</sort_order>
             <show_in_default>1</show_in_default>
             <show_in_website>0</show_in_website>
             <show_in_store>0</show_in_store>
@@ -433,5 +421,35 @@
                 </file>
             </groups>
         </customgrid_rewriters>
+        <customgrid_editors>
+            <label>Editors Configuration</label>
+            <tab>customgrid</tab>
+            <frontend_type>text</frontend_type>
+            <sort_order>30</sort_order>
+            <show_in_default>1</show_in_default>
+            <show_in_website>0</show_in_website>
+            <show_in_store>0</show_in_store>
+            <groups>
+                <sitemap translate="label" module="customgrid">
+                    <label>Google Sitemap</label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>10</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>0</show_in_website>
+                    <show_in_store>0</show_in_store>
+                    <fields>
+                        <delete_file translate="label" module="customgrid">
+                            <label>Delete File Before Save</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </delete_file>
+                    </fields>
+                </sitemap>
+            </groups>
+        </customgrid_editors>
     </sections>
 </config>

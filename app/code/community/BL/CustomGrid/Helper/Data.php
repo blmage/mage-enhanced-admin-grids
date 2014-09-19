@@ -9,45 +9,74 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class BL_CustomGrid_Helper_Data extends Mage_Core_Helper_Abstract
 {
+    /**
+     * Implode the given value, return an empty string if it is not an array
+     * 
+     * @param array $array Value to implode
+     * @param string $glue Imploding glue
+     * @return string
+     */
     public function implodeArray($array, $glue=',')
     {
         return (is_array($array) ? implode($glue, $array) : '');
     }
     
+    /**
+     * Unserialize the given value, always return an array (empty by default)
+     * 
+     * @param string $array Value to unserialize
+     * @return array
+     */
     public function unserializeArray($array)
     {
-        return (is_array($array = @unserialize($array)) ? $array : array());
+        return (($array !== '') && is_array($array = @unserialize($array)) ? $array : array());
     }
     
+    /**
+     * Parse the given value as an integer, but return null if it is an empty string
+     * 
+     * @param string $value Value to parse
+     * @return int|null
+     */
     protected function _parseIntValue($value)
     {
-        return ($value !== '' ? intval($value) : null);
+        return ($value !== '' ? (int) $value : null);
     }
     
+    /**
+     * Parse the integer values contained in the given csv string and return them as an array
+     * 
+     * @param string $string Csv string
+     * @param bool $unique Whether only unique values should be returned
+     * @param bool $sorted Whether returned values should be sorted
+     * @param int|null $min Minimum allowed value (lesser will be excluded)
+     * @param int|null $max Maximum allowed value (greater will be excluded)
+     * @return array
+     */
     public function parseCsvIntArray($string, $unique=true, $sorted=false, $min=null, $max=null)
     {
         $values = array_map(array($this, '_parseIntValue'), explode(',', $string));
         $filterCodes = array('!is_null($v)');
         
+        if (!is_null($min)) {
+            $filterCodes[] = '($v >= ' . (int) $min . ')';
+        }
+        if (!is_null($max)) {
+            $filterCodes[] = '($v <= ' . (int) $max . ')';
+        }
+        
+        $filterCode = 'return (' . implode(' && ', $filterCodes) . ');';
+        $values = array_filter($values, create_function('$v', $filterCode));
+        
         if ($unique) {
             $values = array_unique($values);
         }
-        if (!is_null($min)) {
-            $filterCodes[] = '($v >= '.intval($min).')';
-        }
-        if (!is_null($max)) {
-            $filterCodes[] = '($v <= '.intval($max).')';
-        }
-        
-        $filterCode = 'return ('.implode(' && ', $filterCodes).');';
-        $values = array_filter($values, create_function('$v', $filterCode));
-        
         if ($sorted) {
             sort($values, SORT_NUMERIC);
         }
@@ -55,6 +84,13 @@ class BL_CustomGrid_Helper_Data extends Mage_Core_Helper_Abstract
         return $values;
     }
     
+    /**
+     * Return an options hash corresponding to the given options array
+     * 
+     * @param array $optionsArray Options array
+     * @param bool $withEmpty Whether empty values from the array should be kept in the hash
+     * @return array
+     */
     public function getOptionsHashFromOptionsArray(array $optionsArray, $withEmpty=false)
     {
         $optionsHash = array();
@@ -75,6 +111,13 @@ class BL_CustomGrid_Helper_Data extends Mage_Core_Helper_Abstract
         return $optionsHash;
     }
     
+    /**
+     * Return an options array corresponding to the given options hash
+     * 
+     * @param array $optionsArray Options array
+     * @param bool $withEmpty Whether empty values from the hash should be kept in the array
+     * @return array
+     */
     public function getOptionsArrayFromOptionsHash(array $optionsHash, $withEmpty=false)
     {
         $optionsArray = array();
@@ -98,103 +141,187 @@ class BL_CustomGrid_Helper_Data extends Mage_Core_Helper_Abstract
         return $optionsArray;
     }
     
-    public function getColumnHeaderName($key)
+    /**
+     * Return the current Magento version's revision number
+     * 
+     * @return int
+     */
+    public function getMageVersionRevision()
     {
-        // Beautify column key
-        $key = trim(str_replace('_', ' ', strtolower($key)));
-        
-        // Play on words case for translation
-        // Try three of the whole possibilities, which should represent most of the successfull ones
-        $helper = Mage::helper('adminhtml');
-        
-        if (($key === ($result = $helper->__($key)))
-            && (ucfirst($key) === ($result = $helper->__(ucfirst($key))))
-            && (uc_words($key, ' ', ' ') === ($result = $helper->__(uc_words($key, ' ', ' '))))) {
-            // Use basic key if no translation succeeded
-            $result = uc_words($key, ' ', ' ');
-        }
-        
-        return $result;
+        $version = Mage::getVersionInfo();
+        return (int) $version['revision'];
     }
     
+    /**
+     * Return whether the given Magento version corresponds to the current version
+     * 
+     * @param int $major Major version number
+     * @param int $minor Minor version number
+     * @param int|null $revision Revision version number
+     * @return bool
+     */
     public function isMageVersion($major, $minor, $revision=null)
     {
-        $infos = Mage::getVersionInfo();
-        return (($infos['major'] == $major)
-                 && ($infos['minor'] == $minor)
-                 && (is_null($revision) || ($infos['revision'] == $revision)));
+        $version = Mage::getVersionInfo();
+        return ($version['major'] == $major)
+            && ($version['minor'] == $minor)
+            && (is_null($revision) || ($version['revision'] == $revision));
     }
     
+    /**
+     * Return whether the current Magento version is strictly greater than the given one
+     * 
+     * @param int $major Major version number
+     * @param int $minor Minor version number
+     * @param int|null $revision Revision version number
+     * @return bool
+     */
     public function isMageVersionGreaterThan($major, $minor, $revision=null)
     {
-        $infos  = Mage::getVersionInfo();
+        $version = Mage::getVersionInfo();
         
-        if (($iMajor = intval($infos['major'])) > $major) {
+        if (($currentMajor = (int) $version['major']) > $major) {
             return true;
-        } elseif ($iMajor == $major) {
-            if (($iMinor = intval($infos['minor'])) > $minor) {
+        } elseif ($currentMajor == $major) {
+            if (($currentMinor = (int) $version['minor']) > $minor) {
                 return true;
-            } elseif (($iMinor == $minor) && !is_null($revision)) {
-                return (intval($infos['revision']) > $revision);
+            } elseif (($currentMinor == $minor) && !is_null($revision)) {
+                return ((int) $version['revision'] > $revision);
             }
         }
         
         return false;
     }
     
+    /**
+     * Return whether the current Magento version is strictly lesser than the given one
+     * 
+     * @param int $major Major version number
+     * @param int $minor Minor version number
+     * @param int|null $revision Revision version number
+     * @return bool
+     */
     public function isMageVersionLesserThan($major, $minor, $revision=null)
     {
-        $infos  = Mage::getVersionInfo();
+        $version = Mage::getVersionInfo();
         
-        if (($iMajor = intval($infos['major'])) < $major) {
+        if (($currentMajor = (int) $version['major']) < $major) {
             return true;
-        } elseif ($iMajor == $major) {
-            if (($iMinor = intval($infos['minor'])) < $minor) {
+        } elseif ($currentMajor == $major) {
+            if (($currentMinor = (int) $version['minor']) < $minor) {
                 return true;
-            } elseif (($iMinor == $minor) && !is_null($revision)) {
-                return (intval($infos['revision']) < $revision);
+            } elseif (($currentMinor == $minor) && !is_null($revision)) {
+                return ((int) $version['revision'] < $revision);
             }
         }
         
         return false;
     }
     
+    /**
+     * Return whether the current Magento version is 1.4.x
+     * 
+     * @return bool
+     */
     public function isMageVersion14()
     {
         return $this->isMageVersion(1, 4);
     }
     
+    /**
+     * Return whether the current Magento version is 1.5.x
+     * 
+     * @return bool
+     */
     public function isMageVersion15()
     {
         return $this->isMageVersion(1, 5);
     }
     
+    /**
+     * Return whether the current Magento version is 1.6.x
+     * 
+     * @return bool
+     */
     public function isMageVersion16()
     {
         return $this->isMageVersion(1, 6);
     }
     
+    /**
+     * Return whether the current Magento version is 1.7.x
+     * 
+     * @return bool
+     */
     public function isMageVersion17()
     {
         return $this->isMageVersion(1, 7);
     }
     
-    public function getMageVersionRevision()
+    /**
+     * Return whether the current Magento version is 1.8.x
+     * 
+     * @return bool
+     */
+    public function isMageVersion18()
     {
-        $infos = Mage::getVersionInfo();
-        return $infos['revision'];
+        return $this->isMageVersion(1, 8);
     }
     
-    public function isRewritedGrid($block)
+    /**
+     * Return whether the current Magento version is 1.9.x
+     * 
+     * @return bool
+     */
+    public function isMageVersion19()
     {
-        if ($class = get_class($block)) {
-            return (bool) preg_match('#^BL_CustomGrid_Block_Rewrite_.+$#', $class);
-        }
-        return false;
+        return $this->isMageVersion(1, 8);
     }
     
+    /**
+     * Return whether the current request uses Ajax
+     * 
+     * @return bool
+     */
     public function isAjaxRequest()
     {
         return $this->_getRequest()->isAjax();
+    }
+    
+    /**
+     * Return whether the given grid block has been rewrited by this extension
+     * 
+     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
+     * @return bool
+     */
+    public function isRewritedGridBlock(Mage_Adminhtml_Block_Widget_Grid $gridBlock)
+    {
+        return ($className = get_class($gridBlock))
+            ? (bool) preg_match('#^BL_CustomGrid_Block_Rewrite_.+$#', $className)
+            : false;
+    }
+    
+    /**
+     * Return a suitable column header name from the given key
+     * 
+     * @param string $key Column key
+     * @return string
+     */
+    public function getColumnHeaderName($key)
+    {
+        $key = trim(str_replace('_', ' ', strtolower($key)));
+        
+        // Play on words case for translation
+        // Try three of the whole possibilities, which should represent most of the possible ones
+        $helper = Mage::helper('adminhtml');
+        
+        if (($key === ($result = $helper->__($key)))
+            && (ucfirst($key) === ($result = $helper->__(ucfirst($key))))
+            && (uc_words($key, ' ', ' ') === ($result = $helper->__(uc_words($key, ' ', ' '))))) {
+            // Use basic key if not any translation succeeded
+            $result = uc_words($key, ' ', ' ');
+        }
+        
+        return $result;
     }
 }

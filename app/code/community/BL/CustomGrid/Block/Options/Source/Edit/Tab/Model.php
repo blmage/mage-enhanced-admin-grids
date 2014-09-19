@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -17,31 +17,10 @@ class BL_CustomGrid_Block_Options_Source_Edit_Tab_Model
     extends Mage_Adminhtml_Block_Widget_Form
     implements Mage_Adminhtml_Block_Widget_Tab_Interface
 {
-    public function getTabLabel()
-    {
-        return $this->__('Magento Model');
-    }
-    
-    public function getTabTitle()
-    {
-        return $this->__('Magento Model');
-    }
-    
-    public function canShowTab()
-    {
-        return true;
-    }
-    
-    public function isHidden()
-    {
-        return false;
-    }
-    
     protected function _prepareForm()
     {
-        $source = Mage::registry('options_source');
-        
-        $form = new Varien_Data_Form();
+        $source = Mage::registry('blcg_options_source');
+        $form   = new Varien_Data_Form();
         $fieldset = $form->addFieldset('general', array('legend' => $this->__('Model')));
         
         if ($source->getId()) {
@@ -65,7 +44,7 @@ class BL_CustomGrid_Block_Options_Source_Edit_Tab_Model
             'title'    => $this->__('Type'),
             'class'    => 'required-entry',
             'required' => true,
-            'values'   => Mage::getModel('customgrid/options_source')->getModelTypesAsOptionHash(),
+            'values'   => Mage::getSingleton('customgrid/options_source')->getModelTypesAsOptionHash(),
         ));
         
         $fieldset->addField('method', 'text', array(
@@ -82,7 +61,7 @@ class BL_CustomGrid_Block_Options_Source_Edit_Tab_Model
             'title'    => $this->__('Return Type'),
             'class'    => 'required-entry',
             'required' => true,
-            'values'   => Mage::getModel('customgrid/options_source')->getModelReturnTypesAsOptionHash(),
+            'values'   => Mage::getSingleton('customgrid/options_source')->getModelReturnTypesAsOptionHash(),
         ));
         
         $fieldset->addField('value_key', 'text', array(
@@ -104,8 +83,8 @@ class BL_CustomGrid_Block_Options_Source_Edit_Tab_Model
         $form->setValues($source->getData());
         $this->setForm($form);
         
-        // Add dependences for "value key" and "label key"
-        $block = $this->getLayout()->createBlock('customgrid/widget_form_element_dependence');
+        $block = $this->getLayout()
+            ->createBlock('customgrid/widget_form_element_dependence');
         
         $block->addFieldMap(array(
             'return_type' => 'return_type',
@@ -114,17 +93,38 @@ class BL_CustomGrid_Block_Options_Source_Edit_Tab_Model
         ));
         
         $block->addFieldDependence(
-            array(
-                'value_key',
-                'label_key',
-            ), 
-            'return_type', 
-            array(
-                BL_CustomGrid_Model_Options_Source::SOURCE_MODEL_RETURN_TYPE_OPTIONS_ARRAY,
-                BL_CustomGrid_Model_Options_Source::SOURCE_MODEL_RETURN_TYPE_VO_COLLECTION,
-            )
-        );
+                array(
+                    'value_key',
+                    'label_key',
+                ), 
+                'return_type', 
+                array(
+                    BL_CustomGrid_Model_Options_Source::RETURN_TYPE_OPTIONS_ARRAY,
+                    BL_CustomGrid_Model_Options_Source::RETURN_TYPE_VARIEN_OBJECT_COLLECTION,
+                )
+            );
         
         $this->setChild('form_after', $block);
+        return $this;
+    }
+    
+    public function getTabLabel()
+    {
+        return $this->__('Magento Model');
+    }
+    
+    public function getTabTitle()
+    {
+        return $this->__('Magento Model');
+    }
+    
+    public function canShowTab()
+    {
+        return true;
+    }
+    
+    public function isHidden()
+    {
+        return false;
     }
 }

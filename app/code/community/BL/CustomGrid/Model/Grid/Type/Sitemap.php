@@ -9,40 +9,32 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class BL_CustomGrid_Model_Grid_Type_Sitemap
     extends BL_CustomGrid_Model_Grid_Type_Abstract
 {
-    public function isAppliableToGrid($type, $rewritingClassName)
+    protected function _getSupportedBlockTypes()
     {
-        return ($type == 'adminhtml/sitemap_grid');
+        return 'adminhtml/sitemap_grid';
     }
     
-    public function checkUserEditPermissions($type, $model, $block=null, $params=array())
+    protected function _getBaseEditableFields($blockType)
     {
-        if (parent::checkUserEditPermissions($type, $model, $block, $params)) {
-            return Mage::getSingleton('admin/session')->isAllowed('catalog/sitemap');
-        }
-        return false;
-    }
-    
-    protected function _getBaseEditableFields($type)
-    {
-        $helper = Mage::helper('sitemap');
+        $helper = Mage::helper('adminhtml');
         
         $fields = array(
             'sitemap_filename' => array(
                 'type'      => 'text',
                 'required'  => true,
-                'form_note' => Mage::helper('adminhtml')->__('example: sitemap.xml'),
+                'form_note' => $helper->__('example: sitemap.xml'),
             ),
             'sitemap_path' => array(
                 'type'      => 'text',
                 'required'  => true,
-                'form_note' => Mage::helper('adminhtml')->__('example: "sitemap/" or "/" for base path (path must be writeable)'),
+                'form_note' => $helper->__('example: "sitemap/" or "/" for base path (path must be writeable)'),
             ),
         );
         
@@ -57,29 +49,32 @@ class BL_CustomGrid_Model_Grid_Type_Sitemap
         return $fields;
     }
     
-    protected function _getEntityRowIdentifiersKeys($type)
+    protected function _getEntityRowIdentifiersKeys($blockType)
     {
         return array('sitemap_id');
     }
     
-    protected function _loadEditedEntity($type, $config, $params)
+    protected function _loadEditedEntity($blockType, BL_CustomGrid_Object $config, array $params, $entityId)
     {
-        if (isset($params['ids']['sitemap_id'])) {
-            return Mage::getModel('sitemap/sitemap')->load($params['ids']['sitemap_id']);
-        }
-        return null;
+        return Mage::getModel('sitemap/sitemap')->load($entityId);
     }
     
-    protected function _beforeApplyEditedFieldValue($type, $config, $params, $entity, &$value)
+    protected function _getEditRequiredAclPermissions($blockType)
     {
-        if (Mage::helper('customgrid')->isMageVersionGreaterThan(1, 5, 0)
-            && in_array($config['id'], array('sitemap_filename', 'sitemap_path'))) {
-            $fileName = ($config['id'] == 'sitemap_filename' ? $entity->getSitemapFilename() : $value);
-            $path     = ($config['id'] == 'sitemap_path' ? $entity->getSitemapPath() : $value);
+        return 'catalog/sitemap';
+    }
+    
+    protected function _beforeApplyEditedFieldValue($blockType, BL_CustomGrid_Object $config, array $params, $entity,
+        &$value)
+    {
+        if ($this->_getHelper()->isMageVersionGreaterThan(1, 5, 0)
+            && in_array($config->getId(), array('sitemap_filename', 'sitemap_path'))) {
+            $fileName = ($config->getId() != 'sitemap_filename' ? $entity->getSitemapFilename() : $value);
+            $path = ($config->getId() != 'sitemap_path' ? $entity->getSitemapPath() : $value);
             
             if (!empty($fileName) && !empty($path)) {
+                $helper = Mage::helper('adminhtml/catalog');
                 $resultPath = rtrim($path, '\\/') . DS . $fileName;
-                $helper     = Mage::helper('adminhtml/catalog');
                 $validator  = Mage::getModel('core/file_validator_availablePath');
                 $validator->setPaths($helper->getSitemapValidPaths());
                 
@@ -95,6 +90,6 @@ class BL_CustomGrid_Model_Grid_Type_Sitemap
             unlink($entity->getPreparedFilename());
         }
         
-        return parent::_beforeApplyEditedFieldValue($type, $config, $params, $entity, $value);
+        return parent::_beforeApplyEditedFieldValue($blockType, $config, $params, $entity, $value);
     }
 }

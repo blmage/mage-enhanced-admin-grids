@@ -16,13 +16,13 @@
 class BL_CustomGrid_Model_Grid_Type_Shipment
     extends BL_CustomGrid_Model_Grid_Type_Sales_Abstract
 {
-    public function isAppliableToGrid($type, $rewritingClassName)
+    protected function _getSupportedBlockTypes()
     {
-        return ($type == 'adminhtml/sales_shipment_grid');
+        return 'adminhtml/sales_shipment_grid';
     }
     
     protected function _getItemsCustomColumnModel($customizable=false)
     {
-        return 'customgrid/custom_column_shipment_items_'.($customizable ? 'custom' : 'default');
+        return 'customgrid/custom_column_shipment_items_' . ($customizable ? 'custom' : 'default');
     }
 }

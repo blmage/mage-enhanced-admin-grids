@@ -9,12 +9,20 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2012 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Helper_Js extends Mage_Core_Helper_Abstract
+class BL_CustomGrid_Helper_Js
+    extends Mage_Core_Helper_Abstract
 {
+    /**
+     * Turn the given HTML string into a string that can directly be output in a <script> tag as-is
+     * 
+     * @param string $html Base HTML string
+     * @param bool $canTrim Whether string lines can be trimmed
+     * @return string
+     */
     public function prepareHtmlForJsOutput($html, $canTrim=false)
     {
         $parts  = preg_split('#\r\n|\r[^\n]|\n#', ($canTrim ? trim($html) : $html));
@@ -23,8 +31,8 @@ class BL_CustomGrid_Helper_Js extends Mage_Core_Helper_Abstract
         
         foreach ($parts as $part) {
             $result .= ($first ? '' : "\r\n+ ") . '\'' 
-                       . str_replace(array('\\', '\'', '/'), array('\\\\', '\\\'', '\\/'), ($canTrim ? trim($part) : $part))
-                       . '\'';
+                . str_replace(array('\\', '\'', '/'), array('\\\\', '\\\'', '\\/'), ($canTrim ? trim($part) : $part))
+                . '\'';
             $first = false;
         }
         
