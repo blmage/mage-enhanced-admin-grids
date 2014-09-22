@@ -5,6 +5,11 @@ _This version is a work-in-progress, it is strictly for testing purposes, unless
 
 More informations about the extension can be found on its Magento Connect page here : https://www.magentocommerce.com/magento-connect/enhanced-admin-grids-editor.html.
 
+### Backwards compatibility
+Due to the code refactoring, any custom development based on classes coming from the previous versions of the extension, or using an own `customgrid.xml` file, may certainly not be compatible as-is with the new version. Please review the changes and adapt your code accordingly before using the new version on a live environment.
+
+_Backwards compatibility is assured for all the existing data._
+
 ### Main changes / New features :
 - massive code refactoring (goals: better maintainability, more consistency, more independence, better practices and a smaller footprint)
 - every in-grid customization is now saved via Ajax, for a seamless integration in Ajax-based grids
