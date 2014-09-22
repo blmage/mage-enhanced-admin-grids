@@ -44,6 +44,7 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Store
     public function getHtml()
     {
         $storeModel = Mage::getSingleton('adminhtml/system_store');
+        
         $websites = $storeModel->getWebsiteCollection();
         $storeGroups = $storeModel->getGroupCollection();
         $stores = $storeModel->getStoreCollection();
@@ -59,10 +60,10 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Store
             . '</option>';
         
         foreach ($websites as $website) {
-            $websiteShow = false;
+            $shownWebsite = false;
             
             foreach ($storeGroups as $storeGroup) {
-                $storeGroupShow = false;
+                $shownStoreGroup = false;
                 
                 if ($storeGroup->getWebsiteId() != $website->getId()) {
                     continue;
@@ -72,12 +73,12 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Store
                     if ($store->getGroupId() != $storeGroup->getId()) {
                         continue;
                     }
-                    if (!$websiteShow) {
-                        $websiteShow = true;
+                    if (!$shownWebsite) {
+                        $shownWebsite = true;
                         $html .= '<optgroup label="' . $this->htmlEscape($website->getName()) . '"></optgroup>';
                     }
-                    if (!$storeGroupShow) {
-                        $storeGroupShow = true;
+                    if (!$shownStoreGroup) {
+                        $shownStoreGroup = true;
                         $html .= '<optgroup label="' . $this->htmlEscape($storeGroup->getName()) . '">';
                     }
                     
@@ -85,7 +86,7 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Store
                         . '>' . $spaces . $store->getName() . '</option>';
                 }
                 
-                if ($storeGroupShow) {
+                if ($shownStoreGroup) {
                     $html .= '</optgroup>';
                 }
             }

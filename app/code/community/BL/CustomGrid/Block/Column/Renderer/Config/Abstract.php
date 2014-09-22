@@ -67,9 +67,4 @@ abstract class BL_CustomGrid_Block_Column_Renderer_Config_Abstract
     {
         return $this->getDataSetDefault('renderer_target_id', '');
     }
-    
-    public function getConfigValues()
-    {
-        return $this->getDataSetDefault('config_values', array());
-    }
 }

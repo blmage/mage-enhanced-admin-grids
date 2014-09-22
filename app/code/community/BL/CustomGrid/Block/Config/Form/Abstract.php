@@ -54,6 +54,7 @@ abstract class BL_CustomGrid_Block_Config_Form_Abstract
         $fieldsetHtmlId = 'blcg_config_fieldset' . md5($this->_getFormCode());
         $this->setFieldsetHtmlId($fieldsetHtmlId);
         
+        // @todo we could allow to add and use multiple fieldsets based on a group label value, to arrange fields
         $fieldset = $form->addFieldset($fieldsetHtmlId, array('legend' => $this->__('Configuration')));
         /*
         Use an own renderer for multiselect fields to prevent a bug between

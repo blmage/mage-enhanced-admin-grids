@@ -30,7 +30,6 @@ class BL_CustomGrid_Model_Column_Renderer_Collection_Text
         $values = array(
             'renderer'          => 'customgrid/widget_grid_column_renderer_text',
             'filter'            => 'customgrid/widget_grid_column_filter_text',
-            'exact_filter'      => (bool) $this->getData('values/exact_filter'),
             'truncation_mode'   => $this->getData('values/truncation_mode'),
             'truncation_at'     => (int) $this->getData('values/truncation_at'),
             'truncation_ending' => $this->getData('values/truncation_ending'),
@@ -40,16 +39,29 @@ class BL_CustomGrid_Model_Column_Renderer_Collection_Text
             'cms_template_processor' => $this->getData('values/cms_template_processor'),
         );
         
-        $stringHelper = Mage::helper('core/string');
-        $singleWildcard = strval($this->getData('values/single_wildcard'));
-        $multipleWildcard = strval($this->getData('values/multiple_wildcard'));
-        
-        if ($stringHelper->strlen($singleWildcard) === 1) {
-            $values['single_wildcard'] = $singleWildcard;
+        if ($this->hasData('values/filter_mode')) {
+            $values['filter_mode'] = $this->getData('values/filter_mode');
+            $values['negative_filter'] = (bool) $this->getData('values/negative_filter');
+        } else {
+            $values['filter_mode'] = $this->getData('values/exact_filter')
+                ? BL_CustomGrid_Block_Widget_Grid_Column_Filter_Text::MODE_EXACT_LIKE
+                : BL_CustomGrid_Block_Widget_Grid_Column_Filter_Text::MODE_INSIDE_LIKE;
+            $values['negative_filter'] = false;
         }
-        if (($stringHelper->strlen($multipleWildcard) === 1)
-            && ($multipleWildcard !== $singleWildcard)) {
-            $values['multiple_wildcard'] = $multipleWildcard;
+        
+        if (($values['filter_mode'] == BL_CustomGrid_Block_Widget_Grid_Column_Filter_Text::MODE_EXACT_LIKE)
+            || ($values['filter_mode'] == BL_CustomGrid_Block_Widget_Grid_Column_Filter_Text::MODE_INSIDE_LIKE)) {
+            $stringHelper = Mage::helper('core/string');
+            $singleWildcard = strval($this->getData('values/single_wildcard'));
+            $multipleWildcard = strval($this->getData('values/multiple_wildcard'));
+            
+            if ($stringHelper->strlen($singleWildcard) === 1) {
+                $values['single_wildcard'] = $singleWildcard;
+            }
+            if (($stringHelper->strlen($multipleWildcard) === 1)
+                && ($multipleWildcard !== $singleWildcard)) {
+                $values['multiple_wildcard'] = $multipleWildcard;
+            }
         }
         
         return $values;

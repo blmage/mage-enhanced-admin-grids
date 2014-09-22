@@ -837,42 +837,73 @@
                     <height>530</height>
                 </config_window>
                 <parameters>
-                    <exact_filter>
-                        <label>Exact Filter</label>
-                        <description>Choose "Yes" if the filter must match the entire value, and not just be contained within</description>
+                    <filter_mode>
+                        <label>Filter Mode</label>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>customgrid/column_renderer_source_text_filter_mode</source_model>
+                        <sort_order>10</sort_order>
+                        <value>inside_like</value>
+                    </filter_mode>
+                    <negative_filter>
+                        <label>Negative Filter</label>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
-                        <sort_order>10</sort_order>
-                        <value>no</value>
-                    </exact_filter>
+                        <sort_order>20</sort_order>
+                        <depends>
+                            <filter_mode>
+                                <values>
+                                    <value1>exact_like</value1>
+                                    <value2>inside_like</value2>
+                                    <value3>regex</value3>
+                                </values>
+                            </filter_mode>
+                        </depends>
+                    </negative_filter>
                     <single_wildcard>
                         <label>Wildcard for single character</label>
                         <description>Must be exactly one character. If none is set, no wildcard of this kind will be available at all</description>
                         <visible>1</visible>
                         <type>text</type>
-                        <sort_order>20</sort_order>
+                        <sort_order>30</sort_order>
+                        <depends>
+                            <filter_mode>
+                                <values>
+                                    <value1>exact_like</value1>
+                                    <value2>inside_like</value2>
+                                </values>
+                            </filter_mode>
+                        </depends>
                     </single_wildcard>
                     <multiple_wildcard>
                         <label>Wildcard for multiple characters</label>
                         <description>Must be exactly one character, differing from the wildcard for single character. If no valid value is set, no wildcard of this kind will be available at all</description>
                         <visible>1</visible>
                         <type>text</type>
-                        <sort_order>30</sort_order>
+                        <sort_order>40</sort_order>
+                        <depends>
+                            <filter_mode>
+                                <values>
+                                    <value1>exact_like</value1>
+                                    <value2>inside_like</value2>
+                                </values>
+                            </filter_mode>
+                        </depends>
                     </multiple_wildcard>
                     <truncation_mode>
                         <label>Truncate text</label>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>customgrid/column_renderer_source_truncation_mode</source_model>
-                        <sort_order>40</sort_order>
+                        <source_model>customgrid/column_renderer_source_text_truncation_mode</source_model>
+                        <sort_order>50</sort_order>
                         <value>none</value>
                     </truncation_mode>
                     <truncation_at>
                         <label>Truncate at n-th character</label>
                         <visible>1</visible>
                         <type>text</type>
-                        <sort_order>50</sort_order>
+                        <sort_order>60</sort_order>
                         <depends>
                             <truncation_mode>
                                 <values>
@@ -886,7 +917,7 @@
                         <label>Truncate ending string</label>
                         <visible>1</visible>
                         <type>text</type>
-                        <sort_order>60</sort_order>
+                        <sort_order>70</sort_order>
                         <depends>
                             <truncation_mode>
                                 <values>
@@ -901,7 +932,7 @@
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
-                        <sort_order>70</sort_order>
+                        <sort_order>80</sort_order>
                         <depends>
                             <truncation_mode>
                                 <values>
@@ -916,7 +947,7 @@
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
-                        <sort_order>80</sort_order>
+                        <sort_order>90</sort_order>
                         <value>0</value>
                     </escape_html>
                     <nl2br>
@@ -924,7 +955,7 @@
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
-                        <sort_order>90</sort_order>
+                        <sort_order>100</sort_order>
                         <value>0</value>
                     </nl2br>
                     <cms_template_processor>
@@ -933,7 +964,7 @@
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/column_renderer_source_cms_template_processor</source_model>
-                        <sort_order>100</sort_order>
+                        <sort_order>110</sort_order>
                         <value>none</value>
                     </cms_template_processor>
                 </parameters>
@@ -1290,42 +1321,73 @@
                     <height>530</height>
                 </config_window>
                 <parameters>
-                    <exact_filter>
-                        <label>Exact Filter</label>
-                        <description>Choose "Yes" if the filter must match the entire value, and not just be contained within</description>
+                    <filter_mode>
+                        <label>Filter Mode</label>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>customgrid/column_renderer_source_text_filter_mode</source_model>
+                        <sort_order>10</sort_order>
+                        <value>inside_like</value>
+                    </filter_mode>
+                    <negative_filter>
+                        <label>Negative Filter</label>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
-                        <sort_order>10</sort_order>
-                        <value>no</value>
-                    </exact_filter>
+                        <sort_order>20</sort_order>
+                        <depends>
+                            <filter_mode>
+                                <values>
+                                    <value1>exact_like</value1>
+                                    <value2>inside_like</value2>
+                                    <value3>regex</value3>
+                                </values>
+                            </filter_mode>
+                        </depends>
+                    </negative_filter>
                     <single_wildcard>
                         <label>Wildcard for single character</label>
                         <description>Must be exactly one character. If none is set, no wildcard of this kind will be available at all</description>
                         <visible>1</visible>
                         <type>text</type>
-                        <sort_order>20</sort_order>
+                        <sort_order>30</sort_order>
+                        <depends>
+                            <filter_mode>
+                                <values>
+                                    <value1>exact_like</value1>
+                                    <value2>inside_like</value2>
+                                </values>
+                            </filter_mode>
+                        </depends>
                     </single_wildcard>
                     <multiple_wildcard>
                         <label>Wildcard for multiple characters</label>
                         <description>Must be exactly one character, differing from the wildcard for single character. If no valid value is set, no wildcard of this kind will be available at all</description>
                         <visible>1</visible>
                         <type>text</type>
-                        <sort_order>30</sort_order>
+                        <sort_order>40</sort_order>
+                        <depends>
+                            <filter_mode>
+                                <values>
+                                    <value1>exact_like</value1>
+                                    <value2>inside_like</value2>
+                                </values>
+                            </filter_mode>
+                        </depends>
                     </multiple_wildcard>
                     <truncation_mode>
                         <label>Truncate text</label>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>customgrid/column_renderer_source_truncation_mode</source_model>
-                        <sort_order>40</sort_order>
+                        <source_model>customgrid/column_renderer_source_text_truncation_mode</source_model>
+                        <sort_order>50</sort_order>
                         <value>none</value>
                     </truncation_mode>
                     <truncate_at>
                         <label>Truncate at n-th character</label>
                         <visible>1</visible>
                         <type>text</type>
-                        <sort_order>50</sort_order>
+                        <sort_order>60</sort_order>
                         <depends>
                             <truncation_mode>
                                 <values>
@@ -1339,7 +1401,7 @@
                         <label>Truncate ending string</label>
                         <visible>1</visible>
                         <type>text</type>
-                        <sort_order>60</sort_order>
+                        <sort_order>70</sort_order>
                         <depends>
                             <truncation_mode>
                                 <values>
@@ -1354,7 +1416,7 @@
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
-                        <sort_order>70</sort_order>
+                        <sort_order>80</sort_order>
                         <depends>
                             <truncation_mode>
                                 <values>
@@ -1369,7 +1431,7 @@
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
-                        <sort_order>80</sort_order>
+                        <sort_order>90</sort_order>
                         <value>0</value>
                     </escape_html>
                     <nl2br>
@@ -1377,7 +1439,7 @@
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
-                        <sort_order>90</sort_order>
+                        <sort_order>100</sort_order>
                         <value>0</value>
                     </nl2br>
                     <cms_template_processor>
@@ -1386,7 +1448,7 @@
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/column_renderer_source_cms_template_processor</source_model>
-                        <sort_order>100</sort_order>
+                        <sort_order>110</sort_order>
                         <value>none</value>
                     </cms_template_processor>
                 </parameters>

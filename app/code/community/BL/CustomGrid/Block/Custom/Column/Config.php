@@ -66,9 +66,4 @@ class BL_CustomGrid_Block_Custom_Column_Config
     {
         return $this->getDataSetDefault('config_target_id', '');
     }
-    
-    public function getConfigValues()
-    {
-        return $this->getDataSetDefault('config_values', array());
-    }
 }

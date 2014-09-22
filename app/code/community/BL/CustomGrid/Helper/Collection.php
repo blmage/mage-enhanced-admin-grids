@@ -169,6 +169,69 @@ class BL_CustomGrid_Helper_Collection
     }
     
     /**
+    * Add a regex filter for the given field on the given collection
+    * 
+    * @param Varien_Data_Collection_Db $collection Collection
+    * @param string $fieldName Field name
+    * @param string $regex Regex
+    * @param bool $negative Whether the field value should not match the given regex
+    * @return this
+    */
+    public function addRegexFilterToCollection(Varien_Data_Collection_Db $collection, $fieldName, $regex,
+        $negative=false)
+    {
+        $adapter = $this->getCollectionAdapter($collection);
+        $quotedRegex = $adapter->quoteInto('?', $regex);
+        $hasRegexpKeyword = Mage::helper('customgrid')->isMageVersionGreaterThan(1, 5);
+        
+        try {
+            $adapter->query('SELECT "crash test dummy" REGEXP ' . $quotedRegex);
+        } catch (Exception $e) {
+            Mage::throwException(Mage::helper('customgrid')->__('Invalid regex : "%s"', $regex));
+            return $this;
+        }
+        
+        if ($hasRegexpKeyword) {
+            $filterKeyword = 'regexp';
+            
+            if ($negative) {
+                $searchedPart  = '#\\s+(regexp|REGEXP)\\s+' . preg_quote($quotedRegex, '#') . '#';
+                $replacingPart = ' NOT REGEXP ' . $quotedRegex;
+            }
+        } else {
+            $filterKeyword = 'like';
+            $searchedPart  = '#\\s+(like|LIKE)\\s+' . preg_quote($quotedRegex, '#') . '#';
+            $replacingPart = ($negative ? ' NOT' : '') . ' REGEXP ' . $quotedValue;
+        }
+        
+        $previousWherePart = $collection->getSelect()->getPart(Zend_Db_Select::WHERE);
+        $previousWhereKeys = array_keys($previousWherePart);
+        $collection->addFieldToFilter($fieldName, array($filterKeyword => $regex));
+        
+        if (!$hasRegexpKeyword || $negative) {
+            $newWherePart = $collection->getSelect()->getPart(Zend_Db_Select::WHERE);
+            $newWhereKeys = array_diff(array_keys($newWherePart), $previousWhereKeys);
+            $foundCondition = false;
+            
+            foreach ($newWhereKeys as $key) {
+                if (preg_match($searchedPart, $newWherePart[$key])) {
+                    $newWherePart[$key] = preg_replace($searchedPart, $replacingPart, $newWherePart[$key]);
+                    $foundCondition = true;
+                    break;
+                }
+            }
+            if ($foundCondition) {
+                $collection->getSelect()->setPart(Zend_Db_Select::WHERE, $newWherePart);
+            } else {
+                $collection->getSelect()->setPart(Zend_Db_Select::WHERE, $previousWherePart);
+                Mage::throwException(Mage::helper('customgrid')->__('Could not inject regex'));
+            }
+        }
+        
+        return $this;
+    }
+    
+    /**
      * Return a filters map built from the given fields and table alias, by qualifying all of the given fields
      * and associating them to the given aliases (or their own names by default)
      * 

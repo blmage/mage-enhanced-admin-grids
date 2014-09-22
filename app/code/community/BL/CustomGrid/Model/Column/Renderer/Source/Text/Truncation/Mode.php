@@ -13,7 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_Column_Renderer_Source_Truncation_Mode
+class BL_CustomGrid_Model_Column_Renderer_Source_Text_Truncation_Mode
 {
     public function toOptionArray()
     {

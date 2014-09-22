@@ -16,8 +16,8 @@ _Backwards compatibility is assured for all the existing data._
 - profiles system (different columns lists and default parameters for each grid, assignable to different roles)
 - refined permissions
 - various bug fixes
-- **_todo_** advanced filtering possibilities for text and options columns
 - **_todo_** forcable grid types (use advanced features for the grids that you know to be compatible with a given grid type, but by default are not associated to it)
+- **_todo for options_** advanced filtering possibilities for text and options columns
 
 ### Continuous changes :
 - new custom columns for different grids (especially the sales grids)

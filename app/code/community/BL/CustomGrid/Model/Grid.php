@@ -3799,6 +3799,7 @@ class BL_CustomGrid_Model_Grid
         $columns = $this->getColumns(false, true);
         uasort($columns, array($this, '_sortColumns'));
         $attributes = $this->getAvailableAttributes();
+        $addedAttributes = array();
         
         foreach ($columns as $column) {
             if (!in_array($column->getBlockId(), $gridIds, true)) {
@@ -3845,18 +3846,25 @@ class BL_CustomGrid_Model_Grid
                         $store = is_null($column->getStoreId())
                             ? $gridBlock->blcg_getStore()
                             : Mage::app()->getStore($column->getStoreId());
+                        $attributeKey = $column->getIndex() . '_' . $store->getId();
                         
-                        $data['index'] = $alias = self::ATTRIBUTE_COLUMN_GRID_ALIAS
-                            . str_replace(self::ATTRIBUTE_COLUMN_ID_PREFIX, '', $column->getBlockId());
-                        
-                        $gridBlock->blcg_addAdditionalAttribute(array(
-                            'alias'     => $alias,
-                            'attribute' => $attributes[$column->getIndex()],
-                            'bind'      => 'entity_id',
-                            'filter'    => null,
-                            'join_type' => 'left',
-                            'store_id'  => $store->getId(),
-                        ));
+                        if (!isset($addedAttributes[$attributeKey])) {
+                            $data['index'] = $alias = self::ATTRIBUTE_COLUMN_GRID_ALIAS
+                                . str_replace(self::ATTRIBUTE_COLUMN_ID_PREFIX, '', $column->getBlockId());
+                            
+                            $gridBlock->blcg_addAdditionalAttribute(array(
+                                'alias'     => $alias,
+                                'attribute' => $attributes[$column->getIndex()],
+                                'bind'      => 'entity_id',
+                                'filter'    => null,
+                                'join_type' => 'left',
+                                'store_id'  => $store->getId(),
+                            ));
+                            
+                            $addedAttributes[$attributeKey] = $alias;
+                        } else {
+                            $data['index'] = $addedAttributes[$attributeKey];
+                        }
                         
                         $data = array_merge(
                             $data,
