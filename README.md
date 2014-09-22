@@ -8,7 +8,7 @@ More informations about the extension can be found on its Magento Connect page h
 ### Backwards compatibility
 Due to the code refactoring, any custom development based on classes coming from the previous versions of the extension, or using an own `customgrid.xml` file, may certainly not be compatible as-is with the new version. Please review the changes and adapt your code accordingly before using the new version on a live environment.
 
-_Backwards compatibility is assured for all the existing data._
+_Backwards compatibility is assured for all the previously existing data. **If you're upgrading from a previous version, flushing the cache storage is likely to be needed to ensure that everything works fine (due to some renamings in the database structure).**_
 
 ### Main changes / New features :
 - massive code refactoring (goals: better maintainability, more consistency, more independence, better practices and a smaller footprint)
