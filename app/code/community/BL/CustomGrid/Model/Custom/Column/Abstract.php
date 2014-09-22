@@ -846,7 +846,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract
             $this->_getDefaultBlockValues($gridBlock, $gridModel, $columnBlockId, $columnIndex, $params, $store),
             $this->_getBlockValues($gridBlock, $gridModel, $columnBlockId, $columnIndex, $params, $store),
             (is_array($values = $this->getBlockParams()) ? $values : array()),
-            (is_object($renderer) ? $renderer->getColumnGridValues($columnIndex, $store, $gridModel) : array()),
+            (is_object($renderer) ? $renderer->getColumnBlockValues($columnIndex, $store, $gridModel) : array()),
             $this->_getForcedBlockValues($gridBlock, $gridModel, $columnBlockId, $columnIndex, $params, $store)
         );
     }
