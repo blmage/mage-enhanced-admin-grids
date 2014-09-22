@@ -718,7 +718,7 @@ class BL_CustomGrid_Model_Grid
      */
     public function getBaseProfileName()
     {
-        return $this->_getHelper()->__('Default Grid Profile');
+        return $this->_getHelper()->__('Default');
     }
     
     /**
