@@ -132,10 +132,14 @@ $grids = $connection->select()
     ->from($tables['grid'])
     ->where('default_filter IS NOT NULL');
 
+$grids = $connection->fetchAll($grids);
+
 foreach ($grids as $grid) {
     if (is_array($defaultFilter = @unserialize($grid['default_filter']))) {
         foreach ($defaultFilter as $key => $data) {
-            if (isset($data['column']) && isset($data['column']['custom_params'])) {
+            if (isset($data['column'])
+                && is_array($data['column'])
+                && array_key_exists('custom_params', $data['column'])) {
                 $defaultFilter[$key]['column']['customization_params'] = $data['column']['custom_params'];
                 unset($defaultFilter[$key]['column']['custom_params']);
             }
