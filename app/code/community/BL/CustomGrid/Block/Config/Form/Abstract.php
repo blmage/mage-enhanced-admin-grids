@@ -98,8 +98,8 @@ abstract class BL_CustomGrid_Block_Config_Form_Abstract
         }
         
         // Initial value
-        if (is_array($values = $this->getConfigValues())) {
-            $fieldData['value'] = (isset($values[$fieldName]) ? $values[$fieldName] : '');
+        if (is_array($values = $this->getConfigValues()) && isset($values[$fieldName])) {
+            $fieldData['value'] = $values[$fieldName];
         } else {
             $fieldData['value'] = $parameter->getValue();
             

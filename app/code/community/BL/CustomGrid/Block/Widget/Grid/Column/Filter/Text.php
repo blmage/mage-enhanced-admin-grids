@@ -21,18 +21,68 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Text
     const MODE_INSIDE_LIKE  = 'inside_like';
     const MODE_REGEX = 'regex';
     
+    static protected $_modesShortcuts = array(
+        'el' => self::MODE_EXACT_LIKE,
+        'il' => self::MODE_INSIDE_LIKE,
+        're' => self::MODE_REGEX,
+    );
+    
+    public function getHtml()
+    {
+        if ($this->getColumn()->getFilterMode() == self::MODE_WITH_WITHOUT) {
+            $value = (!is_null($value = $this->getValue()) ? (bool) $value : null);
+            $withSelected = ($value === true ? ' selected="selected"' : '');
+            $withoutSelected = ($value === false ? ' selected="selected"' : '');
+            
+            return '<select name="' . $this->_getHtmlName() . '" id="' . $this->_getHtmlId() . '" class="no-changes">'
+                . '<option value=""></option>'
+                . '<option value="1"' . $withSelected . '>' . $this->__('With') . '</option>'
+                . '<option value="0"' . $withoutSelected . '>' . $this->__('Without') . '</option>'
+                . '</select>';
+        }
+        return parent::getHtml();
+    }
+    
     public function getCondition()
     {
-        // @todo add a mode where filter mode and negative flag would be implied by the given value ?
-        // (eg: re-(test) for a negative regex filter on "test") - how to call it ?
-        
         $columnBlock = $this->getColumn();
         $collection  = $columnBlock->getGrid()->getCollection();
-        $filterMode  = $columnBlock->getFilterMode();
-        $filterIndex = (($filterIndex = $columnBlock->getFilterIndex()) ? $filterIndex : $columnBlock->getIndex());
-        $isNegative  = (bool) $columnBlock->getNegativeFilter();
         $value = $this->getValue();
         $condition = null;
+        
+        $filterModeShortcut = (bool) $columnBlock->getFilterModeShortcut();
+        $negativeFilterShortcut = (bool) $columnBlock->getNegativeFilterShortcut();
+        $filterIndex = (($filterIndex = $columnBlock->getFilterIndex()) ? $filterIndex : $columnBlock->getIndex());
+        $filterMode  = $columnBlock->getFilterMode();
+        $isNegative  = (!$negativeFilterShortcut && $columnBlock->getNegativeFilter());
+        
+        if ($filterMode == self::MODE_WITH_WITHOUT) {
+            $filterModeShortcut = false;
+            $negativeFilterShortcut = false;
+        }
+        
+        if ($filterModeShortcut || $negativeFilterShortcut) {
+            $modesCodesRegex = implode('|', array_keys(self::$_modesShortcuts)); 
+            
+            if (preg_match('#^\\[(!)?(' . $modesCodesRegex . ')?\\](.*)$#', $value, $matches)) {
+                $value = $matches[3];
+                
+                if ($negativeFilterShortcut) {
+                    $isNegative = !empty($matches[1]);
+                } elseif (!empty($matches[1])) {
+                    Mage::getSingleton('customgrid/session')
+                        ->addNotice($this->__('Negative filter shortcut is not enabled (used in "%s")', $matches[0]));
+                }
+                if ($filterModeShortcut) {
+                    if (!empty($matches[2])) {
+                        $filterMode = self::$_modesShortcuts[$matches[2]];
+                    }
+                } elseif (!empty($matches[2])) {
+                    Mage::getSingleton('customgrid/session')
+                        ->addNotice($this->__('Filter mode shortcut is not enabled (used in "%s")', $matches[0]));
+                }
+            }
+        }
         
         if ($filterMode == self::MODE_WITH_WITHOUT) {
             $condition = ($value ? array('neq' => '') : array(array('eq' => ''), array('isnull' => true)));
@@ -56,8 +106,8 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Text
             $stringHelper   = $this->helper('core/string');
             $valueLength    = $stringHelper->strlen($value);
             $searchedValue  = '';
-            $singleWildcard = $this->getColumn()->getSingleWildcard();
-            $multipleWildcard = $this->getColumn()->getMultipleWildcard();
+            $singleWildcard = $columnBlock->getSingleWildcard();
+            $multipleWildcard = $columnBlock->getMultipleWildcard();
             
             for ($i=0; $i<$valueLength; $i++) {
                 $char = $stringHelper->substr($value, $i, 1);

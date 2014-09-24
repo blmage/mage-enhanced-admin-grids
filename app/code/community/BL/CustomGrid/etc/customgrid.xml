@@ -818,8 +818,8 @@
                         <description>If no value is set, "," will be used</description>
                         <visible>1</visible>
                         <type>text</type>
-                        <value>,</value>
                         <sort_order>70</sort_order>
+                        <value>,</value>
                         <depends>
                             <imploded_values>
                                 <value>1</value>
@@ -845,12 +845,14 @@
                         <sort_order>10</sort_order>
                         <value>inside_like</value>
                     </filter_mode>
-                    <negative_filter>
-                        <label>Negative Filter</label>
+                    <filter_mode_shortcut>
+                        <label>Enable Filter Mode Shortcut</label>
+                        <description><![CDATA[Allows to specify the filter mode directly in the filter field, by placing the corresponding code between square brackets at the beginning of the searched value.<br />Eg, use "<strong>[el]</strong>Example" to search for "Example" using "LIKE (exact)".<br />If no filter mode is indicated in the field, then the value of "Filter Mode" will be used by default")]]></description>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
                         <sort_order>20</sort_order>
+                        <value>1</value>
                         <depends>
                             <filter_mode>
                                 <values>
@@ -860,50 +862,71 @@
                                 </values>
                             </filter_mode>
                         </depends>
-                    </negative_filter>
-                    <single_wildcard>
-                        <label>Wildcard for single character</label>
-                        <description>Must be exactly one character. If none is set, no wildcard of this kind will be available at all</description>
+                    </filter_mode_shortcut>
+                    <negative_filter>
+                        <label>Negative Filter</label>
                         <visible>1</visible>
-                        <type>text</type>
+                        <type>select</type>
+                        <source_model>customgrid/system_config_source_yesno</source_model>
                         <sort_order>30</sort_order>
                         <depends>
                             <filter_mode>
                                 <values>
                                     <value1>exact_like</value1>
                                     <value2>inside_like</value2>
+                                    <value3>regex</value3>
                                 </values>
                             </filter_mode>
+                            <negative_filter_shortcut>
+                                <value>0</value>
+                            </negative_filter_shortcut>
                         </depends>
-                    </single_wildcard>
-                    <multiple_wildcard>
-                        <label>Wildcard for multiple characters</label>
-                        <description>Must be exactly one character, differing from the wildcard for single character. If no valid value is set, no wildcard of this kind will be available at all</description>
+                    </negative_filter>
+                    <negative_filter_shortcut>
+                        <label>Enable Negative Filter Shortcut</label>
+                        <description><![CDATA[Allows to trigger negative filter directly from the filter field, by placing the character "<strong>!</strong>" between square brackets at the beginning of the searched value (eg: "<strong>[!]</strong>Example").<br />If the code of a filter mode is already present in the value, then place the character "<strong>!</strong>" in front of it (eg: "<strong>[!el]</strong>Example")]]></description>
                         <visible>1</visible>
-                        <type>text</type>
+                        <type>select</type>
+                        <source_model>customgrid/system_config_source_yesno</source_model>
                         <sort_order>40</sort_order>
+                        <value>1</value>
                         <depends>
                             <filter_mode>
                                 <values>
                                     <value1>exact_like</value1>
                                     <value2>inside_like</value2>
+                                    <value3>regex</value3>
                                 </values>
                             </filter_mode>
                         </depends>
+                    </negative_filter_shortcut>
+                    <single_wildcard>
+                        <label>Wildcard for single character (LIKE filters)</label>
+                        <description>Must be exactly one character. If none is set, no wildcard of this kind will be available at all</description>
+                        <visible>1</visible>
+                        <type>text</type>
+                        <sort_order>50</sort_order>
+                    </single_wildcard>
+                    <multiple_wildcard>
+                        <label>Wildcard for multiple characters (LIKE filters)</label>
+                        <description>Must be exactly one character, differing from the wildcard for single character. If no valid value is set, no wildcard of this kind will be available at all</description>
+                        <visible>1</visible>
+                        <type>text</type>
+                        <sort_order>60</sort_order>
                     </multiple_wildcard>
                     <truncation_mode>
                         <label>Truncate text</label>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/column_renderer_source_text_truncation_mode</source_model>
-                        <sort_order>50</sort_order>
+                        <sort_order>70</sort_order>
                         <value>none</value>
                     </truncation_mode>
                     <truncation_at>
                         <label>Truncate at n-th character</label>
                         <visible>1</visible>
                         <type>text</type>
-                        <sort_order>60</sort_order>
+                        <sort_order>80</sort_order>
                         <depends>
                             <truncation_mode>
                                 <values>
@@ -917,7 +940,7 @@
                         <label>Truncate ending string</label>
                         <visible>1</visible>
                         <type>text</type>
-                        <sort_order>70</sort_order>
+                        <sort_order>90</sort_order>
                         <depends>
                             <truncation_mode>
                                 <values>
@@ -932,7 +955,7 @@
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
-                        <sort_order>80</sort_order>
+                        <sort_order>100</sort_order>
                         <depends>
                             <truncation_mode>
                                 <values>
@@ -947,7 +970,7 @@
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
-                        <sort_order>90</sort_order>
+                        <sort_order>110</sort_order>
                         <value>0</value>
                     </escape_html>
                     <nl2br>
@@ -955,7 +978,7 @@
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
-                        <sort_order>100</sort_order>
+                        <sort_order>120</sort_order>
                         <value>0</value>
                     </nl2br>
                     <cms_template_processor>
@@ -964,7 +987,7 @@
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/column_renderer_source_cms_template_processor</source_model>
-                        <sort_order>110</sort_order>
+                        <sort_order>130</sort_order>
                         <value>none</value>
                     </cms_template_processor>
                 </parameters>
@@ -1020,8 +1043,8 @@
                         <label>Options Separator</label>
                         <visible>1</visible>
                         <type>text</type>
-                        <value> - </value>
                         <sort_order>60</sort_order>
+                        <value> - </value>
                         <depends>
                             <display_full_path>
                                 <value>1</value>
@@ -1329,12 +1352,14 @@
                         <sort_order>10</sort_order>
                         <value>inside_like</value>
                     </filter_mode>
-                    <negative_filter>
-                        <label>Negative Filter</label>
+                    <filter_mode_shortcut>
+                        <label>Enable Filter Mode Shortcut</label>
+                        <description><![CDATA[Allows to specify the filter mode directly in the filter field, by placing the corresponding code between square brackets at the beginning of the searched value.<br />Eg, use "<strong>[el]</strong>Example" to search for "Example" using "LIKE (exact)".<br />If no filter mode is indicated in the field, then the value of "Filter Mode" will be used by default")]]></description>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
                         <sort_order>20</sort_order>
+                        <value>1</value>
                         <depends>
                             <filter_mode>
                                 <values>
@@ -1344,50 +1369,71 @@
                                 </values>
                             </filter_mode>
                         </depends>
-                    </negative_filter>
-                    <single_wildcard>
-                        <label>Wildcard for single character</label>
-                        <description>Must be exactly one character. If none is set, no wildcard of this kind will be available at all</description>
+                    </filter_mode_shortcut>
+                    <negative_filter>
+                        <label>Negative Filter</label>
                         <visible>1</visible>
-                        <type>text</type>
+                        <type>select</type>
+                        <source_model>customgrid/system_config_source_yesno</source_model>
                         <sort_order>30</sort_order>
                         <depends>
                             <filter_mode>
                                 <values>
                                     <value1>exact_like</value1>
                                     <value2>inside_like</value2>
+                                    <value3>regex</value3>
                                 </values>
                             </filter_mode>
+                            <negative_filter_shortcut>
+                                <value>0</value>
+                            </negative_filter_shortcut>
                         </depends>
-                    </single_wildcard>
-                    <multiple_wildcard>
-                        <label>Wildcard for multiple characters</label>
-                        <description>Must be exactly one character, differing from the wildcard for single character. If no valid value is set, no wildcard of this kind will be available at all</description>
+                    </negative_filter>
+                    <negative_filter_shortcut>
+                        <label>Enable Negative Filter Shortcut</label>
+                        <description><![CDATA[Allows to trigger negative filter directly from the filter field, by placing the character "<strong>!</strong>" between square brackets at the beginning of the searched value (eg: "<strong>[!]</strong>Example").<br />If the code of a filter mode is already present in the value, then place the character "<strong>!</strong>" in front of it (eg: "<strong>[!el]</strong>Example")]]></description>
                         <visible>1</visible>
-                        <type>text</type>
+                        <type>select</type>
+                        <source_model>customgrid/system_config_source_yesno</source_model>
                         <sort_order>40</sort_order>
+                        <value>1</value>
                         <depends>
                             <filter_mode>
                                 <values>
                                     <value1>exact_like</value1>
                                     <value2>inside_like</value2>
+                                    <value3>regex</value3>
                                 </values>
                             </filter_mode>
                         </depends>
+                    </negative_filter_shortcut>
+                    <single_wildcard>
+                        <label>Wildcard for single character (LIKE filters)</label>
+                        <description>Must be exactly one character. If none is set, no wildcard of this kind will be available at all</description>
+                        <visible>1</visible>
+                        <type>text</type>
+                        <sort_order>50</sort_order>
+                    </single_wildcard>
+                    <multiple_wildcard>
+                        <label>Wildcard for multiple characters (LIKE filters)</label>
+                        <description>Must be exactly one character, differing from the wildcard for single character. If no valid value is set, no wildcard of this kind will be available at all</description>
+                        <visible>1</visible>
+                        <type>text</type>
+                        <sort_order>60</sort_order>
                     </multiple_wildcard>
                     <truncation_mode>
                         <label>Truncate text</label>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/column_renderer_source_text_truncation_mode</source_model>
-                        <sort_order>50</sort_order>
+                        <sort_order>70</sort_order>
                         <value>none</value>
                     </truncation_mode>
                     <truncate_at>
                         <label>Truncate at n-th character</label>
                         <visible>1</visible>
                         <type>text</type>
-                        <sort_order>60</sort_order>
+                        <sort_order>80</sort_order>
                         <depends>
                             <truncation_mode>
                                 <values>
@@ -1401,7 +1447,7 @@
                         <label>Truncate ending string</label>
                         <visible>1</visible>
                         <type>text</type>
-                        <sort_order>70</sort_order>
+                        <sort_order>90</sort_order>
                         <depends>
                             <truncation_mode>
                                 <values>
@@ -1416,7 +1462,7 @@
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
-                        <sort_order>80</sort_order>
+                        <sort_order>100</sort_order>
                         <depends>
                             <truncation_mode>
                                 <values>
@@ -1431,7 +1477,7 @@
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
-                        <sort_order>90</sort_order>
+                        <sort_order>110</sort_order>
                         <value>0</value>
                     </escape_html>
                     <nl2br>
@@ -1439,7 +1485,7 @@
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
-                        <sort_order>100</sort_order>
+                        <sort_order>120</sort_order>
                         <value>0</value>
                     </nl2br>
                     <cms_template_processor>
@@ -1448,7 +1494,7 @@
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/column_renderer_source_cms_template_processor</source_model>
-                        <sort_order>110</sort_order>
+                        <sort_order>130</sort_order>
                         <value>none</value>
                     </cms_template_processor>
                 </parameters>

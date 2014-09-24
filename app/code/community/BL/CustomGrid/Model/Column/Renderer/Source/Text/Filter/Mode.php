@@ -24,15 +24,15 @@ class BL_CustomGrid_Model_Column_Renderer_Source_Text_Filter_Mode
             ),
             array(
                 'value' => BL_CustomGrid_Block_Widget_Grid_Column_Filter_Text::MODE_EXACT_LIKE,
-                'label' => Mage::helper('customgrid')->__('LIKE (exact)'),
+                'label' => Mage::helper('customgrid')->__('[el] LIKE (exact)'),
             ),
             array(
                 'value' => BL_CustomGrid_Block_Widget_Grid_Column_Filter_Text::MODE_INSIDE_LIKE,
-                'label' => Mage::helper('customgrid')->__('LIKE (between %)'),
+                'label' => Mage::helper('customgrid')->__('[il] LIKE (between %)'),
             ),
             array(
                 'value' => BL_CustomGrid_Block_Widget_Grid_Column_Filter_Text::MODE_REGEX,
-                'label' => Mage::helper('customgrid')->__('Regular Expression'),
+                'label' => Mage::helper('customgrid')->__('[re] Regular Expression'),
             ),
         );
     }
