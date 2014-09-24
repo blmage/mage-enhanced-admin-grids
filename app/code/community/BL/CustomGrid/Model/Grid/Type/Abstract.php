@@ -288,7 +288,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract
             || !is_array($exportTypes = $this->getData('export_types/' . $blockType))) {
             $exportTypes = array();
             
-            foreach ($this->_getExportTypes($blockType) as $exportType) {
+            foreach ($this->_getExportTypes($blockType) as $key => $exportType) {
                 if (!$exportType instanceof BL_CustomGrid_Object) {
                     if (is_array($exportType)) {
                         $exportType = new BL_CustomGrid_Object($exportType);
@@ -296,6 +296,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract
                         continue;
                     }
                 }
+                
                 if ($exportType->hasRoute() && !$exportType->hasUrl()) {
                     $urlParams = array('_current' => true);
                     
@@ -305,6 +306,8 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract
                     
                     $exportType->setUrl(Mage::helper('adminhtml')->getUrl($exportType->getRoute(), $urlParams));
                 }
+                
+                $exportTypes[$key] = $exportType;
             }
             
             $this->setData('export_types/' . $blockType, $exportTypes);
