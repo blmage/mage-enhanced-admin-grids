@@ -102,6 +102,11 @@ class BL_CustomGrid_Model_Observer
         return $this->getData($dataKey);
     }
     
+    /**
+     * Return a collection of grid models matching the current request
+     * 
+     * @return BL_CustomGrid_Model_Mysql4_Grid_Collection
+     */
     public function getGridModelsCollection()
     {
         if (!$this->hasData('grid_models_collection')) {
@@ -129,18 +134,18 @@ class BL_CustomGrid_Model_Observer
      */
     public function getGridModel($blockType, $blockId, $exceptExcluded=true)
     {
-        $gridModel = null;
+        $matchingGridModel = null;
         
         foreach ($this->getGridModelsCollection() as $gridModel) {
             if ($gridModel->matchGridBlock($blockType, $blockId)) {
-                if ($exceptExcluded && $this->isExcludedGridModel($gridModel)) {
-                    $gridModel = null;
+                if (!$exceptExcluded || !$this->isExcludedGridModel($gridModel)) {
+                    $matchingGridModel = $gridModel;
                 }
                 break;
             }
         }
         
-        return $gridModel;
+        return $matchingGridModel;
     }
     
     /**
