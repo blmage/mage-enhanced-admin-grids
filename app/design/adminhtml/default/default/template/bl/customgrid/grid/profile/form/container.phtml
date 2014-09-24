@@ -37,10 +37,17 @@ blcgGridProfileForm.submit = function(url) {
     <?php if ($_profilesJsObjectName): ?>
     if (typeof(<?php echo $_profilesJsObjectName ?>) != 'undefined') {
         if (this.validator && this.validator.validate()) {
-            <?php echo $_profilesJsObjectName ?>.applyAction(
-                '<?php echo $this->jsQuoteEscape($this->getActionCode()) ?>',
-                $('<?php echo $_formHtmlId ?>').serialize(true)
-            );
+            var editedProfile = <?php echo $_profilesJsObjectName ?>.getProfile(<?php echo (int) $this->getProfileId() ?>);
+            
+            if (editedProfile) {
+                <?php echo $_profilesJsObjectName ?>.applyAction(
+                    editedProfile,
+                    '<?php echo $this->jsQuoteEscape($this->getActionCode()) ?>',
+                    $('<?php echo $_formHtmlId ?>').serialize(true)
+                );
+            } else {
+                alert('<?php echo $this->jsQuoteEscape($this->__('The edited profile is not available anymore')) ?>');
+            }
         }
     } else {
         alert('<?php echo $this->jsQuoteEscape($this->__('Can\'t find profiles JS object')) ?>');

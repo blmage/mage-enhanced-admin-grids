@@ -31,7 +31,7 @@ class BL_CustomGrid_Grid_ProfileController
         
         try {
             $gridModel = $this->_initGridModel();
-            $this->_initGridProfile();
+            $gridProfile = $this->_initGridProfile();
             
             if (!is_null($permissions)) {
                 $isAllowed = false;
@@ -72,7 +72,8 @@ class BL_CustomGrid_Grid_ProfileController
                 $errorBlock->setErrorText($error);
             }
         } elseif ($containerBlock = $this->getLayout()->getBlock('blcg.grid_profile.form_container')) {
-            $containerBlock->setActionCode($actionCode)
+            $containerBlock->setProfileId($gridProfile->getId())
+                ->setActionCode($actionCode)
                 ->setProfilesBarJsObjectName($this->getRequest()->getParam('js_object_name'));
         }
         

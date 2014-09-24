@@ -601,6 +601,7 @@ blcg.MessagesTabs.prototype = {
 };
 
 /*
+ * Based on tooltip-0.2.js - Small tooltip library on top of Prototype:
  * Copyright (c) 2006 Jonathan Weiss <jw@innerewut.de>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -747,6 +748,210 @@ blcg.Tooltip.prototype = {
         return document.viewport.getScrollOffsets();
     }
 };
+
+/**
+ * Based on Control.ContextMenu from LivePipe UI:
+ * @author Ryan Johnson <http://syntacticx.com/>
+ * @copyright 2008 PersonalGrid Corporation <http://personalgrid.com/>
+ * @package LivePipe UI
+ * @license MIT
+ * @url http://livepipe.net/control/contextmenu
+ */
+
+blcg.ContextMenu = Class.create();
+blcg.ContextMenu.prototype = {
+    initialize: function(container)
+    {
+        blcg.ContextMenu.load();
+        
+        this.activatedItem = false;
+        this.items = [];
+        this.container = $(container);
+        
+        this.container.observe((Prototype.Browser.Opera ? 'click' : 'contextmenu'), function(event) {
+            if (!blcg.ContextMenu.isEnabled || (Prototype.Browser.Opera && !event.ctrlKey)) {
+                return;
+            }
+            this.open(event);
+        }.bindAsEventListener(this));
+    },
+    
+    open: function(event)
+    {
+        if (blcg.ContextMenu.currentMenu && !blcg.ContextMenu.currentMenu.close()) {
+            return;
+        }
+        
+        this.buildMenu();
+        
+        if (this.items.length === 0) {
+            this.close(event);
+            return false;
+        }
+        
+        this.clickedItem = Event.element(event);
+        blcg.ContextMenu.currentMenu = this;
+        blcg.ContextMenu.positionContainer(event);
+        blcg.ContextMenu.container.show();
+        
+        event.stop();
+        return true;
+    },
+    
+    close: function(event)
+    {
+        if (event) {
+            event.stop();
+        }
+        
+        blcg.ContextMenu.currentMenu = false;
+        this.activatedItem = false;
+        
+        blcg.ContextMenu.container.select('li').invoke('stopObserving');
+        blcg.ContextMenu.container.hide();
+        blcg.ContextMenu.container.update('');
+        
+        return true;
+    },
+    
+    getItemValue: function(value)
+    {
+        return (Object.isFunction(value) ? value() : value);
+    },
+    
+    buildMenu: function()
+    {
+        var list = document.createElement('ul');
+        blcg.ContextMenu.container.appendChild(list);
+        
+        this.items.each(function(item) {
+            if (!(!item.condition || (item.condition && (item.condition() !== false)))) {
+                return;
+            }
+            
+            var itemContainer = $(document.createElement('li'));
+            itemContainer.update(this.getItemValue(item.label));
+            list.appendChild(itemContainer);
+            itemContainer[this.getItemValue(item.isEnabled) ? 'removeClassName' : 'addClassName']('disabled');
+            
+            itemContainer.observe('mousedown', function(event, item) {
+                if (!this.getItemValue(item.isEnabled)) {
+                    return event.stop();
+                }
+                this.activatedItem = this.getItemValue(item.label);
+            }.bindAsEventListener(this, item));
+            
+            itemContainer.observe('click', this.selectMenuItem.bindAsEventListener(this, item, itemContainer));
+            itemContainer.observe('contextmenu', this.selectMenuItem.bindAsEventListener(this, item, itemContainer));
+        }.bind(this));
+    },
+    
+    addItem: function(params)
+    {
+        if (!('isEnabled' in params)) {
+            params.isEnabled = true;
+        }
+        this.items.push(params);
+        return this;
+    },
+    
+    destroy: function()
+    {
+        this.container.stopObserving(Prototype.Browser.Opera ? 'click' : 'contextmenu');
+        this.items = [];
+    },
+    
+    selectMenuItem: function(event, item, itemContainer)
+    {
+        if (!this.getItemValue(item.isEnabled)) {
+            return event.stop();
+        }
+        
+        if (!this.activatedItem || (this.activatedItem == this.getItemValue(item.label))) {
+            if (this.close()) {
+                item.callback(this.clickedItem);
+            }
+        }
+        
+        event.stop();
+        return false;
+    }
+};
+
+Object.extend(blcg.ContextMenu, {
+    isLoaded: false,
+    isEnabled: false,
+    menus: [],
+    currentMenu: false,
+    offset: 4,
+    
+    load: function()
+    {
+        if (blcg.ContextMenu.isLoaded) {
+            return;
+        }
+        
+        blcg.ContextMenu.isLoaded = true;
+        blcg.ContextMenu.container = $(document.createElement('div'));
+        blcg.ContextMenu.container.id = 'blcg-context-menu';
+        
+        blcg.ContextMenu.container.setStyle({
+            position: 'absolute',
+            zIndex: 99999
+        });
+        
+        blcg.ContextMenu.container.hide();
+        $(document.body).appendChild(blcg.ContextMenu.container);
+        blcg.ContextMenu.enable();
+    },
+    
+    enable: function()
+    {
+        blcg.ContextMenu.isEnabled = true;
+        $(document.body).observe('click', blcg.ContextMenu.onClick);
+    },
+    
+    disable: function()
+    {
+        $(document.body).stopObserving('click', blcg.ContextMenu.onClick);
+    },
+    
+    onContextMenu: function(event)
+    {
+        event.stop();
+        return false;
+    },
+    
+    onClick: function()
+    {
+        if (blcg.ContextMenu.currentMenu) {
+            blcg.ContextMenu.currentMenu.close();
+        }
+    },
+    
+    positionContainer: function(event)
+    {
+        var dimensions = blcg.ContextMenu.container.getDimensions();
+        var top  = Event.pointerY(event);
+        var left = Event.pointerX(event);
+        var bottom = dimensions.height + top;
+        var right  = dimensions.width  + left;
+        var viewportDimensions = document.viewport.getDimensions();
+        var viewportScrollOffsets = document.viewport.getScrollOffsets();
+        
+        if (bottom > viewportDimensions.height + viewportScrollOffsets.top) {
+            top -= bottom - ((viewportDimensions.height  + viewportScrollOffsets.top) - blcg.ContextMenu.offset);
+        }
+        if(right > viewportDimensions.width + viewportScrollOffsets.left) {
+            left -= right - ((viewportDimensions.width + viewportScrollOffsets.left) - blcg.ContextMenu.offset);
+        }
+        
+        blcg.ContextMenu.container.setStyle({
+            top: top + 'px',
+            left: left + 'px'
+        });
+    }
+});
 
 /*
 * Table drag'n'drop
@@ -1242,7 +1447,6 @@ blcg.Grid.ProfilesBar.prototype = {
             profileIdPlaceholder: '{{profile_id}}',
             profileItemIdPrefix: 'blcg-grid-profile-item-',
             fixedPartClassName: 'blcg-grid-profiles-bar-fixed-part',
-            actionsListClassName: 'blcg-grid-profiles-bar-actions',
             profilesListClassName: 'blcg-grid-profiles-list',
             upArrowClassName: 'blcg-grid-profiles-bar-arrow-up',
             downArrowClassName: 'blcg-grid-profiles-bar-arrow-down',
@@ -1250,14 +1454,12 @@ blcg.Grid.ProfilesBar.prototype = {
             listLevelsCountClassName: 'blcg-grid-profiles-list-levels-count',
             currentClassName: 'blcg-current',
             baseClassName: 'blcg-base',
-            disabledClassName: 'blcg-disabled',
-            selectedClassName: 'blcg-selected'
+            disabledClassName: 'blcg-disabled'
         }, config || {});
         
         this.barId = barId;
         this.bar = $(this.barId);
         this.profilesList  = this.bar.select('.' + this.config.profilesListClassName).first();
-        this.actionsSelect = this.bar.select('.' + this.config.actionsListClassName + ' select').first();
         this.fixedPart = this.bar.select('.' + this.config.fixedPartClassName).first();
         this.upArrow   = this.bar.select('.' + this.config.upArrowClassName).first();
         this.downArrow = this.bar.select('.' + this.config.downArrowClassName).first();
@@ -1268,14 +1470,12 @@ blcg.Grid.ProfilesBar.prototype = {
         this.sortedIds = $A(sortedIds); // Hash.each() may not keep initial order
         this.profiles  = $H(profiles);
         this.actions   = $H(actions);
-        this.baseProfileId     = null;
-        this.currentProfileId  = null;
-        this.selectedProfile   = null;
-        this.selectedProfileId = null;
-        this.isActionRunning = false;
+        this.baseProfileId    = null;
+        this.currentProfileId = null;
+        this.isActionRunning  = false;
         
         this.sortedIds.each(function(profileId) {
-            var profile = this.profiles.get(profileId);
+            var profile = this.getProfile(profileId);
             
             if (profile) {
                 this.addProfileItem(profile, null);
@@ -1289,12 +1489,8 @@ blcg.Grid.ProfilesBar.prototype = {
             }
         }.bind(this));
         
-        if (this.currentProfileId !== null) {
-            this.selectProfile(this.currentProfileId);
-        }
-        
         this.profilesListScrollLevel = 0;
-        this.scrolledAfterSelect = false;
+        this.scrolledListTo = false;
         this.lastProfilesListScrollLevel = Number.MIN_VALUE;
         this.lastProfilesListMaxScrollLevel = Number.MAX_VALUE;
         this.profilesListHeight  = this.profilesList.up().getHeight();
@@ -1316,7 +1512,6 @@ blcg.Grid.ProfilesBar.prototype = {
     intializeRefresh: function()
     {
         this.fixedPartWidth = this.fixedPart.getWidth();
-        this.actionsSelect.observe('change', this.onActionSelect.bind(this));
         this.upArrow.observe('click', this.scrollUp.bind(this));
         this.downArrow.observe('click', this.scrollDown.bind(this));
         
@@ -1334,6 +1529,7 @@ blcg.Grid.ProfilesBar.prototype = {
         var item = $(document.createElement('li'));
         item.id = this.config.profileItemIdPrefix + profile.id;
         item.update(profile.name.escapeHTML());
+        item.observe('click', this.applyLeftClickAction.bind(this, profile.id));
         
         if (profile.isBase) {
             item.addClassName(this.config.baseClassName);
@@ -1342,8 +1538,22 @@ blcg.Grid.ProfilesBar.prototype = {
             item.addClassName(this.config.currentClassName);
         }
         
-        item.observe('click', this.selectProfile.bind(this, profile.id));
-        item.observe('dblclick', this.applyDoubleClickAction.bind(this, profile.id));
+        profile.contextMenu = new blcg.ContextMenu(item);
+        
+        profile.contextMenu.addItem({
+            label: profile.name.escapeHTML(),
+            isEnabled: false
+        });
+        
+        this.actions.each(function(pair) {
+            if ((pair.value.appliesToBase || !profile.isBase)
+                && (pair.value.appliesToCurrent || !profile.isCurrent)) {
+                profile.contextMenu.addItem({
+                    label: pair.value.label.escapeHTML(),
+                    callback: this.onActionMenuItemClick.bind(this, profile.id, pair.key)
+                });
+            }
+        }.bind(this));
         
         if (insertBeforeId == null) {
             this.profilesList.insert({bottom: item});
@@ -1357,13 +1567,9 @@ blcg.Grid.ProfilesBar.prototype = {
         this.getProfileItem(profileId).remove();
     },
     
-    selectProfileItem: function(profileId, selected)
+    getProfile: function(profileId)
     {
-        if (selected) {
-            this.getProfileItem(profileId).addClassName(this.config.selectedClassName);
-        } else {
-            this.getProfileItem(profileId).removeClassName(this.config.selectedClassName);
-        }
+        return this.profiles.get(profileId);
     },
     
     addProfile: function(profile)
@@ -1372,7 +1578,7 @@ blcg.Grid.ProfilesBar.prototype = {
         
         this.sortedIds.each(function(profileId) {
             if (insertBeforeId === null) {
-                var existingProfile = this.profiles.get(profileId);
+                var existingProfile = this.getProfile(profileId);
                 
                 if (existingProfile
                     && !existingProfile.isBase
@@ -1395,69 +1601,24 @@ blcg.Grid.ProfilesBar.prototype = {
     
     deleteProfile: function(profileId)
     {
-        var profile = this.profiles.get(profileId);
+        var profile = this.getProfile(profileId);
         
         if (profile) {
-            if (this.selectedProfileId == profile.id) {
-                this.selectedProfile = null;
-                this.selectedProfileId = null;
-            }
-            
             var sortedIndex = this.sortedIds.indexOf(profile.id);
             this.sortedIds  = this.sortedIds.slice(0, sortedIndex).concat(this.sortedIds.slice(sortedIndex+1));
             this.profiles.unset(profile.id);
             this.deleteProfileItem(profile.id);
-            
-            this.selectProfile(this.baseProfileId);
         }
     },
     
     renameProfile: function(profileId, newName)
     {
-        var profile = this.profiles.get(profileId);
+        var profile = this.getProfile(profileId);
         
         if (profile) {
             profile.name = newName;
             this.deleteProfile(profile.id);
             this.addProfile(profile);
-            this.selectProfile(profile.id);
-        }
-    },
-    
-    selectProfile: function(profileId)
-    {
-        var profile = this.profiles.get(profileId);
-        
-        if (profile) {
-            if (this.selectedProfileId !== null) {
-                this.selectProfileItem(this.selectedProfileId, false);
-            }
-            
-            this.actionsSelect.select('optgroup').invoke('remove');
-            var optgroup = $(document.createElement('optgroup'));
-            optgroup.label = profile.name.escapeHTML();
-            
-            var option = $(document.createElement('option'));
-            option.value = '';
-            option.update('');
-            optgroup.insert({bottom: option});
-            
-            this.actions.each(function(pair) {
-                if ((pair.value.appliesToBase || !profile.isBase)
-                    && (pair.value.appliesToCurrent || !profile.isCurrent)) {
-                    var option = $(document.createElement('option'));
-                    option.value = pair.key;
-                    option.update(pair.value.label.escapeHTML());
-                    optgroup.insert({bottom: option});
-                }
-            }.bind(this));
-            
-            this.actionsSelect.insert({bottom: optgroup});
-            
-            this.selectedProfile = profile;
-            this.selectedProfileId = profile.id;
-            this.scrolledAfterSelect = false;
-            this.selectProfileItem(this.selectedProfileId, true);
         }
     },
     
@@ -1472,7 +1633,6 @@ blcg.Grid.ProfilesBar.prototype = {
                 } else if (action.type == 'create') {
                     if (action.profile && action.profile.id) {
                         this.addProfile(action.profile);
-                        this.selectProfile(action.profile.id);
                     }
                 } else if (action.type == 'rename') {
                     if (action.profileId && action.profileName) {
@@ -1481,34 +1641,33 @@ blcg.Grid.ProfilesBar.prototype = {
                 } else if (action.type == 'delete') {
                     if (action.profileId) {
                         this.deleteProfile(action.profileId);
-                        this.selectProfile(this.currentProfileId);
                     }
                 }
             }.bind(this));
         }
     },
     
-    applyAction: function(actionCode, actionValues)
+    applyAction: function(profile, actionCode, actionValues)
     {
-        if (this.isActionRunning) {
+        if (!profile || this.isActionRunning) {
             return;
         }
         
         var action = this.actions.get(actionCode);
         
         if (action) {
-            if ((this.selectedProfile.isBase && !action.appliesToBase)
-                || (this.selectedProfile.isCurrent && !action.appliesToCurrent)) {
+            if ((profile.isBase && !action.appliesToBase)
+                || (profile.isCurrent && !action.appliesToCurrent)) {
                 return;
             }
             
             var windowMode = ((action.mode == 'window') && !actionValues);
             var actionUrl  = (windowMode ? action.windowUrl : action.url);
-            actionUrl = actionUrl.replace(this.config.profileIdPlaceholder, this.selectedProfileId);
+            actionUrl = actionUrl.replace(this.config.profileIdPlaceholder, profile.id);
             
             if (windowMode) {
                 var windowConfig = Object.extend({
-                    title: this.selectedProfile.name + ' - ' + action.label
+                    title: profile.name + ' - ' + action.label
                 }, action.windowConfig || {});
                 
                 blcg.Tools.openDialogFromUrl(actionUrl, windowConfig);
@@ -1541,46 +1700,49 @@ blcg.Grid.ProfilesBar.prototype = {
         }
     },
     
-    applyDoubleClickAction: function(profileId)
+    applyLeftClickAction: function(profileId)
     {
+        var profile = this.getProfile(profileId);
         var actionCode = null;
+        
+        if (!profile) {
+            return;
+        }
         
         this.actions.each(function(pair) {
             if (actionCode) {
                 return;
             }
-            if (pair.value.doubleClickable) {
+            if (pair.value.leftClickable) {
                 actionCode = pair.key;
             }
         });
         
-        this.applyAction(actionCode);
+        this.applyAction(profile, actionCode);
     },
     
-    onActionSelect: function()
+    onActionMenuItemClick: function(profileId, actionCode)
     {
-        var actionCode = $F(this.actionsSelect);
-        this.actionsSelect.selectedIndex = -1;
-        action = this.actions.get(actionCode);
+        var profile = this.getProfile(profileId);
+        var action = this.actions.get(actionCode);
         
-        if (action) {
+        if (profile && action) {
             if (!action.confirm || confirm(action.confirm)) {
-                this.applyAction(actionCode);
+                this.applyAction(profile, actionCode);
             }
         }
     },
     
     scrollUp: function()
     {
-        this.scrolledAfterSelect = true;
         this.profilesListScrollLevel = Math.max(0, this.profilesListScrollLevel-1);
+        this.scrolledListTo = this.profilesListScrollLevel;
         this.refreshProfilesList();
     },
     
     scrollDown: function()
     {
-        this.scrolledAfterSelect = true;
-        this.profilesListScrollLevel++;
+        this.scrolledListTo = ++this.profilesListScrollLevel;
         this.refreshProfilesList();
     },
     
@@ -1588,14 +1750,19 @@ blcg.Grid.ProfilesBar.prototype = {
     {
         this.profilesList.setStyle({width: (this.bar.getWidth() - this.fixedPartWidth) + 'px'});
         var listHeight = this.profilesList.getHeight();
+        
+        if (listHeight == 0) {
+            return;
+        }
+        
         var itemHeight = this.profilesList.up().getHeight();
         var maxScrollLevel = listHeight / this.profilesListHeight -1;
         
-        if (this.scrolledAfterSelect || !this.selectedProfileId) {
-            this.profilesListScrollLevel = Math.min(this.profilesListScrollLevel, maxScrollLevel);
+        if (this.scrolledListTo !== false) {
+            this.profilesListScrollLevel = Math.min(this.scrolledListTo, maxScrollLevel);
         } else {
-            var selectedOffset = this.getProfileItem(this.selectedProfileId).positionedOffset();
-            this.profilesListScrollLevel = Math.floor(selectedOffset.top / itemHeight);
+            var currentOffset = this.getProfileItem(this.currentProfileId).positionedOffset();
+            this.profilesListScrollLevel = Math.floor(currentOffset.top / itemHeight);
         }
         
         if ((this.profilesListScrollLevel != this.lastProfilesListScrollLevel)
