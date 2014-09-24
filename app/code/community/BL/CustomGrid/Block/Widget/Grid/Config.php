@@ -56,7 +56,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config
     
     public function getJsObjectName()
     {
-        return $this->getId();
+        return $this->getId() . 'Config';
     }
     
     public function getGridBlockJsObjectName()
@@ -228,7 +228,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config
                     'confirm' => false,
                     'appliesToBase'    => true,
                     'appliesToCurrent' => false,
-                    'doubleClickable'  => true,
+                    'leftClickable'    => true,
                 );
                 
                 if ($gridModel->checkUserActionPermission(BL_CustomGrid_Model_Grid::ACTION_CHOOSE_OWN_USER_DEFAULT_PROFILE)

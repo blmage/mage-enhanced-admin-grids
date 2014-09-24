@@ -102,7 +102,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config_Columns_List
     
     public function getConfigJsObjectName()
     {
-        return $this->getId();
+        return $this->getId() . 'Config';
     }
     
     public function getSaveUrl()
