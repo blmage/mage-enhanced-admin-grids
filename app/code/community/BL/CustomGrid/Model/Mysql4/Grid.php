@@ -628,7 +628,7 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
                             $values,
                             $write->quoteInto('grid_id = ?', $gridId)
                                 . ' AND '
-                                . $write->quoteInto('profile_id = ?', $profileId)
+                                . $write->quoteInto('profile_id = ?', $toProfileId)
                         );
                     }
                 }

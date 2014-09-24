@@ -111,6 +111,15 @@
                     </bl_customgrid>
                 </observers>
             </core_block_abstract_to_html_before>
+            <core_block_abstract_to_html_after>
+                <observers>
+                    <bl_customgrid>
+                        <type>singleton</type>
+                        <class>customgrid/observer</class>
+                        <method>afterBlockToHtml</method>
+                    </bl_customgrid>
+                </observers>
+            </core_block_abstract_to_html_after>
         </events>
         <layout>
             <updates>

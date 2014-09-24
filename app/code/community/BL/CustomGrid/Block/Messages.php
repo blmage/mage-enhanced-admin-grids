@@ -99,6 +99,7 @@ class BL_CustomGrid_Block_Messages
                 }
                 
                 foreach ($datedMessages as $date => $messages) {
+                    $html .= '<div class="blcg-messages-list">';
                     $html .= '<div class="blcg-messages-content-date">' . $this->_formatDate($date) . '</div>';
                     $html .= '<' . $this->_messagesFirstLevelTagName . ' class="messages">';
                     $html .= '<' . $this->_messagesSecondLevelTagName . ' class="' . $type . '-msg">';
@@ -121,6 +122,7 @@ class BL_CustomGrid_Block_Messages
                     $html .= '</' . $this->_messagesFirstLevelTagName . '>';
                     $html .= '</' . $this->_messagesSecondLevelTagName . '>';
                     $html .= '</' . $this->_messagesFirstLevelTagName . '>';
+                    $html .= '</div>';
                 }
             }
             

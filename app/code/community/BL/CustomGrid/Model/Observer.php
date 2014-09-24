@@ -309,10 +309,10 @@ class BL_CustomGrid_Model_Observer
     }
     
     /**
-     * Rewrite the grid block type that may not correspond to the current request,
-     * but whom the results are currently exported (if any)
+     * If one does exist, rewrite the grid block type that may not correspond to the current request,
+     * but whom the results are currently exported, and return the corresponding grid model
      *
-     * @return BL_CustomGrid_Model_Grid|null Grid model corresponding to the exported grid block (if any)
+     * @return BL_CustomGrid_Model_Grid|null
      */
     protected function _rewriteExportedGridBlock()
     {
@@ -321,6 +321,8 @@ class BL_CustomGrid_Model_Observer
         if ((!$gridId = $request->getParam('grid_id', null))
             || (!$gridModel = Mage::getModel('customgrid/grid')->load($gridId))
             || !$gridModel->getId()
+            || $gridModel->getDisabled()
+            || $this->isExcludedGridModel($gridModel)
             || !$gridModel->isExportRequest($request)
             || !$this->_rewriteGridBlock($gridModel->getBlockType())) {
             $gridModel = null;
@@ -354,11 +356,15 @@ class BL_CustomGrid_Model_Observer
         $gridModelsCollection = $this->getGridModelsCollection();
         
         foreach ($gridModelsCollection as $key => $gridModel) {
-            if ($gridModel->getDisabled()
-                || $this->isExcludedGridModel($gridModel)
-                || $this->isObsoleteGridModel($gridModel)
-                || !$this->_rewriteGridBlock($gridModel->getBlockType())) {
-                $gridModelsCollection->removeItemByKey($key);
+            if ($this->isObsoleteGridModel($gridModel)) {
+                // Remove obsolete grid models from the collection to avoid them later being used by confound
+                $gridModelsCollection->removeItemByKey($gridModel->getId());
+            } elseif (!$this->isExcludedGridModel($gridModel)) {
+                // Exclude grid models that should not be used for any reason
+                if ($gridModel->getDisabled()
+                    || !$this->_rewriteGridBlock($gridModel->getBlockType())) {
+                    $this->addExcludedGridModel($gridModel);
+                }
             }
         }
         
@@ -403,15 +409,13 @@ class BL_CustomGrid_Model_Observer
             $blockType = $gridBlock->getType();
             $blockId   = $gridBlock->getId();
             
-            if (($gridModel = $this->getGridModel($blockType, $blockId))
-                && !$gridModel->getDisabled()) {
+            if ($gridModel = $this->getGridModel($blockType, $blockId)) {
                 if (Mage::helper('customgrid')->isRewritedGridBlock($gridBlock)) {
                     $gridBlock->blcg_setGridModel($gridModel);
                     $gridBlock->blcg_setTypeModel($gridModel->getTypeModel());
                 } else {
                     // For some reason the grid was not rewrited, exclude it to prevent possible problems
                     $this->addExcludedGridModel($gridModel);
-                    // @todo add related message (with disable rewrite and refresh cache links)
                 }
             }
         }
@@ -478,8 +482,8 @@ class BL_CustomGrid_Model_Observer
                 
                 $defaultFilterButtonBlock = $layout->createBlock('adminhtml/widget_button')
                     ->setData(array(
-                        'label'     => Mage::helper('adminhtml')->__('Reapply Default Filter'),
-                        'onclick'   => $configBlock->getJsObjectName() . '.reapplyDefaultFilter()',
+                        'label'   => Mage::helper('adminhtml')->__('Reapply Default Filter'),
+                        'onclick' => $configBlock->getJsObjectName() . '.reapplyDefaultFilter()',
                     ));
                 
                 $gridBlock->setChild(
@@ -488,12 +492,6 @@ class BL_CustomGrid_Model_Observer
                         ->append($gridBlock->getChild('reset_filter_button'))
                         ->append($defaultFilterButtonBlock)
                 );
-                
-                if ($messagesBlock = $layout->getBlock('blcg.messages')) {
-                    $gridBlock->setMessagesBlock($messagesBlock);
-                } else {
-                    $gridBlock->setMessagesBlock($layout->createBlock('customgrid/messages'));
-                }
                 
                 $helper = Mage::helper('customgrid');
                 
@@ -510,6 +508,33 @@ class BL_CustomGrid_Model_Observer
     }
     
     /**
+     * Callback for the "core_block_abstract_to_html_after" event observer
+     * For Ajax requests, display our messages block at the end of the first output grid block (rewrited or not)
+     * This ensures that all the error messages are always available to the user as soon as possible
+     * (especially, when messages were added because a grid block could not be rewrited)
+     * 
+     * @param Varien_Event_Observer $observer
+     */
+    public function afterBlockToHtml(Varien_Event_Observer $observer)
+    {
+        if (Mage::helper('customgrid')->isAjaxRequest()
+            && !$this->hasData('has_output_ajax_messages_block')
+            && ($transport = $observer->getEvent()->getTransport())
+            && ($gridBlock = $observer->getEvent()->getBlock())
+            && ($gridBlock instanceof Mage_Adminhtml_Block_Widget_Grid)) {
+            $layout = $gridBlock->getLayout();
+            
+            if (!$messagesBlock = $layout->getBlock('blcg.messages')) {
+                $messagesBlock = $layout->createBlock('customgrid/messages');
+            }
+            
+            $messagesBlock->setIsAjaxMode(true);
+            $transport->setHtml($transport->getHtml() . $messagesBlock->toHtml());
+            $this->setData('has_output_ajax_messages_block', true);
+        }
+    }
+     
+    /**
      * "Callback" to use just before the call to Mage_Adminhtml_Block_Widget_Grid::_prepareCollection()
      * Apply default values to the given grid block, and put the collection preparation on hold
      * 
@@ -520,8 +545,7 @@ class BL_CustomGrid_Model_Observer
         $blockType = $gridBlock->getType();
         $blockId   = $gridBlock->getId();
         
-        if (!is_null($gridModel = $this->getGridModel($blockType, $blockId))
-            && !$gridModel->getDisabled()) {
+        if ($gridModel = $this->getGridModel($blockType, $blockId)) {
             $request = $this->_getRequest();
             
             if ($request->getParam($gridBlock->getVarNameFilter()) == self::GRID_FILTER_RESET_REQUEST_VALUE) {
@@ -553,8 +577,7 @@ class BL_CustomGrid_Model_Observer
         $blockType = $gridBlock->getType();
         $blockId   = $gridBlock->getId();
         
-        if (!is_null($gridModel = $this->getGridModel($blockType, $blockId))
-            && !$gridModel->getDisabled()) {
+        if ($gridModel = $this->getGridModel($blockType, $blockId)) {
             if ($collection = $gridBlock->getCollection()) {
                 $collection->setPageSize(1)->setCurPage(1)->load();
                 $applyFromCollection = $gridModel->checkColumnsAgainstGridBlock($gridBlock);

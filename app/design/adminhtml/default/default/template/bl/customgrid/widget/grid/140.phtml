@@ -277,7 +277,4 @@ $_gridModel  = $this->helper('customgrid/grid')->getGridModelFromBlock($this);;
 <?php endif ?>
 
 <?php endif ?>
-<?php if ($this->helper('customgrid')->isAjaxRequest()): ?>
-    <?php echo $this->getMessagesBlock()->setIsAjaxMode(true)->toHtml() ?>
-<?php endif ?>
 <?php echo $this->getChildHtml('blcg_grid_columns_editor') ?>

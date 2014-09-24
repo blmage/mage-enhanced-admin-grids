@@ -19,7 +19,7 @@
     <?php foreach ($this->getMessagesTypes() as $_type => $_label): ?>
         <?php if ($this->hasMessages($_type)): ?>
             <li class="blcg-no-display blcg-messages-list-wrapper blcg-messages-list-wrapper-<?php echo $_type ?>">
-                <div class="blcg-messages-list"><?php echo $this->getMessagesHtml($_type) ?></div>
+                <?php echo $this->getMessagesHtml($_type) ?>
             </li>
         <?php endif ?>
     <?php endforeach ?>
@@ -35,7 +35,7 @@
         <ul class="blcg-messages-lists">
         <?php foreach ($this->getMessagesTypes() as $_type => $_label): ?>
             <li id="blcg-messages-list-wrapper-<?php echo $_type ?>" class="blcg-no-display blcg-messages-list-wrapper blcg-messages-list-wrapper-<?php echo $_type ?>">
-                <div class="blcg-messages-list"><?php echo $this->getMessagesHtml($_type) ?></div>
+                <?php echo $this->getMessagesHtml($_type) ?>
             </li>
         <?php endforeach ?>
         </ul>

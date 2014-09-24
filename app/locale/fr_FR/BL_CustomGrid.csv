@@ -548,7 +548,7 @@
 "The filtered products must belong to all of the chosen categories","Les produits filtrés doivent appartenir à toutes les catégories choisies"
 "The filtered products must belong to at least one chosen category","Les produits filtrés doivent appartenir à au moins une catégorie choisie"
 "The filtered products must not belong to any of the chosen categories","Les produits filtrés ne doivent appartenir à aucune des catégories choisies"
-"The generated rewriting class ""%s""" can not be found","La classe de réécriture générée ""%s"" n'a pas pu être trouvée"
+"The generated rewriting class ""%s"" can not be found","La classe de réécriture générée ""%s"" n'a pas pu être trouvée"
 "The name is not editable for this customer group","Le nom n'est pas éditable pour ce groupe de clients"
 "The new profile could not be created","Le nouveau profil n'a pas pu être créé"
 "The options source has been successfully deleted.","La source d'options a bien été effacée."
