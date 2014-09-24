@@ -36,8 +36,8 @@ class BL_CustomGrid_Model_Column_Renderer_Attribute_Text
         $values = array(
             'renderer'                 => 'customgrid/widget_grid_column_renderer_text',
             'filter'                   => 'customgrid/widget_grid_column_filter_text',
-            'filter_mode_shortcut'     => (bool) $this->getDataSetDefault('values/filter_mode_shortcut'),
-            'negative_filter_shortcut' => (bool) $this->getDataSetDefault('values/negative_filter_shortcut'),
+            'filter_mode_shortcut'     => (bool) $this->getDataSetDefault('values/filter_mode_shortcut', true),
+            'negative_filter_shortcut' => (bool) $this->getDataSetDefault('values/negative_filter_shortcut', true),
             'truncation_mode'          => $this->getData('values/truncation_mode'),
             'truncation_at'            => (int) $this->getData('values/truncation_at'),
             'truncation_ending'        => $this->getData('values/truncation_ending'),
