@@ -93,6 +93,8 @@ class BL_CustomGrid_Model_Observer
                 if (is_array($rewriteValues) && !empty($rewriteValues)) {
                     // Different rewrites in different modules lead to only one rewrite in config
                     $rewritingClassName = array_shift($rewriteValues);
+                } elseif (is_string($rewriteValues)) {
+                    $rewritingClassName = $rewriteValues;
                 }
             }
             
