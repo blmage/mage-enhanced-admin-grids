@@ -60,8 +60,8 @@ class BL_CustomGrid_Model_Grid_Type_Product_Tab
         
         foreach ($exportTypes as $exportType) {
             $exportType->addData(array(
-                'id' => $productId,
-                'product_id' => $productId,
+                'url_params/id' => $productId,
+                'url_params/product_id' => $productId,
             ));
         }
         

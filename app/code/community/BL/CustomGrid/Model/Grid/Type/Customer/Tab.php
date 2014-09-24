@@ -40,12 +40,13 @@ class BL_CustomGrid_Model_Grid_Type_Customer_Tab
         return (($customer = Mage::registry('current_customer')) ? $customer->getId() : 0);
     }
     
-    public function getExportTypes($blockType)
+    protected function _getExportTypes($blockType)
     {
-        $exportTypes = parent::getExportTypes($blockType);
+        $exportTypes = parent::_getExportTypes($blockType);
+        $customerId  = $this->_getCustomerId();
         
         foreach ($exportTypes as $exportType) {
-            $exportType->setData('params/customer_id', $this->_getCustomerId());
+            $exportType->setData('url_params/customer_id', $customerId);
         }
         
         return $exportTypes;

@@ -264,14 +264,14 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract
     protected function _getExportTypes($blockType)
     {
         return array(
-            'csv' => array(
+            'csv' => new BL_CustomGrid_Object(array(
                 'route' => 'customgrid/grid/exportCsv',
                 'label' => $this->_getHelper()->__('CSV'),
-            ),
-            'xml' => array(
+            )),
+            'xml' => new BL_CustomGrid_Object(array(
                 'route' => 'customgrid/grid/exportExcel', 
                 'label' => $this->_getHelper()->__('Excel'),
-            ),
+            )),
         );
     }
     
@@ -289,18 +289,21 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract
             $exportTypes = array();
             
             foreach ($this->_getExportTypes($blockType) as $exportType) {
-                if (is_array($exportType)) {
+                if (!$exportType instanceof BL_CustomGrid_Object) {
+                    if (is_array($exportType)) {
+                        $exportType = new BL_CustomGrid_Object($exportType);
+                    } else {
+                        continue;
+                    }
+                }
+                if ($exportType->hasRoute() && !$exportType->hasUrl()) {
                     $urlParams = array('_current' => true);
                     
-                    if (isset($exportType['url_params']) && is_array($exportType['url_params'])) {
-                        $urlParams = array_merge($urlParams, $exportType['url_params']);
+                    if (is_array($additionalParams = $exportType->getUrlParams())) {
+                        $urlParams = array_merge($urlParams, $additionalParams);
                     }
                     
-                    $exportTypes[] = new BL_CustomGrid_Object(array(
-                        'route' => $exportType['route'],
-                        'url'   => Mage::helper('adminhtml')->getUrl($exportType['route'], $urlParams),
-                        'label' => $exportType['label'],
-                    ));
+                    $exportType->setUrl(Mage::helper('adminhtml')->getUrl($exportType->getRoute(), $urlParams));
                 }
             }
             
