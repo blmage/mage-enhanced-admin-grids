@@ -517,10 +517,10 @@ blcg.Renderer.Select.prototype = {
         this.renderersConfig = $H({});
         $A(renderersConfig).each(function(renderer){
             if (renderer.code) {
-                this.renderersConfig[renderer.code] = Object.extend({
+                this.renderersConfig.set(renderer.code, Object.extend({
                     code: '',
                     isCustomizable: false
-                }, renderer);
+                }, renderer));
             }
         }.bind(this));
     },
@@ -528,9 +528,9 @@ blcg.Renderer.Select.prototype = {
     initStartValue: function()
     {    
         var code = $F(this.select);
-        if (code && this.renderersConfig[code]) {
+        if (code && this.renderersConfig.get(code)) {
             this.currentRenderer = code;
-            this.renderersParams[code] = $F(this.rendererTargetId);
+            this.renderersParams.set(code, $F(this.rendererTargetId));
         } else {
             this.currentRenderer = null;
             $(this.rendererTargetId).value = '';
@@ -577,15 +577,15 @@ blcg.Renderer.Select.prototype = {
     {
         var code = $F(this.select);
         
-        if (code && this.renderersConfig[code]) {
-            var renderer = this.renderersConfig[code];
+        if (code && this.renderersConfig.get(code)) {
+            var renderer = this.renderersConfig.get(code);
             
             if (renderer.isCustomizable) {
                if (this.currentRenderer) {
-                    this.renderersParams[this.currentRenderer] = $F(this.rendererTargetId);
+                    this.renderersParams.set(this.currentRenderer, $F(this.rendererTargetId));
                 }
-                if (this.renderersParams[code]) {
-                    $(this.rendererTargetId).value = this.renderersParams[code];
+                if (this.renderersParams.get(code)) {
+                    $(this.rendererTargetId).value = this.renderersParams.get(code);
                 } else {
                     $(this.rendererTargetId).value = '';
                 }
@@ -597,7 +597,7 @@ blcg.Renderer.Select.prototype = {
             this.currentRenderer = code;
         } else {
             if (this.currentRenderer) {
-                this.renderersParams[this.currentRenderer] = $F(this.rendererTargetId);
+                this.renderersParams.set(this.currentRenderer, $F(this.rendererTargetId));
             }
             $(this.rendererTargetId).value = '';
             this.disableConfigButton();
@@ -622,9 +622,9 @@ blcg.Renderer.Attribute.Select = Class.create(blcg.Renderer.Select, {
         $super(select, renderersConfig, configButtonId, rendererTargetId, configUrl);
             
         var code = $F(this.select);
-        if (code && this.attributesConfig[code]) {
+        if (code && this.attributesConfig.get(code)) {
             this.currentAttribute = code;
-            this.renderersParams[code] = $F(this.rendererTargetId);
+            this.renderersParams.get(code, $F(this.rendererTargetId));
         } else {
             this.currentAttribute = null;
             $(this.rendererTargetId).value = '';
@@ -636,11 +636,11 @@ blcg.Renderer.Attribute.Select = Class.create(blcg.Renderer.Select, {
         this.attributesConfig = $H({});
         $A(attributesConfig).each(function(attribute){
             if (attribute.code) {
-                this.attributesConfig[attribute.code] = Object.extend({
+                this.attributesConfig.set(attribute.code, Object.extend({
                     code: '',
                     rendererCode: '',
                     editableValues: false
-                }, attribute);
+                }, attribute));
             }
         }.bind(this));
     },
@@ -658,9 +658,9 @@ blcg.Renderer.Attribute.Select = Class.create(blcg.Renderer.Select, {
     initStartValue: function()
     {
         var code = $F(this.select);
-        if (code && this.attributesConfig[code]) {
+        if (code && this.attributesConfig.get(code)) {
             this.currentAttribute = code;
-            this.renderersParams[code] = $F(this.rendererTargetId);
+            this.renderersParams.set(code, $F(this.rendererTargetId));
         } else {
             this.currentAttribute = null;
             $(this.rendererTargetId).value = '';
@@ -671,8 +671,8 @@ blcg.Renderer.Attribute.Select = Class.create(blcg.Renderer.Select, {
     {
         var isEditable = false;
         
-        if (this.currentAttribute) {
-            isEditable = this.attributesConfig[this.currentAttribute].editableValues;
+        if (this.currentAttribute && this.attributesConfig.get(this.currentAttribute)) {
+            isEditable = this.attributesConfig.get(this.currentAttribute).editableValues;
         }
         
         if (this.editableConfig.editableContainerId) {
@@ -695,16 +695,16 @@ blcg.Renderer.Attribute.Select = Class.create(blcg.Renderer.Select, {
     {
         var code = $F(this.select);
         
-        if (code && this.attributesConfig[code]) {
-            var attribute = this.attributesConfig[code];
-            var renderer  = (attribute.rendererCode ? this.renderersConfig[attribute.rendererCode] : null);
+        if (code && this.attributesConfig.get(code)) {
+            var attribute = this.attributesConfig.get(code);
+            var renderer  = (attribute.rendererCode ? this.renderersConfig.get(attribute.rendererCode) : null);
             
             if (renderer && renderer.isCustomizable) {
                if (this.currentAttribute) {
-                    this.renderersParams[this.currentAttribute] = $F(this.rendererTargetId);
+                    this.renderersParams.set(this.currentAttribute, $F(this.rendererTargetId));
                 }
-                if (this.renderersParams[code]) {
-                    $(this.rendererTargetId).value = this.renderersParams[code];
+                if (this.renderersParams.get(code)) {
+                    $(this.rendererTargetId).value = this.renderersParams.get(code);
                 } else {
                     $(this.rendererTargetId).value = '';
                 } 
@@ -716,7 +716,7 @@ blcg.Renderer.Attribute.Select = Class.create(blcg.Renderer.Select, {
             this.currentAttribute = code;
         } else {
             if (this.currentAttribute) {
-                this.renderersParams[this.currentAttribute] = $F(this.rendererTargetId);
+                this.renderersParams.set(this.currentAttribute, $F(this.rendererTargetId));
             }
             $(this.rendererTargetId).value = '';
             this.disableConfigButton();
