@@ -398,6 +398,7 @@
                 <parameters>
                     <format>
                         <label>Display Format</label>
+                        <group>Rendering</group>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/column_renderer_source_date_format</source_model>
@@ -415,22 +416,24 @@
                     <height>180</height>
                 </config_window>
                 <parameters>
-                    <format>
-                        <label>Display Format</label>
-                        <visible>1</visible>
-                        <type>select</type>
-                        <source_model>customgrid/column_renderer_source_date_format</source_model>
-                        <sort_order>10</sort_order>
-                        <value>medium</value>
-                    </format>
                     <filter_time>
                         <label>Allow Filtering On Time</label>
+                        <group>Filtering</group>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
-                        <sort_order>20</sort_order>
+                        <sort_order>10</sort_order>
                         <value>0</value>
                     </filter_time>
+                    <format>
+                        <label>Display Format</label>
+                        <group>Rendering</group>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>customgrid/column_renderer_source_date_format</source_model>
+                        <sort_order>20</sort_order>
+                        <value>medium</value>
+                    </format>
                 </parameters>
             </datetime>
             
@@ -444,6 +447,7 @@
                 <parameters>
                     <show_number_sign>
                         <label>Show Number Sign</label>
+                        <group>Rendering</group>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
@@ -538,6 +542,7 @@
                     </original_currency_column_position>
                     <display_currency>
                         <label>Display Currency</label>
+                        <group>Rendering</group>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/column_renderer_source_collection_currency</source_model>
@@ -545,6 +550,7 @@
                     </display_currency>
                     <display_currency_column_type>
                         <label>Column Type</label>
+                        <group>Rendering</group>
                         <description>If no currency is found with choosen column, then base currency will be used</description>
                         <visible>1</visible>
                         <type>select</type>
@@ -561,6 +567,7 @@
                     </display_currency_column_type>
                     <display_currency_column>
                         <label>Column ID</label>
+                        <group>Rendering</group>
                         <visible>1</visible>
                         <type>text</type>
                         <sort_order>70</sort_order>
@@ -578,6 +585,7 @@
                     </display_currency_column>
                     <display_currency_column_index>
                         <label>Column Field Name</label>
+                        <group>Rendering</group>
                         <visible>1</visible>
                         <type>text</type>
                         <sort_order>70</sort_order>
@@ -595,6 +603,7 @@
                     </display_currency_column_index>
                     <display_currency_column_position>
                         <label>Column Position</label>
+                        <group>Rendering</group>
                         <description>Indicate here the position of the column among all ones sharing the same field name. If given position does not exist or is empty, then the first corresponding column will be used</description>
                         <visible>1</visible>
                         <type>text</type>
@@ -614,6 +623,7 @@
                     </display_currency_column_position>
                     <apply_rates>
                         <label>Apply Rates For Display</label>
+                        <group>Rendering</group>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
@@ -639,6 +649,7 @@
                 <parameters>
                     <skip_website>
                         <label>Skip Website Label</label>
+                        <group>Rendering</group>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
@@ -646,6 +657,7 @@
                     </skip_website>
                     <skip_store>
                         <label>Skip Store Label</label>
+                        <group>Rendering</group>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
@@ -653,6 +665,7 @@
                     </skip_store>
                     <skip_store_view>
                         <label>Skip Store View Label</label>
+                        <group>Rendering</group>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
@@ -660,6 +673,7 @@
                     </skip_store_view>
                     <skip_all_views>
                         <label>Skip "All Store Views" Label</label>
+                        <group>Rendering</group>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
@@ -667,6 +681,7 @@
                     </skip_all_views>
                     <flat_key>
                         <label>Flat Value Key</label>
+                        <group>Rendering</group>
                         <description>If no ID is found, then the value corresponding to the given key will be displayed. If none is set, "store_name" will be used</description>
                         <visible>1</visible>
                         <type>text</type>
@@ -689,34 +704,20 @@
                 <description>Displays whether a country belongs to the EU</description>
                 <sort_order>80000</sort_order>
                 <parameters>
-                    <base_display_format>
-                        <label>Base Display Format</label>
-                        <description><![CDATA[Available variables : <strong>{is_eu_country}</strong>, <strong>{country_code}</strong>, <strong>{country_name}</strong><br />(variables will be replaced by the corresponding values).<br />If no value is set, "{is_eu_country}" will be used by default]]></description>
-                        <visible>1</visible>
-                        <type>text</type>
-                        <sort_order>10</sort_order>
-                    </base_display_format>
-                    <export_display_format>
-                        <label>Export Display Format</label>
-                        <description>If no value is set, then the base display format will be used</description>
-                        <visible>1</visible>
-                        <type>text</type>
-                        <sort_order>20</sort_order>
-                    </export_display_format>
                     <custom_source>
                         <label>Custom Source</label>
                         <description><![CDATA[Choose "Yes" to use a custom source of EU countries.<br /><strong>For Magento versions < 1.7, you should always use this option as there is no base EU countries list by default</strong>]]></description>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
-                        <sort_order>30</sort_order>
+                        <sort_order>10</sort_order>
                     </custom_source>
                     <system_config_source>
                         <label>System Configuration Source</label>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
-                        <sort_order>40</sort_order>
+                        <sort_order>20</sort_order>
                         <depends>
                             <custom_source>
                                 <value>1</value>
@@ -728,7 +729,7 @@
                         <description><![CDATA[Eg : "general/country/eu_countries"]]></description>
                         <visible>1</visible>
                         <type>text</type>
-                        <sort_order>50</sort_order>
+                        <sort_order>30</sort_order>
                         <depends>
                             <custom_source>
                                 <value>1</value>
@@ -743,7 +744,7 @@
                         <visible>1</visible>
                         <type>multiselect</type>
                         <source_model>adminhtml/system_config_source_country</source_model>
-                        <sort_order>60</sort_order>
+                        <sort_order>40</sort_order>
                         <depends>
                             <custom_source>
                                 <value>1</value>
@@ -753,6 +754,22 @@
                             </system_config_source>
                         </depends>
                     </eu_countries>
+                    <base_display_format>
+                        <label>Base Display Format</label>
+                        <group>Rendering</group>
+                        <description><![CDATA[Available variables : <strong>{is_eu_country}</strong>, <strong>{country_code}</strong>, <strong>{country_name}</strong><br />(variables will be replaced by the corresponding values).<br />If no value is set, "{is_eu_country}" will be used by default]]></description>
+                        <visible>1</visible>
+                        <type>text</type>
+                        <sort_order>50</sort_order>
+                    </base_display_format>
+                    <export_display_format>
+                        <label>Export Display Format</label>
+                        <group>Rendering</group>
+                        <description>If no value is set, then the base display format will be used</description>
+                        <visible>1</visible>
+                        <type>text</type>
+                        <sort_order>60</sort_order>
+                    </export_display_format>
                 </parameters>
             </eu_country>
             
@@ -761,64 +778,30 @@
                 <description>Displays a value from an options source</description>
                 <sort_order>90000</sort_order>
                 <config_window>
-                    <height>420</height>
+                    <height>500</height>
                 </config_window>
                 <parameters>
-                    <boolean_filter>
-                        <label>With/Without Filter</label>
-                        <visible>1</visible>
-                        <type>select</type>
-                        <source_model>customgrid/system_config_source_yesno</source_model>
-                        <sort_order>10</sort_order>
-                    </boolean_filter>
                     <source_id>
                         <label>Options Source</label>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/column_renderer_source_options_source</source_model>
-                        <sort_order>20</sort_order>
+                        <sort_order>10</sort_order>
                     </source_id>
-                    <show_missing>
-                        <label>Show Missing Option Values</label>
-                        <visible>1</visible>
-                        <type>select</type>
-                        <source_model>customgrid/system_config_source_yesno</source_model>
-                        <sort_order>30</sort_order>
-                    </show_missing>
-                    <display_full_path>
-                        <label>Display Full Path</label>
-                        <description>For sources with multiple levels of options, display labels of all levels, and not just last one</description>
-                        <visible>1</visible>
-                        <type>select</type>
-                        <source_model>customgrid/system_config_source_yesno</source_model>
-                        <sort_order>40</sort_order>
-                    </display_full_path>
-                    <options_separator>
-                        <label>Options Separator</label>
-                        <visible>1</visible>
-                        <type>text</type>
-                        <value> - </value>
-                        <sort_order>50</sort_order>
-                        <depends>
-                            <display_full_path>
-                                <value>1</value>
-                            </display_full_path>
-                        </depends>
-                    </options_separator>
                     <imploded_values>
                         <label>Merged Values</label>
                         <description>Choose "Yes" if the field contains multiple values separated by a given string</description>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
-                        <sort_order>60</sort_order>
+                        <sort_order>20</sort_order>
                     </imploded_values>
                     <imploded_separator>
                         <label>Values Separator</label>
                         <description>If no value is set, "," will be used</description>
                         <visible>1</visible>
                         <type>text</type>
-                        <sort_order>70</sort_order>
+                        <sort_order>30</sort_order>
                         <value>,</value>
                         <depends>
                             <imploded_values>
@@ -826,6 +809,93 @@
                             </imploded_values>
                         </depends>
                     </imploded_separator>
+                    <filter_mode>
+                        <label>Filter Mode</label>
+                        <group>Filtering</group>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>customgrid/column_renderer_source_options_filter_mode</source_model>
+                        <sort_order>40</sort_order>
+                        <value>single</value>
+                    </filter_mode>
+                    <filter_logical_operator>
+                        <label>Logical Operator</label>
+                        <group>Filtering</group>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>customgrid/system_config_source_sql_logical_operator</source_model>
+                        <sort_order>50</sort_order>
+                        <value>OR</value>
+                        <depends>
+                            <imploded_values>
+                                <value>1</value>
+                            </imploded_values>
+                            <filter_mode>
+                                <value>multiple</value>
+                            </filter_mode>
+                        </depends>
+                    </filter_logical_operator>
+                    <negative_filter>
+                        <label>Negative Filter</label>
+                        <group>Filtering</group>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>customgrid/system_config_source_yesno</source_model>
+                        <sort_order>60</sort_order>
+                        <depends>
+                            <filter_mode>
+                                <values>
+                                    <value1>single</value1>
+                                    <value2>multiple</value2>
+                                </values>
+                            </filter_mode>
+                        </depends>
+                    </negative_filter>
+                    <values_separator>
+                        <label>Values Separator</label>
+                        <group>Rendering</group>
+                        <description>If no value is set, ", " will be used</description>
+                        <visible>1</visible>
+                        <type>text</type>
+                        <sort_order>70</sort_order>
+                        <value>, </value>
+                        <depends>
+                            <imploded_values>
+                                <value>1</value>
+                            </imploded_values>
+                        </depends>
+                    </values_separator>
+                    <show_missing>
+                        <label>Show Missing Option Values</label>
+                        <group>Rendering</group>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>customgrid/system_config_source_yesno</source_model>
+                        <sort_order>80</sort_order>
+                    </show_missing>
+                    <display_full_path>
+                        <label>Display Full Path</label>
+                        <group>Rendering</group>
+                        <description>For sources with multiple levels of options, display labels of all levels, and not just last one</description>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>customgrid/system_config_source_yesno</source_model>
+                        <sort_order>90</sort_order>
+                    </display_full_path>
+                    <sub_values_separator>
+                        <label>Sub-Values Separator</label>
+                        <group>Rendering</group>
+                        <description>If no value is set, " - " will be used</description>
+                        <visible>1</visible>
+                        <type>text</type>
+                        <sort_order>100</sort_order>
+                        <value> - </value>
+                        <depends>
+                            <display_full_path>
+                                <value>1</value>
+                            </display_full_path>
+                        </depends>
+                    </sub_values_separator>
                 </parameters>
             </options>
             
@@ -839,6 +909,7 @@
                 <parameters>
                     <filter_mode>
                         <label>Filter Mode</label>
+                        <group>Filtering</group>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/column_renderer_source_text_filter_mode</source_model>
@@ -847,6 +918,7 @@
                     </filter_mode>
                     <filter_mode_shortcut>
                         <label>Enable Filter Mode Shortcut</label>
+                        <group>Filtering</group>
                         <description><![CDATA[Allows to specify the filter mode directly in the filter field, by placing the corresponding code between square brackets at the beginning of the searched value.<br />Eg, use "<strong>[el]</strong>Example" to search for "Example" using "LIKE (exact)".<br />If no filter mode is indicated in the field, then the value of "Filter Mode" will be used by default")]]></description>
                         <visible>1</visible>
                         <type>select</type>
@@ -865,6 +937,7 @@
                     </filter_mode_shortcut>
                     <negative_filter>
                         <label>Negative Filter</label>
+                        <group>Filtering</group>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
@@ -884,6 +957,7 @@
                     </negative_filter>
                     <negative_filter_shortcut>
                         <label>Enable Negative Filter Shortcut</label>
+                        <group>Filtering</group>
                         <description><![CDATA[Allows to trigger negative filter directly from the filter field, by placing the character "<strong>!</strong>" between square brackets at the beginning of the searched value (eg: "<strong>[!]</strong>Example").<br />If the code of a filter mode is already present in the value, then place the character "<strong>!</strong>" in front of it (eg: "<strong>[!el]</strong>Example")]]></description>
                         <visible>1</visible>
                         <type>select</type>
@@ -902,6 +976,7 @@
                     </negative_filter_shortcut>
                     <single_wildcard>
                         <label>Wildcard for single character (LIKE filters)</label>
+                        <group>Filtering</group>
                         <description>Must be exactly one character. If none is set, no wildcard of this kind will be available at all</description>
                         <visible>1</visible>
                         <type>text</type>
@@ -909,6 +984,7 @@
                     </single_wildcard>
                     <multiple_wildcard>
                         <label>Wildcard for multiple characters (LIKE filters)</label>
+                        <group>Filtering</group>
                         <description>Must be exactly one character, differing from the wildcard for single character. If no valid value is set, no wildcard of this kind will be available at all</description>
                         <visible>1</visible>
                         <type>text</type>
@@ -916,6 +992,7 @@
                     </multiple_wildcard>
                     <truncation_mode>
                         <label>Truncate text</label>
+                        <group>Rendering</group>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/column_renderer_source_text_truncation_mode</source_model>
@@ -924,6 +1001,7 @@
                     </truncation_mode>
                     <truncation_at>
                         <label>Truncate at n-th character</label>
+                        <group>Rendering</group>
                         <visible>1</visible>
                         <type>text</type>
                         <sort_order>80</sort_order>
@@ -938,6 +1016,7 @@
                     </truncation_at>
                     <truncation_ending>
                         <label>Truncate ending string</label>
+                        <group>Rendering</group>
                         <visible>1</visible>
                         <type>text</type>
                         <sort_order>90</sort_order>
@@ -952,6 +1031,7 @@
                     </truncation_ending>
                     <exact_truncation>
                         <label>Truncate without breaking words</label>
+                        <group>Rendering</group>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
@@ -967,6 +1047,7 @@
                     </exact_truncation>
                     <escape_html>
                         <label>Escape HTML</label>
+                        <group>Rendering</group>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
@@ -975,6 +1056,7 @@
                     </escape_html>
                     <nl2br>
                         <label>Apply PHP function nl2br()</label>
+                        <group>Rendering</group>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
@@ -983,6 +1065,7 @@
                     </nl2br>
                     <cms_template_processor>
                         <label>CMS Template Processor</label>
+                        <group>Rendering</group>
                         <description>Choose a processor if you want the CMS content to be treated. Unless you know there is a difference, you can consider that both block and page template processors are the same</description>
                         <visible>1</visible>
                         <type>select</type>
@@ -999,58 +1082,103 @@
                 <name>Options</name>
                 <sort_order>10000</sort_order>
                 <config_window>
-                    <height>390</height>
+                    <height>500</height>
                 </config_window>
                 <parameters>
-                    <boolean_filter>
-                        <label>With/Without Filter</label>
-                        <visible>1</visible>
-                        <type>select</type>
-                        <source_model>customgrid/system_config_source_yesno</source_model>
-                        <sort_order>10</sort_order>
-                    </boolean_filter>
                     <default_source_id>
                         <label>Default Options Source</label>
                         <description>This options source will be used if no options are found for choosen attribute</description>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/column_renderer_source_options_source</source_model>
-                        <sort_order>20</sort_order>
+                        <sort_order>10</sort_order>
                     </default_source_id>
                     <force_default_source>
                         <label>Force use of default options source</label>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
-                        <sort_order>30</sort_order>
+                        <sort_order>20</sort_order>
                     </force_default_source>
-                    <show_missing>
-                        <label>Show Missing Option Values</label>
+                    <filter_mode>
+                        <label>Filter Mode</label>
+                        <group>Filtering</group>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>customgrid/system_config_source_yesno</source_model>
+                        <source_model>customgrid/column_renderer_source_options_filter_mode</source_model>
+                        <sort_order>30</sort_order>
+                    </filter_mode>
+                     <filter_logical_operator>
+                        <label>Logical Operator</label>
+                        <group>Filtering</group>
+                        <description>Used for attributes with multiple values</description>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>customgrid/system_config_source_sql_logical_operator</source_model>
                         <sort_order>40</sort_order>
-                    </show_missing>
-                    <display_full_path>
-                        <label>Display Full Path</label>
-                        <description>For sources with multiple levels of options, display labels of all levels, and not just last one</description>
+                        <value>OR</value>
+                        <depends>
+                            <filter_mode>
+                                <value>multiple</value>
+                            </filter_mode>
+                        </depends>
+                    </filter_logical_operator>
+                    <negative_filter>
+                        <label>Negative Filter</label>
+                        <group>Filtering</group>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
                         <sort_order>50</sort_order>
-                    </display_full_path>
-                    <options_separator>
-                        <label>Options Separator</label>
+                        <depends>
+                            <filter_mode>
+                                <values>
+                                    <value1>single</value1>
+                                    <value2>multiple</value2>
+                                </values>
+                            </filter_mode>
+                        </depends>
+                    </negative_filter>
+                    <values_separator>
+                        <label>Values Separator</label>
+                        <group>Rendering</group>
+                        <description>If no value is set, ", " will be used</description>
                         <visible>1</visible>
                         <type>text</type>
                         <sort_order>60</sort_order>
+                        <value>, </value>
+                    </values_separator>
+                    <show_missing>
+                        <label>Show Missing Option Values</label>
+                        <group>Rendering</group>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>customgrid/system_config_source_yesno</source_model>
+                        <sort_order>70</sort_order>
+                    </show_missing>
+                    <display_full_path>
+                        <label>Display Full Path</label>
+                        <group>Rendering</group>
+                        <description>For sources with multiple levels of options, display labels of all levels, and not just last one</description>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>customgrid/system_config_source_yesno</source_model>
+                        <sort_order>80</sort_order>
+                    </display_full_path>
+                    <sub_values_separator>
+                        <label>Sub-Values Separator</label>
+                        <group>Rendering</group>
+                        <description>If no value is set, " - " will be used</description>
+                        <visible>1</visible>
+                        <type>text</type>
+                        <sort_order>90</sort_order>
                         <value> - </value>
                         <depends>
                             <display_full_path>
                                 <value>1</value>
                             </display_full_path>
                         </depends>
-                    </options_separator>
+                    </sub_values_separator>
                 </parameters>
             </options>
             
@@ -1061,64 +1189,71 @@
                     <height>560</height>
                 </config_window>
                 <parameters>
-                    <display_images>
-                        <label>Display Images</label>
-                        <description>If you choose "No", only the images URLs will be displayed (otherwise, the URLs will be used as titles)</description>
+                    <filter_on_name>
+                        <label>Filter images on name</label>
+                        <group>Filtering</group>
+                        <description>If you choose "No", filter will apply on images existence</description>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>customgrid/system_config_source_yesno</source_model>
                         <sort_order>10</sort_order>
+                        <source_model>customgrid/system_config_source_yesno</source_model>
                         <value>1</value>
-                    </display_images>
-                    <display_images_urls>
-                        <label>Display Complete Images URLs</label>
-                        <description>If you choose "No", only the images paths within the media/catalog directory will be displayed</description>
+                    </filter_on_name>
+                    <display_images>
+                        <label>Display Images</label>
+                        <group>Rendering</group>
+                        <description>If you choose "No", only the images URLs will be displayed (otherwise, the URLs will be used as titles)</description>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
                         <sort_order>20</sort_order>
                         <value>1</value>
-                    </display_images_urls>
-                    <original_image_link>
-                        <label>Original Image Link</label>
-                        <description>If you choose "Yes", the images / URLs will act as links to the original images</description>
+                    </display_images>
+                    <display_images_urls>
+                        <label>Display Complete Images URLs</label>
+                        <group>Rendering</group>
+                        <description>If you choose "No", only the images paths within the media/catalog directory will be displayed</description>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
                         <sort_order>30</sort_order>
+                        <value>1</value>
+                    </display_images_urls>
+                    <original_image_link>
+                        <label>Original Image Link</label>
+                        <group>Rendering</group>
+                        <description>If you choose "Yes", the images / URLs will act as links to the original images</description>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>customgrid/system_config_source_yesno</source_model>
+                        <sort_order>40</sort_order>
                     </original_image_link>
                     <image_width>
                         <label>Image Width</label>
+                        <group>Rendering</group>
                         <description>When an image width is specified, the image height is also required</description>
                         <visible>1</visible>
                         <type>text</type>
-                        <sort_order>40</sort_order>
+                        <sort_order>50</sort_order>
                     </image_width>
                     <image_height>
                         <label>Image Height</label>
+                        <group>Rendering</group>
                         <description>When an image height is specified, the image width is also required</description>
                         <visible>1</visible>
                         <type>text</type>
-                        <sort_order>50</sort_order>
+                        <sort_order>60</sort_order>
                     </image_height>
                     <browser_resize_only>
                         <label>Browser Resize Only</label>
+                        <group>Rendering</group>
                         <description><![CDATA[Used when image dimensions are specified.<br />If you choose "Yes", the original full-size images will be used and resized, when needed, by your web browser only (regarding images URLs, only the original ones will likewise be displayed in all cases)]]></description>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
-                        <sort_order>60</sort_order>
+                        <sort_order>70</sort_order>
                         <value>0</value>
                     </browser_resize_only>
-                    <filter_on_name>
-                        <label>Filter images on name</label>
-                        <description>If you choose "No", filter will apply on images existence</description>
-                        <visible>1</visible>
-                        <type>select</type>
-                        <sort_order>70</sort_order>
-                        <source_model>customgrid/system_config_source_yesno</source_model>
-                        <value>1</value>
-                    </filter_on_name>
                 </parameters>
             </product_image>
             
@@ -1208,6 +1343,7 @@
                     </original_currency_column_position>
                     <display_currency>
                         <label>Display Currency</label>
+                        <group>Rendering</group>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/column_renderer_source_attribute_currency</source_model>
@@ -1215,6 +1351,7 @@
                     </display_currency>
                     <display_currency_column_type>
                         <label>Column Type</label>
+                        <group>Rendering</group>
                         <description>If no currency is found with choosen column, then base currency will be used</description>
                         <visible>1</visible>
                         <type>select</type>
@@ -1231,6 +1368,7 @@
                     </display_currency_column_type>
                     <display_currency_column>
                         <label>Column ID</label>
+                        <group>Rendering</group>
                         <visible>1</visible>
                         <type>text</type>
                         <sort_order>70</sort_order>
@@ -1248,6 +1386,7 @@
                     </display_currency_column>
                     <display_currency_column_index>
                         <label>Column Field Name</label>
+                        <group>Rendering</group>
                         <visible>1</visible>
                         <type>text</type>
                         <sort_order>70</sort_order>
@@ -1265,6 +1404,7 @@
                     </display_currency_column_index>
                     <display_currency_column_position>
                         <label>Column Position</label>
+                        <group>Rendering</group>
                         <description>Indicate here the position of the column among all ones sharing the same field name. If given position does not exist or is empty, then the first corresponding column will be used</description>
                         <visible>1</visible>
                         <type>text</type>
@@ -1284,6 +1424,7 @@
                     </display_currency_column_position>
                     <apply_rates>
                         <label>Apply Rates For Display</label>
+                        <group>Rendering</group>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
@@ -1300,23 +1441,25 @@
                     <height>200</height>
                 </config_window>
                 <parameters>
-                    <format>
-                        <label>Display Format</label>
-                        <visible>1</visible>
-                        <type>select</type>
-                        <source_model>customgrid/column_renderer_source_date_format</source_model>
-                        <sort_order>10</sort_order>
-                        <value>medium</value>
-                    </format>
                     <filter_time>
                         <label>Allow Filtering On Time</label>
+                        <group>Filtering</group>
                         <description>Only for columns with time values</description>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
-                        <sort_order>20</sort_order>
+                        <sort_order>10</sort_order>
                         <value>0</value>
                     </filter_time>
+                    <format>
+                        <label>Display Format</label>
+                        <group>Rendering</group>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>customgrid/column_renderer_source_date_format</source_model>
+                        <sort_order>20</sort_order>
+                        <value>medium</value>
+                    </format>
                 </parameters>
             </datetime>
             
@@ -1329,6 +1472,7 @@
                 <parameters>
                     <show_number_sign>
                         <label>Show Number Sign</label>
+                        <group>Rendering</group>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
@@ -1346,6 +1490,7 @@
                 <parameters>
                     <filter_mode>
                         <label>Filter Mode</label>
+                        <group>Filtering</group>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/column_renderer_source_text_filter_mode</source_model>
@@ -1354,7 +1499,8 @@
                     </filter_mode>
                     <filter_mode_shortcut>
                         <label>Enable Filter Mode Shortcut</label>
-                        <description><![CDATA[Allows to specify the filter mode directly in the filter field, by placing the corresponding code between square brackets at the beginning of the searched value.<br />Eg, use "<strong>[el]</strong>Example" to search for "Example" using "LIKE (exact)".<br />If no filter mode is indicated in the field, then the value of "Filter Mode" will be used by default")]]></description>
+                        <group>Filtering</group>
+                        <description><![CDATA[Allows to specify the filter mode directly in the filter field, by placing the corresponding code between square brackets at the beginning of the searched value.<br />Eg, use "<strong>[el]</strong>Example" to search for "Example" using "LIKE (exact)".<br />If no filter mode is indicated in the field, then the value of "Filter Mode" will be used by default"]]></description>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
@@ -1372,6 +1518,7 @@
                     </filter_mode_shortcut>
                     <negative_filter>
                         <label>Negative Filter</label>
+                        <group>Filtering</group>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
@@ -1391,6 +1538,7 @@
                     </negative_filter>
                     <negative_filter_shortcut>
                         <label>Enable Negative Filter Shortcut</label>
+                        <group>Filtering</group>
                         <description><![CDATA[Allows to trigger negative filter directly from the filter field, by placing the character "<strong>!</strong>" between square brackets at the beginning of the searched value (eg: "<strong>[!]</strong>Example").<br />If the code of a filter mode is already present in the value, then place the character "<strong>!</strong>" in front of it (eg: "<strong>[!el]</strong>Example")]]></description>
                         <visible>1</visible>
                         <type>select</type>
@@ -1409,6 +1557,7 @@
                     </negative_filter_shortcut>
                     <single_wildcard>
                         <label>Wildcard for single character (LIKE filters)</label>
+                        <group>Filtering</group>
                         <description>Must be exactly one character. If none is set, no wildcard of this kind will be available at all</description>
                         <visible>1</visible>
                         <type>text</type>
@@ -1416,6 +1565,7 @@
                     </single_wildcard>
                     <multiple_wildcard>
                         <label>Wildcard for multiple characters (LIKE filters)</label>
+                        <group>Filtering</group>
                         <description>Must be exactly one character, differing from the wildcard for single character. If no valid value is set, no wildcard of this kind will be available at all</description>
                         <visible>1</visible>
                         <type>text</type>
@@ -1423,6 +1573,7 @@
                     </multiple_wildcard>
                     <truncation_mode>
                         <label>Truncate text</label>
+                        <group>Rendering</group>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/column_renderer_source_text_truncation_mode</source_model>
@@ -1431,6 +1582,7 @@
                     </truncation_mode>
                     <truncate_at>
                         <label>Truncate at n-th character</label>
+                        <group>Rendering</group>
                         <visible>1</visible>
                         <type>text</type>
                         <sort_order>80</sort_order>
@@ -1445,6 +1597,7 @@
                     </truncate_at>
                     <truncate_ending>
                         <label>Truncate ending string</label>
+                        <group>Rendering</group>
                         <visible>1</visible>
                         <type>text</type>
                         <sort_order>90</sort_order>
@@ -1459,6 +1612,7 @@
                     </truncate_ending>
                     <truncate_exact>
                         <label>Truncate without breaking words</label>
+                        <group>Rendering</group>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
@@ -1474,6 +1628,7 @@
                     </truncate_exact>
                     <escape_html>
                         <label>Escape HTML</label>
+                        <group>Rendering</group>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
@@ -1482,6 +1637,7 @@
                     </escape_html>
                     <nl2br>
                         <label>Apply PHP function nl2br()</label>
+                        <group>Rendering</group>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
@@ -1490,6 +1646,7 @@
                     </nl2br>
                     <cms_template_processor>
                         <label>CMS Template Processor</label>
+                        <group>Rendering</group>
                         <description>Choose a processor if you want the CMS content to be treated. Unless you know there is a difference, you can consider that both block and page template processors are the same</description>
                         <visible>1</visible>
                         <type>select</type>

@@ -41,28 +41,27 @@
 abstract class BL_CustomGrid_Block_Config_Form_Abstract
     extends Mage_Adminhtml_Block_Widget_Form
 {
-    protected $_translationHelper  = null;
-    
     abstract public function getFormId();
     abstract protected function _getFormCode();
     abstract protected function _getFormAction();
-    abstract protected function _prepareFields(Varien_Data_Form_Element_Fieldset $fieldset);
+    abstract protected function _getFormFields();
+    
+    protected function _prepareLayout()
+    {
+        parent::_prepareLayout();
+        
+        Varien_Data_Form::setFieldsetRenderer(
+            $this->getLayout()->createBlock('customgrid/config_form_renderer_fieldset')
+        );
+        
+        return $this;
+    }
     
     protected function _prepareForm()
     {
+        $helper = $this->getTranslationHelper();
         $form = new Varien_Data_Form();
-        $fieldsetHtmlId = 'blcg_config_fieldset' . md5($this->_getFormCode());
-        $this->setFieldsetHtmlId($fieldsetHtmlId);
-        
-        // @todo we could allow to add and use multiple fieldsets based on a group label value, to arrange fields
-        $fieldset = $form->addFieldset($fieldsetHtmlId, array('legend' => $this->__('Configuration')));
-        /*
-        Use an own renderer for multiselect fields to prevent a bug between
-        Prototype JS / Form.serializeElements() (imploding the values)
-        and Varien_Data_Form_Element_Multiselect (generating an array parameter),
-        leading to obtain an array with a single value containing the expected imploded values
-        */
-        $fieldset->addType('multiselect', 'BL_CustomGrid_Block_Config_Form_Element_Multiselect');
+        $formCode = $this->_getFormCode();
         
         $form->setUseContainer(true);
         $form->setId($this->getFormId());
@@ -73,13 +72,40 @@ abstract class BL_CustomGrid_Block_Config_Form_Abstract
         $dependenceBlock = $this->getLayout()->createBlock('customgrid/widget_form_element_dependence');
         $this->setChild('form_after', $dependenceBlock);
         
-        $this->_prepareFields($fieldset);
+        $fieldsets = array();
+        $fields = $this->_getFormFields();
+        
+        foreach ($fields as $field) {
+            if ($fieldsetLabel = $field->getGroup()) {
+                $fieldsetLabel = $helper->__($fieldsetLabel);
+            } else {
+                $fieldsetLabel = $this->__('General');
+            }
+            
+            $fieldsetKey = md5($formCode . $fieldsetLabel);
+            
+            if (!isset($fieldsets[$fieldsetKey])) {
+                $fieldsetId = 'blcg_config_form_fieldset_' . $fieldsetKey;
+                $fieldsets[$fieldsetKey] = $form->addFieldset($fieldsetId, array('legend' => $fieldsetLabel));
+                /*
+                Use an own renderer for multiselect fields to prevent a bug between
+                Prototype JS / Form.serializeElements() (imploding the values)
+                and Varien_Data_Form_Element_Multiselect (generating an array parameter),
+                leading to obtain an array with a single value containing the expected imploded values
+                */
+                $fieldsets[$fieldsetKey]->addType('multiselect', 'BL_CustomGrid_Block_Config_Form_Element_Multiselect');
+            }
+            
+            $this->_addField($fieldsets[$fieldsetKey], $field);
+        }
+        
         return $this;
     }
     
     protected function _addField(Varien_Data_Form_Element_Fieldset $fieldset, Varien_Object $parameter)
     {
         $form = $this->getForm();
+        $helper = $this->getTranslationHelper();
         
         // Base field data
         $fieldName = $parameter->getKey();
@@ -92,10 +118,8 @@ abstract class BL_CustomGrid_Block_Config_Form_Abstract
             'note'     => $parameter->getDescription(),
         );
         
-        if (!is_null($this->_translationHelper)) {
-            $fieldData['label'] = $this->_translationHelper->__($fieldData['label']);
-            $fieldData['note']  = $this->_translationHelper->__($fieldData['note']);
-        }
+        $fieldData['label'] = $helper->__($fieldData['label']);
+        $fieldData['note']  = $helper->__($fieldData['note']);
         
         // Initial value
         if (is_array($values = $this->getConfigValues()) && isset($values[$fieldName])) {
@@ -127,12 +151,8 @@ abstract class BL_CustomGrid_Block_Config_Form_Abstract
             $fieldData['values'] = array();
             
             foreach ($values as $value) {
-                if (!is_null($this->_translationHelper)) {
-                    $value['label'] = $this->_translationHelper->__($value['label']);
-                }
-                
                 $fieldData['values'][] = array(
-                    'label' => $value['label'],
+                    'label' => $helper->__($value['label']),
                     'value' => $value['value']
                 );
             }
@@ -158,10 +178,10 @@ abstract class BL_CustomGrid_Block_Config_Form_Abstract
         if (($fieldType == 'multiselect') && ($size = $parameter->getSize())) {
             $field->setSize($size);
         }
-        if (($helper = $parameter->getHelperBlock()) instanceof Varien_Object) {
+        if (($helperBlock = $parameter->getHelperBlock()) instanceof Varien_Object) {
             try {
-                $helperData  = $helper->getData();
-                $helperBlock = $this->getLayout()->createBlock($helper->getType(), '', $helperData);
+                $helperData  = $helperBlock->getData();
+                $helperBlock = $this->getLayout()->createBlock($helperBlock->getType(), '', $helperData);
                 
                 if ($helperBlock && method_exists($helperBlock, 'prepareElementHtml')) {
                     $helperBlock->setConfig($helperData)
@@ -195,5 +215,18 @@ abstract class BL_CustomGrid_Block_Config_Form_Abstract
         }
         
         return $field;
+    }
+    
+    public function getTranslationModule()
+    {
+        return $this->getDataSetDefault('translation_module', 'customgrid');
+    }
+    
+    public function getTranslationHelper()
+    {
+        return $this->getDataSetDefault(
+            'translation_helper',
+            $this->helper($this->getTranslationModule())
+        );
     }
 }

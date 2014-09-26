@@ -61,6 +61,7 @@ class BL_CustomGrid_Custom_Column_ConfigController
     
     public function buildConfigAction()
     {
+        $this->_saveConfigFormFieldsetsStates();
         $params = $this->getRequest()->getPost('parameters', array());
         $params = Mage::getSingleton('customgrid/grid_type_config')->encodeParameters($params);
         $this->_setActionSuccessJsonResponse(array('parameters' => $params));

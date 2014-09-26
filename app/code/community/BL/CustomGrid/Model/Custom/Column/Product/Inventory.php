@@ -129,7 +129,7 @@ class BL_CustomGrid_Model_Custom_Column_Product_Inventory
                         ->where(
                             $qi($tableAlias . '.' . $this->getUseConfigFieldName())
                             . ' = '
-                            . $adapter->quoteInto('?', (bool) $condition['eq'])
+                            . $adapter->quote((bool) $condition['eq'])
                         );
                 }
             } else {
@@ -137,7 +137,7 @@ class BL_CustomGrid_Model_Custom_Column_Product_Inventory
                     $conditionBase = new Zend_Db_Expr(
                         'IF('
                         . $qi($tableAlias . '.' . $this->getUseConfigFieldName()) . ','
-                        . $adapter->quoteInto('?', Mage::getStoreConfig($this->getUseConfigSystemPath())) . ','
+                        . $adapter->quote(Mage::getStoreConfig($this->getUseConfigSystemPath())) . ','
                         . $qi($tableAlias . '.' . $this->getTableFieldName())
                         . ')'
                     );
@@ -151,14 +151,14 @@ class BL_CustomGrid_Model_Custom_Column_Product_Inventory
                             ->where(
                                 $conditionBase
                                 . ' BETWEEN '
-                                . $adapter->quoteInto('?', floatval($condition['from']))
+                                . $adapter->quote(floatval($condition['from']))
                                 . ' AND '
-                                . $adapter->quoteInto('?', floatval($condition['to']))
+                                . $adapter->quote(floatval($condition['to']))
                             );
                     }
                 } elseif (isset($condition['eq'])) {
                     $collection->getSelect()
-                        ->where($conditionBase . ' = ' . $adapter->quoteInto('?', $condition['eq']));
+                        ->where($conditionBase . ' = ' . $adapter->quote($condition['eq']));
                 }
             }
         }

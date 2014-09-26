@@ -16,6 +16,10 @@
 class BL_CustomGrid_Model_Column_Renderer_Collection_Options
     extends BL_CustomGrid_Model_Column_Renderer_Collection_Abstract
 {
+    protected $_backwardsMap = array(
+        'options_separator' => 'sub_values_separator',
+    );
+    
     public function getColumnBlockValues($columnIndex, Mage_Core_Model_Store $store,
         BL_CustomGrid_Model_Grid $gridModel)
     {
@@ -32,16 +36,25 @@ class BL_CustomGrid_Model_Column_Renderer_Collection_Options
         if (empty($implodedSeparator) && ($implodedSeparator != '0')) {
             $implodedSeparator = ',';
         }
+        if (!$this->hasData('values/filter_mode') && $this->getData('values/boolean_filter')) {
+            $this->setData(
+                'values/filter_mode',
+                BL_CustomGrid_Block_Widget_Grid_Column_Filter_Select::MODE_WITH_WITHOUT
+            );
+        }
         
         return array(
-            'renderer' => 'customgrid/widget_grid_column_renderer_options',
             'filter'   => 'customgrid/widget_grid_column_filter_select',
-            'options'  => $options,
-            'boolean_filter'     => (bool) $this->getData('values/boolean_filter'),
-            'display_full_path'  => (bool) $this->getData('values/display_full_path'),
-            'options_separator'  => $this->getData('values/options_separator'),
-            'imploded_values'    => (bool) $this->getData('values/imploded_values'),
-            'imploded_separator' => $implodedSeparator,
+            'renderer' => 'customgrid/widget_grid_column_renderer_options',
+            'options'  => (is_array($options) ? $options : array()),
+            'imploded_values'      => (bool) $this->getData('values/imploded_values'),
+            'imploded_separator'   => $implodedSeparator,
+            'filter_mode'          => $this->getData('values/filter_mode'),
+            'logical_operator'     => $this->getData('values/filter_logical_operator'),
+            'negative_filter'      => (bool) $this->getData('values/negative_filter'),
+            'display_full_path'    => (bool) $this->getData('values/display_full_path'),
+            'values_separator'     => $this->getDataSetDefault('values/values_separator', ', '),
+            'sub_values_separator' => $this->getDataSetDefault('values/sub_values_separator', ' - '),
             'show_missing_option_values' => (bool) $this->getData('values/show_missing'),
         );
     }

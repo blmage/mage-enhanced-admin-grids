@@ -66,8 +66,8 @@ class BL_CustomGrid_Model_Column_Renderer_Collection_Price
         BL_CustomGrid_Model_Grid $gridModel)
     {
         $values = array(
-            'renderer' => 'customgrid/widget_grid_column_renderer_price',
             'filter'   => 'customgrid/widget_grid_column_filter_price',
+            'renderer' => 'customgrid/widget_grid_column_renderer_price',
             'default_currency_code' => $store->getBaseCurrency()->getCode(),
         );
         

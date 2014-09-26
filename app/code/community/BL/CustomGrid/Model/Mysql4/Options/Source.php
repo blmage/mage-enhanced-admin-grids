@@ -39,7 +39,7 @@ class BL_CustomGrid_Model_Mysql4_Options_Source
                     ->from($this->getTable('customgrid/options_source_option'))
                     ->where('source_id = ?', $object->getId());
                 
-                $options = $read->fetchAll($query);
+                $options = $read->fetchAll($select);
                 $object->setData('options', is_array($options) ? $options : array());
             }
         }
@@ -48,6 +48,7 @@ class BL_CustomGrid_Model_Mysql4_Options_Source
     
     protected function _afterSave(Mage_Core_Model_Abstract $object)
     {
+        $read  = $this->_getReadAdapter();
         $write = $this->_getWriteAdapter();
         
         if ($object->getType() == BL_CustomGrid_Model_Options_Source::TYPE_MAGE_MODEL) {

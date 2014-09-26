@@ -13,21 +13,16 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Column_Renderer_Attribute_Config_Form
-    extends BL_CustomGrid_Block_Column_Renderer_Config_Form_Abstract
-{   
-    public function getFormId()
+class BL_CustomGrid_Config_FormController
+    extends BL_CustomGrid_Controller_Grid_Action
+{
+    public function saveFieldsetStateAction()
     {
-        return 'blcg_column_renderer_attribute_config_form';
-    }
-    
-    public function getRenderer()
-    {
-        return Mage::registry('blcg_attribute_column_renderer');
-    }
-    
-    public function getRendererType()
-    {
-        return 'attribute';
+        if ($this->_isAjaxRequest()
+            && (($container = $this->getRequest()->getParam('container')) != '')
+            && (($value = $this->getRequest()->getParam('value')) != '')) {
+            Mage::helper('customgrid/config_form')->saveFieldsetsStates(array($container => $value));
+            $this->_setActionSuccessJsonResponse();
+        }
     }
 }

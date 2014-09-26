@@ -26,8 +26,8 @@ class BL_CustomGrid_Model_Column_Renderer_Attribute_Product_Image
         Mage_Core_Model_Store $store, BL_CustomGrid_Model_Grid $gridModel)
     {
         return array(
-            'renderer'            => 'customgrid/widget_grid_column_renderer_product_image',
             'filter'              => 'customgrid/widget_grid_column_filter_product_image',
+            'renderer'            => 'customgrid/widget_grid_column_renderer_product_image',
             'attribute_code'      => $attribute->getAttributeCode(),
             'display_images'      => (bool) $this->getData('values/display_images'),
             'display_images_urls' => (bool) $this->getData('values/display_images_urls'),

@@ -19,6 +19,10 @@ class BL_CustomGrid_Helper_Collection
     const COLLECTION_APPLIED_MAP_FLAG  = '_blcg_hc_applied_map_';
     const COLLECTION_PREVIOUS_MAP_FLAG = '_blcg_hc_previous_map_';
     
+    const SQL_AND = 'AND';
+    const SQL_OR  = 'OR';
+    const SQL_XOR = 'XOR';
+    
     /**
      * Registered $adapter->quoteIdentifier() callbacks (usable for convenience and readability)
      * 
@@ -169,19 +173,101 @@ class BL_CustomGrid_Helper_Collection
     }
     
     /**
-    * Add a regex filter for the given field on the given collection
+    * Return a condition which can be used with Varien_Data_Collection_Db::addFieldToFilter(),
+    * and that will not have any effect
     * 
-    * @param Varien_Data_Collection_Db $collection Collection
+    * @return array
+    */
+    public function getIdentityCondition()
+    {
+        return array(array('null' => true), array('notnull' => true));
+    }
+    
+    /**
+    * Add multiple FIND_IN_SET filters for the given field on the given collection,
+    * using the given logical operator, and possibly a custom set separator
+    * 
+    * @param Varien_Data_Collection_Db $collection Collection on which to apply the filter
     * @param string $fieldName Field name
-    * @param string $regex Regex
-    * @param bool $negative Whether the field value should not match the given regex
+    * @param array $values Values to search in the set
+    * @param string $setSeparator Set values separator
+    * @param string $operator Logical operator with which to bind the sub conditions
+    * @param bool $negative Whether the global resulting condition should be negated
     * @return this
     */
+    public function addFindInSetFiltersToCollection(Varien_Data_Collection_Db $collection, $fieldName, array $values,
+        $setSeparator=',', $operator=self::SQL_OR, $negative=false)
+    {
+        $adapter = $this->getCollectionAdapter($collection);
+        $select  = $collection->getSelect();
+        $firstValue = reset($values);
+        $quotedFirstValue = $adapter->quote($firstValue);
+        
+        $previousWherePart = $select->getPart(Zend_Db_Select::WHERE);
+        $previousWhereKeys = array_keys($previousWherePart);
+        $collection->addFieldToFilter($fieldName, array('finset' => $firstValue));
+        
+        $newWherePart = $select->getPart(Zend_Db_Select::WHERE);
+        $newWhereKeys = array_diff(array_keys($newWherePart), $previousWhereKeys);
+        $foundCondition = false;
+        $findInSetRegex = '#(find_in_set|FIND_IN_SET)\\(' . preg_quote($quotedFirstValue, '#') . ',\\s*(.+?)\\)#';
+        
+        foreach ($newWhereKeys as $key) {
+            if (preg_match($findInSetRegex, $newWherePart[$key], $matches)) {
+                $fieldName = $matches[2];
+                $filterParts = array();
+                
+                if ($setSeparator != ',') {
+                    $fieldName = 'REPLACE(' . $fieldName
+                        . ',' . $adapter->quote($setSeparator)
+                        . ',' . $adapter->quote(',')
+                        . ')';
+                }
+                
+                foreach ($values as $value) {
+                    $filterParts[] = 'FIND_IN_SET(' . $adapter->quote($value) . ',' . $fieldName . ')';
+                }
+                
+                if (!in_array($operator, array(self::SQL_AND, self::SQL_OR, self::SQL_XOR))) {
+                    $operator = self::SQL_OR;
+                }
+                
+                $newWherePart[$key] = '(' . implode(' ' . $operator . ' ', $filterParts) . ')';
+                
+                if ($negative) {
+                    $newWherePart[$key] = '(NOT ' . $newWherePart[$key]. ')';
+                }
+                
+                $foundCondition = true;
+                break;
+            }
+        }
+        
+        if ($foundCondition) {
+           $select->setPart(Zend_Db_Select::WHERE, $newWherePart);
+        } else {
+            $select->setPart(Zend_Db_Select::WHERE, $previousWherePart);
+            Mage::throwException(Mage::helper('customgrid')->__('Could not inject the multiple conditions'));
+        }
+        
+        return $this;
+    }
+    
+    /**
+     * Add a regex filter for the given field on the given collection
+     * 
+     * @param Varien_Data_Collection_Db $collection Collection on which to apply the filter
+     * @param string $fieldName Field name
+     * @param string $regex Regex
+     * @param bool $negative Whether the field value should not match the given regex
+     * @return this
+     */
     public function addRegexFilterToCollection(Varien_Data_Collection_Db $collection, $fieldName, $regex,
         $negative=false)
     {
         $adapter = $this->getCollectionAdapter($collection);
-        $quotedRegex = $adapter->quoteInto('?', $regex);
+        $select  = $collection->getSelect();
+        $quotedRegex = $adapter->quote($regex);
         $hasRegexpKeyword = Mage::helper('customgrid')->isMageVersionGreaterThan(1, 5);
         
         try {
@@ -204,12 +290,12 @@ class BL_CustomGrid_Helper_Collection
             $replacingPart = ($negative ? ' NOT' : '') . ' REGEXP ' . $quotedValue;
         }
         
-        $previousWherePart = $collection->getSelect()->getPart(Zend_Db_Select::WHERE);
+        $previousWherePart = $select->getPart(Zend_Db_Select::WHERE);
         $previousWhereKeys = array_keys($previousWherePart);
         $collection->addFieldToFilter($fieldName, array($filterKeyword => $regex));
         
         if (!$hasRegexpKeyword || $negative) {
-            $newWherePart = $collection->getSelect()->getPart(Zend_Db_Select::WHERE);
+            $newWherePart = $select->getPart(Zend_Db_Select::WHERE);
             $newWhereKeys = array_diff(array_keys($newWherePart), $previousWhereKeys);
             $foundCondition = false;
             
@@ -220,10 +306,11 @@ class BL_CustomGrid_Helper_Collection
                     break;
                 }
             }
+            
             if ($foundCondition) {
-                $collection->getSelect()->setPart(Zend_Db_Select::WHERE, $newWherePart);
+                $select->setPart(Zend_Db_Select::WHERE, $newWherePart);
             } else {
-                $collection->getSelect()->setPart(Zend_Db_Select::WHERE, $previousWherePart);
+                $select->setPart(Zend_Db_Select::WHERE, $previousWherePart);
                 Mage::throwException(Mage::helper('customgrid')->__('Could not inject regex'));
             }
         }

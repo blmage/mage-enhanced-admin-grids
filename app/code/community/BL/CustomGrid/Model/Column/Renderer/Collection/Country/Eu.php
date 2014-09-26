@@ -28,8 +28,8 @@ class BL_CustomGrid_Model_Column_Renderer_Collection_Country_Eu
         BL_CustomGrid_Model_Grid $gridModel)
     {
         $values = array(
-            'renderer' => 'customgrid/widget_grid_column_renderer_country_eu',
             'filter'   => 'customgrid/widget_grid_column_filter_country_eu',
+            'renderer' => 'customgrid/widget_grid_column_renderer_country_eu',
             'base_display_format'   => $this->getData('values/base_display_format'),
             'export_display_format' => $this->getData('values/export_display_format'),
         );

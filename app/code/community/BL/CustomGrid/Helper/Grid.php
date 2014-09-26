@@ -101,6 +101,28 @@ class BL_CustomGrid_Helper_Grid
     }
     
     /**
+    * Return the collection on which is based the grid block to whom belongs the given column block
+    * 
+    * @param Mage_Adminhtml_Block_Widget_Grid_Column $columnBlock Column block
+    * @return Varien_Data_Collection_Db
+    */
+    public function getColumnBlockGridCollection(Mage_Adminhtml_Block_Widget_Grid_Column $columnBlock)
+    {
+        return $columnBlock->getGrid()->getCollection();
+    }
+    
+    /**
+    * Return the filter index usable by the given column block
+    * 
+    * @param Mage_Adminhtml_Block_Widget_Grid_Column $columnBlock Column block
+    * @return string
+    */
+    public function getColumnBlockFilterIndex(Mage_Adminhtml_Block_Widget_Grid_Column $columnBlock)
+    {
+        return (($filterIndex = $columnBlock->getFilterIndex()) ? $filterIndex : $columnBlock->getIndex());
+    }
+    
+    /**
      * Register an additional verification callback for the given block type
      * 
      * @param string $type Verification type (either "block" or "collection")

@@ -23,7 +23,7 @@ class BL_CustomGrid_Block_Custom_Column_Config_Form
     
     protected function _getFormCode()
     {
-        return $this->getCustomColumn()->getId();
+        return 'custom_column_' . $this->getCustomColumn()->getId();
     }
     
     protected function _getFormAction()
@@ -31,21 +31,29 @@ class BL_CustomGrid_Block_Custom_Column_Config_Form
         return $this->getUrl('*/*/buildConfig');
     }
     
-    
-    protected function _prepareFields(Varien_Data_Form_Element_Fieldset $fieldset)
+    protected function _getFormFields()
     {
         $customColumn = $this->getCustomColumn();
-        $module = $customColumn->getModule();
-        $this->_translationHelper = $this->helper($module ? $module : 'customgrid');
+        $fields = array();
         
-        if (!$customColumn->getAllowCustomization()) {
-            return $this;
-        }
-        foreach ($customColumn->getCustomizationParams(true) as $parameter) {
-            $this->_addField($fieldset, $parameter);
+        if ($customColumn->getAllowCustomization()) {
+            foreach ($customColumn->getCustomizationParams(true) as $parameter) {
+                $fields[] = $parameter;
+            }
         }
         
-        return $this;
+        return $fields;
+    }
+    
+    public function getTranslationModule()
+    {
+        if (!$this->hasData('translation_module')) {
+            if (!$module = $this->getCustomColumn()->getModule()) {
+                $module = 'customgrid';
+            }
+            $this->setData('translation_module', $module);
+        }
+        return $this->_getData('translation_module');
     }
     
     public function getCustomColumn()

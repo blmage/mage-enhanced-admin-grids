@@ -88,9 +88,9 @@ class BL_CustomGrid_Model_Options_Source
                 } catch (Exception $e) {
                     $options = array();
                 }
-                
-                $this->setData('options_array', $options);
             }
+            
+            $this->setData('options_array', $options);
         }
         return $this->_getData('options_array');
     }

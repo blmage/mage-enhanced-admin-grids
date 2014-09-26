@@ -72,8 +72,8 @@ class BL_CustomGrid_Model_Column_Renderer_Attribute_Price
         Mage_Core_Model_Store $store, BL_CustomGrid_Model_Grid $gridModel)
     {
         $values = array(
-            'renderer' => 'customgrid/widget_grid_column_renderer_price',
             'filter'   => 'customgrid/widget_grid_column_filter_price',
+            'renderer' => 'customgrid/widget_grid_column_renderer_price',
             'default_currency_code' => $store->getBaseCurrency()->getCode(),
         );
         

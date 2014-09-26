@@ -20,8 +20,8 @@ class BL_CustomGrid_Model_Column_Renderer_Collection_Datetime
         BL_CustomGrid_Model_Grid $gridModel)
     {
         $values = array(
-            'renderer'    => 'customgrid/widget_grid_column_renderer_datetime',
             'filter'      => 'customgrid/widget_grid_column_filter_datetime',
+            'renderer'    => 'customgrid/widget_grid_column_renderer_datetime',
             'filter_time' => (bool) $this->getData('values/filter_time'),
         );
         

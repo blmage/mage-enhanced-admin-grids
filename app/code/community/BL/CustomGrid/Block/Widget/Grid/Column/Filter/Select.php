@@ -16,13 +16,33 @@
 class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Select
     extends Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Abstract
 {
+    const MODE_SINGLE = 'single';
+    const MODE_MULTIPLE = 'multiple';
+    const MODE_WITH_WITHOUT = 'with_without';
+    
     const BOOLEAN_FILTER_VALUE_WITH = 'with';
     const BOOLEAN_FILTER_VALUE_WITHOUT = 'without';
     
+    public function getValue()
+    {
+        $value = parent::getValue();
+        
+        if ($this->getColumn()->getFilterMode() == self::MODE_MULTIPLE) {
+            if (!is_array($value) && !is_null($value) && ($value !== '')) {
+                // The multiple select has likely been imploded by Prototype
+                $value = explode(',', $value);
+            }
+        }
+        
+        return $value;
+    }
+    
     protected function _getOptions()
     {
-        if ($this->getColumn()->getBooleanFilter()) {
-            return array(
+        $options = array();
+        
+        if ($this->getColumn()->getFilterMode() == self::MODE_WITH_WITHOUT) {
+            $options = array(
                 array(
                     'value' => self::BOOLEAN_FILTER_VALUE_WITH,
                     'label' => $this->helper('customgrid')->__('With'),
@@ -34,16 +54,17 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Select
             );
         } else {
             $options = $this->getColumn()->getOptions();
-            
-            if (!empty($options) && is_array($options)) {
-                return $options;
-            }
-            
-            return array();
         }
+        
+        return (is_array($options) ? $options : array());
     }
     
-    protected function _renderOption($option, $value, $removeEmpty=true)
+    protected function _isValueSelected($value, $selected)
+    {
+        return (!is_null($selected) && (is_array($selected) ? in_array($value, $selected) : ($value == $selected)));
+    }
+    
+    protected function _renderOption($option, $selectedValue, $removeEmpty=true)
     {
         $html = '';
         
@@ -51,14 +72,14 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Select
             $html = '<optgroup label="' . $this->htmlEscape($option['label']) . '">';
             
             foreach ($option['value'] as $subOption) {
-                $html .= $this->_renderOption($subOption, $value);
+                $html .= $this->_renderOption($subOption, $selectedValue);
             }
             
             $html .= '</optgroup>';
         } else {
             if (!$removeEmpty || (!is_null($option['value']) && ($option['value'] !== ''))) {
-                $html = '<option value="' . $this->htmlEscape($option['value'])
-                    . '"' . (($option['value'] == $value) && !is_null($value) ? ' selected="selected"' : '' ) . '>'
+                $html = '<option value="' . $this->htmlEscape($option['value']) . '"' 
+                    . ($this->_isValueSelected($option['value'], $selectedValue) ? ' selected="selected"' : '' ) . '>'
                     . $this->htmlEscape($option['label'])
                     . '</option>';
             }
@@ -67,25 +88,14 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Select
         return $html;
     }
     
-    protected function _isExistingOptionValue($options, $value)
-    {
-        foreach ($options as $option) {
-            if (is_array($option['value'])) {
-                if ($this->_isExistingOptionValue($option['value'], $value)) {
-                    return true;
-                }
-            } elseif (($option['value'] == $value) && !is_null($value)) {
-                return true;
-            }
-        }
-        return false;
-    }
-    
     public function getHtml()
     {
-        $options = $this->_getOptions();
-        $value = $this->getValue();
-        $html  = '<select name="' . $this->_getHtmlName() . '" id="' . $this->_getHtmlId() . '" class="no-changes">';
+        $options  = $this->_getOptions();
+        $value    = $this->getValue();
+        $multiple = ($this->getColumn()->getFilterMode() == self::MODE_MULTIPLE ? ' multiple="multiple" ' : '');
+        $htmlName = $this->_getHtmlName();
+        $htmlId   = $this->_getHtmlId();
+        $html     = '<select name="' . $htmlName . '" id="' . $htmlId . '"' . $multiple . 'class="no-changes">';
         
         if (!empty($options)) {
             $html .= $this->_renderOption(array('value' => '', 'label' => ''), $value, false);
@@ -101,32 +111,87 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Select
     
     public function getCondition()
     {
-        if (is_null($value = $this->getValue())) {
-            return null;
-        }
+        $columnBlock = $this->getColumn();
+        $collection  = $this->helper('customgrid/grid')->getColumnBlockGridCollection($columnBlock);
+        $condition   = null;
+        $value = $this->getValue();
         
-        if ($this->getColumn()->getBooleanFilter()) {
-            if ($value == self::BOOLEAN_FILTER_VALUE_WITH) {
-                return array('neq' => '');
-            } elseif ($value == self::BOOLEAN_FILTER_VALUE_WITHOUT) {
-                return array(array('null' => 1), array('eq' => ''));
-            }
-        } elseif ($this->_isExistingOptionValue($this->_getOptions(), $value)) {
-            if ($this->getColumn()->getImplodedValues()) {
-                $separator = $this->getColumn()->getImplodedSeparator();
+        $filterIndex = $this->helper('customgrid/grid')->getColumnBlockFilterIndex($columnBlock);
+        $filterMode  = $this->getColumn()->getFilterMode();
+        $isNegative  = (bool) $this->getColumn()->getNegativeFilter();
+        
+        if ($filterMode == self::MODE_MULTIPLE) {
+            if ($columnBlock->getImplodedValues()) {
+                try {
+                    $this->helper('customgrid/collection')->addFindInSetFiltersToCollection(
+                        $collection,
+                        $filterIndex,
+                        $value,
+                        $columnBlock->getImplodedSeparator(),
+                        $columnBlock->getLogicalOperator(),
+                        $isNegative
+                    );
+                } catch (Mage_Core_Exception $e) {
+                    Mage::getSingleton('customgrid/session')
+                        ->addError($this->__('Could not apply the multiple filter : "%s"', $e->getMessage()));
+                } catch (Exception $e) {
+                    Mage::logException($e);
+                    Mage::getSingleton('customgrid/session')->addError($this->__('Could not apply the multiple filter'));
+                }
                 
-                // No regex keyword available for addFieldToFilter() on all versions
-                return array(
-                    array('eq' => $value),
-                    array('like' => $value . $separator . '%'),
-                    array('like' => '%' . $separator . $value . $separator . '%'),
-                    array('like' => '%' . $separator . $value)
-                );
+                $condition = $this->helper('customgrid/collection')->getIdentityCondition();
+            } elseif ($isNegative) {
+                $lastValue = array_pop($value);
+                $condition = array('neq' => $lastValue);
+                
+                foreach ($value as $subValue) {
+                    $collection->addFieldToFilter($filterIndex, array('neq' => $subValue));
+                }
             } else {
-                return array('eq' => $this->getValue());
+                $condition = array();
+                
+                foreach ($value as $subValue) {
+                    $condition[] = array('eq' => $subValue);
+                }
+            }
+        } elseif ($filterMode == self::MODE_WITH_WITHOUT) {
+            if ($value == self::BOOLEAN_FILTER_VALUE_WITHOUT) {
+                $condition = array(array('null' => true), array('eq' => ''));
+            } else {
+                $condition = array('neq' => '');
+            }
+        } else {
+            if ($columnBlock->getImplodedValues()) {
+                $separator = $columnBlock->getImplodedSeparator();
+                
+                if (($separator == '%') || ($separator == '_')) {
+                    $separator = '\\' . $separator;
+                }
+                
+                $eqCode   = ($isNegative ? 'neq' : 'eq');
+                $likeCode = ($isNegative ? 'nlike' : 'like');
+                
+                $conditions = array(
+                    array($eqCode   => $value),
+                    array($likeCode => $value . $separator . '%'),
+                    array($likeCode => '%' . $separator . $value . $separator . '%'),
+                    array($likeCode => '%' . $separator . $value)
+                );
+                
+                if ($isNegative) {
+                    $condition = array_pop($conditions);
+                    
+                    foreach ($conditions as $subCondition) {
+                        $collection->addFieldToFilter($filterIndex, $subCondition);
+                    }
+                } else {
+                    $condition = $conditions;
+                }
+            } else {
+                $condition = array(($isNegative ? 'neq' : 'eq') => $value);
             }
         }
         
-        return null;
+        return $condition;
     }
 }

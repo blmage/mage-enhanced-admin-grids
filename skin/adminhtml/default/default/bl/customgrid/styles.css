@@ -21,6 +21,10 @@
 .blcg-form-note-text { line-height:14px; font-size:11px; }
 .blcg-form-note-text ul { list-style:decimal inside none; }
 .blcg-form-note-text li { margin:0; }
+div.blcg-collapseable { margin-top:1px; }
+div.blcg-collapseable a { display:block; font-weight:bold; background:url(images/collapse_arrow_down.png) 100% 50% no-repeat; color:#fff; text-decoration:none; }
+div.blcg-collapseable a:hover { color:#fff; text-decoration:none; }
+div.blcg-collapseable a.open { background:url(images/collapse_arrow_up.png) 100% 50% no-repeat; }
 
 /* MESSAGES LIST */
 

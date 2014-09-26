@@ -59,61 +59,26 @@ class BL_CustomGrid_Model_Custom_Column_Product_Categories
                 . ' field',
         );
         
-        $this->addCustomizationParam('separator', array(
-            'label'       => $helper->__('Categories Separator'),
-            'description' => $helper->__($descriptions['separator']),
-            'type'        => 'text',
-            'value'       => '',
-        ), 10);
-        
-        $this->addCustomizationParam('full_paths', array(
-            'label'        => $helper->__('Display Full Paths'),
-            'type'         => 'select',
-            'source_model' => 'adminhtml/system_config_source_yesno',
-            'value'        => 0,
-        ), 20);
-        
-        $this->addCustomizationParam('level_separator', array(
-            'label'       => $helper->__('Levels Separator'),
-            'description' => $helper->__($descriptions['level_separator']),
-            'type'        => 'text',
-            'value'       => '',
-            'depends'     => array('full_paths' => array('value' => 1)),
-        ), 30);
-        
-        $this->addCustomizationParam('ascent_limit', array(
-            'label'       => $helper->__('Ascent Limit Level'),
-            'description' => $helper->__($descriptions['ascent_limit']),
-            'type'        => 'text',
-            'value'       => '',
-            'depends'     => array('full_paths' => array('value' => 1)),
-        ), 40);
-        
-        $this->addCustomizationParam('display_ids', array(
-            'label'        => $helper->__('Display IDs'),
-            'description'  => $helper->__('Choose "Yes" to display IDs instead of names'),
-            'type'         => 'select',
-            'source_model' => 'adminhtml/system_config_source_yesno',
-            'value'        => 0,
-        ), 50);
-        
         $this->addCustomizationParam('boolean_filter', array(
             'label'        => $helper->__('With/Without Filter'),
+            'group'        => $helper->__('Filtering'),
             'type'         => 'select',
             'source_model' => 'adminhtml/system_config_source_yesno',
             'value'        => 0,
-        ), 60);
+        ), 10);
         
         $this->addCustomizationParam('filter_mode', array(
             'label'        => $helper->__('Filter Mode'),
+            'group'        => $helper->__('Filtering'),
             'type'         => 'select',
             'source_model' => 'customgrid/system_config_source_product_categories_filter_mode',
             'value'        => self::FILTER_MODE_ONE_CHOOSEN,
             'depends'      => array('boolean_filter' => array('value' => 0)),
-        ), 70);
+        ), 20);
         
         $this->addCustomizationParam('custom_filter_operator', array(
             'label'       => $helper->__('Custom Filter - Operator'),
+            'group'       => $helper->__('Filtering'),
             'description' => $helper->__($descriptions['custom_filter_operator']),
             'type'        => 'select',
             'values'      => $this->getCustomFilterOperators(true),
@@ -121,16 +86,60 @@ class BL_CustomGrid_Model_Custom_Column_Product_Categories
                 'boolean_filter' => array('value' => 0),
                 'filter_mode'    => array('value' => self::FILTER_MODE_CUSTOM),
             ),
-        ), 80);
+        ), 30);
         
         $this->addCustomizationParam('custom_filter_number', array(
             'label'       => $helper->__('Custom Filter - Number'),
+            'group'       => $helper->__('Filtering'),
             'description' => $helper->__($descriptions['custom_filter_number']),
             'type'        => 'text',
             'depends'     => array(
                 'boolean_filter' => array('value' => 0),
                 'filter_mode'    => array('value' => self::FILTER_MODE_CUSTOM),
             ),
+        ), 40);
+        
+        $this->addCustomizationParam('separator', array(
+            'label'       => $helper->__('Categories Separator'),
+            'group'       => $helper->__('Rendering'),
+            'description' => $helper->__($descriptions['separator']),
+            'type'        => 'text',
+            'value'       => '',
+        ), 50);
+        
+        $this->addCustomizationParam('full_paths', array(
+            'label'        => $helper->__('Display Full Paths'),
+            'group'        => $helper->__('Rendering'),
+            'type'         => 'select',
+            'source_model' => 'adminhtml/system_config_source_yesno',
+            'value'        => 0,
+        ), 60);
+        
+        $this->addCustomizationParam('level_separator', array(
+            'label'       => $helper->__('Levels Separator'),
+            'group'       => $helper->__('Rendering'),
+            'description' => $helper->__($descriptions['level_separator']),
+            'type'        => 'text',
+            'value'       => '',
+            'depends'     => array('full_paths' => array('value' => 1)),
+        ), 70);
+        
+        $this->addCustomizationParam('ascent_limit', array(
+            'label'       => $helper->__('Ascent Limit Level'),
+            'group'       => $helper->__('Rendering'),
+            'description' => $helper->__($descriptions['ascent_limit']),
+            'type'        => 'text',
+            'value'       => '',
+            'depends'     => array('full_paths' => array('value' => 1)),
+        ), 80);
+        
+        $this->addCustomizationParam('display_ids', array(
+            'label'        => $helper->__('Display IDs'),
+            'group'        => $helper->__('Rendering'),
+            'description'  => $helper->__('Choose "Yes" to display IDs instead of names'),
+            'type'         => 'select',
+            'source_model' => 'adminhtml/system_config_source_yesno',
+            'value'        => 0,
         ), 90);
         
         $this->setCustomizationWindowConfig(array('height' => 520));
@@ -248,8 +257,8 @@ class BL_CustomGrid_Model_Custom_Column_Product_Categories
         }
         
         return array(
-            'renderer' => 'customgrid/widget_grid_column_renderer_product_categories',
             'filter'   => 'customgrid/widget_grid_column_filter_product_categories',
+            'renderer' => 'customgrid/widget_grid_column_renderer_product_categories',
             'category_tree'      => $categoryTree,
             'category_hash'      => $categoryHash,
             'result_separator'   => $this->_extractStringParam($params, 'separator', ', ', true),

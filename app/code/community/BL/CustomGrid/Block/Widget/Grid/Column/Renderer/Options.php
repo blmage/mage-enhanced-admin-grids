@@ -43,11 +43,12 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Options
     public function render(Varien_Object $row)
     {
         $keepPath  = (bool) $this->getColumn()->getDisplayFullPath();
-        $separator = $this->getColumn()->getOptionsSeparator();
+        $separator = $this->getColumn()->getSubValuesSeparator();
         $options   = $this->_collectOptions($this->getColumn()->getOptions(), $keepPath, $separator);
         $imploded  = (bool) $this->getColumn()->getImplodedValues();
         $implodedSeparator = $this->getColumn()->getImplodedSeparator();
         $showMissingOptionValues = (bool) $this->getColumn()->getShowMissingOptionValues();
+        $result = '';
         
         if (!empty($options) && is_array($options)) {
             $value = $row->getData($this->getColumn()->getIndex());
@@ -66,14 +67,14 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Options
                     }
                 }
                 
-                return implode(', ', $result);
+                $result = implode($this->getColumn()->getValuesSeparator(), $result);
             } elseif (isset($options[$value])) {
-                return $options[$value];
+                $result = $options[$value];
             } elseif ($showMissingOptionValues) {
-                return $value;
+                $result = $value;
             }
         }
         
-        return '';
+        return $result;
     }
 }

@@ -25,4 +25,9 @@ class BL_CustomGrid_Block_Column_Renderer_Collection_Config_Form
     {
         return Mage::registry('blcg_collection_column_renderer');
     }
+    
+    public function getRendererType()
+    {
+        return 'collection';
+    }
 }

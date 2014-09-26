@@ -20,7 +20,6 @@ class BL_CustomGrid_Model_Column_Renderer_Collection_Date
         BL_CustomGrid_Model_Grid $gridModel)
     {
         $values = array(
-            'renderer'    => 'customgrid/widget_grid_column_renderer_date',
             /**
              * Use datetime filter, as there doesnt seem to be any inconvenience for it,
              * and because using a simple date filter can cause problems when we have date fields
@@ -28,6 +27,7 @@ class BL_CustomGrid_Model_Column_Renderer_Collection_Date
              * (because of the timezone), which leads to excluding rows that should be taken
              */
             'filter'      => 'customgrid/widget_grid_column_filter_datetime',
+            'renderer'    => 'customgrid/widget_grid_column_renderer_date',
             'filter_time' => false,
         );
         

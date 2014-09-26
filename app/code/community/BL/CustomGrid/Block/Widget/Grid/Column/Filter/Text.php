@@ -46,13 +46,13 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Text
     public function getCondition()
     {
         $columnBlock = $this->getColumn();
-        $collection  = $columnBlock->getGrid()->getCollection();
+        $collection  = $this->helper('customgrid/grid')->getColumnBlockCollection($columnBlock);
+        $condition   = null;
         $value = $this->getValue();
-        $condition = null;
         
         $filterModeShortcut = (bool) $columnBlock->getFilterModeShortcut();
         $negativeFilterShortcut = (bool) $columnBlock->getNegativeFilterShortcut();
-        $filterIndex = (($filterIndex = $columnBlock->getFilterIndex()) ? $filterIndex : $columnBlock->getIndex());
+        $filterIndex = $this->helper('customgrid/grid')->getColumnBlockFilterIndex($columnBlock);
         $filterMode  = $columnBlock->getFilterMode();
         $isNegative  = (!$negativeFilterShortcut && $columnBlock->getNegativeFilter());
         
@@ -85,7 +85,7 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Text
         }
         
         if ($filterMode == self::MODE_WITH_WITHOUT) {
-            $condition = ($value ? array('neq' => '') : array(array('eq' => ''), array('isnull' => true)));
+            $condition = ($value ? array('neq' => '') : array(array('eq' => ''), array('null' => true)));
             
         } elseif ($filterMode == self::MODE_REGEX) {
             try {
@@ -99,8 +99,7 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Text
                 Mage::getSingleton('customgrid/session')->addError($this->__('Could not apply the regex filter'));
             }
             
-            // A condition is needed, so let's use one that does nothing
-            $condition = array(array('null' => true), array('notnull' => true));
+            $condition = $this->helper('customgrid/collection')->getIdentityCondition();
             
         } else {
             $stringHelper   = $this->helper('core/string');

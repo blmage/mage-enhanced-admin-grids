@@ -600,6 +600,71 @@ blcg.MessagesTabs.prototype = {
     }
 };
 
+blcg.Fieldset = {
+    applyCollapse: function(containerId)
+    {
+        var container = $(containerId);
+        var stateElement = $(containerId + '-state');
+        var headElement  = $(containerId + '-head');
+        
+        if (stateElement) {
+            collapsed = (stateElement.value == 1 ? 0 : 1);
+        } else {
+            collapsed = headElement.collapsed;
+        }
+        
+        if ((collapsed == 1) || (typeof(collapsed) == 'undefined')) {
+           headElement.removeClassName('open');
+           container.hide();
+        } else {
+           headElement.addClassName('open');
+           container.show();
+        }
+    },
+    
+    toggleCollapse: function(containerId, saveStateUrl)
+    {
+        var stateElement = $(containerId + '-state');
+        var headElement  = $(containerId + '-head');
+        
+        if (stateElement) {
+            collapsed = (stateElement.value == 1 ? 0 : 1);
+        } else {
+            collapsed = $(containerId + '-head').collapsed;
+        }
+        
+        if ((collapsed == 1) || (typeof(collapsed) == 'undefined')) {
+            if (stateElement) {
+                stateElement.value = 1;
+            }
+            headElement.collapsed = 0;
+        } else {
+            if (stateElement) {
+                stateElement.value = 0;
+            }
+            headElement.collapsed = 1;
+        }
+        
+        this.applyCollapse(containerId);
+        
+        if ((saveStateUrl != '') && stateElement) {
+            this.saveState(saveStateUrl, {
+                container: containerId,
+                value: stateElement.value
+            });
+        }
+    },
+    
+    saveState: function(url, parameters)
+    {
+        new Ajax.Request(url, {
+            method: 'get',
+            parameters: Object.toQueryString(parameters),
+            loaderArea: false
+        });
+    }
+};
+
 /*
  * Based on tooltip-0.2.js - Small tooltip library on top of Prototype:
  * Copyright (c) 2006 Jonathan Weiss <jw@innerewut.de>

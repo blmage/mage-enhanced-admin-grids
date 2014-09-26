@@ -133,55 +133,61 @@ abstract class BL_CustomGrid_Model_Custom_Column_Sales_Items_Abstract
         if ($this->_canFilterOnSku()) {
             $this->addCustomizationParam('filter_on_sku', array(
                 'label'        => $helper->__('Filter on Item SKU'),
+                'group'        => $helper->__('Filtering'),
                 'type'         => 'select',
                 'source_model' => 'customgrid/system_config_source_yesno',
                 'value'        => 0,
-            ), 100000);
+            ), 10);
         }
         if ($this->_canFilterOnName()) {
             $this->addCustomizationParam('filter_on_name', array(
                 'label'        => $helper->__('Filter on Item Name'),
+                'group'        => $helper->__('Filtering'),
                 'type'         => 'select',
                 'source_model' => 'customgrid/system_config_source_yesno',
                 'value'        => 0,
-            ), 100010);
+            ), 20);
         }
         if ($this->_canExcludeChildrenFromFilter()) {
             $this->addCustomizationParam('filter_exclude_child', array(
                 'label'        => $helper->__('Exclude Child Items From Filter'),
+                'group'        => $helper->__('Filtering'),
                 'type'         => 'select',
                 'source_model' => 'customgrid/system_config_source_yesno',
                 'value'        => 0,
-            ), 100020);
+            ), 30);
         }
         if ($this->_canAllowSqlWildcardsInFilter()) {
             $this->addCustomizationParam('allow_sql_wildcards', array(
                 'label'        => $helper->__('Allow SQL Wildcards In Filter'),
+                'group'        => $helper->__('Filtering'),
                 'type'         => 'select',
                 'source_model' => 'customgrid/system_config_source_yesno',
                 'value'        => 0,
-            ), 100030);
+            ), 40);
         }
         
         if ($this->_isCustomizableList()) {
             $itemValues = array_reverse($this->getItemValues());
-            $position = -10;
+            $position = 10000;
             $hideHeaderDescription = 'Choose "Yes" if you do not want the field labels to be displayed in the header';
             
             $this->addCustomizationParam('hide_header', array(
                 'label'        => $helper->__('Hide Header'),
+                'group'        => $helper->__('Rendering'),
                 'description'  => $helper->__($hideHeaderDescription),
                 'type'         => 'select',
                 'source_model' => 'customgrid/system_config_source_yesno',
-            ), ($position -= 10));
+            ), 50);
             
             foreach ($itemValues as $key => $itemValue) {
                  $this->addCustomizationParam('display_' . $key, array(
-                    'label'        => $helper->__('Display "%s"', $itemValue->getData('name')),
-                    'description'  => $itemValue->getData('description'),
+                    'label'        => $helper->__('Display "%s"', $itemValue->getName()),
+                    'group'        => $helper->__('Fields'),
+                    'description'  => $itemValue->getDescription(),
                     'type'         => 'select',
                     'source_model' => 'customgrid/system_config_source_yesno',
-                    'value'        => ($itemValue->getData('default') ? 1 : 0),
+                    'value'        => ($itemValue->getDefault() ? 1 : 0),
                 ), ($position -= 10));
             }
             
@@ -335,7 +341,9 @@ abstract class BL_CustomGrid_Model_Custom_Column_Sales_Items_Abstract
             $itemValues = $this->getItemValues();
             
             foreach ($itemValues as $key => $itemValue) {
-                if (!$this->_extractBoolParam($params, 'display_' . $itemValue->getData('code'), false)) {
+                $shouldDisplay = $this->_extractBoolParam($params, 'display_' . $itemValue->getCode(), null);
+                
+                if ((!is_null($shouldDisplay) && !$shouldDisplay) || !$itemValue->getDefault()) {
                     unset($itemValues[$key]);
                 }
             }

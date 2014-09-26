@@ -62,6 +62,7 @@ class BL_CustomGrid_Column_Renderer_AttributeController
     
     public function buildConfigAction()
     {
+        $this->_saveConfigFormFieldsetsStates();
         $params = $this->getRequest()->getPost('parameters', array());
         $params = Mage::getSingleton('customgrid/column_renderer_config_attribute')->encodeParameters($params);
         $this->_setActionSuccessJsonResponse(array('parameters' => $params));

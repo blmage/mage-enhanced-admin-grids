@@ -19,18 +19,20 @@ class BL_CustomGrid_Model_Custom_Column_Order_Status_Color
     protected function _prepareConfig()
     {
         $helper = $this->_getBaseHelper();
-        $sortOrder = 10;
+        $sortOrder = 20;
         
         $this->addCustomizationParam('only_cell', array(
             'label'        => $helper->__('Only Colorize Status Cell'),
+            'group'        => $helper->__('Rendering'),
             'type'         => 'select',
             'source_model' => 'adminhtml/system_config_source_yesno',
             'value'        => 0,
-        ), $sortOrder);
+        ), 10);
         
         foreach ($this->getOrderStatuses() as $key => $status) {
             $this->addCustomizationParam($key . '_background', array(
                 'label'       => $helper->__('"%s" Background Color', $status),
+                'group'       => $helper->__('Background Colors'),
                 'description' => $helper->__('Must be a valid CSS color'),
                 'type'        => 'text',
                 'value'       => '',
@@ -38,6 +40,7 @@ class BL_CustomGrid_Model_Custom_Column_Order_Status_Color
             
             $this->addCustomizationParam($key . '_text', array(
                 'label'       => $helper->__('"%s" Text Color', $status),
+                'group'       => $helper->__('Text Colors'),
                 'description' => $helper->__('Must be a valid CSS color'),
                 'type'        => 'text',
                 'value'       => '',
@@ -72,8 +75,8 @@ class BL_CustomGrid_Model_Custom_Column_Order_Status_Color
         
         return array(
             // @todo lock "options" renderer, to allow customizing the filter, + remember to use proper inheritance
-            'renderer'  => 'customgrid/widget_grid_column_renderer_order_status_color',
             'filter'    => 'adminhtml/widget_grid_column_filter_select',
+            'renderer'  => 'customgrid/widget_grid_column_renderer_order_status_color',
             'only_cell' => $this->_extractBoolParam($params, 'only_cell'),
             'options'   => $this->getOrderStatuses(),
             'options_colors' => $colors,

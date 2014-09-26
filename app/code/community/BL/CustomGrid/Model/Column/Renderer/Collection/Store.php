@@ -20,8 +20,8 @@ class BL_CustomGrid_Model_Column_Renderer_Collection_Store
         BL_CustomGrid_Model_Grid $gridModel)
     {
         return array(
-            'renderer'        => 'customgrid/widget_grid_column_renderer_store',
             'filter'          => 'customgrid/widget_grid_column_filter_store',
+            'renderer'        => 'customgrid/widget_grid_column_renderer_store',
             'skip_website'    => (bool) $this->getData('values/skip_website'),
             'skip_store'      => (bool) $this->getData('values/skip_store'),
             'skip_store_view' => (bool) $this->getData('values/skip_store_view'),

@@ -38,6 +38,20 @@ class BL_CustomGrid_Controller_Grid_Action
     }
     
     /**
+    * Save the states (collapsed or not) of some config form fieldsets,
+    * if the information is present in the current request
+    * 
+    * @return this
+    */
+    protected function _saveConfigFormFieldsetsStates()
+    {
+        if (is_array($fieldsetsStates = $this->getRequest()->getParam('blcg_form_config_fieldsets_states'))) {
+            Mage::helper('customgrid/config_form')->saveFieldsetsStates($fieldsetsStates);
+        }
+        return $this;
+    }
+    
+    /**
      * Set JSON response
      * 
      * @param string $type Response type

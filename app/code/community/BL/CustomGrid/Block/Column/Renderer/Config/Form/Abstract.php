@@ -17,10 +17,11 @@ abstract class BL_CustomGrid_Block_Column_Renderer_Config_Form_Abstract
     extends BL_CustomGrid_Block_Config_Form_Abstract
 {
     abstract public function getRenderer();
+    abstract public function getRendererType();
     
     protected function _getFormCode()
     {
-        return $this->getRenderer()->getCode();
+        return $this->getRendererType() . '_renderer_' . $this->getRenderer()->getCode();
     }
     
     protected function _getFormAction()
@@ -28,19 +29,26 @@ abstract class BL_CustomGrid_Block_Column_Renderer_Config_Form_Abstract
         return $this->getUrl('*/*/buildConfig');
     }
     
-    protected function _prepareFields(Varien_Data_Form_Element_Fieldset $fieldset)
+    protected function _getFormFields()
     {
         $renderer = $this->getRenderer();
-        
-        if ((!$module = $renderer->getModule())
-            || (!$this->_translationHelper = $this->helper($module))) {
-            $this->_translationHelper = $this->helper('customgrid');
-        }
+        $fields = array();
         
         foreach ($renderer->getParameters() as $parameter) {
-            $this->_addField($fieldset, $parameter);
+            $fields[] = $parameter;
         }
         
-        return $this;
+        return $fields;
+    }
+    
+    public function getTranslationModule()
+    {
+        if (!$this->hasData('translation_module')) {
+            if (!$module = $this->getRenderer()->getModule()) {
+                $module = 'customgrid';
+            }
+            $this->setData('translation_module', $module);
+        }
+        return $this->_getData('translation_module');
     }
 }

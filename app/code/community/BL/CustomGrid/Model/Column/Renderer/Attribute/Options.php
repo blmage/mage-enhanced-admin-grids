@@ -16,6 +16,10 @@
 class BL_CustomGrid_Model_Column_Renderer_Attribute_Options
     extends BL_CustomGrid_Model_Column_Renderer_Attribute_Abstract
 {
+    protected $_backwardsMap = array(
+        'options_separator' => 'sub_values_separator',
+    );
+    
     public function isAppliableToAttribute(Mage_Eav_Model_Entity_Attribute $attribute,
         BL_CustomGrid_Model_Grid $gridModel)
     {
@@ -37,8 +41,8 @@ class BL_CustomGrid_Model_Column_Renderer_Attribute_Options
     public function getColumnBlockValues(Mage_Eav_Model_Entity_Attribute $attribute, Mage_Core_Model_Store $store,
         BL_CustomGrid_Model_Grid $gridModel)
     {
-        $options  = null;
-        $multiple = ($attribute->getFrontendInput() == 'multiselect');
+        $options = null;
+        $isMultiple = ($attribute->getFrontendInput() == 'multiselect');
         
         if ($this->getData('values/force_default_source')
             || !is_array($options = $this->_getAttributeOptions($attribute))) {
@@ -51,15 +55,25 @@ class BL_CustomGrid_Model_Column_Renderer_Attribute_Options
             }
         }
         
+        if (!$this->hasData('values/filter_mode') && $this->getData('values/boolean_filter')) {
+            $this->setData(
+                'values/filter_mode',
+                BL_CustomGrid_Block_Widget_Grid_Column_Filter_Select::MODE_WITH_WITHOUT
+            );
+        }
+        
         return array(
-            'renderer' => 'customgrid/widget_grid_column_renderer_options',
             'filter'   => 'customgrid/widget_grid_column_filter_select',
+            'renderer' => 'customgrid/widget_grid_column_renderer_options',
             'options'  => (is_array($options) ? $options : array()),
-            'boolean_filter'     => (bool) $this->getData('values/boolean_filter'),
-            'display_full_path'  => (bool) $this->getData('values/display_full_path'),
-            'options_separator'  => $this->getData('values/options_separator'),
-            'imploded_values'    => $multiple,
-            'imploded_separator' => ($multiple ? ',' : null),
+            'imploded_values'      => $isMultiple,
+            'imploded_separator'   => ($isMultiple ? ',' : null),
+            'filter_mode'          => $this->getData('values/filter_mode'),
+            'logical_operator'     => $this->getData('values/filter_logical_operator'),
+            'negative_filter'      => (bool) $this->getData('values/negative_filter'),
+            'display_full_path'    => (bool) $this->getData('values/display_full_path'),
+            'values_separator'     => $this->getDataSetDefault('values/values_separator', ', '),
+            'sub_values_separator' => $this->getDataSetDefault('values/sub_values_separator', ' - '),
             'show_missing_option_values' => (bool) $this->getData('values/show_missing'),
         );
     }

@@ -136,9 +136,9 @@ class BL_CustomGrid_Model_Custom_Column_Product_Stats_Quote
             
             if (is_array($condition) && isset($condition['from']) && isset($condition['to'])) {
                 $condition = ' BETWEEN '
-                    . $adapter->quoteInto('?', $condition['from'])
+                    . $adapter->quote($condition['from'])
                     . ' AND '
-                    . $adapter->quoteInto('?', $condition['to']);
+                    . $adapter->quote($condition['to']);
             } else {
                 $condition = $adapter->quoteInto(' = ?', $condition);
             }
