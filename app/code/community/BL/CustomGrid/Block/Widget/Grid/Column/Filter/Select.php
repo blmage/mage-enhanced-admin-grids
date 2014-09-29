@@ -98,7 +98,15 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Select
         $html     = '<select name="' . $htmlName . '" id="' . $htmlId . '"' . $multiple . 'class="no-changes">';
         
         if (!empty($options)) {
-            $html .= $this->_renderOption(array('value' => '', 'label' => ''), $value, false);
+            if (is_null($emptyLabel = $this->getColumn()->getEmptyOptionLabel())) {
+                $emptyLabel = '';
+            }
+            
+            $html .= $this->_renderOption(
+                array('value' => '', 'label' => $emptyLabel),
+                $value,
+                false
+            );
             
             foreach ($this->_getOptions() as $option){
                 $html .= $this->_renderOption($option, $value);

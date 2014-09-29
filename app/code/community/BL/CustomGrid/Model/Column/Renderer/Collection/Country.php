@@ -19,6 +19,25 @@ class BL_CustomGrid_Model_Column_Renderer_Collection_Country
     public function getColumnBlockValues($columnIndex, Mage_Core_Model_Store $store,
         BL_CustomGrid_Model_Grid $gridModel)
     {
-        return array('type' => 'country');
+        $options = Mage::getResourceModel('directory/country_collection')->load()->toOptionArray(false);
+        $implodedSeparator = $this->getData('values/imploded_separator');
+        
+        if (empty($implodedSeparator) && ($implodedSeparator != '0')) {
+            $implodedSeparator = ',';
+        }
+        
+        return array(
+            'filter'   => 'customgrid/widget_grid_column_filter_select',
+            'renderer' => 'customgrid/widget_grid_column_renderer_options',
+            'options'  => $options,
+            'empty_option_label'   => Mage::helper('cms')->__('All Countries'),
+            'imploded_values'      => (bool) $this->getData('values/imploded_values'),
+            'imploded_separator'   => $implodedSeparator,
+            'filter_mode'          => $this->getData('values/filter_mode'),
+            'logical_operator'     => $this->getData('values/filter_logical_operator'),
+            'negative_filter'      => (bool) $this->getData('values/negative_filter'),
+            'values_separator'     => $this->getDataSetDefault('values/values_separator', ', '),
+            'show_missing_option_values' => (bool) $this->getData('values/show_missing'),
+        );
     }
 }

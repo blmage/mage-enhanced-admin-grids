@@ -168,7 +168,6 @@ button.blcg-export span { padding-left:20px; background-image:url(images/ico_exp
 .blcg-collection-renderers-descriptions-list dd { margin:0 0 6px; padding-left:10px; }
 .blcg-collection-renderer-help,
 .blcg-attribute-renderer-help { margin:0 0 12px; font-style:italic; }
-.blcg-custom-grid-forced-renderer span { vertical-align:top; }
 
 /* CUSTOM COLUMNS */
 

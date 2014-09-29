@@ -43,7 +43,7 @@ class BL_CustomGrid_Model_Custom_Column_Product_Inventory
             $this->setCustomizationWindowConfig(array('height' => 280), true);
         }
         
-        return $this;
+        return parent::_prepareConfig();
     }
     
     public function getTableName()

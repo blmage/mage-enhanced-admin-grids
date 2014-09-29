@@ -19,7 +19,7 @@ class BL_CustomGrid_Model_Custom_Column_Order_Payment
     protected function _prepareConfig()
     {
         $this->setExcludedVersions('1.4.0.*'); // those versions don't have the sales_flat_order_grid table
-        return $this;
+        return parent::_prepareConfig();
     }
     
     public function getTableName()

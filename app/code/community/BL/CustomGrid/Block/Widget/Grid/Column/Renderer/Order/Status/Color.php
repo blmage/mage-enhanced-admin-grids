@@ -14,50 +14,41 @@
  */
 
 class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Order_Status_Color
-    extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Text
+    extends BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Options
 {
-    protected function _renderRow(Varien_Object $row, $forExport=false)
+    protected function _renderRow(Varien_Object $row, $renderedValue, $forExport=false)
     {
-        $result  = '';
-        $options = $this->getColumn()->getOptions();
-        $colors  = $this->getColumn()->getOptionsColors();
-        
-        if (!is_array($colors)) {
-            $colors = array();
-        }
-        if (!empty($options) && is_array($options)) {
-            $value = $row->getData($this->getColumn()->getIndex());
+        if (!empty($renderedValue) && !$forExport) {
+            $value  = $row->getData($this->getColumn()->getIndex());
+            $colors = $this->getColumn()->getOptionsColors();
             
-            if (isset($options[$value])) {
-                $result = $options[$value];
-            } else {
-                $result = $value;
-            }
-            if (!$forExport && isset($colors[$value])) {
+            if (is_array($colors) && isset($colors[$value])) {
                 $elementId = $this->helper('core')->uniqHash('blcg-gcr-osc-');
                 $onlyCell  = ($this->getColumn()->getOnlyCell() ? 'true' : 'false');
                 
-                $result .= '<span id="' . $elementId . '"></span>'
+                $renderedValue .= '<span id="' . $elementId . '"></span>'
                     . '<script type="text/javascript">'
                     . "\n" . '//<![CDATA[' . "\n"
-                    . 'blcg.Grid.CustomColumn.OptionsColor.registerRowChange("' . $elementId . '", '
+                    . 'blcg.Grid.CustomColumn.RowColorizer.colorizeRow('
+                    . '"' . $elementId . '", '
                     . '"' . $this->jsQuoteEscape($colors[$value]['background'], '"') . '", '
-                    . '"' . $this->jsQuoteEscape($colors[$value]['text'], '"') . '", ' . $onlyCell . ');'
-                    . "\n" . '//<![CDATA[' . "\n"
+                    . '"' . $this->jsQuoteEscape($colors[$value]['text'], '"') . '", '
+                    . $onlyCell
+                    . ');'
+                    . "\n" . '//]]>' . "\n"
                     . '</script>';
             }
         }
-        
-        return $result;
+        return $renderedValue;
     }
     
     public function render(Varien_Object $row)
     {
-        return $this->_renderRow($row);
+        return $this->_renderRow($row, parent::render($row));
     }
     
     public function renderExport(Varien_Object $row)
     {
-        return $this->_renderRow($row, true);
+        return $this->_renderRow($row, parent::renderExport($row), true);
     }
 }

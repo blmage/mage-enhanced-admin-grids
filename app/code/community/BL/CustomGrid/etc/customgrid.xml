@@ -86,13 +86,13 @@
                 <number_in_wishlists model="customgrid/custom_column_product_stats_wishlist" module="customgrid">
                     <name>Quantity in Wishlists</name>
                     <description>Displays the quantity of each product contained in wishlists</description>
+                    <group>Stats</group>
+                    <allow_customization>1</allow_customization>
                     <availability>
                         <excluded_versions>
                             <version>1.4.*</version>
                         </excluded_versions>
                     </availability>
-                    <group>Stats</group>
-                    <allow_customization>1</allow_customization>
                     <config_params>
                         <count_mode>products</count_mode>
                     </config_params>
@@ -322,13 +322,15 @@
                 <status_color model="customgrid/custom_column_order_status_color" module="customgrid">
                     <name>Status (With Color)</name>
                     <description>Displays the status and colorizes the row</description>
+                    <warning>This column must be visible and not only filterable for the rows to be colorized</warning>
                     <group>Duplicated</group>
+                    <allow_renderers>1</allow_renderers>
+                    <allow_customization>1</allow_customization>
                     <availability>
                         <excluded_versions>
                             <version>1.4.0.*</version>
                         </excluded_versions>
                     </availability>
-                    <allow_customization>1</allow_customization>
                 </status_color>
                 
                 <customer_group model="customgrid/custom_column_order_customer_group" module="customgrid">
@@ -695,8 +697,95 @@
                 <description>Displays a country name from its code</description>
                 <sort_order>70000</sort_order>
                 <config_window>
-                    <height>200</height>
+                    <height>450</height>
                 </config_window>
+                <parameters>
+                    <imploded_values>
+                        <label>Merged Values</label>
+                        <description>Choose "Yes" if the field contains multiple values separated by a given string</description>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>customgrid/system_config_source_yesno</source_model>
+                        <sort_order>10</sort_order>
+                    </imploded_values>
+                    <imploded_separator>
+                        <label>Values Separator</label>
+                        <description>If no value is set, "," will be used</description>
+                        <visible>1</visible>
+                        <type>text</type>
+                        <sort_order>20</sort_order>
+                        <value>,</value>
+                        <depends>
+                            <imploded_values>
+                                <value>1</value>
+                            </imploded_values>
+                        </depends>
+                    </imploded_separator>
+                    <filter_mode>
+                        <label>Filter Mode</label>
+                        <group>Filtering</group>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>customgrid/column_renderer_source_options_filter_mode</source_model>
+                        <sort_order>30</sort_order>
+                        <value>single</value>
+                    </filter_mode>
+                    <filter_logical_operator>
+                        <label>Logical Operator</label>
+                        <group>Filtering</group>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>customgrid/system_config_source_sql_logical_operator</source_model>
+                        <sort_order>40</sort_order>
+                        <value>OR</value>
+                        <depends>
+                            <imploded_values>
+                                <value>1</value>
+                            </imploded_values>
+                            <filter_mode>
+                                <value>multiple</value>
+                            </filter_mode>
+                        </depends>
+                    </filter_logical_operator>
+                    <negative_filter>
+                        <label>Negative Filter</label>
+                        <group>Filtering</group>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>customgrid/system_config_source_yesno</source_model>
+                        <sort_order>50</sort_order>
+                        <depends>
+                            <filter_mode>
+                                <values>
+                                    <value1>single</value1>
+                                    <value2>multiple</value2>
+                                </values>
+                            </filter_mode>
+                        </depends>
+                    </negative_filter>
+                    <values_separator>
+                        <label>Values Separator</label>
+                        <group>Rendering</group>
+                        <description>If no value is set, ", " will be used</description>
+                        <visible>1</visible>
+                        <type>text</type>
+                        <sort_order>60</sort_order>
+                        <value>, </value>
+                        <depends>
+                            <imploded_values>
+                                <value>1</value>
+                            </imploded_values>
+                        </depends>
+                    </values_separator>
+                    <show_missing>
+                        <label>Show Missing Option Values</label>
+                        <group>Rendering</group>
+                        <visible>1</visible>
+                        <type>select</type>
+                        <source_model>customgrid/system_config_source_yesno</source_model>
+                        <sort_order>70</sort_order>
+                    </show_missing>
+                </parameters>
             </country>
             
             <eu_country model="customgrid/column_renderer_collection_country_eu" module="customgrid">

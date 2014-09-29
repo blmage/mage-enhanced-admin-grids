@@ -19,7 +19,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Order_Address_Abstract
     protected function _prepareConfig()
     {
         $this->setExcludedVersions('1.4.0.*');
-        return $this;
+        return parent::_prepareConfig();
     }
     
     abstract public function getAddressType();

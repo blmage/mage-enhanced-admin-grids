@@ -48,7 +48,7 @@ class BL_CustomGrid_Model_Custom_Column_Order_Status_Color
         }
         
         $this->setCustomizationWindowConfig(array('height' => 450));
-        return $this;
+        return parent::_prepareConfig();
     }
     
     public function getDuplicatedFieldName()
@@ -74,13 +74,18 @@ class BL_CustomGrid_Model_Custom_Column_Order_Status_Color
         }
         
         return array(
-            // @todo lock "options" renderer, to allow customizing the filter, + remember to use proper inheritance
-            'filter'    => 'adminhtml/widget_grid_column_filter_select',
+            'filter'    => 'customgrid/widget_grid_column_filter_select',
             'renderer'  => 'customgrid/widget_grid_column_renderer_order_status_color',
             'only_cell' => $this->_extractBoolParam($params, 'only_cell'),
-            'options'   => $this->getOrderStatuses(),
-            'options_colors' => $colors,
+            'options'   => $this->_getBaseHelper()->getOptionsArrayFromOptionsHash($this->getOrderStatuses()),
+            'options_colors'  => $colors,
+            'imploded_values' => false,
         );
+    }
+    
+    public function getLockedRenderer()
+    {
+        return 'options';
     }
     
     public function getOrderStatuses()

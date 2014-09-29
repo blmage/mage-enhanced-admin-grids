@@ -590,6 +590,7 @@
 "This attribute is locked","Cet attribut est verrouillé"
 "This attribute is not editable for bundle products","Cet attribut n'est pas éditable pour les produits packagés"
 "This attribute is not editable for this product","Cet attribut n'est pas éditable pour ce produit"
+"This column must be visible and not only filterable for the rows to be colorized","Cette colonne doit être visible et pas seulement filtrable pour que les lignes soient colorisées"
 "This custom grid no longer exists","Cette grille personnalisée n'existe plus"
 "This grid does not seem to be compatible with the custom export. If you wish to report this problem, please indicate this class name : ""%s""","Cette grille ne semble pas être compatible avec l'export personnalisé. Si vous souhaitez signaler ce problème, merci d'indiquer ce nom de classe : ""%s"""
 "This options source no longer exists.","Cette source d'options n'existe plus."

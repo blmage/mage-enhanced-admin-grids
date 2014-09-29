@@ -143,7 +143,7 @@ class BL_CustomGrid_Model_Custom_Column_Product_Categories
         ), 90);
         
         $this->setCustomizationWindowConfig(array('height' => 520));
-        return $this;
+        return parent::_prepareConfig();
     }
     
     public function shouldInvalidateFilters(BL_CustomGrid_Model_Grid $gridModel,

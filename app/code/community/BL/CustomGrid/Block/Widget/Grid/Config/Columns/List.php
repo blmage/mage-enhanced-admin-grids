@@ -271,7 +271,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config_Columns_List
             $lockedRenderer = isset($lockedValues['renderer']);
             $lockedLabel    = (isset($lockedValues['renderer_label']) ? $lockedValues['renderer_label'] : '');
             $rendererType   = ($lockedRenderer ? $lockedValues['renderer'] : $column->getRendererType());
-        } elseif ($customColumn = $column->getCustomColumnModel()) {
+        } elseif ($column->isCustom() && ($customColumn = $column->getCustomColumnModel())) {
             $lockedRenderer = (bool) strlen($customColumn->getLockedRenderer());
             $lockedLabel    = ($lockedRenderer ? $customColumn->getRendererLabel() : '');
             $rendererType   = ($lockedRenderer ? $customColumn->getLockedRenderer() : $column->getRendererType());
@@ -279,7 +279,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config_Columns_List
             return '';
         }
         
-        $validRenderer  = (!$lockedRenderer || ($rendererType === $column->getRendererType()));
+        $isPreviousRenderer = (!$lockedRenderer || ($rendererType === $column->getRendererType()));
         
         return $this->_getCollectionRenderersSelect()
             ->setData(array())
@@ -287,7 +287,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config_Columns_List
             ->setRendererCode($rendererType)
             ->setIsForcedRenderer($lockedRenderer)
             ->setForcedRendererLabel($lockedLabel)
-            ->setRendererParams($validRenderer ? $column['renderer_params'] : '')
+            ->setRendererParams($isPreviousRenderer ? $column->getRendererParams() : '')
             ->setSelectName('columns[' . $columnId . '][renderer_type]')
             ->setSelectClassNames('select')
             ->setRendererTargetName('columns[' . $columnId . '][renderer_params]')

@@ -82,7 +82,9 @@ abstract class BL_CustomGrid_Model_Custom_Column_Sales_Items_Abstract
             if (in_array($key, $amountsKeys)) {
                 $itemValues[$key]->setData('value_align', 'right');
             }
-            // Also usable: "header_align" for header label alignment (possible values: left, center, right)
+            // Also usable:
+            // - "header_align": header label alignment (possible values: left, center, right)
+            // - "renderers": array of renderer block codes, ordered by priority
         }
         
         if (!empty($eventName)) {
@@ -196,7 +198,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Sales_Items_Abstract
             $this->setCustomizationWindowConfig(array('height' => 300));
         }
         
-        return $this;
+        return parent::_prepareConfig();
     }
     
     protected function _getOrdersCollection($ordersIds)

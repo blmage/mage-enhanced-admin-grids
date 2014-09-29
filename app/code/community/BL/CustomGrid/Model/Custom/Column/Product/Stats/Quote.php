@@ -63,7 +63,7 @@ class BL_CustomGrid_Model_Custom_Column_Product_Stats_Quote
         ), 40);
         
         $this->setCustomizationWindowConfig(array('height' => 330));
-        return $this;
+        return parent::_prepareConfig();
     }
     
     protected function _getCountSelect(Varien_Data_Collection_Db $collection, array $params, $countMode)

@@ -1834,7 +1834,7 @@ class BL_CustomGrid_Model_Grid
                     $newColumn,
                     ($isCustom || ($customColumn && $customColumn->getAllowStore())),
                     ($isCollection || $isAttribute || ($customColumn && $customColumn->getAllowRenderers())),
-                    ($isCollection || ($customColumn && $customColumn->getAllowRenderers())),
+                    ($isCollection || $isCustom),
                     ($allowEditable && $column->isEditable()),
                     $isCustom
                 ));
