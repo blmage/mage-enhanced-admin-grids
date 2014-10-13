@@ -44,7 +44,8 @@ class BL_CustomGrid_Block_Grid_Form_Default_Params extends BL_CustomGrid_Block_G
         $isEmpty = false;
         
         if (is_array($value)) {
-            if (isset($value['currency']) && (count($value) == 1)) {
+            if ((isset($value['currency']) || isset($value['locale']))
+                && (count($value) == 1)) {
                 $isEmpty = true;
             }
         } elseif ($value === '') {
