@@ -152,8 +152,11 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
     {
         $actions   = array();
         $actionsRoute  = 'customgrid/grid_profile/';
-        $actionsParams = $this->getBaseUrlParams();
-        $actionsParams['profiles_js_object_name'] = $this->getProfilesJsObjectName();
+        $actionsParams = array(
+            'grid_id' => $gridModel->getId(),
+            'profile_id' => $this->getProfileIdPlaceholder(),
+            'js_object_name' => $this->getProfilesJsObjectName(),
+        );
         
         $actions['go_to'] = array(
             'label'   => $this->__('Go To'),
