@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Helper_Editor
-    extends Mage_Core_Helper_Abstract
+class BL_CustomGrid_Helper_Editor extends Mage_Core_Helper_Abstract
 {
     protected $_adminBaseRouteName = null;
     
@@ -66,7 +65,7 @@ class BL_CustomGrid_Helper_Editor
      * @param array $config Config values
      * @return array
      */
-    public function getWysiwygConfig(array $config=array())
+    public function getWysiwygConfig(array $config = array())
     {
         $config = Mage::getSingleton('cms/wysiwyg_config')->getConfig($config);
         $data = $config->getData();

@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_Grid_Type_Tax_Class
-    extends BL_CustomGrid_Model_Grid_Type_Abstract
+class BL_CustomGrid_Model_Grid_Type_Tax_Class extends BL_CustomGrid_Model_Grid_Type_Abstract
 {
     protected function _getSupportedBlockTypes()
     {
@@ -23,12 +22,6 @@ class BL_CustomGrid_Model_Grid_Type_Tax_Class
     
     public function canExport($blockType)
     {
-        /**
-         * @todo to get export running for some of the grids for which it can not work atm :
-         * Add additional export parameters from a method with grid block instance as parameter
-         * This way we'll be able to give the class type to a custom controller (or other required values)
-         * (could be done along with the new export system)
-         */
         return false;
     }
     
@@ -61,11 +54,16 @@ class BL_CustomGrid_Model_Grid_Type_Tax_Class
         return null;
     }
     
-     protected function _isEditedEntityLoaded($blockType, BL_CustomGrid_Object $config, array $params, $entity,
-        $entityId)
-    {
+    protected function _isEditedEntityLoaded(
+        $blockType,
+        BL_CustomGrid_Object $config,
+        array $params,
+        $entity,
+        $entityId
+    ) {
         if (parent::_isEditedEntityLoaded($blockType, $config, $params, $entity, $entityId)
-            && isset($params['additional']) && isset($params['additional']['class_type'])) {
+            && isset($params['additional'])
+            && isset($params['additional']['class_type'])) {
             return ($entity->getClassType() == $params['additional']['class_type']);
         }
         return false;
@@ -76,9 +74,12 @@ class BL_CustomGrid_Model_Grid_Type_Tax_Class
         return $entity->getClassName();
     }
     
-    public function checkUserEditPermissions($blockType, BL_CustomGrid_Model_Grid $gridModel,
-        Mage_Adminhtml_Block_Widget_Grid $gridBlock=null, array $params=array())
-    {
+    public function checkUserEditPermissions(
+        $blockType,
+        BL_CustomGrid_Model_Grid $gridModel,
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock = null,
+        array $params = array()
+    ) {
         if (parent::checkUserEditPermissions($blockType, $gridModel, $gridBlock, $params)) {
             $classType = null;
             

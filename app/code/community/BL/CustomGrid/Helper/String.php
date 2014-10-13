@@ -52,9 +52,9 @@ class BL_CustomGrid_Helper_String extends Mage_Core_Helper_Abstract
      * @param bool $breakWords Whether words can be broken (if not, truncation will stop on the first available space)
      * @return string
      */
-    public function truncateText($string, $length=80, $etc='...', &$remainder='', $breakWords=true)
+    public function truncateText($string, $length = 80, $etc = '...', &$remainder = '', $breakWords = true)
     {
-        if (0 == $length) {
+        if ($length == 0) {
             return '';
         }
         
@@ -97,11 +97,10 @@ class BL_CustomGrid_Helper_String extends Mage_Core_Helper_Abstract
      * @param string $string String to be truncated
      * @param integer $length Truncated string length (not including $etc)
      * @param string $etc Value to be appended at the end of the truncated string
-     * @param string $dummy Unused variable to have the same signature as "core/string" helper truncate function
      * @param bool $breakWords Whether words can be broken (if not, truncation will stop on the first available space)
      * @return string
      */
-    function truncateHtml($string, $length=80, $etc='...', $dummy='', $breakWords=true)
+    public function truncateHtml($string, $length = 80, $etc = '...', $breakWords = true)
     {
         if ($length == 0) {
             return '';
@@ -110,7 +109,7 @@ class BL_CustomGrid_Helper_String extends Mage_Core_Helper_Abstract
         $helper = Mage::helper('core/string');
         
         // If the plain text is shorter than the maximum length, return the whole text
-        if (($textLength = $helper->strlen(preg_replace('/<.*?>/', '', $string))) <= $length) {
+        if ($helper->strlen(preg_replace('/<.*?>/', '', $string)) <= $length) {
             return $string;
         }
         
@@ -234,14 +233,14 @@ class BL_CustomGrid_Helper_String extends Mage_Core_Helper_Abstract
      * @param bool $overwrite Whether already existing keys can be overwritten
      * @return array
      */
-    public function camelizeArrayKeys(array $array, $recursive=true, $overwrite=false)
+    public function camelizeArrayKeys(array $array, $recursive = true, $overwrite = false)
     {
         $result = array();
         
         foreach ($array as $key => $value) {
             $camelizedKey = $this->camelize($key);
             
-            if ($overwrite || !isset($ersult[$camelizedKey])) {
+            if ($overwrite || !isset($result[$camelizedKey])) {
                 if ($recursive && is_array($value)) {
                     $result[$camelizedKey] = $this->camelizeArrayKeys($value, true, $overwrite);
                 } else {
@@ -260,7 +259,7 @@ class BL_CustomGrid_Helper_String extends Mage_Core_Helper_Abstract
      * @param array|null $allowedTags HTML tags that should be preserved
      * @return array|string
      */
-    public function htmlDoubleEscape($data, $allowedTags=null)
+    public function htmlDoubleEscape($data, $allowedTags = null)
     {
         if (is_array($data)) {
             $result = array();

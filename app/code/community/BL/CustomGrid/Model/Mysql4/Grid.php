@@ -66,7 +66,7 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
             // Non-default profile : do not save its specific values in the grids table but in the profiles one
             $profileValues = array();
             
-            foreach ($object->getStashableProfileKeys() as $key) {
+            foreach ($object->getStashedProfileKeys() as $key) {
                 if (isset($data[$key])) {
                     $profileValues[$key] = $data[$key];
                     unset($data[$key]);
@@ -190,17 +190,17 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
     {
         $result = array();
         
-         foreach ($values as $key => $value) {
-             if (isset($value[$valueKey])) {
-                 $key = $value[$valueKey];
-             } 
-             $result[$key] = $value;
-         }
+        foreach ($values as $key => $value) {
+            if (isset($value[$valueKey])) {
+                $key = $value[$valueKey];
+            } 
+            $result[$key] = $value;
+        }
         
         return $result;
     }
     
-    protected function _arrangeGroupedResult(array $values, $groupKey, $valueKey=null)
+    protected function _arrangeGroupedResult(array $values, $groupKey, $valueKey = null)
     {
         $result = array();
         
@@ -208,11 +208,10 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
             if (isset($value[$groupKey])) {
                 $group = $value[$groupKey];
                 
-                if (!empty($valueKey)
-                    && isset($value[$valueKey])) {
+                if (!empty($valueKey) && isset($value[$valueKey])) {
                     $key = $value[$valueKey];
                 }
-                if  (isset($result[$group])) {
+                if (isset($result[$group])) {
                     $result[$group][$key] = $value;
                 } else {
                     $result[$group] = array($key => $value);
@@ -398,7 +397,7 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
         return $this;
     }
     
-    protected function _assignProfile($profileId, array $assignedRolesIds=array())
+    protected function _assignProfile($profileId, array $assignedRolesIds = array())
     {
         $write  = $this->_getWriteAdapter();
         $table  = $this->_getRolesProfilesTable();
@@ -648,7 +647,7 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
         return $this;
     }
     
-    public function updateProfile($gridId, $profileId, array $values, $useTransaction=true)
+    public function updateProfile($gridId, $profileId, array $values, $useTransaction = true)
     {
         $write = $this->_getWriteAdapter();
         

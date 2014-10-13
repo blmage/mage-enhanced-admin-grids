@@ -13,14 +13,17 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_Custom_Column_Simple_Table
-    extends BL_CustomGrid_Model_Custom_Column_Simple_Abstract
+class BL_CustomGrid_Model_Custom_Column_Simple_Table extends BL_CustomGrid_Model_Custom_Column_Simple_Abstract
 {
     static protected $_tablesAppliedFlags = array();
     
-    public function getAppliedFlagKey($columnIndex, array $params, Mage_Adminhtml_Block_Widget_Grid $gridBlock,
-        Varien_Data_Collection_Db $collection, $tableName)
-    {
+    public function getAppliedFlagKey(
+        $columnIndex,
+        array $params,
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock,
+        Varien_Data_Collection_Db $collection,
+        $tableName
+    ) {
         return $tableName;
     }
     
@@ -49,15 +52,25 @@ class BL_CustomGrid_Model_Custom_Column_Simple_Table
         return $this->getConfigParam('table_field_name');
     }
     
-    protected function _getAdditionalJoinConditions($columnIndex, array $params,
-        Mage_Adminhtml_Block_Widget_Grid $gridBlock, Varien_Data_Collection_Db $collection, $mainAlias, $tableAlias)
-    {
+    protected function _getAdditionalJoinConditions(
+        $columnIndex,
+        array $params,
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock,
+        Varien_Data_Collection_Db $collection,
+        $mainAlias,
+        $tableAlias
+    ) {
         return array();
     }
     
-    protected function _addFieldToSelect(Varien_Db_Select $select, $columnIndex, $tableAlias, array $params,
-        Mage_Adminhtml_Block_Widget_Grid $gridBlock, Varien_Data_Collection_Db $collection)
-    {
+    protected function _addFieldToSelect(
+        Varien_Db_Select $select,
+        $columnIndex,
+        $tableAlias,
+        array $params,
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock,
+        Varien_Data_Collection_Db $collection
+    ) {
         $helper = $this->_getCollectionHelper();
         list($adapter, $qi) = $this->_getCollectionAdapter($collection, true);
         $fieldName = $this->getTableFieldName();
@@ -66,9 +79,12 @@ class BL_CustomGrid_Model_Custom_Column_Simple_Table
         return $this;
     }
     
-    public function addFieldToGridCollection($columnIndex, array $params,
-        Mage_Adminhtml_Block_Widget_Grid $gridBlock, Varien_Data_Collection_Db $collection)
-    {
+    public function addFieldToGridCollection(
+        $columnIndex,
+        array $params,
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock,
+        Varien_Data_Collection_Db $collection
+    ) {
         $helper    = $this->_getCollectionHelper();
         $mainAlias = $helper->getCollectionMainTableAlias($collection);
         $tableName = $this->getTableName();
@@ -112,9 +128,14 @@ class BL_CustomGrid_Model_Custom_Column_Simple_Table
         return $this->_addFieldToSelect($select, $columnIndex, $tableAlias, $params, $gridBlock, $collection);
     }
     
-    protected function _getForcedBlockValues(Mage_Adminhtml_Block_Widget_Grid $gridBlock,
-        BL_CustomGrid_Model_Grid $gridModel, $columnBlockId, $columnIndex, array $params, Mage_Core_Model_Store $store)
-    {
+    protected function _getForcedBlockValues(
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock,
+        BL_CustomGrid_Model_Grid $gridModel,
+        $columnBlockId,
+        $columnIndex,
+        array $params,
+        Mage_Core_Model_Store $store
+    ) {
         $collection = $gridBlock->getCollection();
         $tableName  = $this->getTableName();
         $flagKey = $this->getAppliedFlagKey($columnIndex, $params, $gridBlock, $collection, $tableName);

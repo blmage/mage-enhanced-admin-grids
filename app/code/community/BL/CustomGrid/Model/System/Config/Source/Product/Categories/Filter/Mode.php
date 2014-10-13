@@ -18,6 +18,7 @@ class BL_CustomGrid_Model_System_Config_Source_Product_Categories_Filter_Mode
     public function toOptionArray()
     {
         $helper = Mage::helper('customgrid');
+        
         return array(
             array(
                 'value' => BL_CustomGrid_Model_Custom_Column_Product_Categories::FILTER_MODE_ONE_CHOOSEN,

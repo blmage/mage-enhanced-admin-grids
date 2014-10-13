@@ -38,8 +38,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-abstract class BL_CustomGrid_Model_Config_Abstract
-    extends BL_CustomGrid_Object
+abstract class BL_CustomGrid_Model_Config_Abstract extends BL_CustomGrid_Object
 {
     abstract public function getConfigType();
     
@@ -92,15 +91,17 @@ abstract class BL_CustomGrid_Model_Config_Abstract
         return $this->_getData($dataKey);
     }
     
-    protected function _sortElements(BL_CustomGrid_Object $a, BL_CustomGrid_Object $b)
+    protected function _sortElements(BL_CustomGrid_Object $elementA, BL_CustomGrid_Object $elementB)
     {
-        $result = $a->compareIntDataTo('sort_order', $b);
-        return ($result === 0 ? $a->compareStringDataTo('name', $b) : $result);
+        $result = $elementA->compareIntDataTo('sort_order', $elementB);
+        return ($result === 0 ? $elementA->compareStringDataTo('name', $elementB) : $result);
     }
     
-    public function getElementsArrayAdditionalSubValues(Varien_Simplexml_Element $xmlElement, array $baseValues,
-        Mage_Core_Helper_Abstract $helper)
-    {
+    public function getElementsArrayAdditionalSubValues(
+        Varien_Simplexml_Element $xmlElement,
+        array $baseValues,
+        Mage_Core_Helper_Abstract $helper
+    ) {
         return array();
     }
     
@@ -121,7 +122,7 @@ abstract class BL_CustomGrid_Model_Config_Abstract
                     'type' => $xmlElement->getAttribute('type'),
                     'name' => $helper->__((string) $xmlElement->name),
                     'help' => $helper->__((string) $xmlElement->help),
-                    'sort_order'  => (int) $xmlElement->sort_order,
+                    'sort_order'  => (int) $xmlElement->{'sort_order'}, // CheckStyle validatorsdo not like snake case
                     'description' => $helper->__((string) $xmlElement->description),
                     'is_customizable' => $this->getAcceptParameters(),
                 );
@@ -140,9 +141,88 @@ abstract class BL_CustomGrid_Model_Config_Abstract
         return $this->_getData('elements_array');
     }
     
-    protected function _sortParams(BL_CustomGrid_Object $a, BL_CustomGrid_Object $b)
+    protected function _sortParams(BL_CustomGrid_Object $paramA, BL_CustomGrid_Object $paramB)
     {
-        return $a->compareIntDataTo('sort_order', $b);
+        return $paramA->compareIntDataTo('sort_order', $paramB);
+    }
+    
+    protected function _parseXmlElementParamsArray(array $rawParams)
+    {
+        $objectParams = array();
+        $sortOrder = 0;
+        
+        foreach ($rawParams as $key => $data) {
+            if (is_array($data)) {
+                $data['key'] = $key;
+                $data['sort_order'] = (isset($data['sort_order']) ? (int) $data['sort_order'] : $sortOrder);
+                $values = array();
+                
+                if (isset($data['values']) && is_array($data['values'])) {
+                    foreach ($data['values'] as $value) {
+                        if (is_array($value) && isset($value['label']) && isset($value['value'])) {
+                            $values[] = $value;
+                        }
+                    }
+                }
+                
+                $data['values'] = $values;
+                
+                // Prepare helper block object
+                if (isset($data['helper_block']) && is_array($data['helper_block'])) {
+                    $helperBlock = new BL_CustomGrid_Object();
+                    
+                    if (isset($data['helper_block']['data']) && is_array($data['helper_block']['data'])) {
+                        $helperBlock->addData($data['helper_block']['data']);
+                    }
+                    if (isset($data['helper_block']['type'])) {
+                        $helperBlock->setType($data['helper_block']['type']);
+                    }
+                    
+                    $data['helper_block'] = $helperBlock;
+                }
+                
+                $objectParams[$key] = new BL_CustomGrid_Object($data);
+                ++$sortOrder;
+            }
+        }
+        
+        return $objectParams;
+    }
+    
+    protected function _getObjectElementFromXmlElement($code, Varien_Simplexml_Element $xmlElement)
+    {
+        // Initialize object
+        $object = new BL_CustomGrid_Object();
+        $object->setData($xmlElement->asArray());
+        $object->setCode($code);
+        $object->setType($object->getData('@/type'));
+        $object->setModule($object->getDataSetDefault('@/module', 'customgrid'));
+        $object->unsetData('@');
+        
+        // Apply translations
+        $translatableKeys = array('name', 'description', 'help');
+        
+        if (!$helper = Mage::helper($object->getModule())) {
+            $helper = Mage::helper('customgrid');
+        }
+        
+        foreach ($translatableKeys as $key) {
+            if ($object->hasData($key)) {
+                $object->setData($key, $helper->__((string) $object->getData($key)));
+            }
+        }
+        
+        // Parse parameters
+        if ($this->getAcceptParameters()) {
+            $objectParams = is_array($rawParams = $object->getData('parameters'))
+                ? $this->_parseXmlElementParamsArray($rawParams)
+                : array();
+            
+            uasort($objectParams, array($this, '_sortParams'));
+            $object->setData('parameters', $objectParams);
+        }
+        
+        return $object;
     }
     
     public function getObjectElementByCode($code)
@@ -150,81 +230,12 @@ abstract class BL_CustomGrid_Model_Config_Abstract
         $dataKey = 'object_element_' . $code;
         
         if (!$this->hasData($dataKey)) {
-            $object = new BL_CustomGrid_Object();
             $xmlElement = $this->getXmlElementByCode($code);
             
-            if (is_null($xmlElement)) {
-                $this->setData($dataKey, $object); 
-                return $object;
-            }
-            
-            // Initialize object
-            $object->setData($xmlElement->asArray());
-            
-            $object->setCode($code);
-            $object->setType($object->getData('@/type'));
-            $object->setModule($object->getDataSetDefault('@/module', 'customgrid'));
-            
-            $object->unsetData('@');
-            
-            // Apply translations
-            $translatableKeys = array('name', 'description', 'help');
-            
-            if (!$helper = Mage::helper($object->getModule())) {
-                $helper = Mage::helper('customgrid');
-            }
-            
-            foreach ($translatableKeys as $key) {
-                if ($object->hasData($key)) {
-                    $object->setData($key, $helper->__((string) $object->getData($key)));
-                }
-            }
-            
-            // Parse parameters
-            if ($this->getAcceptParameters()) {
-                $objectParams = array();
-                
-                if (is_array($rawParams = $object->getData('parameters'))) {
-                    $sortOrder = 0;
-                    
-                    foreach ($rawParams as $key => $data) {
-                        if (is_array($data)) {
-                            $data['key'] = $key;
-                            $data['sort_order'] = (isset($data['sort_order']) ? (int) $data['sort_order'] : $sortOrder);
-                            $values = array();
-                            
-                            if (isset($data['values']) && is_array($data['values'])) {
-                                foreach ($data['values'] as $value) {
-                                    if (is_array($value) && isset($value['label']) && isset($value['value'])) {
-                                        $values[] = $value;
-                                    }
-                                }
-                            }
-                            
-                            $data['values'] = $values;
-                            
-                            // Prepare helper block object
-                            if (isset($data['helper_block']) && is_array($data['helper_block'])) {
-                                $helperBlock = new BL_CustomGrid_Object();
-                                
-                                if (isset($data['helper_block']['data']) && is_array($data['helper_block']['data'])) {
-                                    $helperBlock->addData($data['helper_block']['data']);
-                                }
-                                if (isset($data['helper_block']['type'])) {
-                                    $helperBlock->setType($data['helper_block']['type']);
-                                }
-                                
-                                $data['helper_block'] = $helperBlock;
-                            }
-                            
-                            $objectParams[$key] = new BL_CustomGrid_Object($data);
-                            ++$sortOrder;
-                        }
-                    }
-                }
-                
-                uasort($objectParams, array($this, '_sortParams'));
-                $object->setData('parameters', $objectParams);
+            if (!is_null($xmlElement)) {
+                $object = $this->_getObjectElementFromXmlElement($code, $xmlElement);
+            } else {
+                $object = new BL_CustomGrid_Object();
             }
             
             $this->setData($dataKey, $object);
@@ -233,7 +244,7 @@ abstract class BL_CustomGrid_Model_Config_Abstract
         return $this->_getData($dataKey);
     }
     
-    public function getElementInstanceByCode($code, $parameters=null)
+    public function getElementInstanceByCode($code, $parameters = null)
     {
         $model = null;
         

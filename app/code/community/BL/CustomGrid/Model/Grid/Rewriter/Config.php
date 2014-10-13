@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_Grid_Rewriter_Config
-    extends BL_CustomGrid_Object
+class BL_CustomGrid_Model_Grid_Rewriter_Config extends BL_CustomGrid_Object
 {
     protected function _getRewriter($code, array $config)
     {
@@ -39,12 +38,10 @@ class BL_CustomGrid_Model_Grid_Rewriter_Config
                 ->setLogErrors(isset($config['log_errors']) ? (bool) $config['log_errors'] : false)
                 ->setLogErrorsIfSuccess(false);
             
-            if ($rewriter->getDisplayErrors()
-                && isset($config['display_errors_if_success'])) {
+            if ($rewriter->getDisplayErrors() && isset($config['display_errors_if_success'])) {
                 $rewriter->setDisplayErrorsIfSuccess((bool) $config['display_errors_if_success']);
             }
-            if ($rewriter->getLogErrors()
-                && isset($config['log_errors_if_success'])) {
+            if ($rewriter->getLogErrors() && isset($config['log_errors_if_success'])) {
                 $rewriter->setLogErrorsIfSuccess((bool) $config['log_errors_if_success']);
             }
             
@@ -60,13 +57,14 @@ class BL_CustomGrid_Model_Grid_Rewriter_Config
         return (is_array($rewriterConfig) ? $this->_getRewriter($code, $rewriterConfig) : false);
     }
     
-    protected function _sortRewriters(BL_CustomGrid_Model_Grid_Rewriter_Abstract $a,
-        BL_CustomGrid_Model_Grid_Rewriter_Abstract $b)
-    {
-        return $a->compareIntDataTo('position', $b);
+    protected function _sortRewriters(
+        BL_CustomGrid_Model_Grid_Rewriter_Abstract $rewriterA,
+        BL_CustomGrid_Model_Grid_Rewriter_Abstract $rewriterB
+    ) {
+        return $rewriterA->compareIntDataTo('position', $rewriterB);
     }
     
-    public function getAllRewriters($sorted=false)
+    public function getAllRewriters($sorted = false)
     {
         if (!$this->hasData('rewriters')) {
             foreach (Mage::getStoreConfig('customgrid_rewriters') as $code => $rewriterConfig) {
@@ -83,7 +81,7 @@ class BL_CustomGrid_Model_Grid_Rewriter_Config
         return $rewriters;
     }
     
-    public function getEnabledRewriters($sorted=false)
+    public function getEnabledRewriters($sorted = false)
     {
         $rewriters = $this->getAllRewriters();
         

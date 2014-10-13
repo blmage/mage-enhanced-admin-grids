@@ -13,29 +13,19 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_Column_Renderer_Collection_Country_Eu
-    extends BL_CustomGrid_Model_Column_Renderer_Collection_Abstract
+class BL_CustomGrid_Model_Column_Renderer_Collection_Country_Eu extends
+    BL_CustomGrid_Model_Column_Renderer_Collection_Abstract
 {
     protected function _getSystemConfigCountries($configPath)
     {
-        if (!is_array($countries = Mage::getStoreConfig($configPath))) {
-            $countries = explode(',', $countries);
-        }
-        return $countries;
+        return !is_array($countries = Mage::getStoreConfig($configPath))
+            ? explode(',', $countries)
+            : $countries;
     }
     
-    public function getColumnBlockValues($columnIndex, Mage_Core_Model_Store $store,
-        BL_CustomGrid_Model_Grid $gridModel)
+    protected function _getEuCountries()
     {
-        $values = array(
-            'filter'   => 'customgrid/widget_grid_column_filter_country_eu',
-            'renderer' => 'customgrid/widget_grid_column_renderer_country_eu',
-            'base_display_format'   => $this->getData('values/base_display_format'),
-            'export_display_format' => $this->getData('values/export_display_format'),
-        );
-        
-        $euCountries  = array();
-        $allCountries = array();
+        $euCountries = array();
         
         if ($this->getData('values/custom_source')) {
             if ($this->getData('values/system_config_source')) {
@@ -51,11 +41,28 @@ class BL_CustomGrid_Model_Column_Renderer_Collection_Country_Eu
             $euCountries = $this->_getSystemConfigCountries('general/country/eu_countries');
         }
         
+        return $euCountries;
+    }
+    
+    public function getColumnBlockValues(
+        $columnIndex,
+        Mage_Core_Model_Store $store,
+        BL_CustomGrid_Model_Grid $gridModel
+    ) {
+        $values = array(
+            'filter'   => 'customgrid/widget_grid_column_filter_country_eu',
+            'renderer' => 'customgrid/widget_grid_column_renderer_country_eu',
+            'base_display_format'   => $this->getData('values/base_display_format'),
+            'export_display_format' => $this->getData('values/export_display_format'),
+        );
+        
+        $euCountries  = $this->_getEuCountries();
+        $allCountries = array();
         $countries = Mage::getResourceModel('directory/country_collection')
             ->loadData()
             ->toOptionArray(false);
         
-        $countries  = Mage::helper('customgrid')->getOptionsHashFromOptionsArray($countries);
+        $countries  = Mage::helper('customgrid')->getOptionHashFromOptionArray($countries);
         $isEuCountry = array();
         
         foreach ($euCountries as $key => $code) {

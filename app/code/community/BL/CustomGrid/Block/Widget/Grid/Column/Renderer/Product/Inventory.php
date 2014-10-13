@@ -13,13 +13,13 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Product_Inventory
-    extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
+class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Product_Inventory extends
+    Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
-    protected function _getValue(Varien_Object $row)
+    protected function _getUseConfigData(Varien_Object $row)
     {
+        $data = null;
         $useConfig = false;
-        $fieldType = $this->getColumn()->getFieldType();
         
         if ($this->getColumn()->getCanUseConfig()) {
             if ($row->getData($this->getColumn()->getUseConfigIndex())) {
@@ -33,6 +33,26 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Product_Inventory
                 }
             }
         }
+        
+        return array($useConfig, $data);
+    }
+    
+    protected function _renderUseConfigData($data)
+    {
+        if (($text = $this->getColumn()->getUseConfigPrefix()) !== '') {
+            $data = $text . ' ' . $data;
+        }
+        if (($text = $this->getColumn()->getUseConfigSuffix()) !== '') {
+            $data .= ' ' . $text;
+        }
+        return $data;
+    }
+    
+    protected function _getValue(Varien_Object $row)
+    {
+        $fieldType = $this->getColumn()->getFieldType();
+        list($useConfig, $data) = $this->_getUseConfigData($row);
+        
         if (!$useConfig) {
             $data = $row->getData($this->getColumn()->getIndex());
         }
@@ -41,7 +61,7 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Product_Inventory
         } elseif ($fieldType == 'decimal') {
             $data *= 1;
         } elseif (($fieldType == 'options')
-            && is_array($hash = $this->getColumn()->getOptionsHash())
+            && is_array($hash = $this->getColumn()->getOptionHash())
             && isset($hash[$data])) {
             $data = $hash[$data];
         }
@@ -49,12 +69,7 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Product_Inventory
         $data = strval($data);
         
         if ($useConfig) {
-            if (($text = $this->getColumn()->getUseConfigPrefix()) !== '') {
-                $data = $text . ' ' . $data;
-            }
-            if (($text = $this->getColumn()->getUseConfigSuffix()) !== '') {
-                $data .= ' ' . $text;
-            }
+            $data = $this->_renderUseConfigData($data);
         }
         
         return $data;

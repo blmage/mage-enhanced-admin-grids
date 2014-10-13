@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_Custom_Column_Order_Base
-    extends BL_CustomGrid_Model_Custom_Column_Simple_Table
+class BL_CustomGrid_Model_Custom_Column_Order_Base extends BL_CustomGrid_Model_Custom_Column_Simple_Table
 {
     protected function _prepareConfig()
     {
@@ -39,6 +38,6 @@ class BL_CustomGrid_Model_Custom_Column_Order_Base
     
     public function getTableFieldName()
     {
-        return $this->getConfigParam('order_field');
+        return $this->getConfigParam('order_field_name');
     }
 }

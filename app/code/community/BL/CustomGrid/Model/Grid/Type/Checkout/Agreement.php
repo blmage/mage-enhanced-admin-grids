@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_Grid_Type_Checkout_Agreement
-    extends BL_CustomGrid_Model_Grid_Type_Abstract
+class BL_CustomGrid_Model_Grid_Type_Checkout_Agreement extends BL_CustomGrid_Model_Grid_Type_Abstract
 {
     protected function _getSupportedBlockTypes()
     {
@@ -71,10 +70,12 @@ class BL_CustomGrid_Model_Grid_Type_Checkout_Agreement
         );
         
         if (!Mage::app()->isSingleStoreMode()) {
+            $stores = Mage::getSingleton('adminhtml/system_store')->getStoreValuesForForm(false, true);
+            
             $fields['store_id'] = array(
                 'type'              => 'multiselect',
                 'required'          => true,
-                'form_values'       => Mage::getSingleton('adminhtml/system_store')->getStoreValuesForForm(false, true),
+                'form_values'       => $stores,
                 'render_block_type' => 'customgrid/widget_grid_editor_renderer_static_store',
             );
         }
@@ -82,14 +83,15 @@ class BL_CustomGrid_Model_Grid_Type_Checkout_Agreement
         return $fields;
     }
     
-    protected function _prepareEditableFieldCommonConfig($blockType, $id,
-        BL_CustomGrid_Model_Grid_Edit_Config $config)
-    {
-        parent::_prepareEditableFieldCommonConfig($blockType, $id, $config);
+    protected function _prepareEditableFieldCommonConfig(
+        $blockType,
+        $fieldId,
+        BL_CustomGrid_Model_Grid_Edit_Config $config
+    ) {
+        parent::_prepareEditableFieldCommonConfig($blockType, $fieldId, $config);
         
         // Remove editor handle, as it is not used/needed in original edit form
-        if (($config->getType() == 'editor')
-            && is_array($handles = $config->getData('layout_handles'))) {
+        if (($config->getType() == 'editor') && is_array($handles = $config->getData('layout_handles'))) {
             $config->setData(
                 'layout_handles',
                 array_filter($handles, create_function('$v', 'return ($v != "blcg_grid_editor_handle_editor");'))
@@ -116,7 +118,7 @@ class BL_CustomGrid_Model_Grid_Type_Checkout_Agreement
     
     protected function _applyEditedFieldValue($blockType, BL_CustomGrid_Object $config, array $params, $entity, $value)
     {
-        if ($config->getId() == 'store_id') {
+        if ($config->getValueId() == 'store_id') {
             $entity->setStores($value);
             return $this;
         }
@@ -126,7 +128,7 @@ class BL_CustomGrid_Model_Grid_Type_Checkout_Agreement
     
     protected function _getSavedFieldValueForRender($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
-        return ($config->getId() == 'store_id')
+        return ($config->getValueId() == 'store_id')
             ? $entity->getStores()
             : parent::_getSavedFieldValueForRender($blockType, $config, $params, $entity);
     }

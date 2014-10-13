@@ -178,6 +178,15 @@ blcg.Tools = {
         return url + (url.match(new RegExp('\\?')) ? '&isAjax=true' : '?isAjax=true');
     },
     
+    focusFirstInput: function(container)
+    {
+        var firstInput = $(container).select('input[type!=hidden], select, textarea').first();
+        
+        if (firstInput) {
+            firstInput.focus();
+        }
+    },
+    
     submitContainerValues: function(container, url, additional, method, useAjax, ajaxCallbacks)
     {
         container = $(container);
@@ -479,7 +488,11 @@ blcg.Form.Element.DependenceController.prototype = {
         this.idsStates = $H();
         this.invertedMap = $A();
         this.elementsMap = elementsMap;
-        this.config = Object.extend({levelsUp: 1}, config || {});
+        
+        this.config = Object.extend({
+            chainHidden: true,
+            levelsUp: 1
+        }, config || {});
         
         for (var idTo in elementsMap) {
             this.idsStates[idTo] = true;
@@ -488,21 +501,35 @@ blcg.Form.Element.DependenceController.prototype = {
                 if (!this.invertedMap[idFrom]) {
                     this.invertedMap[idFrom] = $A();
                 }
+                
                 this.invertedMap[idFrom].push(idTo);
                 this.idsStates[idFrom] = true;
-                $(idFrom).observe('change', this.trackChange.bindAsEventListener(this, idTo));
-                this.trackChange(null, idTo);
+                var elementFrom = $(idFrom);
+                
+                if (elementFrom) {
+                    elementFrom.observe('change', this.trackChange.bindAsEventListener(this, idTo));
+                    this.trackChange(null, idTo);
+                }
             }
         }
     },
     
-    trackChange : function(e, idTo)
+    trackChange : function(e, idTo, inspectedIds)
     {
+        if (inspectedIds) {
+            if (inspectedIds.indexOf(idTo) != -1) {
+                return;
+            }
+            inspectedIds.push(idTo)
+        } else {
+            inspectedIds = [idTo];
+        }
+        
         var valuesFrom = this.elementsMap[idTo];
         var shouldShowUp = true;
         
         for (var idFrom in valuesFrom) {
-            if (!this.idsStates[idFrom]
+            if ((this.config.chainHidden && !this.idsStates[idFrom])
                 || (valuesFrom[idFrom].indexOf($F(idFrom)) == -1)) {
                 shouldShowUp = false;
             }
@@ -527,7 +554,7 @@ blcg.Form.Element.DependenceController.prototype = {
         
         if (this.invertedMap[idTo]) {
             this.invertedMap[idTo].each(function(subIdTo) {
-                this.trackChange(null, subIdTo, this.elementsMap[subIdTo]);
+                this.trackChange(null, subIdTo, inspectedIds);
             }.bind(this));
         }
     }
@@ -1513,23 +1540,27 @@ blcg.Grid.ProfilesBar.prototype = {
             profileItemIdPrefix: 'blcg-grid-profile-item-',
             fixedPartClassName: 'blcg-grid-profiles-bar-fixed-part',
             profilesListClassName: 'blcg-grid-profiles-list',
+            pagerClassName: 'blcg-grid-profiles-bar-pager',
             upArrowClassName: 'blcg-grid-profiles-bar-arrow-up',
             downArrowClassName: 'blcg-grid-profiles-bar-arrow-down',
             listCurrentLevelClassName: 'blcg-grid-profiles-list-current-level',
             listLevelsCountClassName: 'blcg-grid-profiles-list-levels-count',
             currentClassName: 'blcg-current',
             baseClassName: 'blcg-base',
-            disabledClassName: 'blcg-disabled'
+            disabledClassName: 'blcg-disabled',
+            hiddenClassName: 'blcg-no-display',
+            profileItemTitle: blcg.Tools.translate('Right-click to view all the available actions')
         }, config || {});
         
         this.barId = barId;
         this.bar = $(this.barId);
         this.profilesList  = this.bar.select('.' + this.config.profilesListClassName).first();
         this.fixedPart = this.bar.select('.' + this.config.fixedPartClassName).first();
-        this.upArrow   = this.bar.select('.' + this.config.upArrowClassName).first();
-        this.downArrow = this.bar.select('.' + this.config.downArrowClassName).first();
-        this.currentLevelLabel = this.bar.select('.' + this.config.listCurrentLevelClassName).first();
-        this.levelsCountLabel  = this.bar.select('.' + this.config.listLevelsCountClassName).first();
+        this.pager     = this.bar.select('.' + this.config.pagerClassName).first();
+        this.upArrow   = this.pager.select('.' + this.config.upArrowClassName).first();
+        this.downArrow = this.pager.select('.' + this.config.downArrowClassName).first();
+        this.currentLevelLabel = this.pager.select('.' + this.config.listCurrentLevelClassName).first();
+        this.levelsCountLabel  = this.pager.select('.' + this.config.listLevelsCountClassName).first();
         this.gridObjectName = gridObjectName;
         
         this.sortedIds = $A(sortedIds); // Hash.each() may not keep initial order
@@ -1576,7 +1607,6 @@ blcg.Grid.ProfilesBar.prototype = {
     
     intializeRefresh: function()
     {
-        this.fixedPartWidth = this.fixedPart.getWidth();
         this.upArrow.observe('click', this.scrollUp.bind(this));
         this.downArrow.observe('click', this.scrollDown.bind(this));
         
@@ -1594,6 +1624,7 @@ blcg.Grid.ProfilesBar.prototype = {
         var item = $(document.createElement('li'));
         item.id = this.config.profileItemIdPrefix + profile.id;
         item.update(profile.name.escapeHTML());
+        item.writeAttribute('title', this.config.profileItemTitle);
         item.observe('click', this.applyLeftClickAction.bind(this, profile.id));
         
         if (profile.isBase) {
@@ -1813,7 +1844,7 @@ blcg.Grid.ProfilesBar.prototype = {
     
     refreshProfilesList: function()
     {
-        this.profilesList.setStyle({width: (this.bar.getWidth() - this.fixedPartWidth) + 'px'});
+        this.profilesList.setStyle({width: (this.bar.getWidth() - this.fixedPart.getWidth()) + 'px'});
         var listHeight = this.profilesList.getHeight();
         
         if (listHeight == 0) {
@@ -1850,6 +1881,13 @@ blcg.Grid.ProfilesBar.prototype = {
         
         this.lastProfilesListScrollLevel = this.profilesListScrollLevel;
         this.lastMaxScrollLevel = maxScrollLevel;
+        
+        if (maxScrollLevel == 0) {
+            this.pager.addClassName(this.config.hiddenClassName);
+        } else {
+            this.pager.removeClassName(this.config.hiddenClassName);
+            
+        }
     },
     
     periodicalRefresh: function()
@@ -1910,6 +1948,15 @@ blcg.Grid.ConfigForm.prototype = {
     {
         this.form = form;
         this.rendererTargetId = rendererTargetId;
+        blcg.Tools.focusFirstInput(this.form);
+        
+        $(this.form).observe('keydown', function(e) {
+            if (e.keyCode == Event.KEY_RETURN) {
+                e.stop();
+                this.insertParams();
+                return;
+            }
+        }.bind(this));
     },
     
     insertParams: function()
@@ -1946,69 +1993,6 @@ blcg.Grid.ConfigForm.prototype = {
     updateContent: function(content)
     {
         $(this.rendererTargetId).value = content;
-    }
-};
-
-blcg.Grid.ExportForm = Class.create();
-blcg.Grid.ExportForm.prototype = {
-    initialize: function(containerId, config)
-    {
-        this.config = Object.extend({
-            formatSelectIdSuffix : '-format',
-            sizeSelectIdSuffix: '-size',
-            customSizeInputIdSuffix: '-custom-size',
-            fromResultInputIdSuffix: '-from-result',
-            additionalParams: {}
-        }, config || {});
-        
-        this.containerId  = containerId;
-        this.container    = $(this.containerId);
-        this.formatSelect = $(this.containerId + this.config.formatSelectIdSuffix);
-        this.sizeSelect   = $(this.containerId + this.config.sizeSelectIdSuffix);
-        this.customSizeInput = $(this.containerId + this.config.customSizeInputIdSuffix);
-        this.fromResultInput = $(this.containerId + this.config.fromResultInputIdSuffix);
-        
-        this.customSizeInput.hide();
-        this.customSizeInput.disabled = true;
-        this.customSizeInput.observe('change', this.verifyInput.bind(this, this.customSizeInput, ''));
-        this.fromResultInput.observe('change', this.verifyInput.bind(this, this.fromResultInput, '1'));
-        
-        this.sizeSelect.observe('change', function() {
-            if ($F(this.sizeSelect) != '') {
-                this.customSizeInput.hide();
-                this.customSizeInput.disabled = true;
-            } else {
-                this.customSizeInput.show();
-                this.customSizeInput.disabled = false;
-            }
-        }.bind(this));
-    },
-    
-    verifyInput: function(input, defaultValue)
-    {
-        if (!$F(input).match(/^[0-9]+$/g)) {
-            input.value = defaultValue;
-        }
-    },
-    
-    doExport: function()
-    {
-        if ($F(this.formatSelect) == '') {
-            alert(blcg.Tools.translate('You must select an export format'));
-            return false;
-        }
-        if (($F(this.sizeSelect) == '')
-            && ($F(this.customSizeInput) == '')) {
-            alert(blcg.Tools.translate('You must enter a custom size'));
-            return false;
-        }
-        
-        return blcg.Tools.submitContainerValues(
-            this.container,
-            $F(this.formatSelect),
-            this.config.additionalParams,
-            'get'
-        );
     }
 };
 
@@ -2675,57 +2659,6 @@ blcg.Grid.Renderer.Attribute.SelectsManager  = Class.create(blcg.Grid.Renderer.S
         }
     }
 });
-
-blcg.Grid.CustomColumn.List = Class.create();
-blcg.Grid.CustomColumn.List.prototype = {
-    initialize: function(wrapperId, config)
-    {
-        this.config = Object.extend({
-            groupClassName: 'blcg-custom-columns-group',
-            labelClassName: 'blcg-custom-columns-group-label',
-            labelOnClassName: 'blcg-custom-columns-group-label-on',
-            labelOffClassName: 'blcg-custom-columns-group-label-off',
-            listClassName: 'blcg-custom-columns-list',
-            buttonClassName: 'blcg-custom-columns-column-button' 
-        }, config || {});
-        
-        this.wrapper = $(wrapperId);
-        this.initListToggles();
-        this.initButtonTooltips();
-    },
-    
-    initListToggles: function()
-    {
-        this.wrapper.select('.' + this.config.labelClassName).each(function(label) {
-            label.observe('click', function() {
-                var list = label.next('.' + this.config.listClassName);
-                
-                if (list) {
-                    if (list.visible()) {
-                        list.hide();
-                        label.removeClassName(this.config.labelOnClassName);
-                        label.addClassName(this.config.labelOffClassName);
-                    } else {
-                        list.show();
-                        label.removeClassName(this.config.labelOffClassName);
-                        label.addClassName(this.config.labelOnClassName);
-                    }
-                }
-            }.bind(this));
-        }.bind(this));
-    },
-    
-    initButtonTooltips: function()
-    {
-        this.wrapper.select('.' + this.config.buttonClassName).each(function(button) {
-            var content = button.down();
-            
-            if (content) {
-                new blcg.Tooltip(button, content);
-            }
-        }.bind(this));
-    }
-} 
 
 blcg.Grid.CustomColumn.ConfigButton = Class.create();
 blcg.Grid.CustomColumn.ConfigButton.prototype = {

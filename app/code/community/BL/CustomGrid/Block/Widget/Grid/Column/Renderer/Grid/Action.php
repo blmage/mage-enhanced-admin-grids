@@ -13,23 +13,12 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Grid_Action
-    extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Action
+class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Grid_Action extends
+    Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Action
 {
     protected function _isAllowedAction($action, BL_CustomGrid_Model_Grid $gridModel)
     {
-        $isAllowedAction = !isset($action['permissions']);
-        
-        if (!$isAllowedAction) {
-            foreach ($action['permissions'] as $permission) {
-                if ($gridModel->checkUserActionPermission($permission)) {
-                    $isAllowedAction = true;
-                    break;
-                }
-            }
-        }
-        
-        return $isAllowedAction;
+        return (!isset($action['permissions']) || $gridModel->checkUserPermissions($action['permissions']));
     }
     
     protected function _toLinkHtml($action, Varien_Object $row)

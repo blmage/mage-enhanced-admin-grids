@@ -122,14 +122,14 @@ $_gridModel  = $this->helper('customgrid/grid')->getGridModelFromBlock($this);;
             <?php echo $this->__('per page') ?><span class="separator">|</span>
             <?php echo $this->__('Total %d records found', $this->getCollection()->getSize()) ?>
             <span id="<?php echo $this->getHtmlId() ?>-total-count" class="no-display"><?php echo $this->getCollection()->getSize() ?></span>
-            <?php if($this->getRssLists()): ?>
+            <?php if((!$_gridModel || !$_gridModel->getUseRssLinksWindow()) && $this->getRssLists()): ?>
                 <?php foreach ($this->getRssLists() as $_rss): ?>
                 <span class="separator">|</span><a href="<?php echo $_rss->getUrl() ?>" class="link-feed"><?php echo $_rss->getLabel() ?></a>
                 <?php endforeach ?>
             <?php endif; ?>
         </td>
     <?php endif ?>
-    <?php if($this->getExportTypes()): ?>
+    <?php if((!$_gridModel || !$_gridModel->getHideOriginalExportBlock()) && $this->getExportTypes()): ?>
         <td class="export a-right">
             <img src="<?php echo $this->getSkinUrl('images/icon_export.gif') ?>" alt="" class="v-middle"/>&nbsp; <?php echo $this->__('Export to:') ?>
             <select name="<?php echo $this->getId() ?>_export" id="<?php echo $this->getId() ?>_export" style="width:8em;">

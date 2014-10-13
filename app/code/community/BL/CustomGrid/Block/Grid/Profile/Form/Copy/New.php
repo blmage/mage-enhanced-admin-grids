@@ -13,51 +13,74 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Grid_Profile_Form_Copy_New
-    extends BL_CustomGrid_Block_Grid_Profile_Form_Abstract
+class BL_CustomGrid_Block_Grid_Profile_Form_Copy_New extends BL_CustomGrid_Block_Grid_Profile_Form_Abstract
 {
     protected function _getFormType()
     {
         return 'copy_new';
     }
     
-    protected function _addFormFields(Varien_Data_Form $form)
+    protected function _prepareDependenceBlock($restrictedFieldId, $assignedToFieldId)
+    {
+        return $this->setChild(
+            'form_after',
+            $this->getLayout()
+                ->createBlock('customgrid/widget_form_element_dependence')
+                ->addFieldMap($restrictedFieldId, 'is_restricted')
+                ->addFieldMap($assignedToFieldId, 'assigned_to')
+                ->addFieldDependence('assigned_to', 'is_restricted', '1')
+        );
+    }
+    
+    protected function _addFieldsToForm(Varien_Data_Form $form)
     {
         $gridModel = $this->getGridModel();
         
-        $fieldset = $form->addFieldset('values', array(
-            'legend' => $this->__('New Profile'),
-            'class'  => 'fielset-wide',
-        ));
+        $fieldset = $form->addFieldset(
+            'values',
+            array(
+                'legend' => $this->__('New Profile'),
+                'class'  => 'fielset-wide',
+            )
+        );
         
-        $fieldset->addField('name', 'text', array(
-            'name'     => 'name',
-            'label'    => $this->__('Name'),
-            'required' => true,
-        ));
+        $fieldset->addField(
+            'name',
+            'text',
+            array(
+                'name'     => 'name',
+                'label'    => $this->__('Name'),
+                'required' => true,
+            )
+        );
         
-        if ($gridModel->checkUserActionPermission(BL_CustomGrid_Model_Grid::ACTION_ASSIGN_PROFILES)) {
-            $restrictedField = $fieldset->addField('is_restricted', 'select', array(
-                'name'     => 'is_restricted',
-                'label'    => $this->__('Restricted'),
-                'required' => true,
-                'values'   => Mage::getSingleton('customgrid/system_config_source_yesno')->toOptionArray(),
-            ));
+        if ($gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_ASSIGN_PROFILES)) {
+            $yesNoValues = Mage::getSingleton('customgrid/system_config_source_yesno')->toOptionArray();
+            $rolesValues = Mage::getSingleton('customgrid/system_config_source_admin_role')->toOptionArray(false);
             
-            $assignedToField = $fieldset->addField('assigned_to', 'multiselect', array(
-                'name'     => 'assigned_to',
-                'label'    => $this->__('Assigned To'),
-                'required' => true,
-                'values'   => Mage::getSingleton('customgrid/system_config_source_admin_role')->toOptionArray(false),
-            ));
+            $restrictedField = $fieldset->addField(
+                'is_restricted',
+                'select',
+                array(
+                    'name'     => 'is_restricted',
+                    'label'    => $this->__('Restricted'),
+                    'required' => true,
+                    'values'   => $yesNoValues,
+                )
+            );
             
-            $dependenceBlock = $this->getLayout()
-                ->createBlock('customgrid/widget_form_element_dependence')
-                ->addFieldMap($restrictedField->getHtmlId(), 'is_restricted')
-                ->addFieldMap($assignedToField->getHtmlId(), 'assigned_to')
-                ->addFieldDependence('assigned_to', 'is_restricted', '1');
+            $assignedToField = $fieldset->addField(
+                'assigned_to',
+                'multiselect',
+                array(
+                    'name'     => 'assigned_to',
+                    'label'    => $this->__('Assigned To'),
+                    'required' => true,
+                    'values'   => $rolesValues,
+                )
+            );
             
-            $this->setChild('form_after', $dependenceBlock);
+            $this->_prepareDependenceBlock($restrictedField->getHtmlId(), $assignedToField->getHtmlId());
         }
         
         return $this;

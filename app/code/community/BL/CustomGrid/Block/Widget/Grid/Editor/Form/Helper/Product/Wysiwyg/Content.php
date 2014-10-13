@@ -13,8 +13,8 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Helper_Product_Wysiwyg_Content
-    extends Mage_Adminhtml_Block_Widget_Form
+class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Helper_Product_Wysiwyg_Content extends
+    Mage_Adminhtml_Block_Widget_Form
 {
     protected function _prepareForm()
     {

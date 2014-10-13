@@ -13,13 +13,15 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Widget_Form_Container
-    extends Mage_Adminhtml_Block_Widget_Form_Container
+class BL_CustomGrid_Block_Widget_Form_Container extends Mage_Adminhtml_Block_Widget_Form_Container
 {
     public function __construct()
     {
+        if (!$originalTemplate = $this->getTemplate()) {
+            $originalTemplate = 'bl/customgrid/widget/form/container.phtml';
+        }
         parent::__construct();
-        $this->setTemplate('bl/customgrid/widget/form/container.phtml');
+        $this->setTemplate($originalTemplate);
     }
     
     protected function _removeButtons(array $buttons)

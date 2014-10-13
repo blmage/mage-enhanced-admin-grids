@@ -13,31 +13,27 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Helper_Grid
-    extends Mage_Core_Helper_Abstract
+class BL_CustomGrid_Helper_Grid extends Mage_Core_Helper_Abstract
 {
     /**
      * Whether the current Magento version is greater or equal to 1.6
      * 
      * @var bool|null
      */
-    protected $_checkFrom16 = null;
+    protected $_checkFromOneDotSix = null;
     
     /**
-     * Base verification callbacks by verification types and block type
+     * Base verification callbacks by verification type and block type
      * 
      * @var array
      */
     protected $_baseVerificationCallbacks = array(
         'block' => array(
-            // Those block verifications are certainly more often troublesome than they are useful
-            /*
             'adminhtml/catalog_product_grid'  => '_verifyCatalogProductGridBlock',
             'adminhtml/sales_order_grid'      => '_verifySalesOrderGridBlock',
             'adminhtml/sales_invoice_grid'    => '_verifySalesInvoiceGridBlock',
             'adminhtml/sales_shipment_grid'   => '_verifySalesShipmentGridBlock',
             'adminhtml/sales_creditmemo_grid' => '_verifySalesCreditmemoGridBlock',
-            */
         ),
         'collection' => array(
             'adminhtml/catalog_product_grid'  => '_verifyCatalogProductGridCollection',
@@ -46,10 +42,10 @@ class BL_CustomGrid_Helper_Grid
             'adminhtml/sales_shipment_grid'   => '_verifySalesShipmentGridCollection',
             'adminhtml/sales_creditmemo_grid' => '_verifySalesCreditmemoGridCollection',
         ),
-    ); // @todo should verification callbacks be set by grid type code ?
+    );
     
     /**
-     * Additional verification callbacks by verification types and block type
+     * Additional verification callbacks by verification type and block type
      * 
      * @var array
      */
@@ -85,7 +81,9 @@ class BL_CustomGrid_Helper_Grid
      */
     public function getGridModelFromBlock(Mage_Adminhtml_Block_Widget_Grid $gridBlock)
     {
-        return (Mage::helper('customgrid')->isRewritedGridBlock($gridBlock) ? $gridBlock->blcg_getGridModel() : null);
+        return Mage::helper('customgrid')->isRewritedGridBlock($gridBlock)
+            ? $gridBlock->blcg_getGridModel()
+            : null;
     }
     
     /**
@@ -101,25 +99,49 @@ class BL_CustomGrid_Helper_Grid
     }
     
     /**
-    * Return the collection on which is based the grid block to whom belongs the given column block
-    * 
-    * @param Mage_Adminhtml_Block_Widget_Grid_Column $columnBlock Column block
-    * @return Varien_Data_Collection_Db
-    */
+     * Return the collection on which is based the grid block to whom belongs the given column block
+     * 
+     * @param Mage_Adminhtml_Block_Widget_Grid_Column $columnBlock Column block
+     * @return Varien_Data_Collection_Db
+     */
     public function getColumnBlockGridCollection(Mage_Adminhtml_Block_Widget_Grid_Column $columnBlock)
     {
         return $columnBlock->getGrid()->getCollection();
     }
     
     /**
-    * Return the filter index usable by the given column block
-    * 
-    * @param Mage_Adminhtml_Block_Widget_Grid_Column $columnBlock Column block
-    * @return string
-    */
+     * Return the filter index usable by the given column block
+     * 
+     * @param Mage_Adminhtml_Block_Widget_Grid_Column $columnBlock Column block
+     * @return string
+     */
     public function getColumnBlockFilterIndex(Mage_Adminhtml_Block_Widget_Grid_Column $columnBlock)
     {
         return (($filterIndex = $columnBlock->getFilterIndex()) ? $filterIndex : $columnBlock->getIndex());
+    }
+    
+    /**
+     * Return whether the given block ID has been generated via Mage_Core_Helper_Abstract::uniqHash()
+     *
+     * @param string $gridBlockId Grid block ID
+     * @return bool
+     */
+    public function isVaryingGridBlockId($gridBlockId)
+    {
+        return (strlen($gridBlockId) >= 32)
+            && preg_match('#([0-9a-f]{32}#', substr($gridBlockId, -32));
+    }
+    
+    /**
+     * Return whether the two given varying grid block IDs actually correspond to the same base block ID
+     * 
+     * @param string $gridBlockIdA One grid block ID
+     * @param string $gridBlockIdB Another grid block ID
+     * @return bool
+     */
+    public function checkVaryingGridBlockIdsEquality($gridBlockIdA, $gridBlockIdB)
+    {
+        return (substr($gridBlockIdA, 0, -32) == substr($gridBlockIdB, 0, -32));
     }
     
     /**
@@ -132,7 +154,7 @@ class BL_CustomGrid_Helper_Grid
      * @param bool $addNative Whether the native callback parameters should be appended to the callback call
      * @return this
      */
-    public function addVerificationCallback($type, $blockType, $callback, array $params=array(), $addNative=true)
+    public function addVerificationCallback($type, $blockType, $callback, array $params = array(), $addNative = true)
     {
         if (!isset($this->_additionalVerificationCallbacks[$type][$blockType])) {
             $this->_additionalVerificationCallbacks[$type][$blockType] = array();
@@ -148,16 +170,16 @@ class BL_CustomGrid_Helper_Grid
     }
     
     /**
-     * Whether grid block verifications should be based on Magento 1.6+
+     * Whether grid block and collection verifications should be based on Magento 1.6+
      * 
      * @return bool
      */
     public function shouldCheckFrom16()
     {
-        if (is_null($this->_checkFrom16)) {
-            $this->_checkFrom16 = Mage::helper('customgrid')->isMageVersionGreaterThan(1, 5);
+        if (is_null($this->_checkFromOneDotSix)) {
+            $this->_checkFromOneDotSix = Mage::helper('customgrid')->isMageVersionGreaterThan(1, 5);
         }
-        return $this->_checkFrom16;
+        return $this->_checkFromOneDotSix;
     }
     
     /**
@@ -173,15 +195,15 @@ class BL_CustomGrid_Helper_Grid
      */
     protected function _verifyGridElement($type, $blockType, $element, BL_CustomGrid_Model_Grid $gridModel)
     {
-        $checkFrom16 = $this->shouldCheckFrom16();
-        $isVerified  = true;
+        $checkFromOneDotSix = $this->shouldCheckFrom16();
+        $isVerified = true;
         
         if (isset($this->_baseVerificationCallbacks[$type][$blockType])) {
             $isVerified = (bool) call_user_func(
                 array($this, $this->_baseVerificationCallbacks[$type][$blockType]),
                 $element,
                 $gridModel,
-                $checkFrom16
+                $checkFromOneDotSix
             );
         }
         if ($isVerified && isset($this->_additionalVerificationCallbacks[$type][$blockType])) {
@@ -190,7 +212,7 @@ class BL_CustomGrid_Helper_Grid
                     $callback['callback'],
                     array_merge(
                         array_values($callback['params']),
-                        ($callback['add_native']? array($element, $gridModel, $checkFrom16) : array())
+                        ($callback['add_native']? array($element, $gridModel, $checkFromOneDotSix) : array())
                     ));
                 
                 if (!$isVerified) {
@@ -227,9 +249,10 @@ class BL_CustomGrid_Helper_Grid
      * @param BL_CustomGrid_Model_Grid $gridModel Grid model
      * @return bool
      */
-    public function verifyGridCollection(Mage_Adminhtml_Block_Widget_Grid $gridBlock,
-        BL_CustomGrid_Model_Grid $gridModel)
-    {
+    public function verifyGridCollection(
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock,
+        BL_CustomGrid_Model_Grid $gridModel
+    ) {
         if (($collection = $gridBlock->getCollection())
             && ($collection instanceof Varien_Data_Collection_Db)) {
             return $this->_verifyGridElement('collection', $gridModel->getBlockType(), $collection, $gridModel);
@@ -237,66 +260,176 @@ class BL_CustomGrid_Helper_Grid
         return false;
     }
     
-    protected function _verifyCatalogProductGridBlock($block, $model, $checkFrom16)
-    {
-        return ($block instanceof Mage_Adminhtml_Block_Catalog_Product_Grid);
+    /**
+     * Base block verification callback for catalog product grids
+     *
+     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
+     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @param bool $checkFromOneDotSix Whether verification should be based on Magento 1.6+
+     * @return bool
+     */
+    protected function _verifyCatalogProductGridBlock(
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock,
+        BL_CustomGrid_Model_Grid $gridModel,
+        $checkFromOneDotSix
+    ) {
+        return ($gridBlock instanceof Mage_Adminhtml_Block_Catalog_Product_Grid);
     }
     
-    protected function _verifyCatalogProductGridCollection($collection, $model, $checkFrom16)
-    {
-        if ($checkFrom16) {
+    /**
+     * Base collection verification callback for catalog product grids
+     *
+     * @param Varien_Data_Collection_Db $collection Grid collection
+     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @param bool $checkFromOneDotSix Whether verification should be based on Magento 1.6+
+     * @return bool
+     */
+    protected function _verifyCatalogProductGridCollection(
+        Varien_Data_Collection_Db $collection,
+        BL_CustomGrid_Model_Grid $gridModel,
+        $checkFromOneDotSix
+    ) {
+        if ($checkFromOneDotSix) {
             return ($collection instanceof Mage_Catalog_Model_Resource_Product_Collection);
         }
         return ($collection instanceof Mage_Catalog_Model_Resource_Eav_Mysql4_Product_Collection);
     }
     
-    protected function _verifySalesOrderGridBlock($block, $model, $checkFrom16)
-    {
-        return ($block instanceof Mage_Adminhtml_Block_Sales_Order_Grid);
+    /**
+     * Base block verification callback for sales order grids
+     *
+     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
+     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @param bool $checkFromOneDotSix Whether verification should be based on Magento 1.6+
+     * @return bool
+     */
+    protected function _verifySalesOrderGridBlock(
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock,
+        BL_CustomGrid_Model_Grid $gridModel,
+        $checkFromOneDotSix
+    ) {
+        return ($gridBlock instanceof Mage_Adminhtml_Block_Sales_Order_Grid);
     }
     
-    protected function _verifySalesOrderGridCollection($collection, $model, $checkFrom16)
-    {
-        if ($checkFrom16) {
+    /**
+     * Base collection verification callback for sales order grids
+     *
+     * @param Varien_Data_Collection_Db $collection Grid collection
+     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @param bool $checkFromOneDotSix Whether verification should be based on Magento 1.6+
+     * @return bool
+     */
+    protected function _verifySalesOrderGridCollection(
+        Varien_Data_Collection_Db $collection,
+        BL_CustomGrid_Model_Grid $gridModel,
+        $checkFromOneDotSix
+    ) {
+        if ($checkFromOneDotSix) {
             return ($collection instanceof Mage_Sales_Model_Resource_Order_Grid_Collection);
         }
         return ($collection instanceof Mage_Sales_Model_Mysql4_Order_Grid_Collection);
     }
     
-    protected function _verifySalesInvoiceGridBlock($block, $model, $checkFrom16)
-    {
-        return ($block instanceof Mage_Adminhtml_Block_Sales_Invoice_Grid);
+    /**
+     * Base block verification callback for sales invoice grids
+     *
+     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
+     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @param bool $checkFromOneDotSix Whether verification should be based on Magento 1.6+
+     * @return bool
+     */
+    protected function _verifySalesInvoiceGridBlock(
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock,
+        BL_CustomGrid_Model_Grid $gridModel,
+        $checkFromOneDotSix
+    ) {
+        return ($gridBlock instanceof Mage_Adminhtml_Block_Sales_Invoice_Grid);
     }
     
-    protected function _verifySalesInvoiceGridCollection($collection, $model, $checkFrom16)
-    {
-        if ($checkFrom16) {
+    /**
+     * Base collection verification callback for sales invoice grids
+     *
+     * @param Varien_Data_Collection_Db $collection Grid collection
+     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @param bool $checkFromOneDotSix Whether verification should be based on Magento 1.6+
+     * @return bool
+     */
+    protected function _verifySalesInvoiceGridCollection(
+        Varien_Data_Collection_Db $collection,
+        BL_CustomGrid_Model_Grid $gridModel,
+        $checkFromOneDotSix
+    ) {
+        if ($checkFromOneDotSix) {
             return ($collection instanceof Mage_Sales_Model_Resource_Order_Invoice_Grid_Collection);
         }
         return ($collection instanceof Mage_Sales_Model_Mysql4_Order_Invoice_Grid_Collection);
     }
     
-    protected function _verifySalesShipmentGridBlock($block, $model, $checkFrom16)
-    {
-        return ($block instanceof Mage_Adminhtml_Block_Sales_Shipment_Grid);
+    /**
+     * Base block verification callback for sales shipment grids
+     *
+     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
+     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @param bool $checkFromOneDotSix Whether verification should be based on Magento 1.6+
+     * @return bool
+     */
+    protected function _verifySalesShipmentGridBlock(
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock,
+        BL_CustomGrid_Model_Grid $gridModel,
+        $checkFromOneDotSix
+    ) {
+        return ($gridBlock instanceof Mage_Adminhtml_Block_Sales_Shipment_Grid);
     }
     
-    protected function _verifySalesShipmentGridCollection($collection, $model, $checkFrom16)
-    {
-        if ($checkFrom16) {
+    /**
+     * Base collection verification callback for sales shipment grids
+     *
+     * @param Varien_Data_Collection_Db $collection Grid collection
+     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @param bool $checkFromOneDotSix Whether verification should be based on Magento 1.6+
+     * @return bool
+     */
+    protected function _verifySalesShipmentGridCollection(
+        Varien_Data_Collection_Db $collection,
+        BL_CustomGrid_Model_Grid $gridModel,
+        $checkFromOneDotSix
+    ) {
+        if ($checkFromOneDotSix) {
             return ($collection instanceof Mage_Sales_Model_Resource_Order_Shipment_Grid_Collection);
         }
         return ($collection instanceof Mage_Sales_Model_Mysql4_Order_Shipment_Grid_Collection);
     }
     
-    protected function _verifySalesCreditmemoGridBlock($block, $model, $checkFrom16)
-    {
-        return ($block instanceof Mage_Adminhtml_Block_Sales_Creditmemo_Grid);
+    /**
+     * Base block verification callback for sales creditmemo grids
+     *
+     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
+     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @param bool $checkFromOneDotSix Whether verification should be based on Magento 1.6+
+     * @return bool
+     */
+    protected function _verifySalesCreditmemoGridBlock(
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock,
+        BL_CustomGrid_Model_Grid $gridModel,
+        $checkFromOneDotSix
+    ) {
+        return ($gridBlock instanceof Mage_Adminhtml_Block_Sales_Creditmemo_Grid);
     }
     
-    protected function _verifySalesCreditmemoGridCollection($collection, $model, $checkFrom16)
-    {
-        if ($checkFrom16) {
+    /**
+     * Base collection verification callback for sales creditmemo grids
+     *
+     * @param Varien_Data_Collection_Db $collection Grid collection
+     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @param bool $checkFromOneDotSix Whether verification should be based on Magento 1.6+
+     * @return bool
+     */
+    protected function _verifySalesCreditmemoGridCollection(
+        Varien_Data_Collection_Db $collection,
+        BL_CustomGrid_Model_Grid $gridModel,
+        $checkFromOneDotSix
+    ) {
+        if ($checkFromOneDotSix) {
             return ($collection instanceof Mage_Sales_Model_Resource_Order_Creditmemo_Grid_Collection);
         }
         return ($collection instanceof Mage_Sales_Model_Mysql4_Order_Creditmemo_Grid_Collection);

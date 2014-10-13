@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_Grid_Type_Invoice
-    extends BL_CustomGrid_Model_Grid_Type_Sales_Abstract
+class BL_CustomGrid_Model_Grid_Type_Invoice extends BL_CustomGrid_Model_Grid_Type_Sales_Abstract
 {
     protected function _getSupportedBlockTypes()
     {

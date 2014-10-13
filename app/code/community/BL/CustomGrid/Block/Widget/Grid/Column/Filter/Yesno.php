@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Yesno
-    extends BL_CustomGrid_Block_Widget_Grid_Column_Filter_Select
+class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Yesno extends BL_CustomGrid_Block_Widget_Grid_Column_Filter_Select
 {
     protected function _getOptions()
     {

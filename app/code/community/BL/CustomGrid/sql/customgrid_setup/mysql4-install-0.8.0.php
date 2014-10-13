@@ -16,8 +16,17 @@
 $installer = $this;
 $installer->startSetup();
 
+$tables = array(
+    'grid'           => $installer->getTable('customgrid/grid'),
+    'grid_column'    => $installer->getTable('customgrid/grid_column'),
+    'options_source' => $installer->getTable('customgrid/options_source'),
+    'source_model'   => $installer->getTable('customgrid/options_source_model'),
+    'source_option'  => $installer->getTable('customgrid/options_source_option'),
+    'store'          => $installer->getTable('core/store'),
+);
+
 $installer->run("
-CREATE TABLE IF NOT EXISTS `{$this->getTable('customgrid/grid')}` (
+CREATE TABLE IF NOT EXISTS `{$tables['grid']}` (
 `grid_id` int(10) unsigned NOT NULL auto_increment,
 `type` varchar(255) character set utf8 NOT NULL,
 `module_name` varchar(255) character set utf8 NOT NULL,
@@ -35,7 +44,7 @@ CREATE TABLE IF NOT EXISTS `{$this->getTable('customgrid/grid')}` (
 PRIMARY KEY (`grid_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS `{$this->getTable('customgrid/grid_column')}` (
+CREATE TABLE IF NOT EXISTS `{$tables['grid_column']}` (
 `column_id` int(10) unsigned NOT NULL auto_increment,
 `grid_id` int(10) unsigned NOT NULL,
 `id` varchar(255) character set utf8 NOT NULL,
@@ -54,11 +63,13 @@ CREATE TABLE IF NOT EXISTS `{$this->getTable('customgrid/grid_column')}` (
 PRIMARY KEY (`column_id`),
 KEY `FK_CUSTOM_GRID_GRID_COLUMN_GRID` (`grid_id`),
 KEY `FK_CUSTOM_GRID_GRID_COLUMN_STORE` (`store_id`),
-CONSTRAINT `FK_CUSTOM_GRID_GRID_COLUMN_GRID` FOREIGN KEY (`grid_id`) REFERENCES `{$this->getTable('customgrid/grid')}` (`grid_id`) ON DELETE CASCADE,
-CONSTRAINT `FK_CUSTOM_GRID_GRID_COLUMN_STORE` FOREIGN KEY (`store_id`) REFERENCES `{$this->getTable('core/store')}` (`store_id`) ON DELETE SET NULL
+CONSTRAINT `FK_CUSTOM_GRID_GRID_COLUMN_GRID`
+    FOREIGN KEY (`grid_id`) REFERENCES `{$tables['grid']}` (`grid_id`) ON DELETE CASCADE,
+CONSTRAINT `FK_CUSTOM_GRID_GRID_COLUMN_STORE`
+    FOREIGN KEY (`store_id`) REFERENCES `{$tables['store']}` (`store_id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS `{$installer->getTable('customgrid/options_source')}` (
+CREATE TABLE IF NOT EXISTS `{$tables['options_source']}` (
 `source_id` int(10) unsigned NOT NULL auto_increment,
 `name` varchar(255) character set utf8 NOT NULL,
 `description` text character set utf8 NOT NULL,
@@ -66,7 +77,7 @@ CREATE TABLE IF NOT EXISTS `{$installer->getTable('customgrid/options_source')}`
 PRIMARY KEY (`source_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS `{$installer->getTable('customgrid/options_source_model')}` (
+CREATE TABLE IF NOT EXISTS `{$tables['source_model']}` (
 `model_id` int(10) unsigned NOT NULL auto_increment,
 `source_id` int(10) unsigned NOT NULL,
 `model_name` varchar(255) character set utf8 NOT NULL,
@@ -77,17 +88,21 @@ CREATE TABLE IF NOT EXISTS `{$installer->getTable('customgrid/options_source_mod
 `label_key` varchar(255) character set utf8 default NULL,
 PRIMARY KEY (`model_id`),
 KEY `FK_CUSTOMGRID_OPTIONS_SOURCE_MODEL_SOURCE` (`source_id`),
-CONSTRAINT `FK_CUSTOMGRID_OPTIONS_SOURCE_MODEL_SOURCE` FOREIGN KEY (`source_id`) REFERENCES `{$this->getTable('customgrid_options_source')}` (`source_id`) ON DELETE CASCADE
+CONSTRAINT `FK_CUSTOMGRID_OPTIONS_SOURCE_MODEL_SOURCE`
+    FOREIGN KEY (`source_id`) REFERENCES `{$tables['options_source']}` (`source_id`)
+    ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS `{$installer->getTable('customgrid/options_source_option')}` (
+CREATE TABLE IF NOT EXISTS `{$tables['source_option']}` (
 `option_id` int(10) unsigned NOT NULL auto_increment,
 `source_id` int(10) unsigned NOT NULL,
 `value` varchar(255) character set utf8 NOT NULL,
 `label` varchar(255) character set utf8 NOT NULL,
 PRIMARY KEY (`option_id`),
 KEY `FK_CUSTOMGRID_OPTIONS_SOURCE_OPTION_SOURCE` (`source_id`),
-CONSTRAINT `FK_CUSTOMGRID_OPTIONS_SOURCE_OPTION_SOURCE` FOREIGN KEY (`source_id`) REFERENCES `{$this->getTable('customgrid_options_source')}` (`source_id`) ON DELETE CASCADE
+CONSTRAINT `FK_CUSTOMGRID_OPTIONS_SOURCE_OPTION_SOURCE`
+    FOREIGN KEY (`source_id`) REFERENCES `{$tables['options_source']}` (`source_id`)
+    ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 ");
 

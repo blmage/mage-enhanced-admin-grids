@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Widget_Grid_Columns_Editor
-    extends Mage_Adminhtml_Block_Template
+class BL_CustomGrid_Block_Widget_Grid_Columns_Editor extends Mage_Adminhtml_Block_Template
 {
     protected function _construct()
     {
@@ -27,7 +26,7 @@ class BL_CustomGrid_Block_Widget_Grid_Columns_Editor
     {
         if (!$this->getIsNewGridModel()
             && ($gridModel = $this->getGridModel())
-            && $gridModel->checkUserActionPermission(BL_CustomGrid_Model_Grid::ACTION_EDIT_COLUMNS_VALUES)
+            && $gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_EDIT_COLUMNS_VALUES)
             && ($gridBlock = $this->getGridBlock())
             && $this->helper('customgrid')->isRewritedGridBlock($gridBlock)) {
             return parent::_toHtml();
@@ -57,23 +56,24 @@ class BL_CustomGrid_Block_Widget_Grid_Columns_Editor
                 
                 // Avoid taking non-consistent rows
                 if ($multipleRows = $gridBlock->getMultipleRows($row)) {
-                     foreach ($multipleRows as $multiple) {
-                         $config[] = false;
-                     }
-                 }
-                 if ($gridBlock->shouldRenderSubTotal($row)) {
-                     $config[] = false;
-                 }
-                
+                    $rowsCount = count($multipleRows);
+                    
+                    for ($rowIndex=0; $rowIndex<$rowsCount; $rowIndex++) {
+                        $config[] = false;
+                    }
+                }
+                if ($gridBlock->shouldRenderSubTotal($row)) {
+                    $config[] = false;
+                }
             }
         }
         
         return $this->helper('core')->jsonEncode($config);
     }
     
-    protected function _getGridBlockSortedColumns(Mage_Adminhtml_Block_Widget_Grid $gridBlock)
+    protected function _getGridBlockSortedColumns()
     {
-        $columns = $gridBlock->getColumns();
+        $columns = $this->getGridBlock()->getColumns();
         
         foreach ($columns as $key => $column) {
             if ($column->getBlcgFilterOnly()) {
@@ -81,68 +81,54 @@ class BL_CustomGrid_Block_Widget_Grid_Columns_Editor
             }
         }
         
-        $orders = $gridBlock->getColumnsOrder();
+        return $columns;
+    }
+    
+    protected function _getEditableCustomizedColumns()
+    {
+        $columns = $this->getGridModel()->getSortedColumns(true, false, true, true, true, true);
         
-        if ($sorted) {
-            $keys   = array_keys($columns);
-            $values = array_values($columns);
-            
-            foreach ($orders as $columnId => $after) {
-                if (array_search($after, $keys) !== false) {
-                    $positionCurrent = array_search($columnId, $keys);
-                    
-                    $key = array_splice($keys, $positionCurrent, 1);
-                    $value = array_splice($values, $positionCurrent, 1);
-                    
-                    $positionTarget = array_search($after, $keys) + 1;
-                    
-                    array_splice($keys, $positionTarget, 0, $key);
-                    array_splice($values, $positionTarget, 0, $value);
-                    
-                    $columns = array_combine($keys, $values);
-                }
+        foreach ($columns as $columnBlockId => $column) {
+            if ($column->isOnlyFilterable()) {
+                unset($columns[$columnBlockId]);
+            } elseif (!$column->isEditable() || !$column->isEditAllowed()) {
+                $columns[$columnBlockId] = false;
             }
         }
         
         return $columns;
     }
     
+    protected function _getEditableDefaultColumns()
+    {
+        $blockColumns = $this->_getGridBlockSortedColumns();
+        $modelColumns = $this->getGridModel()->getColumns(true);
+        $columns = array();
+        
+        foreach (array_keys($blockColumns) as $columnBlockId) {
+            if (isset($modelColumns[$columnBlockId]) && $modelColumns[$columnBlockId]->isGrid()) {
+                if ($modelColumns[$columnBlockId]->isOnlyFilterable()) {
+                    continue;
+                }
+                $columns[$columnBlockId] = $modelColumns[$columnBlockId];
+            } else {
+                $columns[$columnBlockId] = false;
+            }
+        }
+    }
+    
     public function getEditableColumnsJsonConfig()
     {
         $stringHelper = $this->helper('customgrid/string');
-        $gridBlock = $this->getGridBlock();
         $gridModel = $this->getGridModel();
         $config = array();
         
-        if ($gridModel->checkUserActionPermission(BL_CustomGrid_Model_Grid::ACTION_USE_CUSTOMIZED_COLUMNS)) {
-            $columns = $gridModel->getSortedColumns(true, false, true, true, true, true);
-            
-            foreach ($columns as $columnBlockId => $column) {
-                if ($column->isOnlyFilterable()) {
-                    unset($columns[$columnBlockId]);
-                } elseif (!$column->isEditable() || !$column->isEditAllowed()) {
-                    $columns[$columnBlockId] = false;
-                }
-            }
-            
+        if ($gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_USE_CUSTOMIZED_COLUMNS)) {
+            $columns = $this->_getEditableCustomizedColumns();
         } else {
-            $blockColumns = $this->_getGridBlockSortedColumns($gridBlock);
-            $modelColumns = $gridModel->getColumns(true);
-            $columns = array();
-            
-            foreach ($blockColumns as $columnBlockId => $columnBlock) {
-                if (isset($modelColumns[$columnBlockId]) && $modelColumns[$columnBlockId]->isGrid()) {
-                    if ($modelColumns[$columnBlockId]->isOnlyFilterable()) {
-                        continue;
-                    }
-                    $columns[$columnBlockId] = $modelColumns[$columnBlockId];
-                } else {
-                    $columns[$columnBlockId] = false;
-                }
-            }
+            $columns = $this->_getEditableDefaultColumns();
         }
-        
-        if ($gridModel->hasUserEditPermissions($gridBlock)) {
+        if ($gridModel->hasUserEditPermissions($this->getGridBlock())) {
             foreach ($columns as $column) {
                 if ($column !== false) {
                     $config[] = $stringHelper->camelizeArrayKeys($column->getEditConfig()->getEditorBlockData(), false);

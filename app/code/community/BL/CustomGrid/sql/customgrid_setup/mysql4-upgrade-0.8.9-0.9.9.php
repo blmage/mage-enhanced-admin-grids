@@ -316,8 +316,10 @@ PRIMARY KEY (`role_profile_id`),
 UNIQUE KEY `UNQ_CUSTOM_GRID_ROLE_PROFILE_ROLE_PROFILE` (`role_id`, `profile_id`),
 KEY `FK_CUSTOM_GRID_ROLE_PROFILE_ROLE` (`role_id`),
 KEY `FK_CUSTOM_GRID_ROLE_PROFILE_PROFILE` (`profile_id`),
-CONSTRAINT `FK_CUSTOM_GRID_ROLE_PROFILE_ROLE` FOREIGN KEY (`role_id`) REFERENCES `{$this->getTable('admin/role')}` (`role_id`) ON DELETE CASCADE,
-CONSTRAINT `FK_CUSTOM_GRID_ROLE_PROFILE_PROFILE` FOREIGN KEY (`profile_id`) REFERENCES `{$tables['grid_profile']}` (`profile_id`) ON DELETE CASCADE
+CONSTRAINT `FK_CUSTOM_GRID_ROLE_PROFILE_ROLE`
+    FOREIGN KEY (`role_id`) REFERENCES `{$this->getTable('admin/role')}` (`role_id`) ON DELETE CASCADE,
+CONSTRAINT `FK_CUSTOM_GRID_ROLE_PROFILE_PROFILE`
+    FOREIGN KEY (`profile_id`) REFERENCES `{$tables['grid_profile']}` (`profile_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 ");
 

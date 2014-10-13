@@ -13,8 +13,8 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-abstract class BL_CustomGrid_Model_Column_Renderer_Collection_Abstract
-    extends BL_CustomGrid_Model_Column_Renderer_Abstract
+abstract class BL_CustomGrid_Model_Column_Renderer_Collection_Abstract extends
+    BL_CustomGrid_Model_Column_Renderer_Abstract
 {
     /**
      * Return suitable values to create a grid column block based on this renderer and a collection value
@@ -24,6 +24,9 @@ abstract class BL_CustomGrid_Model_Column_Renderer_Collection_Abstract
      * @param BL_CustomGrid_Model_Grid $gridModel Grid model
      * @return array
      */
-    abstract public function getColumnBlockValues($columnIndex, Mage_Core_Model_Store $store,
-        BL_CustomGrid_Model_Grid $gridModel);
+    abstract public function getColumnBlockValues(
+        $columnIndex,
+        Mage_Core_Model_Store $store,
+        BL_CustomGrid_Model_Grid $gridModel
+    );
 }

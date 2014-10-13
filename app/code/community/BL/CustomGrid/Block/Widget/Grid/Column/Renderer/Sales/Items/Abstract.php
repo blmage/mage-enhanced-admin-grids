@@ -13,8 +13,8 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-abstract class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Sales_Items_Abstract
-    extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
+abstract class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Sales_Items_Abstract extends
+    Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
     abstract protected function _getItemsBlockType();
     abstract protected function _getActionLayoutHandle();

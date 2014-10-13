@@ -13,12 +13,14 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_Column_Renderer_Collection_Country
-    extends BL_CustomGrid_Model_Column_Renderer_Collection_Abstract
+class BL_CustomGrid_Model_Column_Renderer_Collection_Country extends
+    BL_CustomGrid_Model_Column_Renderer_Collection_Abstract
 {
-    public function getColumnBlockValues($columnIndex, Mage_Core_Model_Store $store,
-        BL_CustomGrid_Model_Grid $gridModel)
-    {
+    public function getColumnBlockValues(
+        $columnIndex,
+        Mage_Core_Model_Store $store,
+        BL_CustomGrid_Model_Grid $gridModel
+    ) {
         $options = Mage::getResourceModel('directory/country_collection')->load()->toOptionArray(false);
         $implodedSeparator = $this->getData('values/imploded_separator');
         

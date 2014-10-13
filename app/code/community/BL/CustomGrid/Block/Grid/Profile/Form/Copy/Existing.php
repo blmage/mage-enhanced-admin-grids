@@ -13,15 +13,14 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Grid_Profile_Form_Copy_Existing
-    extends BL_CustomGrid_Block_Grid_Profile_Form_Abstract
+class BL_CustomGrid_Block_Grid_Profile_Form_Copy_Existing extends BL_CustomGrid_Block_Grid_Profile_Form_Abstract
 {
     protected function _getFormType()
     {
         return 'copy_existing';
     }
     
-    protected function _addFormFields(Varien_Data_Form $form)
+    protected function _addFieldsToForm(Varien_Data_Form $form)
     {
         $gridModel = $this->getGridModel();
         $profileId = $this->getGridProfile()->getId();
@@ -39,33 +38,50 @@ class BL_CustomGrid_Block_Grid_Profile_Form_Copy_Existing
             }
         }
         
-        $fieldset = $form->addFieldset('copy_to', array(
-            'legend' => $this->__('Copy To'),
-            'class'  => 'fielset-wide',
-        ));
+        $fieldset = $form->addFieldset(
+            'copy_to',
+            array(
+                'legend' => $this->__('Copy To'),
+                'class'  => 'fielset-wide',
+            )
+        );
         
-        $fieldset->addField('to_profile_id', 'select', array(
-            'name'     => 'to_profile_id',
-            'label'    => $this->__('Profile'),
-            'required' => true,
-            'values'   => $profilesValues,
-        ));
+        $fieldset->addField(
+            'to_profile_id',
+            'select',
+            array(
+                'name'     => 'to_profile_id',
+                'label'    => $this->__('Profile'),
+                'required' => true,
+                'values'   => $profilesValues,
+            )
+        );
         
-        $fieldset = $form->addFieldset('copied_columns', array(
-            'legend' => $this->__('Copied Values (Columns)'),
-            'class'  => 'fielset-wide',
-        ));
+        $fieldset = $form->addFieldset(
+            'copied_columns',
+            array(
+                'legend' => $this->__('Copied Values (Columns)'),
+                'class'  => 'fielset-wide',
+            )
+        );
         
-        $fieldset->addField('columns', 'select', array(
-            'name'     => 'columns',
-            'label'    => $this->__('Overwrite Columns'),
-            'values'   => $yesNoValues,
-        ));
+        $fieldset->addField(
+            'columns',
+            'select',
+            array(
+                'name'     => 'columns',
+                'label'    => $this->__('Overwrite Columns'),
+                'values'   => $yesNoValues,
+            )
+        );
         
-        $fieldset = $form->addFieldset('copied_default_params', array(
-            'legend' => $this->__('Copied Values (Default Parameters)'),
-            'class'  => 'fielset-wide',
-        ));
+        $fieldset = $form->addFieldset(
+            'copied_default_params',
+            array(
+                'legend' => $this->__('Copied Values (Default Parameters)'),
+                'class'  => 'fielset-wide',
+            )
+        );
         
         $copiableParams = array(
             'default_page'   => $this->__('Page Number'),
@@ -76,11 +92,15 @@ class BL_CustomGrid_Block_Grid_Profile_Form_Copy_Existing
         );
         
         foreach ($copiableParams as $key => $label) {
-             $fieldset->addField($key, 'select', array(
-                'name'     => 'default_params[' . $key . ']',
-                'label'    => $label,
-                'values'   => $yesNoValues,
-            ));
+             $fieldset->addField(
+                $key,
+                'select',
+                array(
+                    'name'   => 'default_params[' . $key . ']',
+                    'label'  => $label,
+                    'values' => $yesNoValues,
+                )
+             );
         }
         
         return $this;

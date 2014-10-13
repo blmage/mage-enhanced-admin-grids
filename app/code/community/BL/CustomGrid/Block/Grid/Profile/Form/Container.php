@@ -13,19 +13,25 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Grid_Profile_Form_Container
-    extends BL_CustomGrid_Block_Widget_Form_Container
+class BL_CustomGrid_Block_Grid_Profile_Form_Container extends BL_CustomGrid_Block_Widget_Form_Container
 {
     public function __construct()
     {
-        Mage_Adminhtml_Block_Widget_Container::__construct();
         $this->setTemplate('bl/customgrid/grid/profile/form/container.phtml');
+        parent::__construct();
         
-        $this->_addButton('save', array(
-            'label'   => $this->__('Apply'),
-            'onclick' => 'blcgGridProfileForm.submit();',
-            'class'   => 'save',
-        ), 1);
+        $this->_removeButtons(array('back', 'delete', 'reset'));
+        
+        $this->_updateButton(
+            'save',
+            null,
+            array(
+                'label'      => $this->__('Apply'),
+                'onclick'    => 'blcgGridProfileForm.submit();',
+                'class'      => 'save',
+                'sort_order' => 0,
+            )
+        );
     }
     
     protected function _prepareLayout()
@@ -52,5 +58,18 @@ class BL_CustomGrid_Block_Grid_Profile_Form_Container
     public function getSaveUrl()
     {
         return '';
+    }
+    
+    public function getProfilesJsObjectName()
+    {
+        if (!$this->hasData('profiles_js_object_name')) {
+            if ($jsObjectName = $this->getRequest()->getParam('profiles_js_object_name', false)) {
+                $jsObjectName = $this->helper('customgrid/string')->sanitizeJsObjectName($jsObjectName);
+            } else {
+                $jsObjectName = false;
+            }
+            $this->setData('profiles_js_object_name', $jsObjectName);
+        }
+        return $this->_getData('profiles_js_object_name');
     }
 }

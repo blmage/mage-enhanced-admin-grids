@@ -43,7 +43,8 @@ CREATE TABLE IF NOT EXISTS `{$tables['grid_profile']}` (
 `default_filters` text character set utf8 default NULL,
 PRIMARY KEY (`profile_id`),
 KEY `FK_CUSTOM_GRID_GRID_PROFILE_GRID` (`grid_id`),
-CONSTRAINT `FK_CUSTOM_GRID_GRID_PROFILE_GRID` FOREIGN KEY (`grid_id`) REFERENCES `{$tables['grid']}` (`grid_id`) ON DELETE CASCADE
+CONSTRAINT `FK_CUSTOM_GRID_GRID_PROFILE_GRID`
+    FOREIGN KEY (`grid_id`) REFERENCES `{$tables['grid']}` (`grid_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `{$tables['grid_role']}` (
@@ -57,9 +58,12 @@ PRIMARY KEY (`grid_role_id`),
 KEY `FK_CUSTOM_GRID_GRID_ROLE_GRID` (`grid_id`),
 KEY `FK_CUSTOM_GRID_GRID_ROLE_ROLE` (`role_id`),
 KEY `FK_CUSTOM_GRID_GRID_ROLE_DEFAULT_PROFILE` (`default_profile_id`),
-CONSTRAINT `FK_CUSTOM_GRID_GRID_ROLE_GRID` FOREIGN KEY (`grid_id`) REFERENCES `{$tables['grid']}` (`grid_id`) ON DELETE CASCADE,
-CONSTRAINT `FK_CUSTOM_GRID_GRID_ROLE_ROLE` FOREIGN KEY (`role_id`) REFERENCES `{$this->getTable('admin/role')}` (`role_id`) ON DELETE CASCADE,
-CONSTRAINT `FK_CUSTOM_GRID_GRID_ROLE_DEFAULT_PROFILE` FOREIGN KEY (`default_profile_id`) REFERENCES `{$tables['grid_profile']}` (`profile_id`) ON DELETE SET NULL
+CONSTRAINT `FK_CUSTOM_GRID_GRID_ROLE_GRID`
+    FOREIGN KEY (`grid_id`) REFERENCES `{$tables['grid']}` (`grid_id`) ON DELETE CASCADE,
+CONSTRAINT `FK_CUSTOM_GRID_GRID_ROLE_ROLE`
+    FOREIGN KEY (`role_id`) REFERENCES `{$this->getTable('admin/role')}` (`role_id`) ON DELETE CASCADE,
+CONSTRAINT `FK_CUSTOM_GRID_GRID_ROLE_DEFAULT_PROFILE`
+    FOREIGN KEY (`default_profile_id`) REFERENCES `{$tables['grid_profile']}` (`profile_id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `{$tables['grid_user']}` (
@@ -71,9 +75,12 @@ PRIMARY KEY (`grid_user_id`),
 KEY `FK_CUSTOM_GRID_GRID_USER_GRID` (`grid_id`),
 KEY `FK_CUSTOM_GRID_GRID_USER_USER` (`user_id`),
 KEY `FK_CUSTOM_GRID_GRID_USER_DEFAULT_PROFILE` (`default_profile_id`),
-CONSTRAINT `FK_CUSTOM_GRID_GRID_USER_GRID` FOREIGN KEY (`grid_id`) REFERENCES `{$tables['grid']}` (`grid_id`) ON DELETE CASCADE,
-CONSTRAINT `FK_CUSTOM_GRID_GRID_USER_USER` FOREIGN KEY (`user_id`) REFERENCES `{$this->getTable('admin/user')}` (`user_id`) ON DELETE CASCADE,
-CONSTRAINT `FK_CUSTOM_GRID_GRID_USER_DEFAULT_PROFILE` FOREIGN KEY (`default_profile_id`) REFERENCES `{$tables['grid_profile']}` (`profile_id`) ON DELETE SET NULL
+CONSTRAINT `FK_CUSTOM_GRID_GRID_USER_GRID`
+    FOREIGN KEY (`grid_id`) REFERENCES `{$tables['grid']}` (`grid_id`) ON DELETE CASCADE,
+CONSTRAINT `FK_CUSTOM_GRID_GRID_USER_USER`
+    FOREIGN KEY (`user_id`) REFERENCES `{$this->getTable('admin/user')}` (`user_id`) ON DELETE CASCADE,
+CONSTRAINT `FK_CUSTOM_GRID_GRID_USER_DEFAULT_PROFILE`
+    FOREIGN KEY (`default_profile_id`) REFERENCES `{$tables['grid_profile']}` (`profile_id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 ");
 
@@ -90,31 +97,32 @@ $connection->addColumn(
 $connection->addColumn(
     $tables['grid'],
     'default_page_behaviour',
-    "enum ('default','force_original','force_custom') character set utf8 default NULL"
+    "enum ('default', 'force_original', 'force_custom') character set utf8 default NULL"
 );
 
 $connection->addColumn(
     $tables['grid'],
     'default_limit_behaviour',
-    "enum ('default','force_original','force_custom') character set utf8 default NULL"
+    "enum ('default', 'force_original', 'force_custom') character set utf8 default NULL"
 );
 
 $connection->addColumn(
     $tables['grid'],
     'default_sort_behaviour',
-    "enum ('default','force_original','force_custom') character set utf8 default NULL"
+    "enum ('default', 'force_original', 'force_custom') character set utf8 default NULL"
 );
 
 $connection->addColumn(
     $tables['grid'],
     'default_dir_behaviour',
-    "enum ('default','force_original','force_custom') character set utf8 default NULL"
+    "enum ('default', 'force_original', 'force_custom') character set utf8 default NULL"
 );
 
 $connection->addColumn(
     $tables['grid'],
     'default_filter_behaviour',
-    "enum ('default','force_original','force_custom','merge_default','merge_on_original','merge_on_custom') character set utf8 default NULL"
+    "enum ('default', 'force_original', 'force_custom', 'merge_default', 'merge_on_original', 'merge_on_custom') '
+        . 'character set utf8 default NULL"
 );
 
 /**
@@ -126,7 +134,7 @@ if ($connection->tableColumnExists($tables['grid'], 'default_direction')) {
         $tables['grid'],
         'default_direction',
         'default_dir',
-        "enum('asc','desc') character set utf8 default NULL"
+        "enum('asc', 'desc') character set utf8 default NULL"
     );
 }
 
@@ -175,7 +183,7 @@ if ($connection->tableColumnExists($tables['grid_column'], 'origin')) {
         $installer->getTable('customgrid/grid_column'),
         'origin',
         'origin',
-        "enum('grid','collection','attribute','custom') character set utf8 NOT NULL default 'grid'"
+        "enum('grid', 'collection', 'attribute', 'custom') character set utf8 NOT NULL default 'grid'"
     );
 }
 

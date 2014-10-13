@@ -22,7 +22,7 @@ class BL_CustomGrid_Helper_Data extends Mage_Core_Helper_Abstract
      * @param string $glue Imploding glue
      * @return string
      */
-    public function implodeArray($array, $glue=',')
+    public function implodeArray($array, $glue = ',')
     {
         return (is_array($array) ? implode($glue, $array) : '');
     }
@@ -59,7 +59,7 @@ class BL_CustomGrid_Helper_Data extends Mage_Core_Helper_Abstract
      * @param int|null $max Maximum allowed value (greater will be excluded)
      * @return array
      */
-    public function parseCsvIntArray($string, $unique=true, $sorted=false, $min=null, $max=null)
+    public function parseCsvIntArray($string, $unique = true, $sorted = false, $min = null, $max = null)
     {
         $values = array_map(array($this, '_parseIntValue'), explode(',', $string));
         $filterCodes = array('!is_null($v)');
@@ -87,45 +87,45 @@ class BL_CustomGrid_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Return an options hash corresponding to the given options array
      * 
-     * @param array $optionsArray Options array
+     * @param array $optionArray Options array
      * @param bool $withEmpty Whether empty values from the array should be kept in the hash
      * @return array
      */
-    public function getOptionsHashFromOptionsArray(array $optionsArray, $withEmpty=false)
+    public function getOptionHashFromOptionArray(array $optionArray, $withEmpty = false)
     {
-        $optionsHash = array();
+        $optionHash = array();
         
-        foreach ($optionsArray as $key => $value) {
+        foreach ($optionArray as $key => $value) {
             if (is_array($value)) {
                 if (isset($value['value']) && isset($value['label'])) {
                     if ($withEmpty || ($value['value'] !== '')) {
-                        $optionsHash[$value['value']] = $value['label'];
+                        $optionHash[$value['value']] = $value['label'];
                     }
                 }
             } else {
                 // Seems to already be an options hash
-                $optionsHash[$key] = $value;
+                $optionHash[$key] = $value;
             }
         }
         
-        return $optionsHash;
+        return $optionHash;
     }
     
     /**
      * Return an options array corresponding to the given options hash
      * 
-     * @param array $optionsArray Options array
+     * @param array $optionHash Options hash
      * @param bool $withEmpty Whether empty values from the hash should be kept in the array
      * @return array
      */
-    public function getOptionsArrayFromOptionsHash(array $optionsHash, $withEmpty=false)
+    public function getOptionArrayFromOptionHash(array $optionHash, $withEmpty = false)
     {
-        $optionsArray = array();
+        $optionArray = array();
         
-        foreach ($optionsHash as $key => $value) {
+        foreach ($optionHash as $key => $value) {
             if (!is_array($value)) {
                 if ($withEmpty || ($key !== '')) {
-                    $optionsArray[] = array(
+                    $optionArray[] = array(
                         'value' => $key,
                         'label' => $value,
                     );
@@ -133,12 +133,12 @@ class BL_CustomGrid_Helper_Data extends Mage_Core_Helper_Abstract
             } elseif (isset($value['value']) && isset($value['label'])) {
                 // Seems to already be an options array, remove anyway empty values if needed
                 if ($withEmpty || ($value['value'] !== '')) {
-                    $optionsArray[] = $value;
+                    $optionArray[] = $value;
                 }
             }
         }
         
-        return $optionsArray;
+        return $optionArray;
     }
     
     /**
@@ -160,7 +160,7 @@ class BL_CustomGrid_Helper_Data extends Mage_Core_Helper_Abstract
      * @param int|null $revision Revision version number
      * @return bool
      */
-    public function isMageVersion($major, $minor, $revision=null)
+    public function isMageVersion($major, $minor, $revision = null)
     {
         $version = Mage::getVersionInfo();
         return ($version['major'] == $major)
@@ -176,7 +176,7 @@ class BL_CustomGrid_Helper_Data extends Mage_Core_Helper_Abstract
      * @param int|null $revision Revision version number
      * @return bool
      */
-    public function isMageVersionGreaterThan($major, $minor, $revision=null)
+    public function isMageVersionGreaterThan($major, $minor, $revision = null)
     {
         $version = Mage::getVersionInfo();
         
@@ -201,7 +201,7 @@ class BL_CustomGrid_Helper_Data extends Mage_Core_Helper_Abstract
      * @param int|null $revision Revision version number
      * @return bool
      */
-    public function isMageVersionLesserThan($major, $minor, $revision=null)
+    public function isMageVersionLesserThan($major, $minor, $revision = null)
     {
         $version = Mage::getVersionInfo();
         

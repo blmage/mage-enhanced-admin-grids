@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_Custom_Column_Product_Stats_Quote
-    extends BL_CustomGrid_Model_Custom_Column_Simple_Abstract
+class BL_CustomGrid_Model_Custom_Column_Product_Stats_Quote extends BL_CustomGrid_Model_Custom_Column_Simple_Abstract
 {
     const COUNT_MODE_QUOTES = 'quotes';
     const COUNT_MODE_PRODUCTS = 'products';
@@ -26,41 +25,60 @@ class BL_CustomGrid_Model_Custom_Column_Product_Stats_Quote
         if (!Mage::app()->isSingleStoreMode()) {
             $stores = Mage::getModel('adminhtml/system_config_source_store')->toOptionArray();
             
-            array_unshift($stores, array(
-                'value' => '0',
-                'label' => $helper->__('All')
-            ));
+            array_unshift(
+                $stores,
+                array(
+                    'value' => '0',
+                    'label' => $helper->__('All')
+                )
+            );
             
-            $this->addCustomizationParam('store_id', array(
-                'label'   => $helper->__('Store Views'),
-                'type'    => 'multiselect',
-                'values'  => $stores,
-                'value'   => 0,
-                'size'    => 4,
-            ), 10);
+            $this->addCustomizationParam(
+                'store_id',
+                array(
+                    'label'   => $helper->__('Store Views'),
+                    'type'    => 'multiselect',
+                    'values'  => $stores,
+                    'value'   => 0,
+                    'size'    => 4,
+                ),
+                10
+            );
         }
         
-        $this->addCustomizationParam('include_inactive', array(
-            'label'        => $helper->__('Include Inactive Carts'),
-            'type'         => 'select',
-            'source_model' => 'customgrid/system_config_source_yesno',
-            'value'        => 0,
-        ), 20);
+        $this->addCustomizationParam(
+            'include_inactive',
+            array(
+                'label'        => $helper->__('Include Inactive Carts'),
+                'type'         => 'select',
+                'source_model' => 'customgrid/system_config_source_yesno',
+                'value'        => 0,
+            ),
+            20
+        );
         
-        $this->addCustomizationParam('only_logged_in', array(
-            'label'        => $helper->__('Only Logged In Carts'),
-            'type'         => 'select',
-            'source_model' => 'customgrid/system_config_source_yesno',
-            'value'        => 0,
-        ), 30);
+        $this->addCustomizationParam(
+            'only_logged_in',
+            array(
+                'label'        => $helper->__('Only Logged In Carts'),
+                'type'         => 'select',
+                'source_model' => 'customgrid/system_config_source_yesno',
+                'value'        => 0,
+            ),
+            30
+        );
         
-        $this->addCustomizationParam('exclude_child_items', array(
-            'label'        => $helper->__('Exclude Child Items'),
-            'description'  => $helper->__('Eg : simple products associated to their configurable parents'),
-            'type'         => 'select',
-            'source_model' => 'customgrid/system_config_source_yesno',
-            'value'        => 0,
-        ), 40);
+        $this->addCustomizationParam(
+            'exclude_child_items',
+            array(
+                'label'        => $helper->__('Exclude Child Items'),
+                'description'  => $helper->__('Eg : simple products associated to their configurable parents'),
+                'type'         => 'select',
+                'source_model' => 'customgrid/system_config_source_yesno',
+                'value'        => 0,
+            ),
+            40
+        );
         
         $this->setCustomizationWindowConfig(array('height' => 330));
         return parent::_prepareConfig();
@@ -113,18 +131,22 @@ class BL_CustomGrid_Model_Custom_Column_Product_Stats_Quote
         return $countSelect;
     }
     
-    public function addFieldToGridCollection($columnIndex, array $params,
-        Mage_Adminhtml_Block_Widget_Grid $gridBlock, Varien_Data_Collection_Db $collection)
-    {
+    public function addFieldToGridCollection(
+        $columnIndex,
+        array $params,
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock,
+        Varien_Data_Collection_Db $collection
+    ) {
         $countMode = $this->getConfigParam('count_mode');
         $countQuery = 'IFNULL((' . $this->_getCountSelect($collection, $params, $countMode) . '), 0)';
         $collection->getSelect()->columns(array($columnIndex => new Zend_Db_Expr($countQuery)));
         return $this;
     }
     
-    public function addFilterToGridCollection(Varien_Data_Collection_Db $collection,
-        Mage_Adminhtml_Block_Widget_Grid_Column $columnBlock)
-    {
+    public function addFilterToGridCollection(
+        Varien_Data_Collection_Db $collection,
+        Mage_Adminhtml_Block_Widget_Grid_Column $columnBlock
+    ) {
         $params = $columnBlock->getBlcgFilterParams();
         $fieldName = ($columnBlock->getFilterIndex() ? $columnBlock->getFilterIndex() : $columnBlock->getIndex());
         $condition = $columnBlock->getFilter()->getCondition();
@@ -149,9 +171,14 @@ class BL_CustomGrid_Model_Custom_Column_Product_Stats_Quote
         return $this;
     }
     
-    protected function _getForcedBlockValues(Mage_Adminhtml_Block_Widget_Grid $gridBlock,
-        BL_CustomGrid_Model_Grid $gridModel, $columnBlockId, $columnIndex, array $params, Mage_Core_Model_Store $store)
-    {
+    protected function _getForcedBlockValues(
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock,
+        BL_CustomGrid_Model_Grid $gridModel,
+        $columnBlockId,
+        $columnIndex,
+        array $params,
+        Mage_Core_Model_Store $store
+    ) {
         return array(
             'type' => 'number',
             'blcg_filter_params' => $params,

@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-abstract class BL_CustomGrid_Block_Widget_Grid_Config_Abstract
-    extends Mage_Adminhtml_Block_Widget
+abstract class BL_CustomGrid_Block_Widget_Grid_Config_Abstract extends Mage_Adminhtml_Block_Widget
 {
     protected function _toHtml()
     {

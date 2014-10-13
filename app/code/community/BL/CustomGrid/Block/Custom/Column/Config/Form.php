@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Custom_Column_Config_Form
-    extends BL_CustomGrid_Block_Config_Form_Abstract
+class BL_CustomGrid_Block_Custom_Column_Config_Form extends BL_CustomGrid_Block_Config_Form_Abstract
 {
     public function getFormId()
     {

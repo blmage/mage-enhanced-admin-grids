@@ -34,7 +34,7 @@
                 <global translate="label" module="customgrid">
                     <label>General</label>
                     <frontend_type>text</frontend_type>
-                    <sort_order>10</sort_order>
+                    <sort_order>1000</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>0</show_in_website>
                     <show_in_store>0</show_in_store>
@@ -80,7 +80,7 @@
                         <sort_with_dnd translate="label comment" module="customgrid">
                             <label>Use drag'n'drop for sorting columns</label>
                             <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <source_model>customgrid/system_config_source_yesno</source_model>
                             <sort_order>50</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
@@ -92,16 +92,25 @@
                 <customization_params translate="label" module="customgrid">
                     <label>Customization Parameters - Default Values</label>
                     <frontend_type>text</frontend_type>
-                    <sort_order>20</sort_order>
+                    <sort_order>2000</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>0</show_in_website>
                     <show_in_store>0</show_in_store>
                     <fields>
+                        <display_system_part translate="label" module="customgrid">
+                            <label>Display "System" Column</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>customgrid/system_config_source_yesno</source_model>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </display_system_part>
                         <ignore_custom_headers translate="label" module="customgrid">
                             <label>Ignore Custom Headers (Base Grid Columns)</label>
                             <frontend_type>select</frontend_type>
                             <source_model>customgrid/system_config_source_yesno</source_model>
-                            <sort_order>10</sort_order>
+                            <sort_order>20</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -110,7 +119,7 @@
                             <label>Ignore Custom Widths (Base Grid Columns)</label>
                             <frontend_type>select</frontend_type>
                             <source_model>customgrid/system_config_source_yesno</source_model>
-                            <sort_order>20</sort_order>
+                            <sort_order>30</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -119,7 +128,7 @@
                             <label>Ignore Custom Alignments (Base Grid Columns)</label>
                             <frontend_type>select</frontend_type>
                             <source_model>customgrid/system_config_source_yesno</source_model>
-                            <sort_order>30</sort_order>
+                            <sort_order>40</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -127,7 +136,7 @@
                         <pagination_values translate="label comment" module="customgrid">
                             <label>Custom Pagination Values</label>
                             <frontend_type>text</frontend_type>
-                            <sort_order>40</sort_order>
+                            <sort_order>50</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -136,37 +145,64 @@
                         <default_pagination_value translate="label comment" module="customgrid">
                             <label>Default Pagination Value</label>
                             <frontend_type>text</frontend_type>
-                            <sort_order>50</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>0</show_in_website>
-                            <show_in_store>0</show_in_store>
-                            <comment><![CDATA[This value will replace the original default value from the grids. If the custom default value can not be found in the pagination values used for the current grid, nor the original one (by fallback), then the smallest available pagination value will be used]]></comment>
-                        </default_pagination_value>
-                        <merge_base_pagination translate="label comment" module="customgrid">
-                            <label>Merge Base Pagination Values</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>customgrid/system_config_source_yesno</source_model>
                             <sort_order>60</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
-                            <comment><![CDATA[Choose "Yes" to make the base pagination values be added to the custom ones]]></comment>
-                        </merge_base_pagination>
-                        <pin_header translate="label" module="customgrid">
-                            <label>Pin Pager And Mass-Actions Block</label>
+                            <comment><![CDATA[This value will replace the original default value from the grids. If the custom default value can not be found in the pagination values used for the current grid, nor the original one (by fallback), the smallest available pagination value will be used]]></comment>
+                        </default_pagination_value>
+                        <merge_base_pagination translate="label comment" module="customgrid">
+                            <label>Merge Base Pagination Values</label>
                             <frontend_type>select</frontend_type>
                             <source_model>customgrid/system_config_source_yesno</source_model>
                             <sort_order>70</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
+                            <comment><![CDATA[Choose "<strong>Yes</strong>" to make the base pagination values be added to the custom ones]]></comment>
+                        </merge_base_pagination>
+                        <pin_header translate="label" module="customgrid">
+                            <label>Pin Pager And Mass-Actions Block</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>customgrid/system_config_source_yesno</source_model>
+                            <sort_order>80</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
                         </pin_header>
+                        <rss_links_window translate="label" module="customgrid">
+                            <label>Move RSS Links in a Dedicated Window</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>customgrid/system_config_source_yesno</source_model>
+                            <sort_order>90</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </rss_links_window>
+                        <hide_original_export_block translate="label" module="customgrid">
+                            <label>Hide Original Export Block</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>customgrid/system_config_source_yesno</source_model>
+                            <sort_order>100</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </hide_original_export_block>
+                        <hide_filter_reset_button translate="label" module="customgrid">
+                            <label>Hide Original Filter Reset Button</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>customgrid/system_config_source_yesno</source_model>
+                            <sort_order>110</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </hide_filter_reset_button>
                     </fields>
                 </customization_params>
                 <default_params_behaviours translate="label" module="customgrid">
                     <label>Default Parameters Behaviours - Default Values</label>
                     <frontend_type>text</frontend_type>
-                    <sort_order>30</sort_order>
+                    <sort_order>3000</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>0</show_in_website>
                     <show_in_store>0</show_in_store>
@@ -226,7 +262,7 @@
                 <profiles translate="label" module="customgrid">
                     <label>Profiles - Default Values</label>
                     <frontend_type>text</frontend_type>
-                    <sort_order>40</sort_order>
+                    <sort_order>4000</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>0</show_in_website>
                     <show_in_store>0</show_in_store>
@@ -264,12 +300,30 @@
                         <group_in_default_header translate="label" module="customgrid">
                             <label>Add Group Name In Default Header</label>
                             <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <source_model>customgrid/system_config_source_yesno</source_model>
                             <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
                         </group_in_default_header>
+                        <unverified_block_behaviour translate="label" module="customgrid">
+                            <label>Behaviour When Unverified Grid Block</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>customgrid/system_config_source_custom_column_unverified_behaviour</source_model>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </unverified_block_behaviour>
+                        <unverified_collection_behaviour translate="label" module="customgrid">
+                            <label>Behaviour When Unverified Grid Collection</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>customgrid/system_config_source_custom_column_unverified_behaviour</source_model>
+                            <sort_order>30</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </unverified_collection_behaviour>
                     </fields>
                 </custom_columns>
             </groups>
@@ -433,7 +487,7 @@
                 <sitemap translate="label" module="customgrid">
                     <label>Google Sitemap</label>
                     <frontend_type>text</frontend_type>
-                    <sort_order>10</sort_order>
+                    <sort_order>1000</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>0</show_in_website>
                     <show_in_store>0</show_in_store>
@@ -441,7 +495,7 @@
                         <delete_file translate="label" module="customgrid">
                             <label>Delete File Before Save</label>
                             <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <source_model>customgrid/system_config_source_yesno</source_model>
                             <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>

@@ -339,7 +339,7 @@
                     <allow_renderers>1</allow_renderers>
                     <allow_customization>1</allow_customization>
                     <config_params>
-                        <order_field>customer_group_id</order_field>
+                        <order_field_name>customer_group_id</order_field_name>
                     </config_params>
                     <customization_params>
                         <config>
@@ -361,7 +361,7 @@
                     <group>Customer</group>
                     <allow_renderers>1</allow_renderers>
                     <config_params>
-                        <order_field>customer_dob</order_field>
+                        <order_field_name>customer_dob</order_field_name>
                     </config_params>
                 </customer_dob>
             </custom_columns>
@@ -475,7 +475,7 @@
                     </original_currency>
                     <original_currency_column_type>
                         <label>Column Type</label>
-                        <description>If no currency is found with choosen column, then base currency will be used</description>
+                        <description>If no currency is found with choosen column, the base currency will be used</description>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>
@@ -525,7 +525,7 @@
                     </original_currency_column_index>
                     <original_currency_column_position>
                         <label>Column Position</label>
-                        <description>Indicate here the position of the column among all ones sharing the same field name. If given position does not exist or is empty, then the first corresponding column will be used</description>
+                        <description>Indicate here the position of the column among all ones sharing the same field name. If given position does not exist or is empty, the first corresponding column will be used</description>
                         <visible>1</visible>
                         <type>text</type>
                         <sort_order>40</sort_order>
@@ -553,7 +553,7 @@
                     <display_currency_column_type>
                         <label>Column Type</label>
                         <group>Rendering</group>
-                        <description>If no currency is found with choosen column, then base currency will be used</description>
+                        <description>If no currency is found with choosen column, the base currency will be used</description>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>
@@ -606,7 +606,7 @@
                     <display_currency_column_position>
                         <label>Column Position</label>
                         <group>Rendering</group>
-                        <description>Indicate here the position of the column among all ones sharing the same field name. If given position does not exist or is empty, then the first corresponding column will be used</description>
+                        <description>Indicate here the position of the column among all ones sharing the same field name. If given position does not exist or is empty, the the first corresponding column will be used</description>
                         <visible>1</visible>
                         <type>text</type>
                         <sort_order>80</sort_order>
@@ -684,7 +684,7 @@
                     <flat_key>
                         <label>Flat Value Key</label>
                         <group>Rendering</group>
-                        <description>If no ID is found, then the value corresponding to the given key will be displayed. If none is set, "store_name" will be used</description>
+                        <description><![CDATA[If no ID is found, the value corresponding to the given key will be displayed. If none is set, "<strong>store_name</strong>" will be used]]></description>
                         <visible>1</visible>
                         <type>text</type>
                         <sort_order>50</sort_order>
@@ -702,7 +702,7 @@
                 <parameters>
                     <imploded_values>
                         <label>Merged Values</label>
-                        <description>Choose "Yes" if the field contains multiple values separated by a given string</description>
+                        <description><![CDATA[Choose "<strong>Yes</strong>" if the field contains multiple values separated by a given string]]></description>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
@@ -710,7 +710,7 @@
                     </imploded_values>
                     <imploded_separator>
                         <label>Values Separator</label>
-                        <description>If no value is set, "," will be used</description>
+                        <description><![CDATA[If no value is set, "<strong>,</strong>" will be used]]></description>
                         <visible>1</visible>
                         <type>text</type>
                         <sort_order>20</sort_order>
@@ -766,7 +766,7 @@
                     <values_separator>
                         <label>Values Separator</label>
                         <group>Rendering</group>
-                        <description>If no value is set, ", " will be used</description>
+                        <description><![CDATA[If no value is set, "<strong>, </strong>" will be used]]></description>
                         <visible>1</visible>
                         <type>text</type>
                         <sort_order>60</sort_order>
@@ -795,7 +795,7 @@
                 <parameters>
                     <custom_source>
                         <label>Custom Source</label>
-                        <description><![CDATA[Choose "Yes" to use a custom source of EU countries.<br /><strong>For Magento versions < 1.7, you should always use this option as there is no base EU countries list by default</strong>]]></description>
+                        <description><![CDATA[Choose "<strong>Yes</strong>" to use a custom source of EU countries.<br /><strong>For Magento versions < 1.7, you should always use this option as there is no base EU countries list by default</strong>]]></description>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
@@ -815,7 +815,7 @@
                     </system_config_source>
                     <system_config_source_path>
                         <label>System Configuration Source Path</label>
-                        <description><![CDATA[Eg : "general/country/eu_countries"]]></description>
+                        <description><![CDATA[Eg : "<strong>general/country/eu_countries</strong>"]]></description>
                         <visible>1</visible>
                         <type>text</type>
                         <sort_order>30</sort_order>
@@ -846,7 +846,7 @@
                     <base_display_format>
                         <label>Base Display Format</label>
                         <group>Rendering</group>
-                        <description><![CDATA[Available variables : <strong>{is_eu_country}</strong>, <strong>{country_code}</strong>, <strong>{country_name}</strong><br />(variables will be replaced by the corresponding values).<br />If no value is set, "{is_eu_country}" will be used by default]]></description>
+                        <description><![CDATA[Available variables : <strong>{is_eu_country}</strong>, <strong>{country_code}</strong>, <strong>{country_name}</strong><br />(variables will be replaced by the corresponding values).<br />If no value is set, "<strong>{is_eu_country}</strong>" will be used by default]]></description>
                         <visible>1</visible>
                         <type>text</type>
                         <sort_order>50</sort_order>
@@ -854,7 +854,7 @@
                     <export_display_format>
                         <label>Export Display Format</label>
                         <group>Rendering</group>
-                        <description>If no value is set, then the base display format will be used</description>
+                        <description>If no value is set, the base display format will be used</description>
                         <visible>1</visible>
                         <type>text</type>
                         <sort_order>60</sort_order>
@@ -879,7 +879,7 @@
                     </source_id>
                     <imploded_values>
                         <label>Merged Values</label>
-                        <description>Choose "Yes" if the field contains multiple values separated by a given string</description>
+                        <description><![CDATA[Choose "<strong>Yes</strong>" if the field contains multiple values separated by a given string]]></description>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
@@ -887,7 +887,7 @@
                     </imploded_values>
                     <imploded_separator>
                         <label>Values Separator</label>
-                        <description>If no value is set, "," will be used</description>
+                        <description><![CDATA[If no value is set, "<strong>,</strong>" will be used]]></description>
                         <visible>1</visible>
                         <type>text</type>
                         <sort_order>30</sort_order>
@@ -943,7 +943,7 @@
                     <values_separator>
                         <label>Values Separator</label>
                         <group>Rendering</group>
-                        <description>If no value is set, ", " will be used</description>
+                        <description><![CDATA[If no value is set, "<strong>, </strong>" will be used]]></description>
                         <visible>1</visible>
                         <type>text</type>
                         <sort_order>70</sort_order>
@@ -974,7 +974,7 @@
                     <sub_values_separator>
                         <label>Sub-Values Separator</label>
                         <group>Rendering</group>
-                        <description>If no value is set, " - " will be used</description>
+                        <description><![CDATA[If no value is set, "<strong> - </strong>" will be used]]></description>
                         <visible>1</visible>
                         <type>text</type>
                         <sort_order>100</sort_order>
@@ -1008,7 +1008,7 @@
                     <filter_mode_shortcut>
                         <label>Enable Filter Mode Shortcut</label>
                         <group>Filtering</group>
-                        <description><![CDATA[Allows to specify the filter mode directly in the filter field, by placing the corresponding code between square brackets at the beginning of the searched value.<br />Eg, use "<strong>[el]</strong>Example" to search for "Example" using "LIKE (exact)".<br />If no filter mode is indicated in the field, then the value of "Filter Mode" will be used by default")]]></description>
+                        <description><![CDATA[Allows to specify the filter mode directly in the filter field, by placing the corresponding code between square brackets at the beginning of the searched value.<br />Eg, use "<strong>[el]</strong>Example" to search for "Example" using "LIKE (exact)".<br />If no filter mode is indicated in the field, the value of "Filter Mode" will be used by default")]]></description>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
@@ -1047,7 +1047,7 @@
                     <negative_filter_shortcut>
                         <label>Enable Negative Filter Shortcut</label>
                         <group>Filtering</group>
-                        <description><![CDATA[Allows to trigger negative filter directly from the filter field, by placing the character "<strong>!</strong>" between square brackets at the beginning of the searched value (eg: "<strong>[!]</strong>Example").<br />If the code of a filter mode is already present in the value, then place the character "<strong>!</strong>" in front of it (eg: "<strong>[!el]</strong>Example")]]></description>
+                        <description><![CDATA[Allows to trigger negative filter directly from the filter field, by placing the character "<strong>!</strong>" between square brackets at the beginning of the searched value (eg: "<strong>[!]</strong>Example").<br />If the code of a filter mode is already present in the value, place the character "<strong>!</strong>" in front of it (eg: "<strong>[!el]</strong>Example")]]></description>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
@@ -1231,7 +1231,7 @@
                     <values_separator>
                         <label>Values Separator</label>
                         <group>Rendering</group>
-                        <description>If no value is set, ", " will be used</description>
+                        <description><![CDATA[If no value is set, "<strong>, </strong>" will be used]]></description>
                         <visible>1</visible>
                         <type>text</type>
                         <sort_order>60</sort_order>
@@ -1257,7 +1257,7 @@
                     <sub_values_separator>
                         <label>Sub-Values Separator</label>
                         <group>Rendering</group>
-                        <description>If no value is set, " - " will be used</description>
+                        <description><![CDATA[If no value is set, "<strong> - </strong>" will be used]]></description>
                         <visible>1</visible>
                         <type>text</type>
                         <sort_order>90</sort_order>
@@ -1281,7 +1281,7 @@
                     <filter_on_name>
                         <label>Filter images on name</label>
                         <group>Filtering</group>
-                        <description>If you choose "No", filter will apply on images existence</description>
+                        <description><![CDATA[If you choose "<strong>No</strong>", filter will apply on images existence]]></description>
                         <visible>1</visible>
                         <type>select</type>
                         <sort_order>10</sort_order>
@@ -1291,7 +1291,7 @@
                     <display_images>
                         <label>Display Images</label>
                         <group>Rendering</group>
-                        <description>If you choose "No", only the images URLs will be displayed (otherwise, the URLs will be used as titles)</description>
+                        <description><![CDATA[If you choose "<strong>No</strong>", only the images URLs will be displayed (otherwise, the URLs will be used as titles)]]></description>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
@@ -1301,7 +1301,7 @@
                     <display_images_urls>
                         <label>Display Complete Images URLs</label>
                         <group>Rendering</group>
-                        <description>If you choose "No", only the images paths within the media/catalog directory will be displayed</description>
+                        <description><![CDATA[If you choose "<strong>No</strong>", only the images paths within the media/catalog directory will be displayed]]></description>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
@@ -1311,7 +1311,7 @@
                     <original_image_link>
                         <label>Original Image Link</label>
                         <group>Rendering</group>
-                        <description>If you choose "Yes", the images / URLs will act as links to the original images</description>
+                        <description><![CDATA[If you choose "<strong>Yes</strong>", the images / URLs will act as links to the original images]]></description>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
@@ -1336,7 +1336,7 @@
                     <browser_resize_only>
                         <label>Browser Resize Only</label>
                         <group>Rendering</group>
-                        <description><![CDATA[Used when image dimensions are specified.<br />If you choose "Yes", the original full-size images will be used and resized, when needed, by your web browser only (regarding images URLs, only the original ones will likewise be displayed in all cases)]]></description>
+                        <description><![CDATA[Used when image dimensions are specified.<br />If you choose "<strong>Yes</strong>", the original full-size images will be used and resized, when needed, by your web browser only (regarding images URLs, only the original ones will likewise be displayed in all cases)]]></description>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
@@ -1363,7 +1363,7 @@
                     </original_currency>
                     <original_currency_column_type>
                         <label>Column Type</label>
-                        <description>If no currency is found with choosen column, then base currency will be used</description>
+                        <description>If no currency is found with choosen column, the base currency will be used</description>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>
@@ -1413,7 +1413,7 @@
                     </original_currency_column_index>
                     <original_currency_column_position>
                         <label>Column Position</label>
-                        <description>Indicate here the position of the column among all ones sharing the same field name. If given position does not exist or is empty, then the first corresponding column will be used</description>
+                        <description>Indicate here the position of the column among all ones sharing the same field name. If given position does not exist or is empty, the first corresponding column will be used</description>
                         <visible>1</visible>
                         <type>text</type>
                         <sort_order>40</sort_order>
@@ -1441,7 +1441,7 @@
                     <display_currency_column_type>
                         <label>Column Type</label>
                         <group>Rendering</group>
-                        <description>If no currency is found with choosen column, then base currency will be used</description>
+                        <description>If no currency is found with choosen column, the base currency will be used</description>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>
@@ -1494,7 +1494,7 @@
                     <display_currency_column_position>
                         <label>Column Position</label>
                         <group>Rendering</group>
-                        <description>Indicate here the position of the column among all ones sharing the same field name. If given position does not exist or is empty, then the first corresponding column will be used</description>
+                        <description>Indicate here the position of the column among all ones sharing the same field name. If given position does not exist or is empty, the first corresponding column will be used</description>
                         <visible>1</visible>
                         <type>text</type>
                         <sort_order>80</sort_order>
@@ -1589,7 +1589,7 @@
                     <filter_mode_shortcut>
                         <label>Enable Filter Mode Shortcut</label>
                         <group>Filtering</group>
-                        <description><![CDATA[Allows to specify the filter mode directly in the filter field, by placing the corresponding code between square brackets at the beginning of the searched value.<br />Eg, use "<strong>[el]</strong>Example" to search for "Example" using "LIKE (exact)".<br />If no filter mode is indicated in the field, then the value of "Filter Mode" will be used by default"]]></description>
+                        <description><![CDATA[Allows to specify the filter mode directly in the filter field, by placing the corresponding code between square brackets at the beginning of the searched value.<br />Eg, use "<strong>[el]</strong>Example" to search for "Example" using "LIKE (exact)".<br />If no filter mode is indicated in the field, the value of "Filter Mode" will be used by default"]]></description>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
@@ -1628,7 +1628,7 @@
                     <negative_filter_shortcut>
                         <label>Enable Negative Filter Shortcut</label>
                         <group>Filtering</group>
-                        <description><![CDATA[Allows to trigger negative filter directly from the filter field, by placing the character "<strong>!</strong>" between square brackets at the beginning of the searched value (eg: "<strong>[!]</strong>Example").<br />If the code of a filter mode is already present in the value, then place the character "<strong>!</strong>" in front of it (eg: "<strong>[!el]</strong>Example")]]></description>
+                        <description><![CDATA[Allows to trigger negative filter directly from the filter field, by placing the character "<strong>!</strong>" between square brackets at the beginning of the searched value (eg: "<strong>[!]</strong>Example").<br />If the code of a filter mode is already present in the value, place the character "<strong>!</strong>" in front of it (eg: "<strong>[!el]</strong>Example")]]></description>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>

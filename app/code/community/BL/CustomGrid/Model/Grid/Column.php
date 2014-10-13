@@ -13,15 +13,14 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_Grid_Column
-    extends BL_CustomGrid_Object
+class BL_CustomGrid_Model_Grid_Column extends BL_CustomGrid_Object
 {
     public function getId()
     {
         return $this->_getData('column_id');
     }
     
-    public function getGridModel($graceful=false)
+    public function getGridModel($graceful = false)
     {
         if (($gridModel = $this->_getData('grid_model')) instanceof BL_CustomGrid_Model_Grid) {
             return $gridModel;
@@ -56,7 +55,7 @@ class BL_CustomGrid_Model_Grid_Column
         return ($this->_getData('edit_config') instanceof BL_CustomGrid_Object);
     }
     
-    public function getCustomColumnModel($graceful=true)
+    public function getCustomColumnModel($graceful = true)
     {
         $customColumn = null;
         

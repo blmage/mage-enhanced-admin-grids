@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Column_Renderer_CollectionController
-    extends BL_CustomGrid_Controller_Grid_Action
+class BL_CustomGrid_Column_Renderer_CollectionController extends BL_CustomGrid_Controller_Grid_Action
 {
     protected function _initRenderer()
     {
@@ -35,7 +34,7 @@ class BL_CustomGrid_Column_Renderer_CollectionController
     
     public function indexAction()
     {
-        if ($renderer = $this->_initRenderer()) {
+        if ($this->_initRenderer()) {
             $this->loadLayout('blcg_empty');
             
             if ($configBlock = $this->getLayout()->getBlock('blcg.column_renderer.collection.config')) {

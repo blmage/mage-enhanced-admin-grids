@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_Grid_Type_Config
-    extends BL_CustomGrid_Model_Config_Abstract
+class BL_CustomGrid_Model_Grid_Type_Config extends BL_CustomGrid_Model_Config_Abstract
 {
     public function getConfigType()
     {
@@ -96,9 +95,10 @@ class BL_CustomGrid_Model_Grid_Type_Config
         return $params;
     }
     
-    protected function _loadXmlElementConfigWindow(Varien_Simplexml_Element $xmlElement,
-        Mage_Core_Helper_Abstract $helper)
-    {
+    protected function _loadXmlElementConfigWindow(
+        Varien_Simplexml_Element $xmlElement,
+        Mage_Core_Helper_Abstract $helper
+    ) {
         $configWindow = $xmlElement->asCanonicalArray();
         
         if (isset($configWindow['width'])) {
@@ -254,15 +254,18 @@ class BL_CustomGrid_Model_Grid_Type_Config
         return array();
     }
     
-    public function getTypesAsOptionHash($sorted=false)
+    public function getTypesAsOptionHash($sorted = false, $withEmpty = false)
     {
         $types = array();
         
-        foreach ($this->getElementsArray() as $code => $type) {
+        foreach ($this->getElementsArray() as $type) {
             $types[$type->getCode()] = $type->getName();
         }
         if ($sorted) {
             uasort($types, 'strcmp');
+        }
+        if ($withEmpty) {
+            $types = array('' => Mage::helper('customgrid')->__('None')) + $types;
         }
         
         return $types;

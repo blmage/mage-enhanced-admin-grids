@@ -13,14 +13,17 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_Column_Renderer_Collection_Price
-    extends BL_CustomGrid_Model_Column_Renderer_Collection_Abstract
+class BL_CustomGrid_Model_Column_Renderer_Collection_Price extends
+    BL_CustomGrid_Model_Column_Renderer_Collection_Abstract
 {
     const CURRENCY_TYPE_BASE   = 'base_currency';
     const CURRENCY_TYPE_COLUMN = 'column_currency';
     
-    protected function _getCurrencyValues($baseCode, Mage_Core_Model_Store $store, BL_CustomGrid_Model_Grid $gridModel)
-    {
+    protected function _getCurrencyValues(
+        $baseCode,
+        Mage_Core_Model_Store $store,
+        BL_CustomGrid_Model_Grid $gridModel
+    ) {
         $isFixedCurrency = true;
         
         if (($currency = $this->getData('values/' . $baseCode . '_currency')) == self::CURRENCY_TYPE_BASE) {
@@ -62,9 +65,11 @@ class BL_CustomGrid_Model_Column_Renderer_Collection_Price
         return array($key => $currency);
     }
     
-    public function getColumnBlockValues($columnIndex, Mage_Core_Model_Store $store,
-        BL_CustomGrid_Model_Grid $gridModel)
-    {
+    public function getColumnBlockValues(
+        $columnIndex,
+        Mage_Core_Model_Store $store,
+        BL_CustomGrid_Model_Grid $gridModel
+    ) {
         $values = array(
             'filter'   => 'customgrid/widget_grid_column_filter_price',
             'renderer' => 'customgrid/widget_grid_column_renderer_price',
@@ -72,7 +77,7 @@ class BL_CustomGrid_Model_Column_Renderer_Collection_Price
         );
         
         $values += $this->_getCurrencyValues('original', $store, $gridModel);
-        $values += $this->_getCurrencyValues('display',  $store, $gridModel);
+        $values += $this->_getCurrencyValues('display', $store, $gridModel);
         $values += array('apply_rates' => (bool) $this->getData('values/apply_rates'));
         
         return $values;

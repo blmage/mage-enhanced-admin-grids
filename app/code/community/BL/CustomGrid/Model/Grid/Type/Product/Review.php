@@ -13,18 +13,15 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_Grid_Type_Product_Review
-    extends BL_CustomGrid_Model_Grid_Type_Abstract
+class BL_CustomGrid_Model_Grid_Type_Product_Review extends BL_CustomGrid_Model_Grid_Type_Abstract
 {
     protected function _getSupportedBlockTypes()
     {
-        // @todo also apply this to the corresponding product edit tab
         return 'adminhtml/review_grid';
     }
     
     public function canExport($blockType)
     {
-        // @todo implement this for the supported block types
         return !$this->isSupportedBlockType($blockType);
     }
     
@@ -68,7 +65,7 @@ class BL_CustomGrid_Model_Grid_Type_Product_Review
     {
         $params = array();
         
-         if (Mage::registry('use_pending_filter') === true) {
+        if (Mage::registry('use_pending_filter') === true) {
             $params['use_pending_filter'] = 1;
         }
         
@@ -85,9 +82,13 @@ class BL_CustomGrid_Model_Grid_Type_Product_Review
         return Mage::getModel('review/review')->load($entityId);
     }
     
-    protected function _isEditedEntityLoaded($blockType, BL_CustomGrid_Object $config, array $params, $entity,
-        $entityId)
-    {
+    protected function _isEditedEntityLoaded(
+        $blockType,
+        BL_CustomGrid_Object $config,
+        array $params,
+        $entity,
+        $entityId
+    ) {
         if (parent::_isEditedEntityLoaded($blockType, $config, $params, $entity, $entityId)) {
             $usePendingFilter = (isset($params['additional']) && isset($params['additional']['use_pending_filter']));
             return ($entity->getStatus() == $entity->getPendingStatus() ? $usePendingFilter : !$usePendingFilter);
@@ -100,9 +101,12 @@ class BL_CustomGrid_Model_Grid_Type_Product_Review
         return $entity->getTitle();
     }
     
-    public function checkUserEditPermissions($blockType, BL_CustomGrid_Model_Grid $gridModel,
-        Mage_Adminhtml_Block_Widget_Grid $gridBlock=null, array $params=array())
-    {
+    public function checkUserEditPermissions(
+        $blockType,
+        BL_CustomGrid_Model_Grid $gridModel,
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock = null,
+        array $params = array()
+    ) {
         if (parent::checkUserEditPermissions($blockType, $gridModel, $gridBlock, $params)) {
             if ((Mage::registry('use_pending_filter') === true)
                 || (isset($params['additional']) && isset($params['additional']['use_pending_filter']))) {

@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_Grid_Type_Poll
-    extends BL_CustomGrid_Model_Grid_Type_Abstract
+class BL_CustomGrid_Model_Grid_Type_Poll extends BL_CustomGrid_Model_Grid_Type_Abstract
 {
     protected function _getSupportedBlockTypes()
     {
@@ -84,7 +83,4 @@ class BL_CustomGrid_Model_Grid_Type_Poll
     {
         return 'cms/poll';
     }
-    
-    // @todo check store assignation when single-store mode (hidden store_ids by default)
-    // @todo make a known-to-work-with table with grid types and single-store / multiple-store modes + Magento versions
 }

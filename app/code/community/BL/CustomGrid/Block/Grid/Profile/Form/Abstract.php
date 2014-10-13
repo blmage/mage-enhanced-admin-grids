@@ -13,33 +13,16 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-abstract class BL_CustomGrid_Block_Grid_Profile_Form_Abstract
-    extends Mage_Adminhtml_Block_Widget_Form
+abstract class BL_CustomGrid_Block_Grid_Profile_Form_Abstract extends BL_CustomGrid_Block_Grid_Form_Abstract
 {
-    abstract protected function _getFormType();
-    abstract protected function _addFormFields(Varien_Data_Form $form);
-    
-    protected function _prepareForm()
+    public function getFormId()
     {
-        $form = new Varien_Data_Form(array('id' => 'blcg_grid_profile_form'));
-        $form->setHtmlIdPrefix($this->_getFormHtmlIdPrefix());
-        $this->_addFormFields($form);
-        $form->setUseContainer(true);
-        $this->setForm($form);
-        return parent::_prepareForm();
+        return 'blcg_grid_profile_form';
     }
     
-    protected function _getFormHtmlIdPrefix()
+    protected function _getFormType()
     {
-        return 'blcg_grid_profile_form'
-            . '_' . $this->_getFormType()
-            . '_' . $this->getGridModel()->getId()
-            . '_' . $this->getGridModel()->getProfileId();
-    }
-    
-    public function getGridModel()
-    {
-        return Mage::registry('blcg_grid');
+        return $this->getActionCode();
     }
     
     public function getGridProfile()

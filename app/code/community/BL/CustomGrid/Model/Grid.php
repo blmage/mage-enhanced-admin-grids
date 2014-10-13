@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_Grid
-    extends Mage_Core_Model_Abstract
+class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
 {
     /**
      * Session keys
@@ -101,6 +100,7 @@ class BL_CustomGrid_Model_Grid
     const ACTION_USE_DEFAULT_PARAMS                 = 'use_default';
     const ACTION_EXPORT_RESULTS                     = 'export';
     const ACTION_ENABLE_DISABLE                     = 'enable_disable';
+    const ACTION_EDIT_FORCED_TYPE                   = 'edit_forced_type';
     const ACTION_EDIT_CUSTOMIZATION_PARAMS          = 'edit_customization_params';
     const ACTION_EDIT_DEFAULT_PARAMS_BEHAVIOURS     = 'edit_default_params_behaviours';
     const ACTION_EDIT_ROLES_PERMISSIONS             = 'edit_roles_permissions';
@@ -146,6 +146,7 @@ class BL_CustomGrid_Model_Grid
         self::ACTION_CHOOSE_EDITABLE_COLUMNS            => 'customgrid/editor/choose_columns',
         self::ACTION_EDIT_COLUMNS_VALUES                => 'customgrid/editor/edit_columns',
         self::ACTION_ENABLE_DISABLE                     => 'customgrid/administration/enable_disable',
+        self::ACTION_EDIT_FORCED_TYPE                   => 'customgrid/administration/edit_forced_type',
         self::ACTION_EDIT_CUSTOMIZATION_PARAMS          => 'customgrid/administration/edit_customization_params',
         self::ACTION_EDIT_DEFAULT_PARAMS_BEHAVIOURS     => 'customgrid/administration/edit_default_params_behaviours',
         self::ACTION_EDIT_ROLES_PERMISSIONS             => 'customgrid/administration/edit_roles_permissions',
@@ -186,7 +187,7 @@ class BL_CustomGrid_Model_Grid
      *
      * @var array
      */
-    static protected $_stashableProfileKeys = array(
+    static protected $_stashedProfileKeys = array(
         'default_page',
         'default_limit',
         'default_sort',
@@ -206,7 +207,7 @@ class BL_CustomGrid_Model_Grid
      * 
      * @param string|null $message Custom exception message
      */
-    protected function _throwPermissionException($message=null)
+    protected function _throwPermissionException($message = null)
     {
         $message = (is_null($message) ? $this->_getHelper()->__('You are not allowed to use this action') : $message);
         throw new BL_CustomGrid_Grid_Permission_Exception($message); 
@@ -304,7 +305,7 @@ class BL_CustomGrid_Model_Grid
      */
     protected function _resetTypeValues()
     {
-        return $this->_resetKeys(array('type', 'type_model'));
+        return $this->_resetKeys(array('type_code', 'type_model'));
     }
     
     /**
@@ -380,7 +381,7 @@ class BL_CustomGrid_Model_Grid
      * @param mixed $field
      * @return this
      */
-    protected function _beforeLoad($id, $field=null)
+    protected function _beforeLoad($id, $field = null)
     {
         $this->setData(array());
         return parent::_beforeLoad($id, $field);
@@ -429,7 +430,7 @@ class BL_CustomGrid_Model_Grid
      */
     protected function _beforeDelete()
     {
-        return !$this->checkUserActionPermission(self::ACTION_DELETE)
+        return !$this->checkUserPermissions(self::ACTION_DELETE)
             ? $this->_throwPermissionException()
             : parent::_beforeDelete();
     }
@@ -444,7 +445,7 @@ class BL_CustomGrid_Model_Grid
      */
     protected function _getData($key)
     {
-        if (in_array($key, $this->getStashableProfileKeys())) {
+        if (in_array($key, $this->getStashedProfileKeys())) {
             // Ensures the current profile is loaded if it can possibly "override" the requested value
             $this->getProfileId();
         }
@@ -460,9 +461,9 @@ class BL_CustomGrid_Model_Grid
      * @param string|int $index Value index
      * @return mixed
      */
-    public function getData($key='', $index=null)
+    public function getData($key = '', $index = null)
     {
-        if (in_array($key, $this->getStashableProfileKeys())) {
+        if (in_array($key, $this->getStashedProfileKeys())) {
             // Ensures the current profile is loaded if it can possibly "override" the requested value
             $this->getProfileId();
         }
@@ -493,7 +494,7 @@ class BL_CustomGrid_Model_Grid
      */
     public function setDisabled($disabled)
     {
-        return !$this->checkUserActionPermission(self::ACTION_ENABLE_DISABLE)
+        return !$this->checkUserPermissions(self::ACTION_ENABLE_DISABLE)
             ? $this->_throwPermissionException()
             : $this->setData('disabled', (bool) $disabled);
     }
@@ -505,7 +506,7 @@ class BL_CustomGrid_Model_Grid
      */
     protected function _stashBaseProfileValues()
     {
-        foreach (self::$_stashableProfileKeys as $key) {
+        foreach (self::$_stashedProfileKeys as $key) {
             $this->setData('base_' . $key, (isset($this->_data[$key]) ? $this->_data[$key] : null));
         }
         return $this;
@@ -520,7 +521,7 @@ class BL_CustomGrid_Model_Grid
     {
         $values = array();
         
-        foreach (self::$_stashableProfileKeys as $key) {
+        foreach (self::$_stashedProfileKeys as $key) {
             $values[$key] = $this->getData('base_' . $key);
         }
         
@@ -539,13 +540,13 @@ class BL_CustomGrid_Model_Grid
     }
     
     /**
-     * Return stashable profile keys
+     * Return the profiles data keys that should be stashed
      *
      * @return array
      */
-    public function getStashableProfileKeys()
+    public function getStashedProfileKeys()
     {
-        return self::$_stashableProfileKeys;
+        return self::$_stashedProfileKeys;
     }
     
     /**
@@ -655,7 +656,6 @@ class BL_CustomGrid_Model_Grid
                 
                 if (($forcedTypeCode = $this->_getData('forced_type_code'))
                     && isset($typeModels[$forcedTypeCode])) {
-                    // @todo little note somewhere about potential risks (also, when juggling with types)
                     $this->setData('type_model', $typeModels[$forcedTypeCode]);
                 } 
             } else {
@@ -671,9 +671,39 @@ class BL_CustomGrid_Model_Grid
      * @param string $default Default value
      * @return mixed
      */
-    public function getTypeModelName($default='')
+    public function getTypeModelName($default = '')
     {
         return (($typeModel = $this->getTypeModel()) ? $typeModel->getName() : $default);
+    }
+    
+    /**
+     * Update the forced grid type
+     * 
+     * @param string $forcedTypeCode Code of the grid type to force
+     * @return this
+     */
+    public function updateForcedType($forcedTypeCode)
+    {
+        if (!$this->checkUserPermissions(self::ACTION_EDIT_FORCED_TYPE)) {
+            $this->_throwPermissionException();
+        }
+        
+        $helper = $this->_getHelper();
+        
+        if (!empty($forcedTypeCode)) {
+            $typeModels = Mage::getSingleton('customgrid/grid_type_config')->getTypesInstances();
+            
+            if (!isset($typeModels[$forcedTypeCode])) {
+                Mage::throwException($helper->__('The forced grid type does not exist'));
+            }
+        } else {
+            $forcedTypeCode = null;
+        }
+        
+        $this->_resetTypeValues();
+        $this->setForcedTypeCode($forcedTypeCode);
+        
+        return $this;
     }
     
     /**
@@ -769,9 +799,11 @@ class BL_CustomGrid_Model_Grid
      * @param BL_CustomGrid_Model_Grid_Profile $b Another profile
      * @return int
      */
-    protected function _sortProfiles($a, $b)
+    protected function _sortProfiles($profileA, $profileB)
     {
-        return ($a->isBase() ? -1 : ($b->isBase() ? 1 : strcasecmp($a->getName(), $b->getName())));
+        return $profileA->isBase()
+            ? -1
+            : ($profileB->isBase() ? 1 : strcasecmp($profileA->getName(), $profileB->getName()));
     }
     
     /**
@@ -782,7 +814,7 @@ class BL_CustomGrid_Model_Grid
      * @param bool $sorted Whether profiles should be sorted
      * @return array
      */
-    public function getProfiles($includeBase=false, $onlyAvailable=false, $sorted=false)
+    public function getProfiles($includeBase = false, $onlyAvailable = false, $sorted = false)
     {
         $profiles = $this->_getProfiles();
         
@@ -805,7 +837,7 @@ class BL_CustomGrid_Model_Grid
      * @param int|null $roleId Role ID (if null, the role of the current user will be used)
      * @return array
      */
-    public function getRoleAssignedProfilesIds($roleId=null)
+    public function getRoleAssignedProfilesIds($roleId = null)
     {
         $assignedProfilesIds = array();
         
@@ -826,12 +858,12 @@ class BL_CustomGrid_Model_Grid
      * @param bool $includeBase Whether the base profile ID should also be returned
      * @return array
      */
-    public function getAvailableProfilesIds($includeBase=false)
+    public function getAvailableProfilesIds($includeBase = false)
     {
         if (!$this->hasData('available_profiles_ids')) {
             $profiles = $this->_getProfiles();
             
-            if (!$this->checkUserActionPermission(self::ACTION_ACCESS_ALL_PROFILES)) {
+            if (!$this->checkUserPermissions(self::ACTION_ACCESS_ALL_PROFILES)) {
                 $assignedProfilesIds = $this->getRoleAssignedProfilesIds();
                 
                 foreach ($profiles as $key => $profile) {
@@ -873,7 +905,7 @@ class BL_CustomGrid_Model_Grid
      * @param bool $forced Whether the given profile ID is "forced" (ie, was not determined automatically)
      * @return this
      */
-    public function setProfileId($profileId, $temporary=false, $forced=true)
+    public function setProfileId($profileId, $temporary = false, $forced = true)
     {
         $profileId = (int) $profileId;
         $profiles  = $this->getProfiles(true, true);
@@ -889,7 +921,7 @@ class BL_CustomGrid_Model_Grid
         if ($profileId !== $this->getBaseProfileId()) {
             $this->addData(array_intersect_key(
                 $profiles[$profileId]->getData(),
-                array_flip(self::$_stashableProfileKeys)
+                array_flip(self::$_stashedProfileKeys)
             ));
         }
         if (!$temporary) {
@@ -906,9 +938,6 @@ class BL_CustomGrid_Model_Grid
                      * Doing so (and removing parameters from the URL - what is done by the JS part of the extension)
                      * ensures that the new profile's default parameters will be used
                      */
-                    // @todo we could save those values and restore them if the previous profile gets used again later
-                    // @todo knowing that this could be a togglable option at global and grid level
-                    
                     foreach ($this->getBlockVarNames() as $varName) {
                         if ($sessionKey = $this->getBlockParamSessionKey($varName)) {
                             $session->unsetData($sessionKey);
@@ -959,7 +988,7 @@ class BL_CustomGrid_Model_Grid
      * @param int|null $userId User ID (if null, the current user will be used)
      * @return int|null
      */
-    public function getUserDefaultProfileId($userId=null)
+    public function getUserDefaultProfileId($userId = null)
     {
         $defaultProfileId = null;
         
@@ -980,7 +1009,7 @@ class BL_CustomGrid_Model_Grid
      * @param int|null $roleId Role ID (if null, the role of the current user will be used)
      * @return int|null
      */
-    public function getRoleDefaultProfileId($roleId=null)
+    public function getRoleDefaultProfileId($roleId = null)
     {
         $defaultProfileId = null;
         
@@ -1075,7 +1104,7 @@ class BL_CustomGrid_Model_Grid
      * @param int|null $profileId Profile ID (if null, the current profile will be returned)
      * @return array
      */
-    public function getProfile($profileId=null)
+    public function getProfile($profileId = null)
     {
         $profiles = $this->getProfiles(true, true);
         
@@ -1127,7 +1156,7 @@ class BL_CustomGrid_Model_Grid
         $assignValues = array_intersect_key($defaults, array_flip($assignKeys));
         
         if (!empty($assignValues)) {
-            if (!$this->checkUserActionPermission(self::ACTION_ASSIGN_PROFILES)) {
+            if (!$this->checkUserPermissions(self::ACTION_ASSIGN_PROFILES)) {
                 $this->_throwPermissionException();
             }
             if (isset($assignValues['restricted'])) {
@@ -1141,6 +1170,91 @@ class BL_CustomGrid_Model_Grid
         }
         
         return $this;
+    }
+    
+    /**
+     * Check, complete and return the given array of user IDs for which a profile will be set as default
+     *
+     * @param array $users User IDs
+     * @return array
+     */
+    protected function _getProfileDefaultForUsers(array $users)
+    {
+        $defaultForUsers = array();
+        $users = array_filter($users);
+        $ownUserId = $this->getSessionUser()->getId();
+        $ownChosen = in_array($ownUserId, $users);
+        $otherChosenIds = array_diff($users, array($ownUserId));
+            
+        if ($this->checkUserPermissions(self::ACTION_CHOOSE_OWN_USER_DEFAULT_PROFILE)) {
+            if ($ownChosen) {
+                $defaultForUsers[] = $ownUserId;
+            }
+        } elseif ($ownChosen) {
+            $this->_throwPermissionException();
+        } elseif ($this->getUserDefaultProfileId() === $profileId) {
+            $defaultForUsers[] = $ownUserId;
+        }
+        
+        if ($this->checkUserPermissions(self::ACTION_CHOOSE_OTHER_USERS_DEFAULT_PROFILE)) {
+            $defaultForUsers = array_merge($defaultForUsers, $otherChosenIds);
+        } elseif (!empty($otherChosenIds)) {
+            $this->_throwPermissionException();
+        } else {
+            $usersIds = Mage::getModel('admin/user')
+                ->getCollection()
+                ->getAllIds();
+            
+            foreach ($usersIds as $userId) {
+                if (($userId != $ownUserId) && ($this->getUserDefaultProfileId($userId) === $profileId)) {
+                    $defaultForUsers[] = $userId;
+                }
+            }
+        }
+        
+        return $defaultForUsers;
+    }
+    
+    /**
+     * Check, complete and return the given array of role IDs for which a profile will be set as default
+     *
+     * @param array $roles Role IDs
+     * @return array
+     */
+    protected function _getProfileDefaultForRoles(array $roles)
+    {
+        $roles = array_filter($roles);
+        $defaultForRoles = array();
+        $ownRoleId = $this->getSessionRole()->getId();
+        $ownChosen = in_array($ownRoleId, $roles);
+        $otherChosenIds = array_diff($roles, array($ownRoleId));
+            
+        if ($this->checkUserPermissions(self::ACTION_CHOOSE_OWN_ROLE_DEFAULT_PROFILE)) {
+            if ($ownChosen) {
+                $defaultForRoles[] = $ownRoleId;
+            }
+        } elseif ($ownChosen) {
+            $this->_throwPermissionException();
+        } elseif ($this->getRoleDefaultProfileId() === $profileId) {
+            $defaultForRoles[] = $ownUserId;
+        }
+        if ($this->checkUserPermissions(self::ACTION_CHOOSE_OTHER_ROLES_DEFAULT_PROFILE)) {
+            $defaultForRoles = array_merge($defaultForRoles, $otherChosenIds);
+        } elseif (!empty($otherChosenIds)) {
+            $this->_throwPermissionException();
+        } else {
+            $rolesIds = Mage::getModel('admin/roles')
+                ->getCollection()
+                ->getAllIds();
+            
+            foreach ($rolesIds as $roleId) {
+                if (($roleId != $ownRoleId) && ($this->getRoleDefaultProfileId($roleId) === $profileId)) {
+                    $defaultForRoles[] = $roleId;
+                }
+            }
+        }
+        
+        return $defaultForRoles;
     }
     
     /**
@@ -1160,77 +1274,14 @@ class BL_CustomGrid_Model_Grid
         if (!isset($profiles[$profileId])) {
             Mage::throwException($helper->__('This profile is not available'));
         }
-        
         if (isset($values['users']) && is_array($values['users'])) {
-            $values['users'] = array_filter($values['users']);
-            $defaultFor['users'] = array();
-            $ownUserId = $this->getSessionUser()->getId();
-            $ownChosen = in_array($ownUserId, $values['users']);
-            $otherChosenIds = array_diff($values['users'], array($ownUserId));
-            
-            if ($this->checkUserActionPermission(self::ACTION_CHOOSE_OWN_USER_DEFAULT_PROFILE)) {
-                if ($ownChosen) {
-                    $defaultFor['users'][] = $ownUserId;
-                }
-            } elseif ($ownChosen) {
-                $this->_throwPermissionException();
-            } elseif ($this->getUserDefaultProfileId() === $profileId) {
-                $defaultFor['users'][] = $ownUserId;
-            }
-            
-            if ($this->checkUserActionPermission(self::ACTION_CHOOSE_OTHER_USERS_DEFAULT_PROFILE)) {
-                $defaultFor['users'] = array_merge($defaultFor['users'], $otherChosenIds);
-            } elseif (!empty($otherChosenIds)) {
-                $this->_throwPermissionException();
-            } else {
-                $usersIds = Mage::getModel('admin/user')
-                    ->getCollection()
-                    ->getAllIds();
-                
-                foreach ($usersIds as $userId) {
-                    if (($userId != $ownUserId)
-                        && ($this->getUserDefaultProfileId($userId) === $profileId)) {
-                        $defaultFor['users'][] = $userId;
-                    }
-                }
-            }
+            $defaultFor['users'] = $this->_getProfileDefaultForUsers($values['users']);
         }
         if (isset($values['roles']) && is_array($values['roles'])) {
-            $values['roles'] = array_filter($values['roles']);
-            $defaultFor['roles'] = array();
-            $ownRoleId = $this->getSessionRole()->getId();
-            $ownChosen = in_array($ownRoleId, $values['roles']);
-            $otherChosenIds = array_diff($values['roles'], array($ownRoleId));
-            
-            if ($this->checkUserActionPermission(self::ACTION_CHOOSE_OWN_ROLE_DEFAULT_PROFILE)) {
-                if ($ownChosen) {
-                    $defaultFor['roles'][] = $ownRoleId;
-                }
-            } elseif ($ownChosen) {
-                $this->_throwPermissionException();
-            } elseif ($this->getRoleDefaultProfileId() === $profileId) {
-                $defaultFor['roles'][] = $ownUserId;
-            }
-            
-            if ($this->checkUserActionPermission(self::ACTION_CHOOSE_OTHER_ROLES_DEFAULT_PROFILE)) {
-                $defaultFor['roles'] = array_merge($defaultFor['roles'], $otherChosenIds);
-            } elseif (!empty($otherChosenIds)) {
-                $this->_throwPermissionException();
-            } else {
-                $rolesIds = Mage::getModel('admin/roles')
-                    ->getCollection()
-                    ->getAllIds();
-                
-                foreach ($rolesIds as $roleId) {
-                    if (($roleId != $ownRoleId)
-                        && ($this->getRoleDefaultProfileId($roleId) === $profileId)) {
-                        $defaultFor['roles'][] = $roleId;
-                    }
-                }
-            }
+            $defaultFor['roles'] = $this->_getProfileDefaultForRoles($values['roles']);
         }
         if (isset($values['global'])) {
-            if ($this->checkUserActionPermission(self::ACTION_CHOOSE_GLOBAL_DEFAULT_PROFILE)) {
+            if ($this->checkUserPermissions(self::ACTION_CHOOSE_GLOBAL_DEFAULT_PROFILE)) {
                 $defaultFor['global'] = (bool) $values['global'];
             } else {
                 $this->_throwPermissionException();
@@ -1264,7 +1315,7 @@ class BL_CustomGrid_Model_Grid
         $helper = $this->_getHelper();
         $profiles = $this->getProfiles(true, true);
         
-        if (!$this->checkUserActionPermission(self::ACTION_COPY_PROFILES_TO_NEW)) {
+        if (!$this->checkUserPermissions(self::ACTION_COPY_PROFILES_TO_NEW)) {
             $this->_throwPermissionException();
         } elseif (!isset($profiles[$profileId])) {
             Mage::throwException($helper->__('The copied profile is not available'));
@@ -1281,7 +1332,7 @@ class BL_CustomGrid_Model_Grid
             }
         }
         
-        if ($this->checkUserActionPermission(self::ACTION_ASSIGN_PROFILES)) {
+        if ($this->checkUserPermissions(self::ACTION_ASSIGN_PROFILES)) {
             if ((isset($values['is_restricted']) && $values['is_restricted'])
                 && (isset($values['assigned_to']) && is_array($values['assigned_to']))) {
                 $assignedRolesIds = $values['assigned_to'];
@@ -1329,7 +1380,7 @@ class BL_CustomGrid_Model_Grid
         $helper = $this->_getHelper();
         $profiles = $this->getProfiles(true, true);
         
-        if (!$this->checkUserActionPermission(self::ACTION_COPY_PROFILES_TO_EXISTING)) {
+        if (!$this->checkUserPermissions(self::ACTION_COPY_PROFILES_TO_EXISTING)) {
             $this->_throwPermissionException();
         } elseif (!isset($profiles[$profileId])) {
             Mage::throwException($helper->__('The copied profile is not available'));
@@ -1357,7 +1408,7 @@ class BL_CustomGrid_Model_Grid
         $helper = $this->_getHelper();
         $profiles = $this->getProfiles(true, true);
         
-        if (!$this->checkUserActionPermission(self::ACTION_EDIT_PROFILES)) {
+        if (!$this->checkUserPermissions(self::ACTION_EDIT_PROFILES)) {
             $this->_throwPermissionException();
         } elseif (!isset($profiles[$profileId])) {
             Mage::throwException($helper->__('This profile is not available'));
@@ -1396,7 +1447,7 @@ class BL_CustomGrid_Model_Grid
         $helper = $this->_getHelper();
         $profiles = $this->getProfiles(true, true);
         
-        if (!$this->checkUserActionPermission(self::ACTION_ASSIGN_PROFILES)) {
+        if (!$this->checkUserPermissions(self::ACTION_ASSIGN_PROFILES)) {
             $this->_throwPermissionException();
         } elseif (!isset($profiles[$profileId])) {
             Mage::throwException($helper->__('This profile is not available'));
@@ -1434,7 +1485,7 @@ class BL_CustomGrid_Model_Grid
         $helper = $this->_getHelper();
         $profiles = $this->getProfiles(true, true);
         
-        if (!$this->checkUserActionPermission(self::ACTION_DELETE_PROFILES)) {
+        if (!$this->checkUserPermissions(self::ACTION_DELETE_PROFILES)) {
             $this->_throwPermissionException();
         } elseif (!isset($profiles[$profileId])) {
             Mage::throwException($helper->__('This profile is not available'));
@@ -1492,7 +1543,7 @@ class BL_CustomGrid_Model_Grid
      * @var int $newOrder If set, the new maximum order will only be computed from the current value and the given one
      * @return this
      */
-    protected function _recomputeColumnsMaxOrder($newOrder=null)
+    protected function _recomputeColumnsMaxOrder($newOrder = null)
     {
         if (is_null($newOrder)) {
             $maxOrder = ~PHP_INT_MAX;
@@ -1581,19 +1632,19 @@ class BL_CustomGrid_Model_Grid
      * Return all columns, possibly with some additional informations
      * 
      * @param bool $withEditConfigs Whether edit configs should be added to the corresponding columns
-     * @param bool $withCustomColumnModels Whether custom columns models should be added to the corresponding columns
+     * @param bool $withCustomColumns Whether custom columns models should be added to the corresponding columns
      * @return array
      */
-    public function getColumns($withEditConfigs=false, $withCustomColumnModels=false)
+    public function getColumns($withEditConfigs = false, $withCustomColumns = false)
     {
         $columns = $this->_getColumns();
         
-        if (($withEditConfigs || $withCustomColumnModels)
+        if (($withEditConfigs || $withCustomColumns)
             && ($typeModel = $this->getTypeModel())) {
             if ($withEditConfigs) {
                 $columns = $typeModel->applyEditConfigsToColumns($this->getBlockType(), $columns);
             }
-            if ($withCustomColumnModels) {
+            if ($withCustomColumns) {
                 $originIds = $this->getColumnIdsByOrigin();
                 $customColumns = $this->getAvailableCustomColumns(false, true);
                 
@@ -1611,13 +1662,15 @@ class BL_CustomGrid_Model_Grid
     /**
      * Columns sort callback
      *
-     * @param BL_CustomGrid_Model_Grid_Column $a One column
-     * @param BL_CustomGrid_Model_Grid_Column $b Another column
+     * @param BL_CustomGrid_Model_Grid_Column $columnA One column
+     * @param BL_CustomGrid_Model_Grid_Column $columnB Another column
      * @return int
      */
-    protected function _sortColumns(BL_CustomGrid_Model_Grid_Column $a, BL_CustomGrid_Model_Grid_Column $b)
-    {
-        return $a->compareOrderTo($b);
+    protected function _sortColumns(
+        BL_CustomGrid_Model_Grid_Column $columnA,
+        BL_CustomGrid_Model_Grid_Column $columnB
+    ) {
+        return $columnA->compareOrderTo($columnB);
     }
     
     /**
@@ -1629,15 +1682,21 @@ class BL_CustomGrid_Model_Grid
      * @param bool $includeCustom Whether custom columns should be returned
      * @param bool $onlyVisible Whether only visible columns should be returned
      * @param bool $withEditConfigs Whether edit configs should be added to the corresponding columns
-     * @param bool $withCustomColumnModels Whether custom columns models should be added to the corresponding columns
+     * @param bool $withCustomColumn Whether custom columns models should be added to the corresponding columns
      * @return array
      */
-    public function getSortedColumns($includeValid=true, $includeMissing=true, $includeAttribute=true,
-        $includeCustom=true, $onlyVisible=false, $withEditConfigs=false, $withCustomColumnModels=false)
-    {
+    public function getSortedColumns(
+        $includeValid = true,
+        $includeMissing = true,
+        $includeAttribute = true,
+        $includeCustom = true,
+        $onlyVisible = false,
+        $withEditConfigs = false,
+        $withCustomColumn = false
+    ) {
         $columns = array();
         
-        foreach ($this->getColumns($withEditConfigs, $withCustomColumnModels) as $columnBlockId => $column) {
+        foreach ($this->getColumns($withEditConfigs, $withCustomColumn) as $columnBlockId => $column) {
             if (($onlyVisible && !$column->isVisible())
                 || (!$includeMissing && $column->isMissing())
                 || (!$includeValid && !$column->isMissing())
@@ -1692,7 +1751,7 @@ class BL_CustomGrid_Model_Grid
      * @param int $position Column position (used for attribute and custom origins)
      * @return string|null
      */
-    public function getColumnIndexFromCode($code, $origin, $position=null)
+    public function getColumnIndexFromCode($code, $origin, $position = null)
     {
         $columns = $this->getColumns();
         $originIds = $this->getColumnIdsByOrigin();
@@ -1749,14 +1808,19 @@ class BL_CustomGrid_Model_Grid
      * @param bool $allowCustomizationParams Whether customization parameters are allowed
      * @return array
      */
-    protected function _extractColumnValues(array $column, $allowStore=false, $allowRenderer=false,
-        $requireRendererType=true, $allowEditable=false, $allowCustomizationParams=false)
-    {
+    protected function _extractColumnValues(
+        array $column,
+        $allowStore = false,
+        $allowRenderer = false,
+        $requireRendererType = true,
+        $allowEditable = false,
+        $allowCustomizationParams = false
+    ) {
         $values = array();
         
         if ($values['is_visible'] = (isset($column['is_visible']) && $column['is_visible'])) {
             $values['is_only_filterable'] = (isset($column['filter_only']) && $column['filter_only']);
-        }  else {
+        } else {
             $values['is_only_filterable'] = false;
         }
         if (isset($column['align']) && array_key_exists($column['align'], $this->getColumnAlignments())) {
@@ -1778,13 +1842,13 @@ class BL_CustomGrid_Model_Grid
         }
         if ($allowRenderer
             && (!$requireRendererType || (isset($column['renderer_type']) && ($column['renderer_type'] !== '')))) {
-             $values['renderer_type'] = ($requireRendererType ? $column['renderer_type'] : null);
-             
-             if (isset($column['renderer_params']) && ($column['renderer_params'] !== '')) {
-                 $values['renderer_params'] = $column['renderer_params'];
-             } else {
-                 $values['renderer_params'] = null;
-             }
+            $values['renderer_type'] = ($requireRendererType ? $column['renderer_type'] : null);
+            
+            if (isset($column['renderer_params']) && ($column['renderer_params'] !== '')) {
+                $values['renderer_params'] = $column['renderer_params'];
+            } else {
+                $values['renderer_params'] = null;
+            }
         } else {
             $values['renderer_type'] = null;
             $values['renderer_params'] = null;
@@ -1810,13 +1874,13 @@ class BL_CustomGrid_Model_Grid
      */
     public function updateColumns(array $columns)
     {
-        if (!$this->checkUserActionPermission(self::ACTION_CUSTOMIZE_COLUMNS)) {
+        if (!$this->checkUserPermissions(self::ACTION_CUSTOMIZE_COLUMNS)) {
             $this->_throwPermissionException();
         }
         
         $this->getColumns(true);
         $this->getColumnIdsByOrigin();
-        $allowEditable = $this->checkUserActionPermission(self::ACTION_CHOOSE_EDITABLE_COLUMNS);
+        $allowEditable = $this->checkUserPermissions(self::ACTION_CHOOSE_EDITABLE_COLUMNS);
         $availableAttributeCodes = $this->getAvailableAttributesCodes();
         
         // Update existing columns
@@ -1918,7 +1982,7 @@ class BL_CustomGrid_Model_Grid
      * @param bool $withEditableFlags Whether editable flag should be added to the attributes
      * @return array
      */
-    public function getAvailableAttributes($withRendererCodes=false, $withEditableFlags=false)
+    public function getAvailableAttributes($withRendererCodes = false, $withEditableFlags = false)
     {
         $attributes = array();
         
@@ -2005,7 +2069,7 @@ class BL_CustomGrid_Model_Grid
      * @param string $typeCode Grid type code
      * @return this
      */
-    protected function _addTypeToCustomColumnCode(&$code, $typeCode=null)
+    protected function _addTypeToCustomColumnCode(&$code, $typeCode = null)
     {
         if (strpos($code, '/') === false) {
             if (is_null($typeCode)) {
@@ -2026,7 +2090,7 @@ class BL_CustomGrid_Model_Grid
      * @param bool $includeTypeCode Whether column codes should include the grid type code
      * @return array
      */
-    public function getUsedCustomColumnsCodes($includeTypeCode=false)
+    public function getUsedCustomColumnsCodes($includeTypeCode = false)
     {
         if ($typeModel = $this->getTypeModel()) {
             $typeCode = $typeModel->getCode();
@@ -2059,7 +2123,7 @@ class BL_CustomGrid_Model_Grid
      * @param bool $includeTypeCode Whether column codes should include the grid type code
      * @return array
      */
-    public function getAvailableCustomColumns($grouped=false, $includeTypeCode=false)
+    public function getAvailableCustomColumns($grouped = false, $includeTypeCode = false)
     {
         $availableColumns = array();
         
@@ -2101,7 +2165,7 @@ class BL_CustomGrid_Model_Grid
      * @param bool $includeTypeCode Whether column codes should include the grid type code
      * @return array
      */
-    public function getAvailableCustomColumnsCodes($includeTypeCode=false)
+    public function getAvailableCustomColumnsCodes($includeTypeCode = false)
     {
         return array_keys($this->getAvailableCustomColumns(false, $includeTypeCode));
     }
@@ -2112,7 +2176,7 @@ class BL_CustomGrid_Model_Grid
      * @param bool $onlyUsed Whether only groups which contain available custom columns should be returned
      * @return array
      */
-    public function getCustomColumnsGroups($onlyUsed=true)
+    public function getCustomColumnsGroups($onlyUsed = true)
     {
         $groups = array();
         
@@ -2158,7 +2222,7 @@ class BL_CustomGrid_Model_Grid
      */
     public function updateCustomColumns(array $columnsCodes)
     {
-        if (!$this->checkUserActionPermission(self::ACTION_CUSTOMIZE_COLUMNS)) {
+        if (!$this->checkUserPermissions(self::ACTION_CUSTOMIZE_COLUMNS)) {
             $this->_throwPermissionException();
         }
         
@@ -2267,7 +2331,6 @@ class BL_CustomGrid_Model_Grid
         
         if (($typeModel = $this->getTypeModel())
             && (($column = $this->getColumnByBlockId($columnBlockId)) && $column->isCollection())) {
-            // @todo rewriting class name should be given more importance
             $values = $typeModel->getColumnLockedValues($this->getBlockType(), $columnBlockId);
         }
         
@@ -2367,6 +2430,7 @@ class BL_CustomGrid_Model_Grid
     {
         // Reset / Initialization
         $this->setBlockId($gridBlock->getId());
+        $this->setHasVaryingBlockId(Mage::helper('customgrid/grid')->isVaryingGridBlockId($gridBlock->getId()));
         $this->setBlockType($gridBlock->getType());
         $this->_resetColumnsValues();
         $this->getColumnIdsByOrigin();
@@ -2556,14 +2620,6 @@ class BL_CustomGrid_Model_Grid
     }
     
     /**
-     * @todo 
-     * Turn _exportFile() into public exportFile()
-     * Remove all explicit calls such as export[Format]File() from here and custom grid controller (make it give format)
-     * Do export in grid type model, so new export types could "simply" be added
-     * Add CSV / XML export to abstract grid type model
-     */
-    
-    /**
      * Return whether current request corresponds to an export request for the active grid
      *
      * @param Mage_Core_Controller_Request_Http $request Request object
@@ -2581,9 +2637,9 @@ class BL_CustomGrid_Model_Grid
      * @param array|null $config Export configuration
      * @return mixed
      */
-    protected function _exportFile($format, $config=null)
+    protected function _exportFile($format, $config = null)
     {
-        if (!$this->checkUserActionPermission(self::ACTION_EXPORT_RESULTS)) {
+        if (!$this->checkUserPermissions(self::ACTION_EXPORT_RESULTS)) {
             $this->_throwPermissionException();
         }
         if ($typeModel = $this->getTypeModel()) {
@@ -2625,7 +2681,7 @@ class BL_CustomGrid_Model_Grid
      * @param array|null $config Export configuration
      * @return mixed
      */
-    public function exportCsvFile($config=null)
+    public function exportCsvFile($config = null)
     {
         return $this->_exportFile('csv', $config);
     }
@@ -2636,7 +2692,7 @@ class BL_CustomGrid_Model_Grid
      * @param array|null $config Export configuration
      * @return mixed
      */
-    public function exportExcelFile($config=null)
+    public function exportExcelFile($config = null)
     {
         return $this->_exportFile('xml', $config);
     }
@@ -2682,7 +2738,7 @@ class BL_CustomGrid_Model_Grid
     {
         return ($typeModel = $this->getTypeModel())
             ? $typeModel->checkUserEditPermissions($this->getBlockType(), $this, $gridBlock)
-            : $this->checkUserActionPermission(self::ACTION_EDIT_COLUMNS_VALUES);
+            : $this->checkUserPermissions(self::ACTION_EDIT_COLUMNS_VALUES);
     }
     
     /**
@@ -2736,20 +2792,20 @@ class BL_CustomGrid_Model_Grid
     /**
      * Compare grid filter values
      *
-     * @param mixed $a One filter value
-     * @param mixed $b Another filter value
+     * @param mixed $valueA One filter value
+     * @param mixed $valueB Another filter value
      * @return bool Whether given values are equal
      */
-    public function compareGridFilterValues($a, $b)
+    public function compareGridFilterValues($valueA, $valueB)
     {
-        if (is_array($a) && is_array($b)) {
-            ksort($a);
-            ksort($b);
-            $a = $this->encodeGridFiltersArray($a);
-            $b = $this->encodeGridFiltersArray($b);
-            return ($a == $b);
+        if (is_array($valueA) && is_array($valueB)) {
+            ksort($valueA);
+            ksort($valueB);
+            $valueA = $this->encodeGridFiltersArray($valueA);
+            $valueB = $this->encodeGridFiltersArray($valueB);
+            return ($valueA == $valueB);
         }
-        return ($a === $b);
+        return ($valueA === $valueB);
     }
     
     /**
@@ -2768,7 +2824,7 @@ class BL_CustomGrid_Model_Grid
      * @param int|null $profileId ID of the profile under which the filters are applied
      * @return string
      */
-    protected function _getAppliedFiltersSessionKey($profileId=null)
+    protected function _getAppliedFiltersSessionKey($profileId = null)
     {
         if (is_null($profileId)) {
             $profileId = $this->getProfileId();
@@ -2782,7 +2838,7 @@ class BL_CustomGrid_Model_Grid
      * @param int|null $profileId ID of the profile under which the filters are removed
      * @return string
      */
-    protected function _getRemovedFiltersSessionKey($profileId=null)
+    protected function _getRemovedFiltersSessionKey($profileId = null)
     {
         if (is_null($profileId)) {
             $profileId = $this->getProfileId();
@@ -2970,10 +3026,10 @@ class BL_CustomGrid_Model_Grid
     }
     
     /**
-    * Return the value of "default_filter", stripped of all the obsolete or invalid values
-    * 
-    * @return null|array
-    */
+     * Return the value of "default_filter", stripped of all the obsolete or invalid values
+     * 
+     * @return null|array
+     */
     public function getAppliableDefaultFilter()
     {
         if (!$this->hasData('appliable_default_filter')) {
@@ -3039,13 +3095,6 @@ class BL_CustomGrid_Model_Grid
                         if ($isValidFilter) {
                             $appliableDefaultFilter[$columnBlockId] = $filter['value'];
                         }
-                        
-                        /*
-                        @todo (see method below) when it is consistent with the current behaviour chosen for default
-                        filters, use a flag telling that obsolete filters should be kept (and associated to false, eg),
-                        in order to at least remove the corresponding original ones when they exist, and then have no
-                        default value at all ? (instead of letting the original ones be used)
-                        */
                     }
                 }
             }
@@ -3065,19 +3114,21 @@ class BL_CustomGrid_Model_Grid
      * @param mixed $originalValue Current value (to be replaced)
      * @return mixed
      */
-    public function getGridBlockDefaultParamValue($type, $blockValue, $customValue=null, $fromCustomSetter=false,
-        $originalValue=null)
-    {
-        // @todo review this code (seems to be working correctly, but what should actually be the correct way ?)
-        // @todo in the meantime, greatly improve corresponding hints / descriptions, make it as intuitive as possible
+    public function getGridBlockDefaultParamValue(
+        $type,
+        $blockValue,
+        $customValue = null,
+        $fromCustomSetter = false,
+        $originalValue = null
+    ) {
         $value = $blockValue;
         
         if (!$fromCustomSetter) {
             if ($type == 'filter') {
                 $customValue = $this->getAppliableDefaultFilter();
-           } else {
-               $customValue = $this->getData('default_' . $type);
-           }
+            } else {
+                $customValue = $this->getData('default_' . $type);
+            }
         }
         
         if (!$behaviour = $this->_getData('default_' . $type . '_behaviour')) {
@@ -3182,7 +3233,7 @@ class BL_CustomGrid_Model_Grid
      */
     public function updateDefaultParameters(array $appliable, array $removable)
     {
-        if (!$this->checkUserActionPermission(self::ACTION_EDIT_DEFAULT_PARAMS)) {
+        if (!$this->checkUserPermissions(self::ACTION_EDIT_DEFAULT_PARAMS)) {
             $this->_throwPermissionException();
         }
         
@@ -3275,7 +3326,7 @@ class BL_CustomGrid_Model_Grid
      */
     public function updateDefaultParametersBehaviours(array $behaviours)
     {
-        if (!$this->checkUserActionPermission(self::ACTION_EDIT_DEFAULT_PARAMS_BEHAVIOURS)) {
+        if (!$this->checkUserPermissions(self::ACTION_EDIT_DEFAULT_PARAMS_BEHAVIOURS)) {
             $this->_throwPermissionException();
         }
         
@@ -3286,11 +3337,13 @@ class BL_CustomGrid_Model_Grid
             'dir'    => false,
             'filter' => true,
         );
+        
         $scalarValues = array(
             self::DEFAULT_PARAM_DEFAULT,
             self::DEFAULT_PARAM_FORCE_CUSTOM,
             self::DEFAULT_PARAM_FORCE_ORIGINAL,
         );
+        
         $arrayValues = array(
             self::DEFAULT_PARAM_MERGE_DEFAULT,
             self::DEFAULT_PARAM_MERGE_BASE_CUSTOM,
@@ -3361,7 +3414,7 @@ class BL_CustomGrid_Model_Grid
      * @param int|null $userId User ID on which to filter, if not set the whole users config will be returned
      * @return array
      */
-    public function getUsersConfig($userId=null)
+    public function getUsersConfig($userId = null)
     {
         $usersConfig = $this->_getUsersConfig();
         return !is_null($userId)
@@ -3380,7 +3433,7 @@ class BL_CustomGrid_Model_Grid
         $this->_resetRolesConfigValues();
         
         foreach ($rolesConfig as $key => $roleConfig) {
-             if (is_array($roleConfig)) {
+            if (is_array($roleConfig)) {
                 $roleConfig = new BL_CustomGrid_Object($roleConfig);
                 $rolesConfig[$key] = $roleConfig;
             }
@@ -3428,7 +3481,7 @@ class BL_CustomGrid_Model_Grid
      * @param int $roleId Role ID on which to filter, if not set the whole roles config will be returned
      * @return mixed
      */
-    public function getRolesConfig($roleId=null)
+    public function getRolesConfig($roleId = null)
     {
         $rolesConfig = $this->_getRolesConfig();
         return !is_null($roleId)
@@ -3443,7 +3496,7 @@ class BL_CustomGrid_Model_Grid
      * @param mixed $default Default value to return if there is no permissions for the given role ID
      * @return mixed
      */
-    public function getRolePermissions($roleId, $default=array())
+    public function getRolePermissions($roleId, $default = array())
     {
         return ($roleConfig = $this->getRolesConfig($roleId))
             ? $roleConfig->getDataSetDefault('permissions', array())
@@ -3458,7 +3511,7 @@ class BL_CustomGrid_Model_Grid
      */
     public function updateRolesPermissions(array $permissions)
     {
-        if (!$this->checkUserActionPermission(self::ACTION_EDIT_ROLES_PERMISSIONS)) {
+        if (!$this->checkUserPermissions(self::ACTION_EDIT_ROLES_PERMISSIONS)) {
             $this->_throwPermissionException();
         }
         
@@ -3499,14 +3552,16 @@ class BL_CustomGrid_Model_Grid
     }
     
     /**
-     * Check if the current user has the required permission for the given action
+     * Check if the current user has the required permissions for any of or all the given actions
      *
-     * @param string $action Action code
-     * @param bool|null $aclPermission Corresponding ACL permission value
+     * @param string|array $actions Actions codes
+     * @param bool|array|null $aclPermissions Corresponding ACL permissions values
+     * @param bool $any Whether the user should have any of the given permissions, otherwise all
      * @return bool
      */
-    public function checkUserActionPermission($action, $aclPermission=null)
+    public function checkUserPermissions($actions, $aclPermissions = null, $any = true)
     {
+        $any = (bool) $any;
         $session = $this->_getAdminSession();
         
         if (($user = $session->getUser()) && ($role = $user->getRole())) {
@@ -3515,21 +3570,47 @@ class BL_CustomGrid_Model_Grid
             return false;
         }
         
-        if (is_array($permissions = $this->getRolePermissions($roleId, false))) {
-            $permission = (isset($permissions[$action]) ? $permissions[$action] : self::ACTION_PERMISSION_USE_CONFIG);
-        } else {
-            $permission = self::ACTION_PERMISSION_USE_CONFIG;
+        if (!is_array($actions)) {
+            if (!is_null($aclPermissions) && !is_array($aclPermissions)) {
+                $aclPermissions = array($actions => $aclPermissions);
+            }
+            $actions = array($actions);
         }
         
-        if ($permission === self::ACTION_PERMISSION_NO) {
-            return false;
-        } elseif ($permission === self::ACTION_PERMISSION_YES) {
-            return true;
+        $permissions = $this->getRolePermissions($roleId, false);
+        $result = true;
+        
+        foreach ($actions as $action) {
+            $actionPermission = (is_array($permissions) && isset($permissions[$action]))
+                ? $permissions[$action]
+                : self::ACTION_PERMISSION_USE_CONFIG;
+            
+            if ($actionPermission === self::ACTION_PERMISSION_NO) {
+                $result = false;
+            } elseif ($actionPermission === self::ACTION_PERMISSION_USE_CONFIG) {
+                $result = (!is_null($aclPermissions) && isset($aclPermissions[$action]))
+                    ? (bool) $aclPermissions[$action]
+                    : (bool) $session->isAllowed(self::$_gridActionsAclPaths[$action]);
+            }
+            
+            if ($any === $result) {
+                break;
+            }
         }
         
-        return is_null($aclPermission)
-            ? $session->isAllowed(self::$_gridActionsAclPaths[$action])
-            : (bool) $aclPermission;
+        return $result;
+    }
+    
+    /**
+     * Return whether the "System" part of the columns list should be displayed
+     *
+     * @return bool
+     */
+    public function getDisplaySystemPart()
+    {
+        return is_null($value = $this->_getData('display_system_part'))
+            ? $this->_getConfigHelper()->getDisplaySystemPart()
+            : (bool) $value;
     }
     
     /**
@@ -3599,9 +3680,9 @@ class BL_CustomGrid_Model_Grid
      */
     public function getDefaultPaginationValue()
     {
-        return is_null($this->_getData('default_pagination_value'))
+        return is_null($value = $this->_getData('default_pagination_value'))
             ? $this->_getConfigHelper()->getDefaultPaginationValue()
-            : (int) $this->_getData('default_pagination_value');
+            : (int) $value;
     }
     
     /**
@@ -3626,8 +3707,6 @@ class BL_CustomGrid_Model_Grid
         return $this->_getData('appliable_pagination_values');
     }
     
-
-
     /**
      * Return whether the grid header should be pinned (pager / export / mass-actions block)
      *
@@ -3635,23 +3714,69 @@ class BL_CustomGrid_Model_Grid
      */
     public function getPinHeader()
     {
-        return is_null($this->_getData('pin_header'))
+        return is_null($value = $this->_getData('pin_header'))
             ? $this->_getConfigHelper()->getPinHeader()
-            : (bool) $this->_getData('pin_header');
+            : (bool) $value;
     }
     
+    /**
+     * Return whether the RSS links should be displayed in a dedicated window
+     *
+     * @return bool
+     */
+    public function getUseRssLinksWindow()
+    {
+        return is_null($value = $this->_getData('use_rss_links_window'))
+            ? $this->_getConfigHelper()->getUseRssLinksWindow()
+            : (bool) $value;
+    }
+    
+    /**
+     * Return whether the original export block should be hidden
+     *
+     * @return bool
+     */
+    public function getHideOriginalExportBlock()
+    {
+        return is_null($value = $this->_getData('hide_original_export_block'))
+            ? $this->_getConfigHelper()->getHideOriginalExportBlock()
+            : (bool) $value;
+    }
+    
+    /**
+     * Return whether the filter reset button should be hidden
+     *
+     * @return bool
+     */
+    public function getHideFilterResetButton()
+    {
+        return is_null($value = $this->_getData('hide_filter_reset_button'))
+            ? $this->_getConfigHelper()->getHideFilterResetButton()
+            : (bool) $value;
+    }
+    
+    /**
+     * Update customization parameters
+     * 
+     * @param array $params Customization parameters
+     * @return this
+     */
     public function updateCustomizationParameters(array $params)
     {
-        if (!$this->checkUserActionPermission(self::ACTION_EDIT_CUSTOMIZATION_PARAMS)) {
+        if (!$this->checkUserPermissions(self::ACTION_EDIT_CUSTOMIZATION_PARAMS)) {
             $this->_throwPermissionException();
         }
         
         $booleanKeys = array(
+            'display_system_part',
             'ignore_custom_headers',
             'ignore_custom_widths',
             'ignore_custom_aligments',
             'merge_base_pagination',
             'pin_header',
+            'rss_links_window',
+            'hide_original_export_block',
+            'hide_filter_reset_button',
         );
         
         foreach ($booleanKeys as $key) {
@@ -3681,9 +3806,12 @@ class BL_CustomGrid_Model_Grid
      * @param Mage_Core_Model_Store $store Current store
      * @return array
      */
-    protected function _getCollectionColumnBlockValues($index, $rendererType, $rendererParams,
-        Mage_Core_Model_Store $store)
-    {
+    protected function _getCollectionColumnBlockValues(
+        $index,
+        $rendererType,
+        $rendererParams,
+        Mage_Core_Model_Store $store
+    ) {
         $config = Mage::getSingleton('customgrid/column_renderer_config_collection');
         
         if ($renderer = $config->getRendererInstanceByCode($rendererType)) {
@@ -3743,10 +3871,16 @@ class BL_CustomGrid_Model_Grid
      * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
      * @return array
      */
-    protected function _getCustomColumnBlockValues($columnBlockId, $columnIndex,
-        BL_CustomGrid_Model_Custom_Column_Abstract $customColumn, $rendererType, $rendererParams,
-        $customizationParams, Mage_Core_Model_Store $store, Mage_Adminhtml_Block_Widget_Grid $gridBlock)
-    {
+    protected function _getCustomColumnBlockValues(
+        $columnBlockId,
+        $columnIndex,
+        BL_CustomGrid_Model_Custom_Column_Abstract $customColumn,
+        $rendererType,
+        $rendererParams,
+        $customizationParams,
+        Mage_Core_Model_Store $store,
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock
+    ) {
         if ($customColumn->getAllowRenderers()) {
             if ($customColumn->getLockedRenderer()
                 && ($customColumn->getLockedRenderer() != $rendererType)) {
@@ -4004,7 +4138,7 @@ class BL_CustomGrid_Model_Grid
      * @param bool $grouped Whether actions should be grouped by general category
      * @return array
      */
-    public function getGridActions($grouped=false)
+    public function getGridActions($grouped = false)
     {
         if (is_null(self::$_groupedGridActions)) {
             $helper = Mage::helper('customgrid');
@@ -4027,6 +4161,7 @@ class BL_CustomGrid_Model_Grid
                     'label'   => $helper->__('Administration'),
                     'actions' => array(
                         self::ACTION_ENABLE_DISABLE                 => 'Enable / Disable',
+                        self::ACTION_EDIT_FORCED_TYPE               => 'Edit Forced Type',
                         self::ACTION_EDIT_CUSTOMIZATION_PARAMS      => 'Edit Customization Parameters', 
                         self::ACTION_EDIT_DEFAULT_PARAMS_BEHAVIOURS => 'Edit Default Parameters Behaviours', 
                         self::ACTION_EDIT_ROLES_PERMISSIONS         => 'Edit Roles Permissions', 

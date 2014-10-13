@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Grid_Edit_Tab_Role
-    extends Mage_Adminhtml_Block_Widget_Form
+class BL_CustomGrid_Block_Grid_Edit_Tab_Role extends Mage_Adminhtml_Block_Widget_Form
 {
     protected function _prepareForm()
     {
@@ -29,19 +28,26 @@ class BL_CustomGrid_Block_Grid_Edit_Tab_Role
         $form->setFieldNameSuffix('roles_permissions[' . $roleId . ']');
         
         foreach ($gridModel->getGridActions(true) as $key => $actionsGroup) {
-            $fieldset = $form->addFieldset('fieldset_' . $key, array(
-                'legend' => $this->__('Permissions: %s', $actionsGroup['label']),
-                'class'  => 'fieldset-wide'
-            ));
+            $fieldset = $form->addFieldset(
+                'fieldset_' . $key,
+                array(
+                    'legend' => $this->__('Permissions: %s', $actionsGroup['label']),
+                    'class'  => 'fieldset-wide'
+                )
+            );
             
             foreach ($actionsGroup['actions'] as $actionKey => $actionLabel) {
-                $fieldset->addField($actionKey, 'select', array(
-                    'name'   => $actionKey,
-                    'label'  => $actionLabel,
-                    'title'  => $actionLabel,
-                    'values' => $options,
-                    'value'  => ($roleConfig ? $roleConfig->getData('permissions/' . $actionKey) : null),
-                ));
+                $fieldset->addField(
+                    $actionKey,
+                    'select',
+                    array(
+                        'name'   => $actionKey,
+                        'label'  => $actionLabel,
+                        'title'  => $actionLabel,
+                        'values' => $options,
+                        'value'  => ($roleConfig ? $roleConfig->getData('permissions/' . $actionKey) : null),
+                    )
+                );
             }
         }
         

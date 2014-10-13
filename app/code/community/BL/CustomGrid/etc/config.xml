@@ -152,6 +152,9 @@
                 <ignore_custom_alignments>0</ignore_custom_alignments>
                 <merge_base_pagination>0</merge_base_pagination>
                 <pin_header>1</pin_header>
+                <rss_links_window>1</rss_links_window>
+                <hide_original_export>1</hide_original_export>
+                <hide_filter_reset>1</hide_filter_reset>
             </customization_params>
             <default_params_behaviours>
                 <page>default</page>
@@ -166,6 +169,8 @@
             </profiles>
             <custom_columns>
                 <group_in_default_header>1</group_in_default_header>
+                <unverified_block_behaviour>warning</unverified_block_behaviour>
+                <unverified_collection_behaviour>warning</unverified_collection_behaviour>
             </custom_columns>
         </customgrid>
         <customgrid_rewriters>

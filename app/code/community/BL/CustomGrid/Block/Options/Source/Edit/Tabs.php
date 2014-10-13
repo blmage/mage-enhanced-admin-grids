@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Options_Source_Edit_Tabs
-    extends Mage_Adminhtml_Block_Widget_Tabs
+class BL_CustomGrid_Block_Options_Source_Edit_Tabs extends Mage_Adminhtml_Block_Widget_Tabs
 {
     public function __construct()
     {

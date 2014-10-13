@@ -1,43 +1,54 @@
 <?php
 
-class BL_CustomGrid_Model_Custom_Column_Product_Inventory
-    extends BL_CustomGrid_Model_Custom_Column_Simple_Table
+class BL_CustomGrid_Model_Custom_Column_Product_Inventory extends BL_CustomGrid_Model_Custom_Column_Simple_Table
 {
     protected function _prepareConfig()
     {
         $helper = $this->_getBaseHelper();
         
         $notes = array(
-            'use_config_filter' => 'Choose "Yes" to filter on products that use system configuration values or not.'
-                . ' Else, the filter type will depend on the type of the field',
+            'use_config_filter' => 'Choose "<strong>Yes</strong>" to filter on products that use system configuration '
+                . 'values or not. Else, the filter type will depend on the type of the field',
             'use_config_prefix' => 'Prefix that will be prepended to the values coming from the system configuration',
             'use_config_suffix' => 'Suffix that will be appended to the values coming from the system configuration',
-            'warning' => 'Sorting does not take system configuration values into account, so that products may not be'
-                . ' sorted consistently',
+            'warning' => 'Sorting does not take system configuration values into account, so that products may not be '
+                . 'sorted consistently',
         );
         
         if ($this->getIsUseConfigField()) {
-            $this->addCustomizationParam('use_config_filter', array(
-                'label'        => $helper->__('Filter on "Use Config"'),
-                'description'  => $helper->__($notes['use_config_filter']),
-                'type'         => 'select',
-                'source_model' => 'adminhtml/system_config_source_yesno',
-                'value'        => 0,
-            ), 10);
+            $this->addCustomizationParam(
+                'use_config_filter',
+                array(
+                    'label'        => $helper->__('Filter on "Use Config"'),
+                    'description'  => $helper->__($notes['use_config_filter']),
+                    'type'         => 'select',
+                    'source_model' => 'adminhtml/system_config_source_yesno',
+                    'value'        => 0,
+                ),
+                10
+            );
             
-            $this->addCustomizationParam('use_config_prefix', array(
-                'label'       => $helper->__('Config Values Prefix'),
-                'description' => $helper->__($notes['use_config_prefix']),
-                'type'        => 'text',
-                'value'       => '',
-            ), 20);
+            $this->addCustomizationParam(
+                'use_config_prefix',
+                array(
+                    'label'       => $helper->__('Config Values Prefix'),
+                    'description' => $helper->__($notes['use_config_prefix']),
+                    'type'        => 'text',
+                    'value'       => '',
+                ),
+                20
+            );
             
-            $this->addCustomizationParam('use_config_suffix', array(
-                'label'       => $helper->__('Config Values Suffix'),
-                'description' => $helper->__($notes['use_config_suffix']),
-                'type'        => 'text',
-                'value'       => '',
-            ), 30);
+            $this->addCustomizationParam(
+                'use_config_suffix',
+                array(
+                    'label'       => $helper->__('Config Values Suffix'),
+                    'description' => $helper->__($notes['use_config_suffix']),
+                    'type'        => 'text',
+                    'value'       => '',
+                ),
+                30
+            );
             
             $this->setWarning($helper->__($notes['warning']));
             $this->setCustomizationWindowConfig(array('height' => 280), true);
@@ -85,17 +96,26 @@ class BL_CustomGrid_Model_Custom_Column_Product_Inventory
         return $this->getConfigParam('field_type');
     }
     
-    protected function _getAdditionalJoinConditions($columnIndex, array $params,
-        Mage_Adminhtml_Block_Widget_Grid $gridBlock, Varien_Data_Collection_Db $collection, $mainAlias, $tableAlias)
-    {
+    protected function _getAdditionalJoinConditions(
+        $columnIndex,
+        array $params,
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock,
+        Varien_Data_Collection_Db $collection,
+        $mainAlias,
+        $tableAlias
+    ) {
         list($adapter, $qi) = $this->_getCollectionAdapter($collection, true);
-        // @todo "stock_id" is usually hard-coded, should we provide it as a customization parameter anyway ?
         return array($adapter->quoteInto($qi($tableAlias . '.stock_id') . ' = ?', 1));
     }
     
-    protected function _addFieldToSelect(Varien_Db_Select $select, $columnIndex, $tableAlias, array $params,
-        Mage_Adminhtml_Block_Widget_Grid $gridBlock, Varien_Data_Collection_Db $collection)
-    {
+    protected function _addFieldToSelect(
+        Varien_Db_Select $select,
+        $columnIndex,
+        $tableAlias,
+        array $params,
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock,
+        Varien_Data_Collection_Db $collection
+    ) {
         $helper = $this->_getCollectionHelper();
         list($adapter, $qi) = $this->_getCollectionAdapter($collection, true);
         
@@ -166,13 +186,16 @@ class BL_CustomGrid_Model_Custom_Column_Product_Inventory
         return $this;
     }
     
-    public function shouldInvalidateFilters(BL_CustomGrid_Model_Grid $gridModel,
-        BL_CustomGrid_Model_Grid_Column $columnModel, array $params, array $renderers)
-    {
+    public function shouldInvalidateFilters(
+        BL_CustomGrid_Model_Grid $gridModel,
+        BL_CustomGrid_Model_Grid_Column $columnModel,
+        array $params,
+        array $renderers
+    ) {
         if (!parent::shouldInvalidateFilters($gridModel, $columnModel, $params, $renderers)) {
             if ($this->getIsUseConfigField()) {
                 return ($this->_extractBoolParam($params['previous'], 'use_config_filter')
-                    XOR $this->_extractBoolParam($params['current'],  'use_config_filter'));
+                    XOR $this->_extractBoolParam($params['current'], 'use_config_filter'));
             }
             return false;
         }
@@ -188,13 +211,13 @@ class BL_CustomGrid_Model_Custom_Column_Product_Inventory
         if (($fieldType == 'options')
             && ($sourceModel = Mage::getModel($this->getConfigParam('source_model')))
             && method_exists($sourceModel, 'toOptionArray')) {
-            $optionsArray = $sourceModel->toOptionArray();
-            $optionsHash  = $helper->getOptionsHashFromOptionsArray($optionsArray);
+            $optionArray = $sourceModel->toOptionArray();
+            $optionHash  = $helper->getOptionHashFromOptionArray($optionArray);
             
             $values = array(
                 'filter'  => 'customgrid/widget_grid_column_filter_select',
-                'options' => $optionsArray,
-                'options_hash' => $optionsHash,
+                'options' => $optionArray,
+                'option_hash' => $optionHash,
             );
         }
         
@@ -215,9 +238,14 @@ class BL_CustomGrid_Model_Custom_Column_Product_Inventory
         return $values;
     }
     
-    protected function _getForcedBlockValues(Mage_Adminhtml_Block_Widget_Grid $gridBlock,
-        BL_CustomGrid_Model_Grid $gridModel, $columnBlockId, $columnIndex, array $params, Mage_Core_Model_Store $store)
-    {
+    protected function _getForcedBlockValues(
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock,
+        BL_CustomGrid_Model_Grid $gridModel,
+        $columnBlockId,
+        $columnIndex,
+        array $params,
+        Mage_Core_Model_Store $store
+    ) {
         return array_merge(
             array(
                 'renderer'   => 'customgrid/widget_grid_column_renderer_product_inventory',

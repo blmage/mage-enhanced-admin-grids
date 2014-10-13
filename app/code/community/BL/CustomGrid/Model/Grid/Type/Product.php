@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_Grid_Type_Product
-    extends BL_CustomGrid_Model_Grid_Type_Abstract
+class BL_CustomGrid_Model_Grid_Type_Product extends BL_CustomGrid_Model_Grid_Type_Abstract
 {
     protected function _getSupportedBlockTypes()
     {
@@ -29,7 +28,6 @@ class BL_CustomGrid_Model_Grid_Type_Product
     
     public function canExport($blockType)
     {
-        // @todo fix and enable export for the other supported block types
         return (($blockType == 'adminhtml/catalog_product_grid') || !$this->isSupportedBlockType($blockType));
     }
     
@@ -107,9 +105,12 @@ class BL_CustomGrid_Model_Grid_Type_Product
         return array('sku' => Mage::getResourceModel('catalog/product')->getAttribute('sku'));
     }
     
-    protected function _prepareEditableAttributeCommonConfig($blockType, $code,
-        Mage_Eav_Model_Entity_Attribute $attribute, BL_CustomGrid_Model_Grid_Edit_Config $config)
-    {
+    protected function _prepareEditableAttributeCommonConfig(
+        $blockType,
+        $attributeCode,
+        Mage_Eav_Model_Entity_Attribute $attribute,
+        BL_CustomGrid_Model_Grid_Edit_Config $config
+    ) {
         if ($attribute->getFrontendInput() == 'weight') {
             $config->setInGrid(true);
         }
@@ -122,7 +123,7 @@ class BL_CustomGrid_Model_Grid_Type_Product
             ),
         ));
         
-        return parent::_prepareEditableAttributeCommonConfig($blockType, $code, $attribute, $config);
+        return parent::_prepareEditableAttributeCommonConfig($blockType, $attributeCode, $attribute, $config);
     }
     
     protected function _getBaseEditableAttributeFields($blockType)
@@ -198,8 +199,8 @@ class BL_CustomGrid_Model_Grid_Type_Product
     protected function _checkEntityEditableField($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
         if (parent::_checkEntityEditableField($blockType, $config, $params, $entity)) {
-            if ($config->getId() == 'qty') {
-                $helper = $this->_getHelper();
+            if ($config->getValueId() == 'qty') {
+                $helper = $this->_getBaseHelper();
                 
                 if (!Mage::helper('core')->isModuleEnabled('Mage_CatalogInventory')) {
                     Mage::throwException($helper->__('The "Mage_CatalogInventory" module is disabled'));
@@ -222,7 +223,7 @@ class BL_CustomGrid_Model_Grid_Type_Product
     protected function _checkEntityEditableAttribute($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
         if (parent::_checkEntityEditableAttribute($blockType, $config, $params, $entity)) {
-            $helper = $this->_getHelper();
+            $helper = $this->_getBaseHelper();
             $isEditable = false;
             $attributeCode = $config->getData('config/attribute')->getAttributeCode();
             $productAttributes = $entity->getAttributes();
@@ -243,7 +244,6 @@ class BL_CustomGrid_Model_Grid_Type_Product
                 && !in_array($entity->getStoreId(), $entity->getStoreIds())) {
                 Mage::throwException($helper->__('The product is not associated to the corresponding website'));
             }
-            // @todo all MAP stuff from 1.6, and handle attributes with "Use config"
             
             if ($isEditable) {
                 if ($entity->getTypeId() == Mage_Catalog_Model_Product_Type::TYPE_BUNDLE) {
@@ -267,16 +267,14 @@ class BL_CustomGrid_Model_Grid_Type_Product
     protected function _getUseDefaultValueForAttribute(Mage_Eav_Model_Entity_Attribute $attribute, $entity)
     {
         if (!$attribute->isScopeGlobal() && $entity->getStoreId()) {
-            /**
-             * This method ensures that the attributes (other than the edited one) using default values
-             * for the current store (= values from higher scopes), will keep this behaviour after save.
-             */
+            // This method ensures that the attributes (other than the edited one) using default values
+            // for the current store (ie values from higher scopes) will keep this behaviour after save
             $attributeCode = $attribute->getAttributeCode();
             $defaultValue  = $entity->getAttributeDefaultValue($attributeCode);
             
             if (!$entity->getExistsStoreValueFlag($attributeCode)) {
                 return true;
-            } elseif ($this->_getHelper()->isMageVersionGreaterThan(1, 4)
+            } elseif ($this->_getBaseHelper()->isMageVersionGreaterThan(1, 4)
                 && ($entity->getData($attributeCode) == $defaultValue)
                 && ($entity->getStoreId() != $this->_getDefaultStoreId())) {
                 return false;
@@ -291,7 +289,7 @@ class BL_CustomGrid_Model_Grid_Type_Product
         return false;
     }
     
-    protected function _getUseDefaultValueForSave(BL_CustomGrid_Object $config, array $params, $formName=null)
+    protected function _getUseDefaultValueForSave(BL_CustomGrid_Object $config, array $params, $formName = null)
     {
         if (is_null($formName)) {
             $formName = $config->getData('config/attribute')->getAttributeCode();
@@ -323,7 +321,7 @@ class BL_CustomGrid_Model_Grid_Type_Product
     
     protected function _applyEditedFieldValue($blockType, BL_CustomGrid_Object $config, array $params, $entity, $value)
     {
-        if ($config->getId() == 'qty') {
+        if ($config->getValueId() == 'qty') {
             $productId = $entity->getId();
             $stockItem = Mage::getModel('cataloginventory/stock_item');
             $stockItem->setData(array());
@@ -331,7 +329,7 @@ class BL_CustomGrid_Model_Grid_Type_Product
             
             if (isset($params['original_inventory_qty'])
                 && (strlen($params['original_inventory_qty']) > 0)) {
-                $stockItem->setQtyCorrection($item->getQty() - $originalQty);
+                $stockItem->setQtyCorrection($stockItem->getQty() - $params['original_inventory_qty']);
             }
             
             $stockItem->setQty($value);
@@ -343,7 +341,7 @@ class BL_CustomGrid_Model_Grid_Type_Product
     
     protected function _saveEditedFieldValue($blockType, BL_CustomGrid_Object $config, array $params, $entity, $value)
     {
-        if ($config->getId() == 'qty') {
+        if ($config->getValueId() == 'qty') {
             if ($stockItem = $entity->getData('_blcg_gtp_stock_item')) {
                 $stockItem->save();
             }
@@ -352,32 +350,41 @@ class BL_CustomGrid_Model_Grid_Type_Product
         return parent::_saveEditedFieldValue($blockType, $config, $params, $entity, $value);
     }
     
-    protected function _getEditedAttributeValue($blockType, BL_CustomGrid_Object $config, array $params, $entity,
-        $formName)
-    {
-        if ($this->_getUseDefaultValueForSave($config, $params)) {
-            // Use "false" to indicate default value (just as base behaviour)
-            return false;
-        }
-        return parent::_getEditedAttributeValue($blockType, $config, $params, $entity, $formName);
+    protected function _getEditedAttributeValue(
+        $blockType,
+        BL_CustomGrid_Object $config,
+        array $params,
+        $entity,
+        $formName
+    ) {
+        return $this->_getUseDefaultValueForSave($config, $params)
+            ? false // Use "false" to indicate default value (just as base behaviour)
+            : parent::_getEditedAttributeValue($blockType, $config, $params, $entity, $formName);
     }
     
-    protected function _filterEditedAttributeValue($blockType, BL_CustomGrid_Object $config, array $params, $entity,
-        $value)
-    {
-        if (!$this->_getUseDefaultValueForSave($config, $params)) {
-            return parent::_filterEditedAttributeValue($blockType, $config, $params, $entity, $value);
-        }
-        // Don't filter when using default value, else it may turn to another value than false
-        return $value;
+    protected function _filterEditedAttributeValue(
+        $blockType,
+        BL_CustomGrid_Object $config,
+        array $params,
+        $entity,
+        $value
+    ) {
+        return $this->_getUseDefaultValueForSave($config, $params)
+            ? $value // Don't filter when using default value, else it may turn to another value than false
+            : parent::_filterEditedAttributeValue($blockType, $config, $params, $entity, $value);
     }
     
-    protected function _beforeApplyEditedAttributeValue($blockType, BL_CustomGrid_Object $config, array $params,
-        $entity, &$value)
-    {
+    protected function _beforeApplyEditedAttributeValue(
+        $blockType,
+        BL_CustomGrid_Object $config,
+        array $params,
+        $entity,
+        &$value
+    ) {
         if (Mage::app()->isSingleStoreMode()) {
             $entity->setWebsiteIds(array(Mage::app()->getStore(true)->getWebsite()->getId()));
         }
+        
         if (isset($params['global']) && isset($params['global']['url_key_create_redirect'])) {
             $entity->setData('save_rewrites_history', (bool) $params['global']['url_key_create_redirect']);
         }
@@ -387,31 +394,36 @@ class BL_CustomGrid_Model_Grid_Type_Product
         return parent::_beforeApplyEditedAttributeValue($blockType, $config, $params, $entity, $value);
     }
     
-    protected function _applyEditedAttributeValue($blockType, BL_CustomGrid_Object $config, array $params, $entity,
-        $value)
-    {
+    protected function _applyEditedAttributeValue(
+        $blockType,
+        BL_CustomGrid_Object $config,
+        array $params,
+        $entity,
+        $value
+    ) {
         parent::_applyEditedAttributeValue($blockType, $config, $params, $entity, $value);
         $entity->validate();
         return $this;
     }
     
-    protected function _afterSaveEditedAttributeValue($blockType, BL_CustomGrid_Object $config, array $params, $entity,
-        $value, $result)
-    {
+    protected function _afterSaveEditedAttributeValue(
+        $blockType,
+        BL_CustomGrid_Object $config,
+        array $params,
+        $entity,
+        $value,
+        $result
+    ) {
         if ($this->_getUseDefaultValueForSave($config, $params)) {
-            // Force product reload if default value was used, to ensure getting the good (value for rendering
+            // Force product reload if default value was used, to ensure getting the good value for rendering
             $config->setData('config/render_reload', true);
         }
-        /**
-         * @todo from 1.5 (but what about giving the choice to the user ? - with an attributes list)
-         * Mage::getModel('catalogrule/rule')->applyAllRulesToProduct($productId);
-         */
         return parent::_afterSaveEditedAttributeValue($blockType, $config, $params, $entity, $value, $result);
     }
     
     protected function _getSavedFieldValueForRender($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
-        if ($config->getId() == 'qty') {
+        if ($config->getValueId() == 'qty') {
             if ($stockItem = $entity->getStockItem()) {
                 // Reload stock item to get the updated value
                 $stockItem->setProductId(null)->assignProduct($entity);
@@ -422,21 +434,22 @@ class BL_CustomGrid_Model_Grid_Type_Product
         return parent::_getSavedFieldValueForRender($blockType, $config, $params, $entity);
     }
     
-    public function beforeGridPrepareCollection(Mage_Adminhtml_Block_Widget_Grid $gridBlock, $firstTime=true)
+    public function beforeGridPrepareCollection(Mage_Adminhtml_Block_Widget_Grid $gridBlock, $firstTime = true)
     {
         $this->setMustCaptureExportedCollection(!$firstTime);
         return $this;
     }
     
-    public function afterGridPrepareCollection(Mage_Adminhtml_Block_Widget_Grid $gridBlock, $firstTime=true)
+    public function afterGridPrepareCollection(Mage_Adminhtml_Block_Widget_Grid $gridBlock, $firstTime = true)
     {
         $this->setMustCaptureExportedCollection(false);
         return $this;
     }
     
-    public function afterGridSetCollection(Mage_Adminhtml_Block_Widget_Grid $gridBlock, 
-        Varien_Data_Collection $collection)
-    {
+    public function afterGridSetCollection(
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock, 
+        Varien_Data_Collection $collection
+    ) {
         if ($this->getMustCaptureExportedCollection()) {
             $clonedCollection = clone $collection;
             $gridBlock->blcg_setExportedCollection($clonedCollection);
@@ -444,9 +457,10 @@ class BL_CustomGrid_Model_Grid_Type_Product
         return $this;
     }
     
-    public function afterGridExportLoadCollection(Mage_Adminhtml_Block_Widget_Grid $gridBlock, 
-        Varien_Data_Collection $collection)
-    {
+    public function afterGridExportLoadCollection(
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock, 
+        Varien_Data_Collection $collection
+    ) {
         if ($collection instanceof Mage_Catalog_Model_Resource_Eav_Mysql4_Product_Collection) {
             $collection->addWebsiteNamesToResult();
         }

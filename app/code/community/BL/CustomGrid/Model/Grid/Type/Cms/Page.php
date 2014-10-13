@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_Grid_Type_Cms_Page
-    extends BL_CustomGrid_Model_Grid_Type_Abstract
+class BL_CustomGrid_Model_Grid_Type_Cms_Page extends BL_CustomGrid_Model_Grid_Type_Abstract
 {
     protected function _getSupportedBlockTypes()
     {
@@ -72,7 +71,7 @@ class BL_CustomGrid_Model_Grid_Type_Cms_Page
                 'form_label'    => $helper->__('Meta Description'),
                 'window_height' => 310,
             ),
-            'content_heading' => array(), // this one only need default values
+            'content_heading' => array(),
             'content' => array(
                 'type'         => 'editor',
                 'required'     => true,
@@ -110,10 +109,12 @@ class BL_CustomGrid_Model_Grid_Type_Cms_Page
         );
         
         if (!Mage::app()->isSingleStoreMode()) {
+            $stores = Mage::getSingleton('adminhtml/system_store')->getStoreValuesForForm(false, true);
+            
             $fields['store_id'] = array(
                 'type'              => 'multiselect',
                 'required'          => true,
-                'form_values'       => Mage::getSingleton('adminhtml/system_store')->getStoreValuesForForm(false, true),
+                'form_values'       => $stores,
                 'render_block_type' => 'customgrid/widget_grid_editor_renderer_static_store',
             );
         }

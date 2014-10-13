@@ -13,10 +13,10 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-abstract class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Sales_Items_Custom_Abstract
-    extends BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Sales_Items_Abstract
+abstract class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Sales_Items_Custom_Abstract extends
+    BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Sales_Items_Abstract
 {
-    const DEFAULT_ROW_RENDERER    = 'customgrid/widget_grid_column_renderer_sales_items_sub_row_default';
+    const DEFAULT_ROW_RENDERER = 'customgrid/widget_grid_column_renderer_sales_items_sub_row_default';
     const DEFAULT_RESULT_RENDERER = 'customgrid/widget_grid_column_renderer_sales_items_sub_default';
     
     protected function _getRendererBlock($type)

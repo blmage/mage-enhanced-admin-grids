@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_Grid_Type_Sitemap
-    extends BL_CustomGrid_Model_Grid_Type_Abstract
+class BL_CustomGrid_Model_Grid_Type_Sitemap extends BL_CustomGrid_Model_Grid_Type_Abstract
 {
     protected function _getSupportedBlockTypes()
     {
@@ -64,13 +63,17 @@ class BL_CustomGrid_Model_Grid_Type_Sitemap
         return 'catalog/sitemap';
     }
     
-    protected function _beforeApplyEditedFieldValue($blockType, BL_CustomGrid_Object $config, array $params, $entity,
-        &$value)
-    {
-        if ($this->_getHelper()->isMageVersionGreaterThan(1, 5, 0)
-            && in_array($config->getId(), array('sitemap_filename', 'sitemap_path'))) {
-            $fileName = ($config->getId() != 'sitemap_filename' ? $entity->getSitemapFilename() : $value);
-            $path = ($config->getId() != 'sitemap_path' ? $entity->getSitemapPath() : $value);
+    protected function _beforeApplyEditedFieldValue(
+        $blockType,
+        BL_CustomGrid_Object $config,
+        array $params,
+        $entity,
+        &$value
+    ) {
+        if ($this->_getBaseHelper()->isMageVersionGreaterThan(1, 5, 0)
+            && in_array($config->getValueId(), array('sitemap_filename', 'sitemap_path'))) {
+            $fileName = ($config->getValueId() != 'sitemap_filename' ? $entity->getSitemapFilename() : $value);
+            $path = ($config->getValueId() != 'sitemap_path' ? $entity->getSitemapPath() : $value);
             
             if (!empty($fileName) && !empty($path)) {
                 $helper = Mage::helper('adminhtml/catalog');

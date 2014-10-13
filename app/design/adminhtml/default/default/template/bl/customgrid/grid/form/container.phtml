@@ -1,0 +1,103 @@
+<?php
+/**
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
+ *
+ * @category   BL
+ * @package    BL_CustomGrid
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+?>
+<?php echo $this->getFormInitScripts() ?>
+<div class="content-header">
+    <?php echo $this->getHeaderHtml() ?>
+    <p class="form-buttons"><?php echo $this->getButtonsHtml('header') ?></p>
+</div>
+<?php echo $this->getFormHtml() ?>
+<?php if ($this->hasFooterButtons()): ?>
+    <div class="content-footer">
+        <p class="form-buttons"><?php echo $this->getButtonsHtml('footer') ?></p>
+    </div>
+<?php endif ?>
+<?php
+$_formHtmlId = $this->getFormHtmlId();
+$_gridJsObjectName = $this->getGridJsObjectName();
+?>
+<script type="text/javascript">
+//<![CDATA[
+blcgGridForm = new varienForm('<?php echo $_formHtmlId ?>');
+
+blcgGridForm.submit = function(url) {
+    if (this.validator && this.validator.validate()) {
+        this.form = $(this.formId);
+        <?php if ($_fieldId = $this->getUseFieldValueForUrl()): ?>
+        url = $F('<?php echo $_fieldId ?>');
+        <?php else: ?>
+        url = this.form.action;
+        <?php endif ?>
+        
+        <?php if ($this->getUseAjaxSubmit()): ?>
+        new Ajax.Request(blcg.Tools.getAjaxUrl(url), {
+            method: 'post',
+            parameters: $H(blcgGridForm.form.serialize(true)),
+            
+            onSuccess: function(transport) {
+                var response= blcg.Tools.handleAjaxOnSuccessResponse(
+                    null,
+                    blcg.Tools.translate('An error occured while saving the values'),
+                    transport
+                );
+                
+                if (response) {
+                    <?php if ($this->getReloadGridAfterSuccess()): ?>
+                    blcg.Grid.Tools.reloadGrid('<?php echo $_gridJsObjectName ?>');
+                    <?php endif ?>
+                }
+            },
+            
+            onFailure: function(transport) {
+                alert(blcg.Tools.translate('An error occured while saving the values'));
+            }.bind(this)
+        });
+        <?php else: ?>
+        var oldAction = this.form.action;
+        this.form.action = url;
+        var e = null;
+        
+        try {
+            this.form.submit();
+        } catch (e) {
+        }
+        
+        this.form.action = oldAction;
+        
+        if (e) {
+            throw e;
+        }
+        <?php endif ?>
+        
+        blcg.Tools.closeDialog();
+        return true;
+    }
+    return false;
+}.bind(blcgGridForm);
+
+<?php if (!$this->hasOnlyReadOnlyFields()): ?>
+$('<?php echo $_formHtmlId ?>').observe('keydown', function(e) {
+    if (e.keyCode == Event.KEY_RETURN) {
+        e.stop();
+        blcgGridForm.submit();
+        return;
+    }
+});
+
+blcg.Tools.focusFirstInput('<?php echo $_formHtmlId ?>');
+<?php endif ?>
+//]]>
+</script>
+<?php echo $this->getFormScripts() ?>

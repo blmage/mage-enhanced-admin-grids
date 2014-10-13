@@ -13,8 +13,8 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Product_Image
-    extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
+class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Product_Image extends
+    Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
     protected function _getImageUrl(Varien_Object $row)
     {
@@ -45,29 +45,27 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Product_Image
     public function render(Varien_Object $row)
     {
         $result = '';
+        $columnBlock = $this->getColumn();
         
         if ($images = $this->_getImageUrl($row)) {
-            $image = ($this->getColumn()->getDisplayImagesUrls() ? $images[1] : $images[0]);
+            $image = ($columnBlock->getDisplayImagesUrls() ? $images[1] : $images[0]);
             
-            if ($this->getColumn()->getOriginalImageLink() && ($imageUrl = $this->_getOriginalImageUrl($row))) {
-                $result = '<a href="' . $imageUrl . '" target="_blank">';
-            }
-            if ($this->getColumn()->getDisplayImages()) {
-                $title = $this->htmlEscape($image);
-                $dimensions = ' ';
+            if ($columnBlock->getDisplayImages()) {
+                $title  = $this->htmlEscape($image);
                 $source = $images[1];
+                $dimensions  = ' ';
                 
-                if ((($width = (int) $this->getColumn()->getImageWidth()) > 0)
-                    && (($height = (int) $this->getColumn()->getImageHeight()) > 0)) {
+                if ((($width = (int) $columnBlock->getImageWidth()) > 0)
+                    && (($height = (int) $columnBlock->getImageHeight()) > 0)) {
                     $dimensions = ' width="' . $width . '" height="' . $height . '" ';
                 }
                 
-                $result .= '<img src="' . $source . '" alt="' . $title . '" title="' . $title . '"' . $dimensions . '/>';
+                $result = '<img src="' . $source . '" alt="' . $title . '" title="' . $title . '"' . $dimensions . '/>';
             } else {
-                $result .= $image;
+                $result = $image;
             }
-            if ($this->getColumn()->getOriginalImageLink() && $imageUrl) {
-                $result .= '</a>';
+            if ($columnBlock->getOriginalImageLink() && ($imageUrl = $this->_getOriginalImageUrl($row))) {
+                $result = '<a href="' . $imageUrl . '" target="_blank">' . $result . '</a>';
             }
         }
         

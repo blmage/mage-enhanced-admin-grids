@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_Grid_Type_Tax_Rule
-    extends BL_CustomGrid_Model_Grid_Type_Abstract
+class BL_CustomGrid_Model_Grid_Type_Tax_Rule extends BL_CustomGrid_Model_Grid_Type_Abstract
 {
     protected function _getSupportedBlockTypes()
     {
@@ -25,7 +24,7 @@ class BL_CustomGrid_Model_Grid_Type_Tax_Rule
     {
         $value = null;
         
-        switch ($config->getId()) {
+        switch ($config->getValueId()) {
             case 'customer_tax_classes':
                 $value = $entity->getCustomerTaxClasses();
                 break;
@@ -132,9 +131,13 @@ class BL_CustomGrid_Model_Grid_Type_Tax_Rule
         return 'sales/tax/rules';
     }
     
-    protected function _beforeApplyEditedFieldValue($blockType, BL_CustomGrid_Object $config, array $params, $entity,
-        &$value)
-    {
+    protected function _beforeApplyEditedFieldValue(
+        $blockType,
+        BL_CustomGrid_Object $config,
+        array $params,
+        $entity,
+        &$value
+    ) {
         $entity->addData(array(
             'tax_rate' => array_unique($entity->getRates()),
             'tax_product_class'  => array_unique($entity->getProductTaxClasses()),

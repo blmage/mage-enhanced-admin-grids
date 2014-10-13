@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Custom_Column_Config
-    extends BL_CustomGrid_Block_Widget_Form_Container
+class BL_CustomGrid_Block_Custom_Column_Config extends BL_CustomGrid_Block_Widget_Form_Container
 {
     public function __construct()
     {
@@ -25,20 +24,26 @@ class BL_CustomGrid_Block_Custom_Column_Config
         $this->_mode = 'config';
         $this->_headerText = $this->getCustomColumn()->getName();
         
-        $this->_removeButtons(array('reset', 'back'));
+        $this->_removeButtons(array('back', 'delete', 'reset'));
         
-        $this->_updateButton('save', null, array(
-            'id'         => 'blcg_custom_column_config_insert_button',
-            'label'      => $this->__('Apply Configuration'),
-            'onclick'    => $this->getJsObjectName() . '.insertParams();',
-            'sort_order' => 0,
-        ));
+        $this->_updateButton(
+            'save',
+            null,
+            array(
+                'id'         => 'blcg_custom_column_config_insert_button',
+                'label'      => $this->__('Apply Configuration'),
+                'onclick'    => $this->getJsObjectName() . '.insertParams();',
+                'sort_order' => 0,
+            )
+        );
     }
     
     protected function _beforeToHtml()
     {
         $this->_formScripts[] =  $this->getJsObjectName() . ' = new blcg.Grid.CustomColumn.ConfigForm('
-            . '"blcg_custom_column_config_form", "' . $this->getConfigTargetId() . '");';
+            . '"blcg_custom_column_config_form", '
+            . '"' . $this->getConfigTargetId() . '"'
+            . ');';
         
         if ($formBlock = $this->getChild('form')) {
             $formBlock->setConfigValues($this->getConfigValues());

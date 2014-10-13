@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-abstract class BL_CustomGrid_Model_Column_Renderer_Config_Abstract
-    extends BL_CustomGrid_Model_Config_Abstract
+abstract class BL_CustomGrid_Model_Column_Renderer_Config_Abstract extends BL_CustomGrid_Model_Config_Abstract
 {
     static protected $_defaultConfigWindow = array(
         'width'  => 800,
@@ -27,48 +26,60 @@ abstract class BL_CustomGrid_Model_Column_Renderer_Config_Abstract
         return true;
     }
     
-    public function getRendererInstanceByCode($code, $parameters=null)
+    public function getRendererInstanceByCode($code, $parameters = null)
     {
         return parent::getElementInstanceByCode($code, $parameters);
     }
     
-    public function getElementsArrayAdditionalSubValues(Varien_Simplexml_Element $xmlElement, array $baseValues,
-        Mage_Core_Helper_Abstract $helper)
-    {
+    protected function _getConfigWindowValues(
+        Varien_Simplexml_Element $xmlElement,
+        array $baseValues,
+        Mage_Core_Helper_Abstract $helper
+    ) {
+        $configWindow = self::$_defaultConfigWindow;
+        $useDefaultTitle = true;
+        
+        if ($windowXmlElement = $xmlElement->descend('config_window')) {
+            $windowValues = $windowXmlElement->asCanonicalArray();
+            
+            if (isset($windowValues['width'])) {
+                if (($value = (int) $windowValues['width']) > 0) {
+                    $configWindow['width'] = $value;
+                }
+            }
+            if (isset($windowValues['height'])) {
+                if (($value = (int) $windowValues['height']) > 0) {
+                    $configWindow['height'] = $value;
+                }
+            }
+            if (isset($windowValues['title'])) {
+                $useDefaultTitle = false;
+                $configWindow['title'] = $values['title'];
+            }
+            
+            $configWindow += $windowValues;
+        }
+        if ($useDefaultTitle) {
+            if (isset($baseValues['name'])) {
+                $configWindow['title'] = $helper->__($configWindow['title'], $baseValues['name']);
+            } else {
+                $configWindow['title'] = '';
+            }
+        }
+        
+        return $configWindow;
+    }
+    
+    public function getElementsArrayAdditionalSubValues(
+        Varien_Simplexml_Element $xmlElement,
+        array $baseValues,
+        Mage_Core_Helper_Abstract $helper
+    ) {
         $configWindow = null;
         $isCustomizable = (bool) $xmlElement->descend('parameters');
         
         if ($isCustomizable) {
-            $configWindow = self::$_defaultConfigWindow;
-            $useDefaultTitle = true;
-            
-            if ($windowXmlElement = $xmlElement->descend('config_window')) {
-                $windowValues = $windowXmlElement->asCanonicalArray();
-                
-                if (isset($windowValues['width'])) {
-                    if (($value = (int) $windowValues['width']) > 0) {
-                        $configWindow['width'] = $value;
-                    }
-                }
-                if (isset($windowValues['height'])) {
-                    if (($value = (int) $windowValues['height']) > 0) {
-                        $configWindow['height'] = $value;
-                    }
-                }
-                if (isset($windowValues['title'])) {
-                    $useDefaultTitle = false;
-                    $configWindow['title'] = $values['title'];
-                }
-                
-                $configWindow += $windowValues;
-            }
-            if ($useDefaultTitle) {
-                if (isset($baseValues['name'])) {
-                    $configWindow['title'] = $helper->__($configWindow['title'], $baseValues['name']);
-                } else {
-                    $configWindow['title'] = '';
-                }
-            }
+            $configWindow = $this->_getConfigWindowValues($xmlElement, $baseValues, $helper);
         }
         
         return array(

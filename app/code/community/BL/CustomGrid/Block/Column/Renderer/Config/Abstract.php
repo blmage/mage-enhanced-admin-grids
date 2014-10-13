@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-abstract class BL_CustomGrid_Block_Column_Renderer_Config_Abstract
-    extends BL_CustomGrid_Block_Widget_Form_Container
+abstract class BL_CustomGrid_Block_Column_Renderer_Config_Abstract extends BL_CustomGrid_Block_Widget_Form_Container
 {
     abstract protected function _getController();
     abstract public function getRenderer(); 
@@ -28,9 +27,12 @@ abstract class BL_CustomGrid_Block_Column_Renderer_Config_Abstract
         $this->_mode = 'config';
         $this->_headerText = $this->getRenderer()->getName();
         
-        $this->_removeButtons(array('back', 'reset'));
+        $this->_removeButtons(array('back', 'delete', 'reset'));
         
-        $this->_updateButton('save', null, array(
+        $this->_updateButton(
+            'save',
+            null,
+            array(
                 'id'         => 'blcg_renderer_config_insert_button',
                 'label'      => $this->__('Apply Configuration'),
                 'onclick'    => $this->getJsObjectName() . '.insertParams();',

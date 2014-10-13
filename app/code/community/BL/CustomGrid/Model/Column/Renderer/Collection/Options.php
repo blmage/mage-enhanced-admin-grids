@@ -13,20 +13,20 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_Column_Renderer_Collection_Options
-    extends BL_CustomGrid_Model_Column_Renderer_Collection_Abstract
+class BL_CustomGrid_Model_Column_Renderer_Collection_Options extends
+    BL_CustomGrid_Model_Column_Renderer_Collection_Abstract
 {
-    protected $_backwardsMap = array(
-        'options_separator' => 'sub_values_separator',
-    );
+    protected $_backwardsMap = array('options_separator' => 'sub_values_separator');
     
-    public function getColumnBlockValues($columnIndex, Mage_Core_Model_Store $store,
-        BL_CustomGrid_Model_Grid $gridModel)
-    {
+    public function getColumnBlockValues(
+        $columnIndex,
+        Mage_Core_Model_Store $store,
+        BL_CustomGrid_Model_Grid $gridModel
+    ) {
         if (($sourceId = $this->getData('values/source_id'))
             && ($source = Mage::getModel('customgrid/options_source')->load($sourceId))
             && $source->getId()) {
-            $options = $source->getOptionsArray();
+            $options = $source->getOptionArray();
         } else {
             $options = array();
         }

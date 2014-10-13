@@ -13,15 +13,15 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Options
-    extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Text
+class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Options extends
+    Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Text
 {
-    protected function _collectOptions(array $list, $keepPath, $separator, $path='', $first=true)
+    protected function _collectOptions(array $list, $keepPath, $separator, $path = '', $first = true)
     {
         $options = array();
         
         foreach ($list as $option) {
-             if (is_array($option['value'])) {
+            if (is_array($option['value'])) {
                 $options = array_merge(
                     $options,
                     $this->_collectOptions(
@@ -40,37 +40,44 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Options
         return $options;
     }
     
+    protected function _renderImplodedValues(array $values, array $options, $showMissingValues)
+    {
+        $result = array();
+        
+        foreach ($values as $item) {
+            if (isset($options[$item])) {
+                $result[] = $options[$item];
+            } elseif ($showMissingValues) {
+                $result[] = $item;
+            }
+        }
+        
+        return implode($this->getColumn()->getValuesSeparator(), $result);
+    }
+    
     public function render(Varien_Object $row)
     {
-        $keepPath  = (bool) $this->getColumn()->getDisplayFullPath();
-        $separator = $this->getColumn()->getSubValuesSeparator();
-        $options   = $this->_collectOptions($this->getColumn()->getOptions(), $keepPath, $separator);
-        $imploded  = (bool) $this->getColumn()->getImplodedValues();
-        $implodedSeparator = $this->getColumn()->getImplodedSeparator();
-        $showMissingOptionValues = (bool) $this->getColumn()->getShowMissingOptionValues();
+        $columnBlock = $this->getColumn();
+        $showMissingValues = (bool) $columnBlock->getShowMissingOptionValues();
         $result = '';
         
+        $options = $this->_collectOptions(
+            $columnBlock->getOptions(),
+            (bool) $columnBlock->getDisplayFullPath(),
+            $columnBlock->getSubValuesSeparator()
+        );
+        
         if (!empty($options) && is_array($options)) {
-            $value = $row->getData($this->getColumn()->getIndex());
+            $value = $row->getData($columnBlock->getIndex());
             
-            if ($imploded) {
-                $value = explode($implodedSeparator, $value);
+            if ($columnBlock->getImplodedValues()) {
+                $value = explode($columnBlock->getImplodedSeparator(), $value);
             }
             if (is_array($value)) {
-                $result = array();
-                
-                foreach ($value as $item) {
-                    if (isset($options[$item])) {
-                        $result[] = $options[$item];
-                    } elseif ($showMissingOptionValues) {
-                        $result[] = $item;
-                    }
-                }
-                
-                $result = implode($this->getColumn()->getValuesSeparator(), $result);
+                $result = $this->_renderImplodedValues($value, $options, $showMissingValues);
             } elseif (isset($options[$value])) {
                 $result = $options[$value];
-            } elseif ($showMissingOptionValues) {
+            } elseif ($showMissingValues) {
                 $result = $value;
             }
         }

@@ -13,15 +13,9 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Grid_Edit_Tab_Columns
-    extends BL_CustomGrid_Block_Widget_Grid_Config
-    implements Mage_Adminhtml_Block_Widget_Tab_Interface
+class BL_CustomGrid_Block_Grid_Edit_Tab_Columns extends BL_CustomGrid_Block_Widget_Grid_Config_Columns_List implements
+    Mage_Adminhtml_Block_Widget_Tab_Interface
 {
-    public function isStandAlone()
-    {
-        return true;
-    }
-    
     public function getTabLabel()
     {
         return $this->__('Columns');
@@ -40,5 +34,15 @@ class BL_CustomGrid_Block_Grid_Edit_Tab_Columns
     public function isHidden()
     {
         return false;
+    }
+    
+    public function isStandAlone()
+    {
+        return true;
+    }
+    
+    public function getGridModel()
+    {
+        return $this->getDataSetDefault('grid_model', Mage::registry('blcg_grid'));
     }
 }

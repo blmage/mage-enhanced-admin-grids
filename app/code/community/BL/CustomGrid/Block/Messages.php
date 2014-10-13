@@ -13,12 +13,12 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Messages
-    extends Mage_Adminhtml_Block_Messages
+class BL_CustomGrid_Block_Messages extends Mage_Adminhtml_Block_Messages
 {
     /**
      * Having our own messages list allows to :
-     * - display as much messages as possible, even ones that are added in session after the call to _initLayoutMessages() by the current controller
+     * - display as much messages as possible, even ones that are added in session after the call to
+     *   _initLayoutMessages() by the current controller
      * - display lots of messages without wasting screen space (rewriting errors, eg)
      * - separate our (sometimes really) specific messages from the other messages
      */
@@ -63,7 +63,7 @@ class BL_CustomGrid_Block_Messages
             ->toString($this->getDateFormat());
     }
     
-    public function getMessagesCount($type=null)
+    public function getMessagesCount($type = null)
     {
         if (!is_null($type)) {
             return count($this->getMessageCollection()->getItems($type));
@@ -71,59 +71,68 @@ class BL_CustomGrid_Block_Messages
         return $this->getMessageCollection()->count();
     }
     
-    public function hasMessages($type=null)
+    public function hasMessages($type = null)
     {
         return ($this->getMessagesCount($type) > 0);
     }
     
-    public function getMessagesHtml($type=null)
+    public function getDatedMessages($type = null)
+    {
+        $datedMessages = array();
+        
+        if ($messages = $this->getMessages($type)) {
+            foreach ($messages as $message) {
+                if ($messageId = $message->getIdentifier()) {
+                    list($messageId, $date) = explode('|', $messageId);
+                    
+                    if (!empty($date)) {
+                        if (isset($datedMessages[$date])) {
+                            $datedMessages[$date][] = $message;
+                        } else {
+                            $datedMessages[$date] = array($message);
+                        }
+                    }
+                }
+            }
+        }
+        
+        return $datedMessages;
+    }
+    
+    public function getMessagesHtml($type = null)
     {
         if (!is_null($type)) {
             $html = '';
             
-            if ($messages = $this->getMessages($type)) {
-                $datedMessages = array();
+            foreach ($this->getDatedMessages($type) as $date => $messages) {
+                $html .= '<div class="blcg-messages-list">';
+                $html .= '<div class="blcg-messages-content-date">' . $this->_formatDate($date) . '</div>';
+                $html .= '<' . $this->_messagesFirstLevelTagName . ' class="messages">';
+                $html .= '<' . $this->_messagesSecondLevelTagName . ' class="' . $type . '-msg">';
+                $html .= '<' . $this->_messagesFirstLevelTagName . '>';
                 
                 foreach ($messages as $message) {
-                    if ($messageId = $message->getIdentifier()) {
-                        list($messageId, $date) = explode('|', $messageId);
-                        
-                        if (!empty($date)) {
-                            if (isset($datedMessages[$date])) {
-                                $datedMessages[$date][] = $message;
-                            } else {
-                                $datedMessages[$date] = array($message);
-                            }
-                        }
+                    $html.= '<' . $this->_messagesSecondLevelTagName . '>';
+                    
+                    if (isset($this->_messagesContentWrapperTagName)) {
+                        $html.= '<' . $this->_messagesContentWrapperTagName . '>';
                     }
+                    
+                    $html.= $this->_escapeMessageFlag
+                        ? $this->htmlEscape($message->getText())
+                        : $message->getText();
+                    
+                    if (isset($this->_messagesContentWrapperTagName)) {
+                        $html.= '</' . $this->_messagesContentWrapperTagName . '>';
+                    }
+                    
+                    $html.= '</' . $this->_messagesSecondLevelTagName . '>';
                 }
                 
-                foreach ($datedMessages as $date => $messages) {
-                    $html .= '<div class="blcg-messages-list">';
-                    $html .= '<div class="blcg-messages-content-date">' . $this->_formatDate($date) . '</div>';
-                    $html .= '<' . $this->_messagesFirstLevelTagName . ' class="messages">';
-                    $html .= '<' . $this->_messagesSecondLevelTagName . ' class="' . $type . '-msg">';
-                    $html .= '<' . $this->_messagesFirstLevelTagName . '>';
-                    
-                    foreach ($messages as $message) {
-                        $html.= '<' . $this->_messagesSecondLevelTagName . '>';
-                        
-                        if (isset($this->_messagesContentWrapperTagName)) {
-                            $html.= '<' . $this->_messagesContentWrapperTagName . '>';
-                        }
-                        $html.= ($this->_escapeMessageFlag) ? $this->htmlEscape($message->getText()) : $message->getText();
-                        
-                        if (isset($this->_messagesContentWrapperTagName)) {
-                            $html.= '</' . $this->_messagesContentWrapperTagName . '>';
-                        }
-                        $html.= '</' . $this->_messagesSecondLevelTagName . '>';
-                    }
-                    
-                    $html .= '</' . $this->_messagesFirstLevelTagName . '>';
-                    $html .= '</' . $this->_messagesSecondLevelTagName . '>';
-                    $html .= '</' . $this->_messagesFirstLevelTagName . '>';
-                    $html .= '</div>';
-                }
+                $html .= '</' . $this->_messagesFirstLevelTagName . '>';
+                $html .= '</' . $this->_messagesSecondLevelTagName . '>';
+                $html .= '</' . $this->_messagesFirstLevelTagName . '>';
+                $html .= '</div>';
             }
             
             return $html;
@@ -153,6 +162,4 @@ class BL_CustomGrid_Block_Messages
         }
         return $this->_getData('ajax_mode_wrapper_id');
     }
-    
-    // @todo persistent clearable messages ? (would give a consistent behaviour between Ajax and "classic" requests)
 }

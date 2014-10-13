@@ -13,12 +13,16 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-abstract class BL_CustomGrid_Model_Custom_Column_Invoice_Items_Abstract
-    extends BL_CustomGrid_Model_Custom_Column_Sales_Items_Abstract
+abstract class BL_CustomGrid_Model_Custom_Column_Invoice_Items_Abstract extends
+    BL_CustomGrid_Model_Custom_Column_Sales_Items_Abstract
 {
-    public function addItemsToGridCollection($columnIndex, array $params,
-        Mage_Adminhtml_Block_Widget_Grid $gridBlock, Varien_Data_Collection_Db $collection, $firstTime)
-    {
+    public function addItemsToGridCollection(
+        $columnIndex,
+        array $params,
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock,
+        Varien_Data_Collection_Db $collection,
+        $firstTime
+    ) {
         if (!$firstTime && !$gridBlock->blcg_isExport()) {
             $invoicesIds = array();
             $ordersIds   = array();
@@ -67,6 +71,13 @@ abstract class BL_CustomGrid_Model_Custom_Column_Invoice_Items_Abstract
                     
                     $itemsProperty->setValue($invoice, $invoiceItems);
                 }
+            } else {
+                foreach ($collection as $invoice) {
+                    $creditmemo->setData('_blcg_items_init_error', true);
+                }
+                
+                Mage::getSingleton('customgrid/session')
+                    ->addError(Mage::helper('customgrid')->__('An error occured while initializing items'));
             }
         }
         return $this;

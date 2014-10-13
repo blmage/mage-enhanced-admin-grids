@@ -13,8 +13,8 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-abstract class BL_CustomGrid_Model_Custom_Column_Customer_Address_Abstract
-    extends BL_CustomGrid_Model_Custom_Column_Simple_Abstract
+abstract class BL_CustomGrid_Model_Custom_Column_Customer_Address_Abstract extends
+    BL_CustomGrid_Model_Custom_Column_Simple_Abstract
 {
     abstract public function getAddressType();
     
@@ -23,9 +23,12 @@ abstract class BL_CustomGrid_Model_Custom_Column_Customer_Address_Abstract
         return $this->getConfigParam('attribute_code');
     }
     
-    public function addFieldToGridCollection($columnIndex, array $params,
-        Mage_Adminhtml_Block_Widget_Grid $gridBlock, Varien_Data_Collection_Db $collection)
-    {
+    public function addFieldToGridCollection(
+        $columnIndex,
+        array $params,
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock,
+        Varien_Data_Collection_Db $collection
+    ) {
         $collection->joinAttribute(
             $columnIndex,
             'customer_address/' . $this->getAttributeCode(),

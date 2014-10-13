@@ -11,14 +11,16 @@ Due to the code refactoring, any custom development based on classes coming from
 _Backwards compatibility is assured for all the previously existing data. **If you're upgrading from a previous version, flushing the cache storage is likely to be needed to ensure that everything works fine (due to some renamings in the database structure).**_
 
 ### Main changes / New features :
-- massive code refactoring (goals: better maintainability, more consistency, more independence, better practices and a smaller footprint)
+- massive code refactoring (goals: better maintainability, more consistency, better practices and a smaller footprint)
+- big design and usability rework
 - every in-grid customization is now saved via Ajax, for a seamless integration in Ajax-based grids
 - profiles system (different columns lists and default parameters for each grid, assignable to different roles)
+- forcable grid types (use advanced features for the grids that you know to be compatible with a given grid type, but by default are not associated to it)
 - advanced filtering possibilities for text, options and country columns (except for the original grid columns, as for the rest)
 - forms in configuration windows are now split in multiple collapsible fieldsets
+- failed block verifications for custom columns are not blocking anymore (by default)
 - refined permissions
 - various bug fixes
-- **_todo_** forcable grid types (use advanced features for the grids that you know to be compatible with a given grid type, but by default are not associated to it)
 
 ### Continuous changes :
 - new custom columns for different grids (especially the sales grids)
@@ -27,6 +29,4 @@ _Backwards compatibility is assured for all the previously existing data. **If y
 
 ### Other considered changes (secondary todo list) :
 - callbacks system for the editors, then editable custom columns
-- duplicatable custom columns
 - profiles groups ?
-- better design :)

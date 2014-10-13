@@ -13,22 +13,25 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Container
-    extends BL_CustomGrid_Block_Widget_Form_Container
+class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Container extends BL_CustomGrid_Block_Widget_Form_Container
 {
     public function __construct()
     {
         parent::__construct();
         
         $this->_blockGroup = null;
-        $this->_removeButtons(array('back', 'reset', 'delete', 'save'));
+        $this->_removeButtons(array('back', 'delete', 'reset'));
         $this->setTemplate('bl/customgrid/widget/grid/editor/form/container.phtml');
         
-        $this->_addButton('save', array(
-            'label'   => $this->helper('adminhtml')->__('Save'),
-            'onclick' => 'blcgGridEditForm.submit();',
-            'class'   => 'save',
-        ), 1);
+        $this->_addButton(
+            'save',
+            array(
+                'label'   => $this->helper('adminhtml')->__('Save'),
+                'onclick' => 'blcgGridEditorForm.submit();',
+                'class'   => 'save',
+            ),
+            1
+        );
     }
     
     public function getUseDefaultForm()
@@ -41,20 +44,25 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Container
         return $this->setChild('form', $formBlock);
     }
     
-    public function getEditorJsObjectName()
-    {
-        if ($jsObjectName = $this->getRequest()->getParam('editor_js_object_name', false)) {
-            $jsObjectName = $this->helper('customgrid/string')->sanitizeJsObjectName($jsObjectName);
-            
-            if ($this->getRequest()->getParam('is_external', false)) {
-                $jsObjectName = 'parent.' . $jsObjectName;
-            }
-        }
-        return $jsObjectName;
-    }
-    
     public function getFormHtml()
     {
         return ($this->getChild('form') ? parent::getFormHtml() : '');
+    }
+    
+    public function getEditorJsObjectName()
+    {
+        if (!$this->hasData('editor_js_object_name')) {
+            if ($jsObjectName = $this->getRequest()->getParam('editor_js_object_name', false)) {
+                $jsObjectName = $this->helper('customgrid/string')->sanitizeJsObjectName($jsObjectName);
+                
+                if ($this->getRequest()->getParam('is_external', false)) {
+                    $jsObjectName = 'parent.' . $jsObjectName;
+                }
+            } else {
+                $jsObjectName = false;
+            }
+            $this->setData('editor_js_object_name', $jsObjectName);
+        }
+        return $this->_getData('editor_js_object_name');
     }
 }

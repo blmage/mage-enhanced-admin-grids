@@ -13,8 +13,8 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Price
-    extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
+class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Price extends
+    Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
     protected $_defaultWidth = 100;
     
@@ -24,12 +24,14 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Price
             if (!$displayCurrency = $this->_getCurrencyCode($row, 'display')) {
                 return $value;
             }
+            
             if ($this->getColumn()->getApplyRates()) {
                 if ($originalCurrency = $this->_getCurrencyCode($row, 'original')) {
                     $value = floatval($value) * $this->_getRate($originalCurrency, $displayCurrency);
                     $value = sprintf('%f', $value);
                 }
             }
+            
             $value = Mage::app()->getLocale()->currency($displayCurrency)->toCurrency($value);
             return $value;
         }
@@ -69,8 +71,10 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Price
         return false;
     }
     
-    protected function _getRate($from, $to)
+    protected function _getRate($fromPrice, $toPrice)
     {
-        return $this->_getCurrencyModel()->load($from)->getAnyRate($to);
+        return $this->_getCurrencyModel()
+            ->load($fromPrice)
+            ->getAnyRate($toPrice);
     }
 }

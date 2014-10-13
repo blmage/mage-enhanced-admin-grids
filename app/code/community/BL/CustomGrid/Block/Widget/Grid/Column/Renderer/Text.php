@@ -13,8 +13,8 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Text
-    extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
+class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Text extends
+    Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
     const CMS_TEMPLATE_PROCESSOR_NONE  = 'none';
     const CMS_TEMPLATE_PROCESSOR_BLOCK = 'block';
@@ -24,10 +24,8 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Text
     const TRUNCATION_MODE_TEXT = 'text';
     const TRUNCATION_MODE_HTML = 'html';
     
-    public function render(Varien_Object $row)
+    protected function _parseText($text)
     {
-        $text = parent::_getValue($row);
-        
         if ($cmsProcessorType = $this->getColumn()->getCmsTemplateProcessor()) {
             $cmsProcessor = null;
             
@@ -40,6 +38,12 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Text
                 $text = $cmsProcessor->filter($text);
             }
         }
+        return $text;
+    }
+    
+    public function render(Varien_Object $row)
+    {
+        $text = $this->_parseText(parent::_getValue($row));
         
         if (($truncationMode = $this->getColumn()->getTruncationMode())
             && ($truncationMode != self::TRUNCATION_MODE_NONE)) {
@@ -54,7 +58,6 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Text
                     $text,
                     $truncationLength,
                     $truncationEnding,
-                    $remainder,
                     !$exactTruncation
                 );
             } elseif ($truncationMode = self::TRUNCATION_MODE_TEXT) {

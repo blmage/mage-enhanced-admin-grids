@@ -38,8 +38,8 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Product_Categories_Chooser
-    extends Mage_Adminhtml_Block_Catalog_Category_Tree
+class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Product_Categories_Chooser extends
+    Mage_Adminhtml_Block_Catalog_Category_Tree
 {
     public function __construct()
     {
@@ -72,22 +72,15 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Product_Categories_Chooser
         return $root;
     }
     
-    public function getRoot($parentNodeCategory=null, $recursionLevel=3)
+    protected function _getRoot()
     {
-        if (!is_null($parentNodeCategory) && $parentNodeCategory->getId()) {
-            return $this->getNode($parentNodeCategory, $recursionLevel);
-        }
-        
-        $root = Mage::registry('blcg_wgcfpcc_root');
-        
-        if (is_null($root)) {
+        if (is_null($root = Mage::registry('blcg_wgcfpcc_root'))) {
             $storeId = (int) $this->getRequest()->getParam('store');
             
             if ($storeId) {
                 $store  = Mage::app()->getStore($storeId);
                 $rootId = $store->getRootCategoryId();
-            }
-            else {
+            } else {
                 $rootId = Mage_Catalog_Model_Category::TREE_ROOT_ID;
             }
             
@@ -109,11 +102,17 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Product_Categories_Chooser
             
             Mage::register('blcg_wgcfpcc_root', $root);
         }
-        
         return $root;
     }
     
-    protected function _getNodeJson($node, $level=1)
+    public function getRoot($parentNodeCategory = null, $recursionLevel = 3)
+    {
+        return (!is_null($parentNodeCategory) && $parentNodeCategory->getId())
+            ? $this->getNode($parentNodeCategory, $recursionLevel)
+            : $this->_getRoot();
+    }
+    
+    protected function _getNodeJson($node, $level = 1)
     {
         $item = parent::_getNodeJson($node, $level);
         $isParent = $this->_isParentSelectedCategory($node);
@@ -178,14 +177,14 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Product_Categories_Chooser
         return $this->helper('core')->jsonEncode($children);
     }
     
-    public function getSelectedCategoriesPathIds($rootId=false)
+    public function getSelectedCategoriesPathIds($rootId = false)
     {
         $ids = array();
         $helper = $this->helper('customgrid');
-        $from16 = $helper->isMageVersionGreaterThan(1, 5);
+        $fromOneDotSix = $helper->isMageVersionGreaterThan(1, 5);
         $categoryIds = $this->getCategoryIds();
         
-        if ($from16 && empty($categoryIds)) {
+        if ($fromOneDotSix && empty($categoryIds)) {
             return array();
         }
         
@@ -206,7 +205,7 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Product_Categories_Chooser
         return $ids;
     }
     
-    public function getLoadTreeUrl($expanded=null)
+    public function getLoadTreeUrl()
     {
         return $this->getUrl('customgrid/grid_column_filter/categoriesJson', array('_current' => true));
     }

@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_Grid_Type_Cms_Widget
-    extends BL_CustomGrid_Model_Grid_Type_Abstract
+class BL_CustomGrid_Model_Grid_Type_Cms_Widget extends BL_CustomGrid_Model_Grid_Type_Abstract
 {
     protected function _getSupportedBlockTypes()
     {
@@ -37,10 +36,12 @@ class BL_CustomGrid_Model_Grid_Type_Cms_Widget
         );
         
         if (!Mage::app()->isSingleStoreMode()) {
+            $stores = Mage::getSingleton('adminhtml/system_store')->getStoreValuesForForm(false, true);
+            
             $fields['store_ids'] = array(
                 'type'              => 'multiselect',
                 'required'          => true,
-                'form_values'       => Mage::getSingleton('adminhtml/system_store')->getStoreValuesForForm(false, true),
+                'form_values'       => $stores,
                 'render_block_type' => 'customgrid/widget_grid_editor_renderer_static_store',
             );
         }
@@ -100,16 +101,20 @@ class BL_CustomGrid_Model_Grid_Type_Cms_Widget
     
     protected function _applyEditedFieldValue($blockType, BL_CustomGrid_Object $config, array $params, $entity, $value)
     {
-        if ($config->getId() == 'sort_order') {
+        if ($config->getValueId() == 'sort_order') {
             $entity->setSortOrder(empty($value) ? '0' : $value);
             return $this;
         }
         return parent::_applyEditedFieldValue($blockType, $config, $params, $entity, $value);
     }
     
-    protected function _beforeSaveEditedFieldValue($blockType, BL_CustomGrid_Object $config, array $params, $entity,
-        $value)
-    {
+    protected function _beforeSaveEditedFieldValue(
+        $blockType,
+        BL_CustomGrid_Object $config,
+        array $params,
+        $entity,
+        $value
+    ) {
         if (is_string($result = $entity->validate())) {
             Mage::throwException($result);
         }
@@ -119,7 +124,7 @@ class BL_CustomGrid_Model_Grid_Type_Cms_Widget
     
     protected function _getSavedFieldValueForRender($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
-        if ($config->getId() == 'store_ids') {
+        if ($config->getValueId() == 'store_ids') {
             $storesIds = $entity->getStoreIds();
             return (is_array($storesIds) ? $storesIds : explode(',', $storesIds));
         }

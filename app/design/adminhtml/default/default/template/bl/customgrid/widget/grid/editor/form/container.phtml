@@ -44,10 +44,10 @@ document.observe('dom:loaded', function() {
     <?php endif ?>
 <script type="text/javascript">
 //<![CDATA[
-blcgGridEditForm = new varienForm('<?php echo $this->getFormHtmlId() ?>');
-blcgGridEditForm.submit = function(url) {
+blcgGridEditorForm = new varienForm('<?php echo $this->getFormHtmlId() ?>');
+blcgGridEditorForm.submit = function(url) {
     if (typeof(varienGlobalEvents) != 'undefined') {
-        varienGlobalEvents.fireEvent('blcgGridEditFormStartSubmit', this.formId);
+        varienGlobalEvents.fireEvent('blcgGridEditorFormStartSubmit', this.formId);
     }
     if (this.validator && this.validator.validate()) {
         <?php if ($_jsObjectName): ?>
@@ -64,7 +64,7 @@ blcgGridEditForm.submit = function(url) {
                 tinyMCE.triggerSave();
             }
             if (typeof(varienGlobalEvents) != 'undefined') {
-                varienGlobalEvents.fireEvent('blcgGridEditFormLaunchSubmit', this.formId);
+                varienGlobalEvents.fireEvent('blcgGridEditorFormLaunchSubmit', this.formId);
             }
             
             <?php echo $_jsObjectName ?>.validateEdit($(this.formId).serialize(true));
@@ -76,7 +76,7 @@ blcgGridEditForm.submit = function(url) {
         <?php endif ?>
     }
     return false;
-}.bind(blcgGridEditForm);
+}.bind(blcgGridEditorForm);
 //]]>
 </script>
     <?php echo $this->getFormScripts() ?>

@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Grid_Edit
-    extends Mage_Adminhtml_Block_Widget
+class BL_CustomGrid_Block_Grid_Edit extends Mage_Adminhtml_Block_Widget
 {
     public function __construct()
     {
@@ -69,15 +68,15 @@ class BL_CustomGrid_Block_Grid_Edit
                 ))
         );
         
-        if ($gridModel->checkUserActionPermission(BL_CustomGrid_Model_Grid::ACTION_DELETE)) {
+        if ($gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_DELETE)) {
             $this->setChild(
                 'delete_button',
                 $this->getLayout()
                     ->createBlock('adminhtml/widget_button')
                     ->setData(array(
                         'label'   => $this->__('Delete'),
-                        'onclick' => 'confirmSetLocation(\'' . $this->__('Are you sure?') . '\', \''
-                            . $this->getDeleteUrl() . '\')',
+                        'onclick' => 'confirmSetLocation(\'' . $this->__('Are you sure?') . '\', '
+                            . '\'' . $this->getDeleteUrl() . '\')',
                         'class'   => 'delete',
                     ))
             );
@@ -125,12 +124,15 @@ class BL_CustomGrid_Block_Grid_Edit
     
     public function getSaveAndContinueUrl()
     {
-        return $this->getUrl('*/*/save', array(
-            '_current'   => true,
-            'back'       => 'edit',
-            'tab'        => '{{tab_id}}',
-            'active_tab' => null,
-        ));
+        return $this->getUrl(
+            '*/*/save',
+            array(
+                '_current'   => true,
+                'back'       => 'edit',
+                'tab'        => '{{tab_id}}',
+                'active_tab' => null,
+            )
+        );
     }
     
     public function getDeleteUrl()

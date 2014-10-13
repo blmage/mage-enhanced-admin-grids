@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Config_Form_Element_Multiselect
-    extends Varien_Data_Form_Element_Multiselect
+class BL_CustomGrid_Block_Config_Form_Element_Multiselect extends Varien_Data_Form_Element_Multiselect
 {
     public function getName()
     {

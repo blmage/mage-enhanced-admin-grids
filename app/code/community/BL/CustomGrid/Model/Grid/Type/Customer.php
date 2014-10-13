@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_Grid_Type_Customer
-    extends BL_CustomGrid_Model_Grid_Type_Abstract
+class BL_CustomGrid_Model_Grid_Type_Customer extends BL_CustomGrid_Model_Grid_Type_Abstract
 {
     protected function _getSupportedBlockTypes()
     {
@@ -37,7 +36,7 @@ class BL_CustomGrid_Model_Grid_Type_Customer
         
         $availableAttributes = array();
         
-        foreach ($attributes as $key => $attribute) {
+        foreach ($attributes as $attribute) {
             if ($attribute->getBackendType() != 'static') {
                 $availableAttributes[$attribute->getAttributeCode()] = $attribute;
             }
@@ -54,8 +53,8 @@ class BL_CustomGrid_Model_Grid_Type_Customer
     protected function _getAddressTypes()
     {
         return array(
-            'billing'  => $this->_getHelper()->__('Billing Address'),
-            'shipping' => $this->_getHelper()->__('Shipping Address'),
+            'billing'  => $this->_getBaseHelper()->__('Billing Address'),
+            'shipping' => $this->_getBaseHelper()->__('Shipping Address'),
         );
     }
     

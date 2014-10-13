@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-abstract class BL_CustomGrid_Model_Grid_Rewriter_Abstract
-    extends BL_CustomGrid_Object
+abstract class BL_CustomGrid_Model_Grid_Rewriter_Abstract extends BL_CustomGrid_Object
 {
     const REWRITE_CODE_VERSION = 2; // bump this value when significant changes are made to the rewriting code
     
@@ -54,7 +53,8 @@ abstract class BL_CustomGrid_Model_Grid_Rewriter_Abstract
                 $this->_rewriteGrid($blcgClass, $originalClass, $blockType);
                 
                 if (!class_exists($blcgClass, true)) {
-                    Mage::throwException($helper->__('The generated rewriting class "%s" can not be found', $blcgClass));
+                    $message = 'The generated rewriting class "%s" can not be found';
+                    Mage::throwException($helper->__($message, $blcgClass));
                 }
             }
             
@@ -282,7 +282,13 @@ abstract class BL_CustomGrid_Model_Grid_Rewriter_Abstract
     public function setDefaultPage($page)
     {
         if (!is_null($this->_blcg_gridModel)) {
-            $page = $this->_blcg_gridModel->getGridBlockDefaultParamValue(\'page\', $page, null, false, $this->_defaultPage);
+            $page = $this->_blcg_gridModel->getGridBlockDefaultParamValue(
+                \'page\',
+                $page,
+                null,
+                false,
+                $this->_defaultPage
+            );
         }
         return parent::setDefaultPage($page);
     }

@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Options_SourceController
-    extends Mage_Adminhtml_Controller_Action
+class BL_CustomGrid_Options_SourceController extends Mage_Adminhtml_Controller_Action
 {
     protected function _initOptionsSource($requireId=false)
     {
@@ -122,11 +121,12 @@ class BL_CustomGrid_Options_SourceController
                     ->setOptionsSourceData(false)
                     ->addSuccess($this->__('The options source has been successfully saved.'));
                 
-                if ($redirectBack = $this->getRequest()->getParam('back', false)) {
+                if ($this->getRequest()->getParam('back', false)) {
                     return $this->_redirect('*/*/edit', array('_current' => true));
-                } else {
-                    return $this->_redirect('*/*/');
                 }
+                
+                return $this->_redirect('*/*/');
+                
             } catch (Exception $e) {
                 $this->_getSession()
                     ->setOptionsSourceData($data)
@@ -134,9 +134,9 @@ class BL_CustomGrid_Options_SourceController
                 
                 if ($source->getId()) {
                     return $this->_redirect('*/*/edit', array('_current' => true));
-                } else {
-                    return $this->_redirect('*/*/new');
                 }
+                
+                return $this->_redirect('*/*/new');
             }
         }
         return $this->_redirect('*/*/', array('_current' => true));
@@ -176,17 +176,26 @@ class BL_CustomGrid_Options_SourceController
             return;
         }
         
+        $sourcesIds = $this->getRequest()->getParam('options_source');
+        $deletedCount = 0;
+        
         try {
-            $sourcesIds = $this->getRequest()->getParam('options_source');
-            
             foreach ($sourcesIds as $sourceId) {
-                Mage::getSingleton('customgrid/options_source')->load($sourceId)->delete();
+                Mage::getSingleton('customgrid/options_source')
+                    ->load($sourceId)
+                    ->delete();
+                ++$deletedCount;
             }
-            
-            $this->_getSession()
-                ->addSuccess($this->__('Total of %d options source(s) have been deleted.', count($sourcesIds)));
-        } catch (Exception $e) {
+        } catch (Mage_Core_Exception $e) {
             $this->_getSession()->addError($e->getMessage());
+        } catch (Exception $e) {
+            Mage::logException($e);
+            $this->_getSession()->addError($this->__('An error occured while deleting an options source'));
+        }
+        
+        if ($deletedCount > 0) {
+            $this->_getSession()
+                ->addSuccess($this->__('Total of %d options source(s) have been deleted.', $deletedCount));
         }
         
         $this->getResponse()->setRedirect($this->getUrl('*/*/index'));

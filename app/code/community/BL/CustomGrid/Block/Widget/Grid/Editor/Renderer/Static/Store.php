@@ -13,8 +13,8 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Store
-    extends BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Abstract
+class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Store extends
+    BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Abstract
 {
     protected function _getStoreModel()
     {

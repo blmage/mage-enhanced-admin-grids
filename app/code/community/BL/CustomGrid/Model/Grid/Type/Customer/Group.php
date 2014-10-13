@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_Grid_Type_Customer_Group
-    extends BL_CustomGrid_Model_Grid_Type_Abstract
+class BL_CustomGrid_Model_Grid_Type_Customer_Group extends BL_CustomGrid_Model_Grid_Type_Abstract
 {
     protected function _getSupportedBlockTypes()
     {
@@ -58,18 +57,22 @@ class BL_CustomGrid_Model_Grid_Type_Customer_Group
         return Mage::getModel('customer/group')->load($entityId);
     }
     
-    protected function _isEditedEntityLoaded($blockType, BL_CustomGrid_Object $config, array $params, $entity,
-        $entityId)
-    {
+    protected function _isEditedEntityLoaded(
+        $blockType,
+        BL_CustomGrid_Object $config,
+        array $params,
+        $entity,
+        $entityId
+    ) {
         return (is_object($entity) ? !is_null($entity->getId()) : false);
     }
     
     protected function _checkEntityEditableField($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
         if (parent::_checkEntityEditableField($blockType, $config, $params, $entity)) {
-            if (($config->getId() == 'type')
+            if (($config->getValueId() == 'type')
                 && ($entity->getId() == Mage_Customer_Model_Group::NOT_LOGGED_IN_ID)) {
-                Mage::throwException($this->_getHelper()->__('The name is not editable for this customer group'));
+                Mage::throwException($this->_getBaseHelper()->__('The name is not editable for this customer group'));
             }
             return true;
         }
@@ -81,13 +84,17 @@ class BL_CustomGrid_Model_Grid_Type_Customer_Group
         return 'customer/group';
     }
     
-    protected function _beforeSaveEditedFieldValue($blockType, BL_CustomGrid_Object $config, array $params, $entity,
-        $value)
-    {
+    protected function _beforeSaveEditedFieldValue(
+        $blockType,
+        BL_CustomGrid_Object $config,
+        array $params,
+        $entity,
+        $value
+    ) {
         if ($entity->getId() == Mage_Customer_Model_Group::NOT_LOGGED_IN_ID) {
             // Prevent unicity check (also done in original form, because code input is disabled and setCode is forced)
             $entity->setCode(null);
         }
-        return parent::_beforeSaveEditedFieldValue($type, $config, $params, $entity, $value);
+        return parent::_beforeSaveEditedFieldValue($blockType, $config, $params, $entity, $value);
     }
 }

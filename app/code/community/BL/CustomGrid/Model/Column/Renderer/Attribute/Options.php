@@ -13,16 +13,15 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_Column_Renderer_Attribute_Options
-    extends BL_CustomGrid_Model_Column_Renderer_Attribute_Abstract
+class BL_CustomGrid_Model_Column_Renderer_Attribute_Options extends
+    BL_CustomGrid_Model_Column_Renderer_Attribute_Abstract
 {
-    protected $_backwardsMap = array(
-        'options_separator' => 'sub_values_separator',
-    );
+    protected $_backwardsMap = array('options_separator' => 'sub_values_separator');
     
-    public function isAppliableToAttribute(Mage_Eav_Model_Entity_Attribute $attribute,
-        BL_CustomGrid_Model_Grid $gridModel)
-    {
+    public function isAppliableToAttribute(
+        Mage_Eav_Model_Entity_Attribute $attribute,
+        BL_CustomGrid_Model_Grid $gridModel
+    ) {
         return ($attribute->getSourceModel() != '')
             || ($attribute->getFrontendInput() == 'select')
             || ($attribute->getFrontendInput() == 'multiselect');
@@ -38,22 +37,29 @@ class BL_CustomGrid_Model_Column_Renderer_Attribute_Options
         return (!empty($options) ? $options : null);
     }
     
-    public function getColumnBlockValues(Mage_Eav_Model_Entity_Attribute $attribute, Mage_Core_Model_Store $store,
-        BL_CustomGrid_Model_Grid $gridModel)
+    protected function _getOptions(Mage_Eav_Model_Entity_Attribute $attribute)
     {
-        $options = null;
-        $isMultiple = ($attribute->getFrontendInput() == 'multiselect');
+        $options = array();
         
         if ($this->getData('values/force_default_source')
             || !is_array($options = $this->_getAttributeOptions($attribute))) {
             if (($sourceId = $this->getData('values/default_source_id'))
                 && ($source = Mage::getModel('customgrid/options_source')->load($sourceId))
                 && $source->getId()) {
-                $options = $source->getOptionsArray();
-            } else {
-                $options = array();
+                $options = $source->getOptionArray();
             }
         }
+        
+        return $options;
+    }
+    
+    public function getColumnBlockValues(
+        Mage_Eav_Model_Entity_Attribute $attribute,
+        Mage_Core_Model_Store $store,
+        BL_CustomGrid_Model_Grid $gridModel
+    ) {
+        $options = $this->_getOptions($attribute);
+        $isMultiple = ($attribute->getFrontendInput() == 'multiselect');
         
         if (!$this->hasData('values/filter_mode') && $this->getData('values/boolean_filter')) {
             $this->setData(

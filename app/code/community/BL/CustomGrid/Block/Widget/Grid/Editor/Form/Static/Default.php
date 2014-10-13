@@ -13,8 +13,8 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Static_Default
-    extends BL_CustomGrid_Block_Widget_Grid_Editor_Form_Abstract
+class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Static_Default extends
+    BL_CustomGrid_Block_Widget_Grid_Editor_Form_Abstract
 {
     protected function _prepareForm()
     {
@@ -22,9 +22,9 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Static_Default
         $editConfig = $this->getEditConfig();
         
         // Prepare field values
-        $fieldId     = $editConfig->getData('form/id');
-        $fieldType   = $editConfig->getData('type');
-        $fieldName   = $editConfig->getData('form/name');
+        $fieldId   = $editConfig->getData('form/id');
+        $fieldType = $editConfig->getData('type');
+        $fieldName = $editConfig->getData('form/name');
         
         $fieldValues = array(
             'name'     => $fieldName,
@@ -79,72 +79,92 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Static_Default
         return parent::_initFormValues();
     }
     
-    protected function _getAdditionalFieldValues($fieldId, $fieldType, $fieldName,
-        BL_CustomGrid_Model_Grid_Edit_Config $editConfig)
+    protected function _getAdditionalChoicesFieldValues(BL_CustomGrid_Model_Grid_Edit_Config $editConfig)
+    {
+        // Options
+        $sourceTypes = array('options', 'values');
+        $sourceOptions = null;
+        
+        foreach ($sourceTypes as $sourceType) {
+            $key = 'form/' . $sourceType;
+            $callbackKey = $key . '_callback';
+            $callbackParamsKey = $callbackKey . '_params';
+            
+            if ($editConfig->hasData($key)) {
+                $sourceOptions = $editConfig->getData($key);
+            } elseif ($editConfig->hasData($callbackKey)) {
+                $editedValue  = $this->getEditedValue();
+                $editParams   = $this->getEditParams();
+                $editedEntity = $this->getEditedEntity();
+                
+                $sourceOptions = call_user_func_array(
+                    $editConfig->getData($callbackKey),
+                    $editConfig->hasData($callbackParamsKey)
+                        ? (is_array($params = $editConfig->hasData($callbackParamsKey)) ? $params : array())
+                        : array($this->getGridBlockType(), $editedValue, $editParams, $editedEntity)
+                );
+            }
+            if (is_array($sourceOptions)) {
+                // Stop as soon as a valid options source is found
+                break;
+            }
+        }
+        
+        if (is_array($sourceOptions)) {
+            $values[$sourceType] = $sourceOptions;
+        } else {
+            Mage::throwException($this->__('Can\'t find any option to use for edited value'));
+        }
+    }
+    
+    protected function _getAdditionalDateFieldValues(BL_CustomGrid_Model_Grid_Edit_Config $editConfig)
+    {
+        $values = array('after_element_html' => '');
+        
+        if ($editConfig->hasData('form/date_image')) {
+            $values['image'] = $editConfig->getData('form/date_image');
+        } else {
+            $values['image'] = $this->getSkinUrl('images/grid-cal.gif');
+        }
+        if ($editConfig->hasData('form/date_format')) {
+            $values['format'] = $editConfig->getData('form/date_format');
+        } else {
+            $values['format'] = Mage::app()->getLocale()
+                ->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
+        }
+        
+        return $values;
+    }
+    
+    protected function _getAdditionalEditorFieldValues(BL_CustomGrid_Model_Grid_Edit_Config $editConfig)
     {
         $values = array();
         
-        // Type specific values
+        if ($editConfig->getData('form/wysiwyg')) {
+            $values['config'] = $editConfig->hasData('form/wysiwyg_config')
+                ? $editConfig->getData('form/wysiwyg_config')
+                : $this->helper('customgrid/editor')->getWysiwygConfig();
+        } elseif ($editConfig->hasData('form/config')) {
+            $editConfig->unsetData('form/config');
+        }
+        
+        return $values;
+    }
+    
+    protected function _getAdditionalFieldValues(
+        $fieldId,
+        $fieldType,
+        $fieldName,
+        BL_CustomGrid_Model_Grid_Edit_Config $editConfig
+    ) {
+        $values = array();
+        
         if (in_array($fieldType, array('checkboxes', 'multiselect', 'radios', 'select'))) {
-            // Options
-            $sourceTypes = array('options', 'values');
-            $sourceOptions = null;
-            
-            foreach ($sourceTypes as $sourceType) {
-                $key = 'form/' . $sourceType;
-                $callbackKey = $key . '_callback';
-                $callbackParamsKey = $callbackKey . '_params';
-                
-                if ($editConfig->hasData($key)) {
-                    $sourceOptions = $editConfig->getData($key);
-                } elseif ($editConfig->hasData($callbackKey)) {
-                    $editedValue  = $this->getEditedValue();
-                    $editParams   = $this->getEditParams();
-                    $editedEntity = $this->getEditedEntity();
-                    
-                    $sourceOptions = call_user_func_array(
-                        $editConfig->getData($callbackKey),
-                        $editConfig->hasData($callbackParamsKey)
-                            ? (is_array($params = $editConfig->hasData($callbackParamsKey)) ? $params : array())
-                            : array($this->getGridBlockType(), $editedValue, $editParams, $editedEntity)
-                    );
-                }
-                if (is_array($sourceOptions)) {
-                    // Stop as soon as a valid options source is found
-                    break;
-                }
-            }
-            
-            if (is_array($sourceOptions)) {
-                $values[$sourceType] = $sourceOptions;
-            } else {
-                Mage::throwException($this->__('Can\'t find any option to use for edited value'));
-            }
-            
+            $values = $this->_getAdditionalChoicesFieldValues($editConfig);
         } elseif ($fieldType == 'date') {
-            // Date
-            $values['after_element_html'] = '';
-            
-            if ($editConfig->hasData('form/date_image')) {
-                $values['image'] = $editConfig->getData('form/date_image');
-            } else {
-                $values['image'] = $this->getSkinUrl('images/grid-cal.gif');
-            }
-            if ($editConfig->hasData('form/date_format')) {
-                $values['format'] = $editConfig->getData('form/date_format');
-            } else {
-                $values['format'] = Mage::app()->getLocale()
-                    ->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
-            }
+            $values = $this->_getAdditionalDateFieldValues($editConfig);
         } elseif ($fieldType == 'editor') {
-            // WYSIWYG editor
-            if ($editConfig->getData('form/wysiwyg')) {
-                $values['config'] = $editConfig->hasData('form/wysiwyg_config')
-                    ? $editConfig->getData('form/wysiwyg_config')
-                    : $this->helper('customgrid/editor')->getWysiwygConfig();
-            } elseif (isset($values['config'])) {
-                unset($values['config']);
-            }
+            $values = $this->_getAdditionalEditorFieldValues($editConfig);
         }
         
         // Additional values (that won't override type-specific ones)
@@ -160,9 +180,13 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Static_Default
         return $values;
     }
     
-    protected function _prepareFormField($fieldId, $fieldType, $fieldName,
-        BL_CustomGrid_Model_Grid_Edit_Config $editConfig, Varien_Data_Form_Element_Abstract $field)
-    {
+    protected function _prepareFormField(
+        $fieldId,
+        $fieldType,
+        $fieldName,
+        BL_CustomGrid_Model_Grid_Edit_Config $editConfig,
+        Varien_Data_Form_Element_Abstract $field
+    ) {
         if ($fieldType == 'date') {
             // Stop click events on icons, else row click events will be handled too (eg redirecting to edit pages)
             $field->setAfterElementHtml($field->getAfterElementHtml() . '

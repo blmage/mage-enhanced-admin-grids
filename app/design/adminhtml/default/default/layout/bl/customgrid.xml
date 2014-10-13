@@ -105,6 +105,18 @@
         </reference>
     </customgrid_custom_column_config_unknown>
     
+    <customgrid_grid_form_window_action>
+        <reference name="content">
+            <block type="customgrid/grid_form_container" name="blcg.grid.form_container" />
+        </reference>
+    </customgrid_grid_form_window_action>
+    
+    <customgrid_grid_form_window_error>
+        <reference name="content">
+            <block type="adminhtml/template" name="blcg.grid.form_error" template="bl/customgrid/grid/form/error.phtml" />
+        </reference>
+    </customgrid_grid_form_window_error>
+    
     <customgrid_grid_profile_form_window_action>
         <reference name="content">
             <block type="customgrid/grid_profile_form_container" name="blcg.grid_profile.form_container" />
@@ -113,7 +125,7 @@
     
     <customgrid_grid_profile_form_window_error>
         <reference name="content">
-            <block type="adminhtml/template" name="blcg.grid_profile.form_error" template="bl/customgrid/grid/profile/form/error.phtml" />
+            <block type="adminhtml/template" name="blcg.grid_profile.form_error" template="bl/customgrid/grid/form/error.phtml" />
         </reference>
     </customgrid_grid_profile_form_window_error>
     

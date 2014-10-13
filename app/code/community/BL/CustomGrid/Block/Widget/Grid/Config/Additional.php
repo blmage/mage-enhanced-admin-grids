@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Widget_Grid_Config_Additional
-    extends BL_CustomGrid_Block_Widget_Grid_Config_Abstract
+class BL_CustomGrid_Block_Widget_Grid_Config_Additional extends BL_CustomGrid_Block_Widget_Grid_Config_Abstract
 {
     protected function _construct()
     {
@@ -35,7 +34,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config_Additional
     public function canDisplayDefaultParamsBlocks()
     {
         return $this->getGridModel()
-            ->checkUserActionPermission(BL_CustomGrid_Model_Grid::ACTION_EDIT_DEFAULT_PARAMS);
+            ->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_EDIT_DEFAULT_PARAMS);
     }
     
     public function getGridPageNumber()
@@ -86,7 +85,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config_Additional
     public function canDisplayCustomColumnsBlock()
     {
         return $this->getGridModel()->canHaveCustomColumns()
-            && $this->getGridModel()->checkUserActionPermission(BL_CustomGrid_Model_Grid::ACTION_CUSTOMIZE_COLUMNS);
+            && $this->getGridModel()->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_CUSTOMIZE_COLUMNS);
     }
     
     public function getCustomColumns()
@@ -117,7 +116,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config_Additional
     public function canDisplayExportBlock()
     {
         return $this->getGridModel()->canExport()
-            && $this->getGridModel()->checkUserActionPermission(BL_CustomGrid_Model_Grid::ACTION_EXPORT_RESULTS);
+            && $this->getGridModel()->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_EXPORT_RESULTS);
     }
     
     public function getExportTypes()

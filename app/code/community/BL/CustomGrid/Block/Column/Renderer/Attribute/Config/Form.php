@@ -13,9 +13,9 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Column_Renderer_Attribute_Config_Form
-    extends BL_CustomGrid_Block_Column_Renderer_Config_Form_Abstract
-{   
+class BL_CustomGrid_Block_Column_Renderer_Attribute_Config_Form extends
+    BL_CustomGrid_Block_Column_Renderer_Config_Form_Abstract
+{
     public function getFormId()
     {
         return 'blcg_column_renderer_attribute_config_form';

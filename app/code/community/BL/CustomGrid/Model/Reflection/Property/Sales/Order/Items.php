@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_Reflection_Property_Sales_Order_Items
-    extends Mage_Sales_Model_Order
+class BL_CustomGrid_Model_Reflection_Property_Sales_Order_Items extends Mage_Sales_Model_Order
 {
     public function setValue($order, $value)
     {

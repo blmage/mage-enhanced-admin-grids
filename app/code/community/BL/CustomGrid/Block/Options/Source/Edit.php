@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Options_Source_Edit
-    extends Mage_Adminhtml_Block_Widget
+class BL_CustomGrid_Block_Options_Source_Edit extends Mage_Adminhtml_Block_Widget
 {
     public function __construct()
     {
@@ -153,17 +152,26 @@ class BL_CustomGrid_Block_Options_Source_Edit
     
     public function getSaveUrl()
     {
-        return $this->getUrl('*/*/save', array('_current' => true, 'back' => null));
+        return $this->getUrl(
+            '*/*/save',
+            array(
+                '_current' => true,
+                'back' => null,
+            )
+        );
     }
     
     public function getSaveAndContinueUrl()
     {
-        return $this->getUrl('*/*/save', array(
-            '_current'   => true,
-            'back'       => 'edit',
-            'tab'        => '{{tab_id}}',
-            'active_tab' => null,
-        ));
+        return $this->getUrl(
+            '*/*/save',
+            array(
+                '_current'   => true,
+                'back'       => 'edit',
+                'tab'        => '{{tab_id}}',
+                'active_tab' => null,
+            )
+        );
     }
     
     public function getDeleteUrl()

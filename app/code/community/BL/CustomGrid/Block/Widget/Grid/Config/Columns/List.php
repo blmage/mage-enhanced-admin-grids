@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Widget_Grid_Config_Columns_List
-    extends BL_CustomGrid_Block_Widget_Grid_Config_Abstract
+class BL_CustomGrid_Block_Widget_Grid_Config_Columns_List extends Mage_Adminhtml_Block_Widget
 {
     protected function _construct()
     {
@@ -22,9 +21,21 @@ class BL_CustomGrid_Block_Widget_Grid_Config_Columns_List
         $this->setTemplate('bl/customgrid/widget/grid/config/columns/list.phtml');
     }
     
-    public function getDisplayableWithoutBlock()
+    protected function _toHtml()
     {
-        return true;
+        return $this->getGridModel()
+            ? parent::_toHtml()
+            : '';
+    }
+    
+    public function isStandAlone()
+    {
+        return false;
+    }
+    
+    public function getId()
+    {
+        return $this->getDataSetDefault('id', $this->helper('core')->uniqHash('blcgConfig'));
     }
     
     public function getColumnsMaxOrder()
@@ -56,8 +67,18 @@ class BL_CustomGrid_Block_Widget_Grid_Config_Columns_List
     {
         return $this->getDataSetDefault(
             'can_choose_editable_columns',
-            $this->getGridModel()->checkUserActionPermission(BL_CustomGrid_Model_Grid::ACTION_CHOOSE_EDITABLE_COLUMNS)
+            $this->getGridModel()->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_CHOOSE_EDITABLE_COLUMNS)
         );
+    }
+    
+    public function canDisplaySystemPart()
+    {
+        return $this->getDataSetDefault('can_display_system_part', $this->getGridModel()->getDisplaySystemPart());
+    }
+    
+    public function canDisplayStorePart()
+    {
+        return $this->getDataSetDefault('can_display_store_part', !Mage::app()->isSingleStoreMode());
     }
     
     public function getColumnAlignments()
@@ -100,6 +121,11 @@ class BL_CustomGrid_Block_Widget_Grid_Config_Columns_List
         return (isset($lockedValues[$value]) ? $lockedValues[$value] : null);
     }
     
+    public function getGridJsObjectName()
+    {
+        return (($gridBlock = $this->getGridBlock()) ? $gridBlock->getJsObjectName() : null);
+    }
+    
     public function getConfigJsObjectName()
     {
         return $this->getId() . 'Config';
@@ -107,7 +133,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config_Columns_List
     
     public function getSaveUrl()
     {
-        return $this->getUrl('customgrid/grid/save');
+        return $this->getUrl('customgrid/grid/saveColumns');
     }
     
     public function getReapplyDefaultFilterUrl()
@@ -126,6 +152,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config_Columns_List
             $this->setData(
                 'additional_params_json_config',
                 Mage::helper('core')->jsonEncode(array(
+                    'form_key'   => $this->getFormKey(),
                     'grid_id'    => $this->getGridModel()->getId(),
                     'profile_id' => $this->getGridModel()->getProfileId(),
                 ))
@@ -144,12 +171,30 @@ class BL_CustomGrid_Block_Widget_Grid_Config_Columns_List
         return '{{id}}';
     }
     
+    public function getAttributeColumnButtonHtml()
+    {
+        return $this->getButtonHtml(
+            $this->__('Add Attribute Column'),
+            $this->getConfigJsObjectName() . '.addColumn();',
+            'scalable add'
+        );
+    }
+    
+    public function getSaveButtonHtml()
+    {
+        return $this->getButtonHtml(
+            $this->__('Save'),
+            $this->getConfigJsObjectName() . '.saveColumns();',
+            'scalable save'
+        );
+    }
+    
     protected function _getGlobalCssId($suffix)
     {
         return $this->getHtmlId() . '-' . $suffix;
     }
     
-    protected function _getColumnBasedCssId($suffix, $columnId=null)
+    protected function _getColumnBasedCssId($suffix, $columnId = null)
     {
         return $this->getHtmlId() . '-' . (is_null($columnId) ? $this->getIdPlaceholder() : $columnId). '-' . $suffix;
     }
@@ -164,47 +209,47 @@ class BL_CustomGrid_Block_Widget_Grid_Config_Columns_List
         return $this->_getGlobalCssId('table-rows');
     }
     
-    public function getTableRowCssId($columnId=null)
+    public function getTableRowCssId($columnId = null)
     {
         return $this->_getColumnBasedCssId('table-column', $columnId);
     }
     
-    public function getVisibleCheckboxCssId($columnId=null)
+    public function getVisibleCheckboxCssId($columnId = null)
     {
         return $this->_getColumnBasedCssId('visible-checkbox', $columnId);
     }
     
-    public function getFilterOnlyCheckboxCssId($columnId=null)
+    public function getFilterOnlyCheckboxCssId($columnId = null)
     {
         return $this->_getColumnBasedCssId('filter-only-checkbox', $columnId);
     }
     
-    public function getEditableContainerCssId($columnId=null)
+    public function getEditableContainerCssId($columnId = null)
     {
         return $this->_getColumnBasedCssId('editable-container', $columnId);
     }
     
-    public function getEditableCheckboxCssId($columnId=null)
+    public function getEditableCheckboxCssId($columnId = null)
     {
         return $this->_getColumnBasedCssId('editable-checkbox', $columnId);
     }
     
-    public function getAttributeRendererConfigButtonCssId($columnId=null)
+    public function getAttributeRendererConfigButtonCssId($columnId = null)
     {
         return $this->_getColumnBasedCssId('config-button', $columnId);
     }
     
-    public function getCustomColumnConfigButtonCssId($columnId=null)
+    public function getCustomColumnConfigButtonCssId($columnId = null)
     {
         return $this->_getColumnBasedCssId('custom-column-config-button', $columnId);
     }
     
-    public function getCustomColumnConfigTargetCssId($columnId=null)
+    public function getCustomColumnConfigTargetCssId($columnId = null)
     {
         return $this->_getColumnBasedCssId('custom-column-config-target', $columnId);
     }
     
-    public function getOrderInputCssId($columnId=null)
+    public function getOrderInputCssId($columnId = null)
     {
         return $this->_getColumnBasedCssId('order-input', $columnId);
     }
@@ -220,7 +265,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config_Columns_List
         return $this->getChild('store_select');
     }
     
-    protected function getStoreSelectHtml(BL_CustomGrid_Model_Grid_Column $column=null)
+    protected function getStoreSelectHtml(BL_CustomGrid_Model_Grid_Column $column = null)
     {
         $jsOutput  = is_null($column);
         $columnId  = ($jsOutput ? $this->getIdPlaceholder() : $column->getId());
@@ -267,14 +312,23 @@ class BL_CustomGrid_Block_Widget_Grid_Config_Columns_List
         $columnBlockId = $column->getBlockId();
         
         if ($column->isCollection()) {
-            $lockedValues   = $this->getGridModel()->getColumnLockedValues($columnBlockId); 
-            $lockedRenderer = isset($lockedValues['renderer']);
-            $lockedLabel    = (isset($lockedValues['renderer_label']) ? $lockedValues['renderer_label'] : '');
-            $rendererType   = ($lockedRenderer ? $lockedValues['renderer'] : $column->getRendererType());
+            $lockedValues = $this->getGridModel()->getColumnLockedValues($columnBlockId);
+            
+            if ($lockedRenderer = isset($lockedValues['renderer'])) {
+                $rendererType = $lockedValues['renderer'];
+            } else {
+                $rendererType = $column->getRendererType();
+            }
+             
+            $lockedLabel  = (isset($lockedValues['renderer_label']) ? $lockedValues['renderer_label'] : '');
         } elseif ($column->isCustom() && ($customColumn = $column->getCustomColumnModel())) {
-            $lockedRenderer = (bool) strlen($customColumn->getLockedRenderer());
-            $lockedLabel    = ($lockedRenderer ? $customColumn->getRendererLabel() : '');
-            $rendererType   = ($lockedRenderer ? $customColumn->getLockedRenderer() : $column->getRendererType());
+            if ($lockedRenderer = (bool) strlen($customColumn->getLockedRenderer())) {
+                $lockedLabel  = $customColumn->getRendererLabel();
+                $rendererType = $customColumn->getLockedRenderer();
+            } else {
+                $lockedLabel  = '';
+                $rendererType = $column->getRendererType();
+            }
         } else {
             return '';
         }
@@ -320,7 +374,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config_Columns_List
         return $this->getChild('attribute_renderer_select');
     }
     
-    public function getAttributesSelectHtml(BL_CustomGrid_Model_Grid_Column $column=null)
+    public function getAttributesSelectHtml(BL_CustomGrid_Model_Grid_Column $column = null)
     {
         $htmlId = $this->getHtmlId();
         $jsOutput  = is_null($column);

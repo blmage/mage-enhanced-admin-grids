@@ -13,9 +13,8 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Options_Source_Edit_Tab_Custom_List
-    extends Mage_Adminhtml_Block_Widget_Form
-    implements Varien_Data_Form_Element_Renderer_Interface
+class BL_CustomGrid_Block_Options_Source_Edit_Tab_Custom_List extends Mage_Adminhtml_Block_Widget_Form implements
+    Varien_Data_Form_Element_Renderer_Interface
 {
     protected $_element;
     
@@ -26,16 +25,18 @@ class BL_CustomGrid_Block_Options_Source_Edit_Tab_Custom_List
     
     protected function _prepareLayout()
     {
-        $button = $this->getLayout()
-            ->createBlock('adminhtml/widget_button')
-            ->setData(array(
-                'name'    => 'add_custom_option_item_button',
-                'label'   => $this->helper('catalog')->__('Add Option'),
-                'onclick' => 'return blcgOptionsSourceControl.addItem()',
-                'class'   => 'add',
-            ));
+        $this->setChild(
+            'add_button',
+            $this->getLayout()
+                ->createBlock('adminhtml/widget_button')
+                ->setData(array(
+                    'name'    => 'add_custom_option_item_button',
+                    'label'   => $this->helper('catalog')->__('Add Option'),
+                    'onclick' => 'return blcgOptionsSourceControl.addItem()',
+                    'class'   => 'add',
+                ))
+        );
         
-        $this->setChild('add_button', $button);
         return parent::_prepareLayout();
     }
     
@@ -44,10 +45,10 @@ class BL_CustomGrid_Block_Options_Source_Edit_Tab_Custom_List
         return Mage::registry('options_source');
     }
     
-    protected function _sortValues($a, $b)
+    protected function _sortValues($valueA, $valueB)
     {
-        $result = strcmp($a['value'], $b['value']);
-        return ($result === 0 ? strcasecmp($a['label'], $b['label']) : $result);
+        $result = strcmp($valueA['value'], $valueB['value']);
+        return ($result === 0 ? strcasecmp($valueA['label'], $valueB['label']) : $result);
     }
     
     public function getValues()

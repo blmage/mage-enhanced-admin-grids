@@ -1,0 +1,76 @@
+<?php
+/**
+ * Magento
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/afl-3.0.php
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@magentocommerce.com so we can send you a copy immediately.
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade Magento to newer
+ * versions in the future. If you wish to customize Magento for your
+ * needs please refer to http://www.magentocommerce.com for more information.
+ *
+ * @category    design
+ * @package     default_default
+ * @copyright   Copyright (c) 2013 Magento Inc. (http://www.magentocommerce.com)
+ * @license     http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/**
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
+ *
+ * @category   BL
+ * @package    BL_CustomGrid
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+?>
+<?php $_element = $this->getElement() ?>
+<?php if ($_element->getFieldsetContainerId()): ?>
+<div id="<?php echo $_element->getFieldsetContainerId() ?>">
+<?php endif ?>
+    <div class="entry-edit-head blcg-collapseable">
+        <a id="<?php echo $_element->getHtmlId() ?>-head" href="#" onclick="blcg.Fieldset.toggleCollapse('<?php echo $_element->getHtmlId() ?>', '<?php echo $this->getFieldsetStateSaveUrl() ?>'); return false;"><?php echo $_element->getLegend() ?></a>
+        <?php if ($_headerBar = $_element->getHeaderBar()): ?>
+            <div class="form-buttons"><?php echo $_headerBar ?></div>
+        <?php endif ?>
+    </div>
+    <input id="<?php echo $_element->getHtmlId() ?>-state" name="blcg_form_config_fieldsets_states[<?php echo $_element->getHtmlId() ?>]" type="hidden" value="<?php echo (int) $this->getElementCollapseState($_element) ?>" />
+    <div class="fieldset <?php echo $_element->getClass() ?>" id="<?php echo $_element->getHtmlId() ?>">
+        <div class="hor-scroll">
+            <?php if ($_element->getComment()): ?>
+                <p class="comment"><?php echo $this->escapeHtml($_element->getComment()) ?></p>
+            <?php endif ?>
+            <?php if ($_element->hasHtmlContent()): ?>
+                <?php echo $_element->getHtmlContent() ?>
+            <?php else: ?>
+            <table cellspacing="0" class="<?php echo $_element->hasTableClass() ? $_element->getTableClass() : 'form-list'?>">
+                <tbody>
+                    <?php echo $_element->getChildrenHtml() ?>
+                </tbody>
+            </table>
+            <?php endif ?>
+        </div>
+        <?php echo $_element->getSubFieldsetHtml() ?>
+    </div>
+<?php if ($_element->getFieldsetContainerId()): ?>
+</div>
+<?php endif ?>
+<script type="text/javascript">
+//<![CDATA[
+blcg.Fieldset.applyCollapse('<?php echo $_element->getHtmlId() ?>');
+//]]>
+</script>

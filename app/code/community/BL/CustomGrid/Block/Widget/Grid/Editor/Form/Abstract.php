@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-abstract class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Abstract
-    extends Mage_Adminhtml_Block_Widget_Form
+abstract class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Abstract extends Mage_Adminhtml_Block_Widget_Form
 {
     protected function _construct()
     {
@@ -76,18 +75,19 @@ abstract class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Abstract
         return '';
     }
     
+    public function getFormId()
+    {
+        return $this->getDataSetDefault('form_id', $this->helper('core')->uniqHash('blcg_grid_editor_form'));
+    }
+    
     protected function _initializeForm()
     {
-        // POST method is needed to get form key
-        $form = new Varien_Data_Form(array(
-            'id' => $this->helper('core')->uniqHash('blcg_grid_form'),
-            'method' => 'post'
+        return new Varien_Data_Form(array(
+            'id'     => $this->getFormId(),
+            'method' => 'post',
+            'html_id_prefix' => $this->getFormId(),
+            'use_container'  => true,
         ));
-        
-        $form->setHtmlIdPrefix($this->helper('core')->uniqHash('blcg_grid_form_'));
-        $form->setUseContainer(!$this->getEditedInGrid());
-        
-        return $form;
     }
     
     abstract public function getIsRequiredValueEdit();

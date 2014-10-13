@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_Grid_Type_Catalog_Search
-    extends BL_CustomGrid_Model_Grid_Type_Abstract
+class BL_CustomGrid_Model_Grid_Type_Catalog_Search extends BL_CustomGrid_Model_Grid_Type_Abstract
 {
     protected function _getSupportedBlockTypes()
     {
@@ -60,9 +59,11 @@ class BL_CustomGrid_Model_Grid_Type_Catalog_Search
         );
         
         if (!Mage::app()->isSingleStoreMode()) {
+            $stores = Mage::getSingleton('adminhtml/system_store')->getStoreValuesForForm(true, false);
+            
             $fields['store_id'] = array(
                 'type'              => 'select',
-                'form_values'       => Mage::getSingleton('adminhtml/system_store')->getStoreValuesForForm(true, false),
+                'form_values'       => $stores,
                 'required'          => true,
                 'render_block_type' => 'customgrid/widget_grid_editor_renderer_static_store',
             );
@@ -91,9 +92,13 @@ class BL_CustomGrid_Model_Grid_Type_Catalog_Search
         return 'catalog/search';
     }
     
-    protected function _beforeSaveEditedFieldValue($blockType, BL_CustomGrid_Object $config, array $params, $entity,
-        $value)
-    {
+    protected function _beforeSaveEditedFieldValue(
+        $blockType,
+        BL_CustomGrid_Object $config,
+        array $params,
+        $entity,
+        $value
+    ) {
         $duplicate = Mage::getModel('catalogsearch/query')
             ->setStoreId($entity->getStoreId())
             ->loadByQueryText($entity->getQueryText());

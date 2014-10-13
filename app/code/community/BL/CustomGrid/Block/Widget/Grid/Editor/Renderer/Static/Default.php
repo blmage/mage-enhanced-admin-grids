@@ -13,17 +13,32 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Default
-    extends BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Abstract
+class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Default extends
+    BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Abstract
 {
-    protected function _renderTextValue($renderableValue, array $renderOptions, array $formOptions)
+    static protected $_renderMethods = array(
+        'checkboxes'  => '_renderCheckboxesValue',
+        'date'        => '_renderDateValue',
+        'radios'      => '_renderRadiosValue',
+        'select'      => '_renderSelectValue',
+        'multiselect' => '_renderMultiSelectValue',
+        'checkbox'    => '_renderDefaultValue',
+        'radio'       => '_renderDefaultValue',
+        'editor'      => '_renderLongTextValue',
+        'textarea'    => '_renderLongTextValue',
+        'text'        => '_renderTextValue',
+     );
+    
+    protected function _renderTextValue($renderableValue)
     {
         return ($renderableValue !== '' ? $this->htmlEscape($renderableValue) : '');
     }
     
-    protected function _renderLongTextValue($renderableValue, array $renderOptions, array $formOptions)
+    protected function _renderLongTextValue($renderableValue)
     {
-        return $this->getDefaultValue();
+        return ($this->helper('core/string')->strlen($renderableValue) < 255)
+            ? $renderableValue
+            : $this->getDefaultValue();
     }
     
     protected function _getChoiceValues(array $formOptions, $key)
@@ -51,18 +66,7 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Default
         return $choiceValues;
     }
     
-    protected function _sortChoiceValues(array $a, array $b)
-    {
-        if (!isset($a['path_id'])) {
-            $a['path_id'] = '';
-        }
-        if (!isset($b['path_id'])) {
-            $b['path_id'] = '';
-        }
-        return (($result = strcmp($a['path_id'], $b['path_id'])) !== 0 ? $result : strcmp($a['label'], $b['label']));
-    }
-    
-    protected function _renderChoiceValue($renderableValue, array $renderOptions, array $choices, $allowMultiple=false)
+    protected function _getRenderableChoiceValue($renderableValue, array $renderOptions, $allowMultiple)
     {
         if (!is_array($renderableValue)) {
             if ($allowMultiple) {
@@ -72,62 +76,94 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Default
                 $renderableValue = array($renderableValue);
             }
         }
+        return $renderableValue;
+    }
+    
+    protected function _renderChoiceValueWithoutPath(array $selectedValues, array $renderOptions)
+    {
+        $labels = array();
         
-        $selectedValues = array_intersect_key($choices, array_flip($renderableValue));
-        $renderedValue = '';
+        foreach ($selectedValues as $value) {
+            $labels[] = $value['label'];
+        }
         
-        if (isset($renderOptions['without_path']) && $renderOptions['without_path']) {
-            $labels = array();
-            
-            foreach ($selectedValues as $value) {
-                $labels[] = $value['label'];
+        $separator = (isset($renderOptions['display_separator']) ? $renderOptions['display_separator'] : ', ');
+        return implode($separator, $labels);
+    }
+    
+    protected function _sortChoiceValues(array $valueA, array $valueB)
+    {
+        if (!isset($valueA['path_id'])) {
+            $valueA['path_id'] = '';
+        }
+        if (!isset($valueB['path_id'])) {
+            $valueB['path_id'] = '';
+        }
+        return (($result = strcmp($valueA['path_id'], $valueB['path_id'])) !== 0)
+            ? $result
+            : strcmp($valueA['label'], $valueB['label']);
+    }
+    
+    protected function _renderChoiceValueWithPath(array $choices, array $selectedValues, array $renderOptions)
+    {
+        uasort($choices, array($this, '_sortChoiceValues'));
+        $currentPath   = array();
+        $currentDepth  = 0;
+        $renderedValue = array();
+        
+        if (isset($renderOptions['spaces_count']) && ($renderOptions['spaces_count'] > 0)) {
+            $spacesCount = $renderOptions['spaces_count'];
+        } else {
+            $spacesCount = 3;
+        }
+        
+        foreach ($selectedValues as $value) {
+            if (($value['value'] === '')
+                || (isset($renderOptions['with_empty_value']) && $renderOptions['with_empty_value'])) {
+                continue;
             }
             
-            $separator = (isset($renderOptions['display_separator']) ? $renderOptions['display_separator'] : ', ');
-            $renderedValue = implode($separator, $labels);
+            $path  = explode('_', $value['path_id']);
+            $depth = count($path);
+            
+            for ($i=0; $i<$currentDepth; $i++) {
+                if ($path[$i] != $currentPath[$i]) {
+                    break;
+                }
+            }
+            for ($j=$i; $j<$depth; $j++) {
+                $renderedValue[] = str_repeat('&nbsp;', $j*$spacesCount) . $value['path_labels'][$j];
+            }
+            
+            $currentPath  = $path;
+            $currentDepth = $depth;
+            $renderedValue[] = str_repeat('&nbsp;', $currentDepth*$spacesCount) . $value['label'];
+        }
+        
+        return implode('<br />', $renderedValue);
+    }
+    
+    protected function _renderChoiceValue(
+        $renderableValue,
+        array $renderOptions,
+        array $choices,
+        $allowMultiple = false
+    ) {
+        $renderableValue = $this->_getRenderableChoiceValue($renderableValue, $renderOptions, $allowMultiple);
+        $selectedValues  = array_intersect_key($choices, array_flip($renderableValue));
+        $renderedValue   = '';
+        
+        if (isset($renderOptions['without_path']) && $renderOptions['without_path']) {
+            $renderedValue = $this->_renderChoiceValueWithoutPath($selectedValues, $renderOptions);
         } else {
-            foreach ($selectedValues as $key => $value) {
+            foreach (array_keys($selectedValues) as $key) {
                 $selectedValues[$key] += array(
                     'path_id' => '',
                     'path_labels' => array(),
                 );
             }
             
-            uasort($choices, array($this, '_sortChoiceValues'));
-            $currentPathId = null;
-            $currentPath   = array();
-            $currentDepth  = 0;
-            $renderedValue = array();
-            $spacesCount   = (isset($renderOptions['spaces_count']) ? $renderOptions['spaces_count'] : 3);
-            $spacesCount   = ($spacesCount > 0 ? $spacesCount : 3);
-            
-            foreach ($selectedValues as $key => $value) {
-                if (($value['value'] === '') // @todo callback to test for other kinds of emptiness ?
-                    || (isset($renderOptions['with_empty_value']) && $renderOptions['with_empty_value'])) {
-                    continue;
-                }
-                
-                if ($currentPathId != $value['path_id']) {
-                    $path  = explode('_', $value['path_id']);
-                    $depth = count($path);
-                    
-                    for ($i=0; $i<$currentDepth; $i++) {
-                        if ($path[$i] != $currentPath[$i]) {
-                            break;
-                        }
-                    }
-                    for ($j=$i; $j<$depth; $j++) {
-                        $renderedValue[] = str_repeat('&nbsp;', $j*$spacesCount) . $value['path_labels'][$j];
-                    }
-                    
-                    $currentPath  = $path;
-                    $currentDepth = $depth;
-                }
-                
-                $renderedValue[] = str_repeat('&nbsp;', $currentDepth*$spacesCount) . $value['label'];
-            }
-            
-            $renderedValue = implode('<br />', $renderedValue); // @todo separator, etc. (for, eg, tax rules)
+            $renderedValue = $this->_renderChoiceValueWithPath($choices, $selectedValues, $renderOptions);
         }
         
         return $renderedValue;
@@ -175,7 +211,7 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Default
                     if (is_array($value['value'])) {
                         foreach ($value['value'] as $subValue) {
                             if (isset($subValue['value'])) {
-                                 if (!isset($value['label'])) {
+                                if (!isset($value['label'])) {
                                     $value['label'] = $subValue['value'];
                                 }
                                 if (!isset($subValue['label'])) {
@@ -193,7 +229,7 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Default
                         
                         $pathsCount++;
                     } else {
-                         if (!isset($value['label'])) {
+                        if (!isset($value['label'])) {
                             $value['label'] = $value['value'];
                         }
                         
@@ -333,47 +369,77 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Default
         return $this->_renderChoiceValue($renderableValue, $renderOptions, $choices);
     }
     
-    protected function _renderDateValue($renderableValue, array $renderOptions, array $formOptions)
+    protected function _getDateInputLocale(array $renderOptions)
+    {
+        return isset($renderOptions['input_locale'])
+            ? $renderOptions['input_locale']
+            : null;
+    }
+    
+    protected function _getDateInputFormat(array $renderOptions)
+    {
+        return isset($renderOptions['input_format'])
+            ? $renderOptions['input_format']
+            : Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
+    }
+    
+    protected function _getRenderableZendDate($renderableValue, array $renderOptions)
+    {
+        if (ctype_digit($renderableValue)) {
+            $renderableValue = (int) $renderableValue;
+            
+            if ($renderableValue > 3155760000) {
+                $renderableValue = 0;
+            }
+            
+            $renderableValue = new Zend_Date($renderableValue);
+        } else {
+            try {
+                $renderableValue = new Zend_Date(
+                    $renderableValue,
+                    $this->_getDateInputFormat($renderOptions),
+                    $this->_getDateInputLocale($renderOptions)
+                );
+            } catch (Exception $e) {
+                $renderableValue = null;
+            }
+        }
+        return $renderableValue;
+    }
+    
+    protected function _getDateOutputLocale(array $renderOptions)
+    {
+        return isset($renderOptions['output_locale'])
+            ? $renderOptions['output_locale']
+            : null;
+    }
+    
+    protected function _getDateOutputFormat(array $renderOptions)
+    {
+        return isset($renderOptions['output_format'])
+            ? $renderOptions['output_format']
+            : Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
+    }
+    
+    protected function _renderDateValue($renderableValue, array $renderOptions)
     {
         if (empty($renderableValue)) {
             return '';
+        } elseif ((!$renderableValue instanceof Zend_Date)
+            && (!$renderableValue = $this->_getRenderableZendDate($renderableValue))) {
+            return $this->getDefaultValue();
         }
         
-        if (!$renderableValue instanceof Zend_Date) {
-            if (ctype_digit($renderableValue)) {
-                $renderableValue = (int) $renderableValue;
-                
-                if ($renderableValue > 3155760000) {
-                    $renderableValue = 0;
-                }
-                
-                $renderableValue = new Zend_Date($renderableValue);
-            } else {
-                $locale = isset($renderOptions['input_locale'])
-                    ? $renderOptions['input_locale']
-                    : null;
-                
-                $format = isset($renderOptions['input_format'])
-                    ? $renderOptions['input_format']
-                    : Varien_Date::DATETIME_INTERNAL_FORMAT;
-                
-                try {
-                    $renderableValue = new Zend_Date($renderableValue, $format, $locale);
-                } catch (Exception $e) {
-                    return $this->getDefaultValue();
-                }
-            }
-        }
-        
-        $locale = isset($renderOptions['output_locale'])
-            ? $renderOptions['output_locale']
-            : null;
-        
-        $format = isset($renderOptions['output_format'])
-            ? $renderOptions['output_format']
-            : Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
-        
-        return $renderableValue->toString($format, null, $locale);
+        return $renderableValue->toString(
+            $this->_getDateOutputFormat($renderOptions),
+            null,
+             $this->_getDateOutputLocale($renderOptions)
+        );
+    }
+    
+    protected function _renderDefaultValue()
+    {
+        return $this->getDefaultValue();
     }
     
     protected function _getRenderedValue()
@@ -385,35 +451,15 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Default
         $renderedValue = '';
         $renderableValue = $this->getRenderableValue();
         
-        switch ($fieldType) {
-            case 'checkboxes':
-                $renderedValue = $this->_renderCheckboxesValue($renderableValue, $renderOptions, $formOptions);
-                break;
-            case 'date':
-                $renderedValue = $this->_renderDateValue($renderableValue, $renderOptions, $formOptions);
-                break;
-            case 'radios':
-                $renderedValue = $this->_renderRadiosValue($renderableValue, $renderOptions, $formOptions);
-                break;
-            case 'select':
-                $renderedValue = $this->_renderSelectValue($renderableValue, $renderOptions, $formOptions);
-                break;
-            case 'multiselect':
-                $renderedValue = $this->_renderMultiSelectValue($renderableValue, $renderOptions, $formOptions);
-                break;
-            case 'checkbox':
-            case 'radio':
-                // @todo ? (don't think those field types are ever used - in the core, at least)
-                $renderedValue = $this->getDefaultValue();
-                break;
-            case 'editor':
-            case 'textarea':
-                $renderedValue = $this->_renderLongTextValue($renderableValue, $renderOptions, $formOptions);
-                break;
-            case 'text':
-            default:
-                $renderedValue = $this->_renderTextValue($renderableValue, $renderOptions, $formOptions);
-                break;
+        if (isset(self::$_renderMethods[$fieldType])) {
+            $renderedValue = call_user_func(
+                array($this, self::$_renderMethods[$fieldType]),
+                $renderableValue,
+                $renderOptions,
+                $formOptions
+            );
+        } else {
+            $renderedValue = $this->_renderTextValue($renderableValue);
         }
         
         return $renderedValue;

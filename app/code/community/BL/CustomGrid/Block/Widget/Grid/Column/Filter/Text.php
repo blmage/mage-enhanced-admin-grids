@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Text
-    extends Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Text
+class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Text extends Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Text
 {
     const MODE_WITH_WITHOUT = 'with_without';
     const MODE_EXACT_LIKE   = 'exact_like';
@@ -43,6 +42,88 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Text
         return parent::getHtml();
     }
     
+    public function applyFilterShortcutsToValue(
+        $value,
+        $filterMode,
+        $filterModeShortcut,
+        $isNegative,
+        $negativeShortcut
+    ) {
+        $modesCodesRegex = implode('|', array_keys(self::$_modesShortcuts)); 
+        
+        if (preg_match('#^\\[(!)?(' . $modesCodesRegex . ')?\\](.*)$#', $value, $matches)) {
+            $value = $matches[3];
+            
+            if ($negativeShortcut) {
+                $isNegative = !empty($matches[1]);
+            } elseif (!empty($matches[1])) {
+                Mage::getSingleton('customgrid/session')
+                    ->addNotice($this->__('Negative filter shortcut is not enabled (used in "%s")', $matches[0]));
+            }
+            if ($filterModeShortcut) {
+                if (!empty($matches[2])) {
+                    $filterMode = self::$_modesShortcuts[$matches[2]];
+                }
+            } elseif (!empty($matches[2])) {
+                Mage::getSingleton('customgrid/session')
+                    ->addNotice($this->__('Filter mode shortcut is not enabled (used in "%s")', $matches[0]));
+            }
+        }
+        
+        return array($filterMode, $isNegative);
+    }
+    
+    public function getBooleanCondition($value)
+    {
+        return ($value ? array('neq' => '') : array(array('eq' => ''), array('null' => true)));
+    }
+    
+    public function getRegexCondition($value, Varien_Data_Collection_Db $collection, $filterIndex, $isNegative)
+    {
+        try {
+            $this->helper('customgrid/collection')
+                ->addRegexFilterToCollection($collection, $filterIndex, $value, $isNegative);
+        } catch (Mage_Core_Exception $e) {
+            Mage::getSingleton('customgrid/session')
+                ->addError($this->__('Could not apply the regex filter : "%s"', $e->getMessage()));
+        } catch (Exception $e) {
+            Mage::logException($e);
+            Mage::getSingleton('customgrid/session')->addError($this->__('Could not apply the regex filter'));
+        }
+        return $this->helper('customgrid/collection')->getIdentityCondition();
+    }
+    
+    public function getLikeCondition($value, Varien_Data_Collection_Db $collection, $filterMode, $isNegative)
+    {
+        $stringHelper   = $this->helper('core/string');
+        $valueLength    = $stringHelper->strlen($value);
+        $searchedValue  = '';
+        $singleWildcard = $this->getColumn()->getSingleWildcard();
+        $multipleWildcard = $this->getColumn()->getMultipleWildcard();
+        
+        for ($i=0; $i<$valueLength; $i++) {
+            $char = $stringHelper->substr($value, $i, 1);
+            
+            if ($char === $singleWildcard) {
+                $searchedValue .= '_';
+            } elseif ($char === $multipleWildcard) {
+                $searchedValue .= '%';
+            } elseif (($char === '%') || ($char === '_')) {
+                $searchedValue .= '\\' . $char;
+            } elseif ($char == '\\') {
+                $searchedValue .= '\\\\';
+            } else {
+                $searchedValue .= $char;
+            }
+        }
+        
+        if ($filterMode == self::MODE_INSIDE_LIKE) {
+            $searchedValue = '%' . $searchedValue . '%';
+        }
+        
+        return array(($isNegative ? 'nlike' : 'like') => $searchedValue);
+    }
+    
     public function getCondition()
     {
         $columnBlock = $this->getColumn();
@@ -51,84 +132,30 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Text
         $value = $this->getValue();
         
         $filterModeShortcut = (bool) $columnBlock->getFilterModeShortcut();
-        $negativeFilterShortcut = (bool) $columnBlock->getNegativeFilterShortcut();
+        $negativeShortcut   = (bool) $columnBlock->getNegativeFilterShortcut();
         $filterIndex = $this->helper('customgrid/grid')->getColumnBlockFilterIndex($columnBlock);
         $filterMode  = $columnBlock->getFilterMode();
-        $isNegative  = (!$negativeFilterShortcut && $columnBlock->getNegativeFilter());
+        $isNegative  = (!$negativeShortcut && $columnBlock->getNegativeFilter());
         
         if ($filterMode == self::MODE_WITH_WITHOUT) {
             $filterModeShortcut = false;
-            $negativeFilterShortcut = false;
-        }
-        
-        if ($filterModeShortcut || $negativeFilterShortcut) {
-            $modesCodesRegex = implode('|', array_keys(self::$_modesShortcuts)); 
-            
-            if (preg_match('#^\\[(!)?(' . $modesCodesRegex . ')?\\](.*)$#', $value, $matches)) {
-                $value = $matches[3];
-                
-                if ($negativeFilterShortcut) {
-                    $isNegative = !empty($matches[1]);
-                } elseif (!empty($matches[1])) {
-                    Mage::getSingleton('customgrid/session')
-                        ->addNotice($this->__('Negative filter shortcut is not enabled (used in "%s")', $matches[0]));
-                }
-                if ($filterModeShortcut) {
-                    if (!empty($matches[2])) {
-                        $filterMode = self::$_modesShortcuts[$matches[2]];
-                    }
-                } elseif (!empty($matches[2])) {
-                    Mage::getSingleton('customgrid/session')
-                        ->addNotice($this->__('Filter mode shortcut is not enabled (used in "%s")', $matches[0]));
-                }
-            }
+            $negativeShortcut   = false;
+        } else {
+            list($filterMode, $isNegative) = $this->applyFilterShortcutsToValue(
+                $value,
+                $filterMode,
+                $filterModeShortcut,
+                $isNegative,
+                $negativeShortcut
+            );
         }
         
         if ($filterMode == self::MODE_WITH_WITHOUT) {
-            $condition = ($value ? array('neq' => '') : array(array('eq' => ''), array('null' => true)));
-            
+            $condition = $this->getBooleanCondition($value);
         } elseif ($filterMode == self::MODE_REGEX) {
-            try {
-                $this->helper('customgrid/collection')
-                    ->addRegexFilterToCollection($collection, $filterIndex, $value, $isNegative);
-            } catch (Mage_Core_Exception $e) {
-                Mage::getSingleton('customgrid/session')
-                    ->addError($this->__('Could not apply the regex filter : "%s"', $e->getMessage()));
-            } catch (Exception $e) {
-                Mage::logException($e);
-                Mage::getSingleton('customgrid/session')->addError($this->__('Could not apply the regex filter'));
-            }
-            
-            $condition = $this->helper('customgrid/collection')->getIdentityCondition();
-            
+            $condition = $this->getRegexCondition($value, $collection, $filterIndex, $isNegative);
         } else {
-            $stringHelper   = $this->helper('core/string');
-            $valueLength    = $stringHelper->strlen($value);
-            $searchedValue  = '';
-            $singleWildcard = $columnBlock->getSingleWildcard();
-            $multipleWildcard = $columnBlock->getMultipleWildcard();
-            
-            for ($i=0; $i<$valueLength; $i++) {
-                $char = $stringHelper->substr($value, $i, 1);
-                
-                if ($char === $singleWildcard) {
-                    $searchedValue .= '_';
-                } elseif ($char === $multipleWildcard) {
-                    $searchedValue .= '%';
-                } elseif (($char === '%') || ($char === '_')) {
-                    $searchedValue .= '\\' . $char;
-                } elseif ($char == '\\') {
-                    $searchedValue .= '\\\\';
-                } else {
-                    $searchedValue .= $char;
-                }
-            }
-            
-            if ($filterMode == self::MODE_INSIDE_LIKE) {
-                $searchedValue = '%' . $searchedValue . '%';
-            }
-            
-            $condition = array(($isNegative ? 'nlike' : 'like') => $searchedValue);
+            $condition = $this->getLikeCondition($value, $collection, $filterMode, $isNegative);
         }
         
         return $condition;

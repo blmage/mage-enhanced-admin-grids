@@ -18,9 +18,18 @@ class BL_CustomGrid_Model_System_Config_Source_Boolean_Config
     public function getOptions()
     {
         return array(
-            array('value' => 0, 'label' => Mage::helper('customgrid')->__('Use Config')),
-            array('value' => 1, 'label' => Mage::helper('customgrid')->__('Yes')),
-            array('value' => 2, 'label' => Mage::helper('customgrid')->__('No')),
+            array(
+                'value' => 0,
+                'label' => Mage::helper('customgrid')->__('Use Config'),
+            ),
+            array(
+                'value' => 1,
+                'label' => Mage::helper('customgrid')->__('Yes'),
+            ),
+            array(
+                'value' => 2,
+                'label' => Mage::helper('customgrid')->__('No'),
+            ),
         );
     }
 }

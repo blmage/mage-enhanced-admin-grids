@@ -68,21 +68,25 @@
                                         <title>Enable / Disable Grids</title>
                                         <sort_order>20</sort_order>
                                     </enable_disable>
+                                    <edit_forced_type translate="title" module="customgrid">
+                                        <title>Edit Forced Type</title>
+                                        <sort_order>30</sort_order>
+                                    </edit_forced_type>
                                     <edit_customization_params translate="title" module="customgrid">
                                         <title>Edit Customization Parameters</title>
-                                        <sort_order>30</sort_order>
+                                        <sort_order>40</sort_order>
                                     </edit_customization_params>
                                     <edit_default_params_behaviours translate="title" module="customgrid">
                                         <title>Edit Default Parameters Behaviours</title>
-                                        <sort_order>40</sort_order>
+                                        <sort_order>50</sort_order>
                                     </edit_default_params_behaviours>
                                     <edit_roles_permissions translate="title" module="customgrid">
                                         <title>Edit Roles Permissions</title>
-                                        <sort_order>50</sort_order>
+                                        <sort_order>60</sort_order>
                                     </edit_roles_permissions>
                                     <delete translate="title" module="customgrid">
                                         <title>Delete Grids</title>
-                                        <sort_order>60</sort_order>
+                                        <sort_order>70</sort_order>
                                     </delete>
                                 </children>
                             </administration>

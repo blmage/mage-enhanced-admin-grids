@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-abstract class BL_CustomGrid_Block_Column_Renderer_Attribute_Abstract
-    extends Mage_Adminhtml_Block_Template
+abstract class BL_CustomGrid_Block_Column_Renderer_Attribute_Abstract extends Mage_Adminhtml_Block_Template
 {
     protected function _getAttributes()
     {
@@ -27,7 +26,7 @@ abstract class BL_CustomGrid_Block_Column_Renderer_Attribute_Abstract
         return $attributes;
     }
     
-    protected function _getAvailableRenderers($withEmpty=false)
+    protected function _getAvailableRenderers($withEmpty = false)
     {
         return Mage::getSingleton('customgrid/column_renderer_config_attribute')->getRenderersArray($withEmpty);
     }

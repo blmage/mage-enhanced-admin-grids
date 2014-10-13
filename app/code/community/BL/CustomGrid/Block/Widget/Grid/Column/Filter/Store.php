@@ -38,61 +38,94 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Store
-    extends Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Abstract
+class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Store extends
+    Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Abstract
 {
-    public function getHtml()
-    {
-        $storeModel = Mage::getSingleton('adminhtml/system_store');
-        
-        $websites = $storeModel->getWebsiteCollection();
-        $storeGroups = $storeModel->getGroupCollection();
-        $stores = $storeModel->getStoreCollection();
-        
-        $selected = ' selected="selected" ';
-        $spaces = str_repeat('&nbsp;', 4);
+    protected function _getStoresOptionsHtml(
+        Mage_Core_Model_Website $website,
+        Mage_Core_Model_Store_Group $storeGroup,
+        array $stores,
+        &$shownWebsite,
+        &$shownStoreGroup
+    ) {
+        $html   = '';
         $value  = $this->getValue();
+        $spaces = str_repeat('&nbsp;', 4);
         
-        $html = '<select name="' . $this->_getHtmlName() . '" ' . $this->getColumn()->getValidateClass() . '>'
-            . '<option value=""'  . (!$value ? $selected : '') . '></option>'
-            . '<option value="0"' . (strval($value) === '0' ? $selected : '') . '>'
-            . $this->helper('adminhtml')->__('All Store Views')
-            . '</option>';
+        foreach ($stores as $store) {
+            if ($store->getGroupId() != $storeGroup->getId()) {
+                continue;
+            }
+            if (!$shownWebsite) {
+                $shownWebsite = true;
+                $html .= '<optgroup label="' . $this->htmlEscape($website->getName()) . '"></optgroup>';
+            }
+            if (!$shownStoreGroup) {
+                $shownStoreGroup = true;
+                $html .= '<optgroup label="' . $this->htmlEscape($storeGroup->getName()) . '">';
+            }
+            
+            $html .= '<option value="' . $store->getId() . '"'
+                . ($value == $store->getId() ? ' selected="selected" ' : '') . '>'
+                . $spaces . $store->getName()
+                . '</option>';
+        }
+        
+        if ($shownStoreGroup) {
+            $html .= '</optgroup>';
+        }
+        
+        return $html;
+    }
+    
+    protected function _getStoreGroupsOptionsHtml(
+        Mage_Core_Model_Website $website,
+        array $storeGroups,
+        array $stores,
+        &$shownWebsite
+    ) {
+        $html = '';
+        
+        foreach ($storeGroups as $storeGroup) {
+            $shownStoreGroup = false;
+            
+            if ($storeGroup->getWebsiteId() != $website->getId()) {
+                continue;
+            }
+            
+            $html .= $this->_getStoresOptionsHtml($website, $storeGroup, $stores, $shownWebsite, $shownStoreGroup);
+        }
+        
+        return $html;
+    }
+    
+    protected function _getWebsitesOptionsHtml()
+    {
+        $storeModel  = Mage::getSingleton('adminhtml/system_store');
+        $websites    = $storeModel->getWebsiteCollection();
+        $storeGroups = $storeModel->getGroupCollection();
+        $stores      = $storeModel->getStoreCollection();
+        $html = '';
         
         foreach ($websites as $website) {
             $shownWebsite = false;
-            
-            foreach ($storeGroups as $storeGroup) {
-                $shownStoreGroup = false;
-                
-                if ($storeGroup->getWebsiteId() != $website->getId()) {
-                    continue;
-                }
-                
-                foreach ($stores as $store) {
-                    if ($store->getGroupId() != $storeGroup->getId()) {
-                        continue;
-                    }
-                    if (!$shownWebsite) {
-                        $shownWebsite = true;
-                        $html .= '<optgroup label="' . $this->htmlEscape($website->getName()) . '"></optgroup>';
-                    }
-                    if (!$shownStoreGroup) {
-                        $shownStoreGroup = true;
-                        $html .= '<optgroup label="' . $this->htmlEscape($storeGroup->getName()) . '">';
-                    }
-                    
-                    $html .= '<option value="' . $store->getId() . '"' . ($value == $store->getId() ? $selected : '')
-                        . '>' . $spaces . $store->getName() . '</option>';
-                }
-                
-                if ($shownStoreGroup) {
-                    $html .= '</optgroup>';
-                }
-            }
+            $html .= $this->_getStoreGroupsOptionsHtml($website, $storeGroups, $stores, $shownWebsite);
         }
         
-        $html .= '<option value="_deleted_"' . ($value == '_deleted_' ? $selected : '') . '>'
+        return $html;
+    }
+    
+    public function getHtml()
+    {
+        $value = $this->getValue();
+        
+        $html = '<select name="' . $this->_getHtmlName() . '" ' . $this->getColumn()->getValidateClass() . '>'
+            . '<option value=""'  . (!$value ? ' selected="selected"' : '') . '></option>'
+            . '<option value="0"' . (strval($value) === '0' ? ' selected="selected"' : '') . '>'
+            . $this->helper('adminhtml')->__('All Store Views')
+            . '</option>'
+            . $this->_getWebsitesOptionsHtml($value)
+            . '<option value="_deleted_"' . ($value == '_deleted_' ? ' selected="selected"' : '') . '>'
             . $this->__('[ deleted ]')
             . '</option>'
             . '</select>';

@@ -13,38 +13,49 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_Custom_Column_Order_Status_Color
-    extends BL_CustomGrid_Model_Custom_Column_Simple_Duplicate
+class BL_CustomGrid_Model_Custom_Column_Order_Status_Color extends BL_CustomGrid_Model_Custom_Column_Simple_Duplicate
 {
     protected function _prepareConfig()
     {
         $helper = $this->_getBaseHelper();
         $sortOrder = 20;
         
-        $this->addCustomizationParam('only_cell', array(
-            'label'        => $helper->__('Only Colorize Status Cell'),
-            'group'        => $helper->__('Rendering'),
-            'type'         => 'select',
-            'source_model' => 'adminhtml/system_config_source_yesno',
-            'value'        => 0,
-        ), 10);
+        $this->addCustomizationParam(
+            'only_cell',
+            array(
+                'label'        => $helper->__('Only Colorize Status Cell'),
+                'group'        => $helper->__('Rendering'),
+                'type'         => 'select',
+                'source_model' => 'adminhtml/system_config_source_yesno',
+                'value'        => 0,
+            ),
+            10
+        );
         
         foreach ($this->getOrderStatuses() as $key => $status) {
-            $this->addCustomizationParam($key . '_background', array(
-                'label'       => $helper->__('"%s" Background Color', $status),
-                'group'       => $helper->__('Background Colors'),
-                'description' => $helper->__('Must be a valid CSS color'),
-                'type'        => 'text',
-                'value'       => '',
-            ), $sortOrder += 10);
+            $this->addCustomizationParam(
+                $key . '_background',
+                array(
+                    'label'       => $helper->__('"%s" Background Color', $status),
+                    'group'       => $helper->__('Background Colors'),
+                    'description' => $helper->__('Must be a valid CSS color'),
+                    'type'        => 'text',
+                    'value'       => '',
+                ),
+                $sortOrder += 10
+            );
             
-            $this->addCustomizationParam($key . '_text', array(
-                'label'       => $helper->__('"%s" Text Color', $status),
-                'group'       => $helper->__('Text Colors'),
-                'description' => $helper->__('Must be a valid CSS color'),
-                'type'        => 'text',
-                'value'       => '',
-            ), $sortOrder += 10);
+            $this->addCustomizationParam(
+                $key . '_text',
+                array(
+                    'label'       => $helper->__('"%s" Text Color', $status),
+                    'group'       => $helper->__('Text Colors'),
+                    'description' => $helper->__('Must be a valid CSS color'),
+                    'type'        => 'text',
+                    'value'       => '',
+                ),
+                $sortOrder += 10
+            );
         }
         
         $this->setCustomizationWindowConfig(array('height' => 450));
@@ -56,9 +67,14 @@ class BL_CustomGrid_Model_Custom_Column_Order_Status_Color
         return 'status';
     }
     
-    protected function _getForcedBlockValues(Mage_Adminhtml_Block_Widget_Grid $gridBlock,
-        BL_CustomGrid_Model_Grid $gridModel, $columnBlockId, $columnIndex, array $params, Mage_Core_Model_Store $store)
-    {
+    protected function _getForcedBlockValues(
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock,
+        BL_CustomGrid_Model_Grid $gridModel,
+        $columnBlockId,
+        $columnIndex,
+        array $params,
+        Mage_Core_Model_Store $store
+    ) {
         $colors = array();
         
         foreach ($this->getOrderStatuses() as $key => $status) {
@@ -77,7 +93,7 @@ class BL_CustomGrid_Model_Custom_Column_Order_Status_Color
             'filter'    => 'customgrid/widget_grid_column_filter_select',
             'renderer'  => 'customgrid/widget_grid_column_renderer_order_status_color',
             'only_cell' => $this->_extractBoolParam($params, 'only_cell'),
-            'options'   => $this->_getBaseHelper()->getOptionsArrayFromOptionsHash($this->getOrderStatuses()),
+            'options'   => $this->_getBaseHelper()->getOptionArrayFromOptionHash($this->getOrderStatuses()),
             'options_colors'  => $colors,
             'imploded_values' => false,
         );

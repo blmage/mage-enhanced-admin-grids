@@ -13,18 +13,21 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_Column_Renderer_Attribute_Product_Image
-    extends BL_CustomGrid_Model_Column_Renderer_Attribute_Abstract
+class BL_CustomGrid_Model_Column_Renderer_Attribute_Product_Image extends
+    BL_CustomGrid_Model_Column_Renderer_Attribute_Abstract
 {
-    public function isAppliableToAttribute(Mage_Eav_Model_Entity_Attribute $attribute,
-        BL_CustomGrid_Model_Grid $gridModel)
-    {
+    public function isAppliableToAttribute(
+        Mage_Eav_Model_Entity_Attribute $attribute,
+        BL_CustomGrid_Model_Grid $gridModel
+    ) {
         return ($attribute->getFrontendModel() == 'catalog/product_attribute_frontend_image');
     }
     
-    public function getColumnBlockValues(Mage_Eav_Model_Entity_Attribute $attribute,
-        Mage_Core_Model_Store $store, BL_CustomGrid_Model_Grid $gridModel)
-    {
+    public function getColumnBlockValues(
+        Mage_Eav_Model_Entity_Attribute $attribute,
+        Mage_Core_Model_Store $store,
+        BL_CustomGrid_Model_Grid $gridModel
+    ) {
         return array(
             'filter'              => 'customgrid/widget_grid_column_filter_product_image',
             'renderer'            => 'customgrid/widget_grid_column_renderer_product_image',

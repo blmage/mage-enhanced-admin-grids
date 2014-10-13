@@ -13,20 +13,19 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-abstract class BL_CustomGrid_Model_Grid_Type_Sales_Abstract
-    extends BL_CustomGrid_Model_Grid_Type_Abstract
+abstract class BL_CustomGrid_Model_Grid_Type_Sales_Abstract extends BL_CustomGrid_Model_Grid_Type_Abstract
 {
     protected function _getAddressTypes()
     {
         return array(
-            'billing'  => $this->_getHelper()->__('Billing Address'),
-            'shipping' => $this->_getHelper()->__('Shipping Address'),
+            'billing'  => $this->_getBaseHelper()->__('Billing Address'),
+            'shipping' => $this->_getBaseHelper()->__('Shipping Address'),
         );
     }
     
     protected function _getAddressFields()
     {
-        $helper = $this->_getHelper();
+        $helper = $this->_getBaseHelper();
         
         return array(
             'prefix'     => $helper->__('Prefix'),
@@ -56,15 +55,15 @@ abstract class BL_CustomGrid_Model_Grid_Type_Sales_Abstract
         return 'order_id';
     }
     
-    protected function _getOrderBaseCustomColumn($id, $name, $group, $orderField=null)
+    protected function _getOrderBaseCustomColumn($columnId, $name, $group, $orderFieldName = null)
     {
         $column = Mage::getModel('customgrid/custom_column_order_base')
-            ->setId($id)
+            ->setId($columnId)
             ->setModule('customgrid')
             ->setName($name)
             ->setGroup($group)
             ->setAllowRenderers(true)
-            ->setConfigParams(array('order_field' => (empty($orderField) ? $id : $orderField)));
+            ->setConfigParams(array('order_field_name' => (empty($orderFieldName) ? $columnId : $orderFieldName)));
         
         if (!$this->_isOrdersGrid()) {
             $column->setConfigParams(array('join_condition_main_field_name' => $this->_getOrderIdField()), true);
@@ -73,10 +72,10 @@ abstract class BL_CustomGrid_Model_Grid_Type_Sales_Abstract
         return $column;
     }
     
-    protected function _getAddressCustomColumn($id, $typeId, $fieldId, $typeLabel, $fieldLabel)
+    protected function _getAddressCustomColumn($columnId, $typeId, $fieldId, $typeLabel, $fieldLabel)
     {
         $column = Mage::getModel('customgrid/custom_column_order_address_' . $typeId)
-            ->setId($id)
+            ->setId($columnId)
             ->setModule('customgrid')
             ->setName($fieldLabel)
             ->setGroup($typeLabel)
@@ -90,15 +89,15 @@ abstract class BL_CustomGrid_Model_Grid_Type_Sales_Abstract
         return $column;
     }
     
-    protected function _getPaymentCustomColumn($id, $name, $group, $paymentField=null)
+    protected function _getPaymentCustomColumn($columnId, $name, $group, $paymentField = null)
     {
         $column = Mage::getModel('customgrid/custom_column_order_payment')
-            ->setId($id)
+            ->setId($columnId)
             ->setModule('customgrid')
             ->setName($name)
             ->setGroup($group)
             ->setAllowRenderers(true)
-            ->setConfigParams(array('payment_field' => (empty($paymentField) ? $id : $paymentField)));
+            ->setConfigParams(array('payment_field' => (empty($paymentField) ? $columnId : $paymentField)));
         
         if (!$this->_isOrdersGrid()) {
             $column->setConfigParams(array('join_condition_main_field_name' => $this->_getOrderIdField()), true);
@@ -107,12 +106,12 @@ abstract class BL_CustomGrid_Model_Grid_Type_Sales_Abstract
         return $column;
     }
     
-    abstract protected function _getItemsCustomColumnModel($customizable=false);
+    abstract protected function _getItemsCustomColumnModel($customizable = false);
     
-    protected function _getItemsCustomColumn($id, $customizable=false)
+    protected function _getItemsCustomColumn($columnId, $customizable = false)
     {
         return Mage::getModel($this->_getItemsCustomColumnModel($customizable))
-            ->setId($id)
+            ->setId($columnId)
             ->setModule('customgrid')
             ->setName(Mage::helper('customgrid')->__($customizable ? 'Customizable' : 'Default'))
             ->setGroup(Mage::helper('customgrid')->__('Items'))
@@ -121,7 +120,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Sales_Abstract
     
     protected function _getAdditionalCustomColumns()
     {
-        $helper  = $this->_getHelper();
+        $helper  = $this->_getBaseHelper();
         
         $columns = array(
             'shipping_method' => $this->_getOrderBaseCustomColumn(

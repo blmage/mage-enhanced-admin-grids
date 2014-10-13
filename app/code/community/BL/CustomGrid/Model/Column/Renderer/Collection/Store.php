@@ -13,12 +13,14 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_Column_Renderer_Collection_Store
-    extends BL_CustomGrid_Model_Column_Renderer_Collection_Abstract
+class BL_CustomGrid_Model_Column_Renderer_Collection_Store extends
+    BL_CustomGrid_Model_Column_Renderer_Collection_Abstract
 {
-    public function getColumnBlockValues($columnIndex, Mage_Core_Model_Store $store,
-        BL_CustomGrid_Model_Grid $gridModel)
-    {
+    public function getColumnBlockValues(
+        $columnIndex,
+        Mage_Core_Model_Store $store,
+        BL_CustomGrid_Model_Grid $gridModel
+    ) {
         return array(
             'filter'          => 'customgrid/widget_grid_column_filter_store',
             'renderer'        => 'customgrid/widget_grid_column_renderer_store',

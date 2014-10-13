@@ -13,12 +13,11 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Object
-    extends Varien_Object
+class BL_CustomGrid_Object extends Varien_Object
 {
     protected $_clonableObjectsKeys = array();
     
-    protected function _cloneObjects(array &$data, $key='')
+    protected function _cloneObjects(array &$data, $key = '')
     {
         foreach ($data as $subKey => $value) {
             $valueKey = ($key !== '' ? $key . '/' . $subKey : $subKey);
@@ -53,7 +52,7 @@ class BL_CustomGrid_Object
         return $this;
     }
     
-    public function mergeData(array $data, $recursive=true)
+    public function mergeData(array $data, $recursive = true)
     {
         if ($recursive) {
             $this->_data = array_merge_recursive($this->_data, $data);
@@ -77,7 +76,7 @@ class BL_CustomGrid_Object
         return $this;
     }
     
-    public function substractData($key, $value, $strict=false)
+    public function substractData($key, $value, $strict = false)
     {
         if ($this->hasData($key)) {
             if (is_array($data = $this->getData($key))) {
@@ -113,14 +112,14 @@ class BL_CustomGrid_Object
         return ($value > $otherValue ? 1: ($value < $otherValue ? -1 : 0));
     }
     
-    public function compareStringDataTo($key, BL_CustomGrid_Object $object, $withCase=true)
+    public function compareStringDataTo($key, BL_CustomGrid_Object $object, $withCase = true)
     {
         $value = (string) $this->getData($key);
         $otherValue = (string) $object->getData($key);
         return ($withCase ? strcmp($value, $otherValue) : strcasecmp($value, $otherValue));
     }
     
-    public function sortData($key, $flags=SORT_REGULAR)
+    public function sortData($key, $flags = SORT_REGULAR)
     {
         if (is_array($data = $this->getData($key))) {
             sort($data, $flags);
@@ -129,7 +128,7 @@ class BL_CustomGrid_Object
         return $this;
     }
     
-    public function ksortData($key, $flags=SORT_REGULAR)
+    public function ksortData($key, $flags = SORT_REGULAR)
     {
         if (is_array($data = $this->getData($key))) {
             ksort($data, $flags);
@@ -143,7 +142,7 @@ class BL_CustomGrid_Object
         return array_filter(explode('/', $key), create_function('$v', 'return ($v !== "");'));
     }
     
-    public function setData($key, $value=null)
+    public function setData($key, $value = null)
     {
         if (is_string($key) && (strpos($key, '/') !== false)) {
             $this->_hasDataChanges = true;
@@ -168,7 +167,7 @@ class BL_CustomGrid_Object
         return parent::setData($key, $value);
     }
     
-    public function unsetData($key=null)
+    public function unsetData($key = null)
     {
         if (is_string($key) && (strpos($key, '/') !== false)) {
             $this->_hasDataChanges = true;
@@ -230,7 +229,7 @@ class BL_CustomGrid_Object
         return parent::getDataSetDefault($key, $default);
     }
     
-    public function hasData($key='')
+    public function hasData($key = '')
     {
         if (is_string($key) && (strpos($key, '/') !== false)) {
             $data    =& $this->_data;

@@ -13,8 +13,8 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Attribute_Default
-    extends BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Abstract
+class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Attribute_Default extends
+    BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Abstract
 {
     protected function _getRenderedValue()
     {
@@ -28,7 +28,6 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Attribute_Default
             if (((string) $renderableValue) != '') {
                 if ($attribute->getFrontendInput() == 'textarea') {
                     // Values from textarea may be too long, so return default value as a default behaviour
-                    // @todo should we check for an acceptable length instead ?
                     $renderedValue = $this->getDefaultValue();
                     
                 } elseif ($attribute->getFrontendInput() == 'price') {
@@ -58,7 +57,7 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Attribute_Default
                 }
             }
         } else {
-            // If the frontend model is a specific one, then trust it for the rendering
+            // If the frontend model is a specific one, trust it for the rendering
             $renderedValue = $renderableValue;
         }
         

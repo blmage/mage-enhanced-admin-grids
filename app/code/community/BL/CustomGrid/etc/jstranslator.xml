@@ -39,14 +39,6 @@
         <message>An error occured while applying the values</message>
     </blcg-grid-values-apply-error>
     
-    <blcg-grid-export-form-error-select-format translate="message" module="customgrid">
-        <message>You must select an export format</message>
-    </blcg-grid-export-form-error-select-format>
-    
-    <blcg-grid-export-form-error-enter-custom-size translate="message" module="customgrid">
-        <message>You must enter a custom size</message>
-    </blcg-grid-export-form-error-enter-custom-size>
-    
     <blcg-grid-columns-list-error-one-visible translate="message" module="customgrid">
         <message>At least one column must be fully visible</message>
     </blcg-grid-columns-list-error-one-visible>
@@ -66,4 +58,8 @@
     <blcg-grid-editor-form-no-savable-value translate="message" module="customgrid">
         <message>There is no value to save</message>
     </blcg-grid-editor-form-no-savable-value>
+    
+    <blcg-grid-profile-title-right-click translate="message" module="customgrid">
+        <message>Right-click to view all the available actions</message>
+    </blcg-grid-profile-title-right-click>
 </jstranslator>

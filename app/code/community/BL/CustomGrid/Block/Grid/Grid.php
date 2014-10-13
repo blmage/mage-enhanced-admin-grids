@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Grid_Grid
-    extends Mage_Adminhtml_Block_Widget_Grid
+class BL_CustomGrid_Block_Grid_Grid extends Mage_Adminhtml_Block_Widget_Grid
 {
     public function __construct()
     {
@@ -31,111 +30,141 @@ class BL_CustomGrid_Block_Grid_Grid
         return parent::_prepareCollection();
     }
     
+    protected function _prepareActionColumn()
+    {
+        return $this->addColumn(
+            'action',
+            array(
+                'header'   => $this->__('Actions'),
+                'index'    => 'id',
+                'renderer' => 'customgrid/widget_grid_column_renderer_grid_action',
+                'filter'   => false,
+                'sortable' => false,
+                'getter'   => 'getId',
+                'width'    => '120px',
+                'actions'  => array(
+                    array(
+                        'caption' => $this->__('Edit'),
+                        'field'   => 'grid_id',
+                        'url'     => array(
+                            'base'   => '*/*/edit',
+                            'params' => array('profile_id' => BL_CustomGrid_Model_Grid::BASE_PROFILE_ID),
+                        ),
+                        'permissions' => array(
+                            BL_CustomGrid_Model_Grid::ACTION_CUSTOMIZE_COLUMNS,
+                             BL_CustomGrid_Model_Grid::ACTION_ENABLE_DISABLE,
+                            BL_CustomGrid_Model_Grid::ACTION_EDIT_FORCED_TYPE,
+                            BL_CustomGrid_Model_Grid::ACTION_EDIT_CUSTOMIZATION_PARAMS,
+                            BL_CustomGrid_Model_Grid::ACTION_EDIT_DEFAULT_PARAMS_BEHAVIOURS,
+                            BL_CustomGrid_Model_Grid::ACTION_EDIT_ROLES_PERMISSIONS,
+                            BL_CustomGrid_Model_Grid::ACTION_ASSIGN_PROFILES,
+                        ),
+                    ),
+                    array(
+                        'caption'     => $this->__('Enable'),
+                        'url'         => array('base' => '*/*/enable'),
+                        'field'       => 'grid_id',
+                        'permissions' => array(BL_CustomGrid_Model_Grid::ACTION_ENABLE_DISABLE),
+                    ),
+                    array(
+                        'caption'     => $this->__('Disable'),
+                        'url'         => array('base' => '*/*/disable'),
+                        'field'       => 'grid_id',
+                        'permissions' => array(BL_CustomGrid_Model_Grid::ACTION_ENABLE_DISABLE),
+                    ),
+                    array(
+                        'caption'     => $this->__('Delete'),
+                        'confirm'     => $this->__('Are you sure?'),
+                        'url'         => array('base' => '*/*/delete'),
+                        'field'       => 'grid_id',
+                        'permissions' => array(BL_CustomGrid_Model_Grid::ACTION_DELETE),
+                    )
+                ),
+            )
+        );
+    }
+    
     protected function _prepareColumns()
     {
-        $this->addColumn('grid_id', array(
-            'header' => $this->__('ID'),
-            'index'  => 'grid_id',
-        ));
-        
-        $this->addColumn('block_type', array(
-            'header' => $this->__('Block Type'),
-            'index'  => 'block_type',
-        ));
-        
-        $this->addColumn('type_code', array(
-            'header'  => $this->__('Type'),
-            'index'   => 'type_code',
-            'type'    => 'options',
-            'options' => Mage::getSingleton('customgrid/grid_type_config')->getTypesAsOptionHash(true),
-        ));
-        
-        $this->addColumn('rewriting_class_name', array(
-            'header' => $this->__('Rewriting Class'),
-            'index'  => 'rewriting_class_name',
-        ));
-        
-        $this->addColumn('module_name', array(
-            'header' => $this->__('Module Name'),
-            'index'  => 'module_name',
-        ));
-        
-        $this->addColumn('controller_name', array(
-            'header' => $this->__('Controller Name'),
-            'index'  => 'controller_name',
-        ));
-        
-        $this->addColumn('block_id', array(
-            'header' => $this->__('Block ID'),
-            'index'  => 'block_id',
-        ));
-        
-        $this->addColumn('disabled', array(
-            'header'  => $this->__('Disabled'),
-            'index'   => 'disabled',
-            'type'    => 'options',
-            'options' => array(
-                1 => $this->__('Yes'),
-                0 => $this->__('No'),
-            ),
-        ));
-        
-        $this->addColumn('action', array(
-            'header'   => $this->__('Actions'),
-            'index'    => 'id',
-            'renderer' => 'customgrid/widget_grid_column_renderer_grid_action',
-            'filter'   => false,
-            'sortable' => false,
-            'getter'   => 'getId',
-            'width'    => '120px',
-            'actions'  => array(
+        $this->addColumn(
+                'grid_id',
                 array(
-                    'caption' => $this->__('Edit'),
-                    'field'   => 'grid_id',
-                    'url'     => array(
-                        'base'   => '*/*/edit',
-                        'params' => array('profile_id' => Mage::getModel('customgrid/grid')->getBaseProfileId()),
-                    ),
-                    'permissions' => array(
-                        BL_CustomGrid_Model_Grid::ACTION_CUSTOMIZE_COLUMNS,
-                        BL_CustomGrid_Model_Grid::ACTION_EDIT_CUSTOMIZATION_PARAMS,
-                        BL_CustomGrid_Model_Grid::ACTION_EDIT_DEFAULT_PARAMS_BEHAVIOURS,
-                        BL_CustomGrid_Model_Grid::ACTION_EDIT_ROLES_PERMISSIONS,
-                        BL_CustomGrid_Model_Grid::ACTION_ASSIGN_PROFILES,
-                    ),
-                ),
-                array(
-                    'caption'     => $this->__('Enable'),
-                    'url'         => array('base' => '*/*/enable'),
-                    'field'       => 'grid_id',
-                    'permissions' => array(BL_CustomGrid_Model_Grid::ACTION_ENABLE_DISABLE),
-                ),
-                array(
-                    'caption'     => $this->__('Disable'),
-                    'url'         => array('base' => '*/*/disable'),
-                    'field'       => 'grid_id',
-                    'permissions' => array(BL_CustomGrid_Model_Grid::ACTION_ENABLE_DISABLE),
-                ),
-                array(
-                    'caption'     => $this->__('Delete'),
-                    'confirm'     => $this->__('Are you sure?'),
-                    'url'         => array('base' => '*/*/delete'),
-                    'field'       => 'grid_id',
-                    'permissions' => array(BL_CustomGrid_Model_Grid::ACTION_DELETE),
+                    'header' => $this->__('ID'),
+                    'index'  => 'grid_id',
                 )
-            ),
-        ));
+            )
+            ->addColumn(
+                'block_type',
+                array(
+                    'header' => $this->__('Block Type'),
+                    'index'  => 'block_type',
+                )
+            )
+            ->addColumn(
+                'type_code',
+                array(
+                    'header'  => $this->__('Type'),
+                    'index'   => 'type_code',
+                    'type'    => 'options',
+                    'options' => Mage::getSingleton('customgrid/grid_type_config')->getTypesAsOptionHash(true),
+                )
+            )
+            ->addColumn(
+                'rewriting_class_name',
+                array(
+                    'header' => $this->__('Rewriting Class'),
+                    'index'  => 'rewriting_class_name',
+                )
+            )
+            ->addColumn(
+                'module_name',
+                array(
+                    'header' => $this->__('Module Name'),
+                    'index'  => 'module_name',
+                )
+            )
+            ->addColumn(
+                'controller_name',
+                array(
+                    'header' => $this->__('Controller Name'),
+                    'index'  => 'controller_name',
+                )
+            )
+            ->addColumn(
+                'block_id',
+                array(
+                    'header' => $this->__('Block ID'),
+                    'index'  => 'block_id',
+                )
+            )
+            ->addColumn(
+                'disabled',
+                array(
+                    'header'  => $this->__('Disabled'),
+                    'index'   => 'disabled',
+                    'type'    => 'options',
+                    'options' => array(
+                        1 => $this->__('Yes'),
+                        0 => $this->__('No'),
+                    ),
+                )
+            )
+            ->_prepareActionColumn();
         
         return parent::_prepareColumns();
     }
     
     protected function _isRowEditAllowed($item)
     {
-        return ($item->checkUserActionPermission(BL_CustomGrid_Model_Grid::ACTION_CUSTOMIZE_COLUMNS)
-            || $item->checkUserActionPermission(BL_CustomGrid_Model_Grid::ACTION_EDIT_CUSTOMIZATION_PARAMS)
-            || $item->checkUserActionPermission(BL_CustomGrid_Model_Grid::ACTION_EDIT_DEFAULT_PARAMS_BEHAVIOURS)
-            || $item->checkUserActionPermission(BL_CustomGrid_Model_Grid::ACTION_EDIT_ROLES_PERMISSIONS)
-            || $item->checkUserActionPermission(BL_CustomGrid_Model_Grid::ACTION_ASSIGN_PROFILES));
+        return $item->checkUserPermissions(array(
+            BL_CustomGrid_Model_Grid::ACTION_CUSTOMIZE_COLUMNS,
+            BL_CustomGrid_Model_Grid::ACTION_ENABLE_DISABLE,
+            BL_CustomGrid_Model_Grid::ACTION_EDIT_FORCED_TYPE,
+            BL_CustomGrid_Model_Grid::ACTION_EDIT_CUSTOMIZATION_PARAMS,
+            BL_CustomGrid_Model_Grid::ACTION_EDIT_DEFAULT_PARAMS_BEHAVIOURS,
+            BL_CustomGrid_Model_Grid::ACTION_EDIT_ROLES_PERMISSIONS,
+            BL_CustomGrid_Model_Grid::ACTION_ASSIGN_PROFILES,
+        ));
     }
     
     public function getRowUrl($item)
@@ -155,25 +184,33 @@ class BL_CustomGrid_Block_Grid_Grid
     protected function _prepareMassaction()
     {
         $this->setMassactionIdField('grid_id');
-        $this->getMassactionBlock()->setFormFieldName('grid');
         
-        $this->getMassactionBlock()->addItem('mass_enable', array(
-            'label'   => $this->__('Enable'),
-            'url'     => $this->getUrl('*/*/massEnable', array('_current' => true)),
-            'confirm' => $this->__('Are you sure?'),
-        ));
-        
-        $this->getMassactionBlock()->addItem('mass_disable', array(
-            'label'   => $this->__('Disable'),
-            'url'     => $this->getUrl('*/*/massDisable', array('_current' => true)),
-            'confirm' => $this->__('Are you sure?'),
-        ));
-        
-        $this->getMassactionBlock()->addItem('mass_delete', array(
-            'label'   => $this->__('Delete'),
-            'url'     => $this->getUrl('*/*/massDelete', array('_current' => true)),
-            'confirm' => $this->__('Are you sure?'),
-        ));
+        $this->getMassactionBlock()
+            ->setFormFieldName('grid')
+            ->addItem(
+                'mass_enable',
+                array(
+                    'label'   => $this->__('Enable'),
+                    'url'     => $this->getUrl('*/*/massEnable', array('_current' => true)),
+                    'confirm' => $this->__('Are you sure?'),
+                )
+            )
+            ->addItem(
+                'mass_disable',
+                array(
+                    'label'   => $this->__('Disable'),
+                    'url'     => $this->getUrl('*/*/massDisable', array('_current' => true)),
+                    'confirm' => $this->__('Are you sure?'),
+                )
+            )
+            ->addItem(
+                'mass_delete',
+                array(
+                    'label'   => $this->__('Delete'),
+                    'url'     => $this->getUrl('*/*/massDelete', array('_current' => true)),
+                    'confirm' => $this->__('Are you sure?'),
+                )
+            );
         
         return $this;
     }

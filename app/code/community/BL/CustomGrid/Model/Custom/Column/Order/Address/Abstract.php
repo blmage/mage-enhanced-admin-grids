@@ -13,8 +13,8 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-abstract class BL_CustomGrid_Model_Custom_Column_Order_Address_Abstract
-    extends BL_CustomGrid_Model_Custom_Column_Simple_Table
+abstract class BL_CustomGrid_Model_Custom_Column_Order_Address_Abstract extends
+    BL_CustomGrid_Model_Custom_Column_Simple_Table
 {
     protected function _prepareConfig()
     {
@@ -24,9 +24,13 @@ abstract class BL_CustomGrid_Model_Custom_Column_Order_Address_Abstract
     
     abstract public function getAddressType();
     
-    public function getAppliedFlagKey($columnIndex, array $params, Mage_Adminhtml_Block_Widget_Grid $gridBlock,
-        Varien_Data_Collection_Db $collection, $tableName)
-    {
+    public function getAppliedFlagKey(
+        $columnIndex,
+        array $params,
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock,
+        Varien_Data_Collection_Db $collection,
+        $tableName
+    ) {
         return $tableName . '/' . $this->getAddressType();
     }
     
@@ -50,9 +54,14 @@ abstract class BL_CustomGrid_Model_Custom_Column_Order_Address_Abstract
         return $this->getConfigParam('address_field');
     }
     
-    protected function _getAdditionalJoinConditions($columnIndex, array $params,
-        Mage_Adminhtml_Block_Widget_Grid $gridBlock, Varien_Data_Collection_Db $collection, $mainAlias, $tableAlias)
-    {
+    protected function _getAdditionalJoinConditions(
+        $columnIndex,
+        array $params,
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock,
+        Varien_Data_Collection_Db $collection,
+        $mainAlias,
+        $tableAlias
+    ) {
         list($adapter, $qi) = $this->_getCollectionAdapter($collection, true);
         return array($adapter->quoteInto($qi($tableAlias . '.address_type') . ' = ?', $this->getAddressType()));
     }

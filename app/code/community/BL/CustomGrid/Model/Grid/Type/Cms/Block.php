@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_Grid_Type_Cms_Block
-    extends BL_CustomGrid_Model_Grid_Type_Abstract
+class BL_CustomGrid_Model_Grid_Type_Cms_Block extends BL_CustomGrid_Model_Grid_Type_Abstract
 {
     protected function _getSupportedBlockTypes()
     {
@@ -54,10 +53,12 @@ class BL_CustomGrid_Model_Grid_Type_Cms_Block
         );
         
         if (!Mage::app()->isSingleStoreMode()) {
+            $stores = Mage::getSingleton('adminhtml/system_store')->getStoreValuesForForm(false, true);
+            
             $fields['store_id'] = array(
                 'type'              => 'multiselect',
                 'required'          => true,
-                'form_values'       => Mage::getSingleton('adminhtml/system_store')->getStoreValuesForForm(false, true),
+                'form_values'       => $stores,
                 'render_block_type' => 'customgrid/widget_grid_editor_renderer_static_store',
             );
         }
@@ -87,7 +88,7 @@ class BL_CustomGrid_Model_Grid_Type_Cms_Block
     
     protected function _applyEditedFieldValue($blockType, BL_CustomGrid_Object $config, array $params, $entity, $value)
     {
-        if ($config->getId() == 'store_id') {
+        if ($config->getValueId() == 'store_id') {
             $entity->setStores($value);
             return $this;
         }
@@ -97,7 +98,7 @@ class BL_CustomGrid_Model_Grid_Type_Cms_Block
     
     protected function _getSavedFieldValueForRender($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
-        return ($config->getId() == 'store_id')
+        return ($config->getValueId() == 'store_id')
             ? $entity->getStores()
             : parent::_getSavedFieldValueForRender($blockType, $config, $params, $entity);
     }

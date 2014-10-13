@@ -13,12 +13,16 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Static_Product_Inventory
-    extends BL_CustomGrid_Block_Widget_Grid_Editor_Form_Static_Default
+class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Static_Product_Inventory extends
+    BL_CustomGrid_Block_Widget_Grid_Editor_Form_Static_Default
 {
-    protected function _prepareFormField($fieldId, $fieldType, $fieldName,
-        BL_CustomGrid_Model_Grid_Edit_Config $editConfig, Varien_Data_Form_Element_Abstract $field)
-    {
+    protected function _prepareFormField(
+        $fieldId,
+        $fieldType,
+        $fieldName,
+        BL_CustomGrid_Model_Grid_Edit_Config $editConfig,
+        Varien_Data_Form_Element_Abstract $field
+    ) {
         if ($editConfig->getData('inventory_field') == 'qty') {
             $entity    = $this->getEditedEntity();
             $qtyValue  = $this->_getProductInventoryData($entity, 'qty')*1;

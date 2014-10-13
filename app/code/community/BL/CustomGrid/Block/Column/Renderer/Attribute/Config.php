@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Column_Renderer_Attribute_Config
-    extends BL_CustomGrid_Block_Column_Renderer_Config_Abstract
+class BL_CustomGrid_Block_Column_Renderer_Attribute_Config extends BL_CustomGrid_Block_Column_Renderer_Config_Abstract
 {
     protected function _getController()
     {

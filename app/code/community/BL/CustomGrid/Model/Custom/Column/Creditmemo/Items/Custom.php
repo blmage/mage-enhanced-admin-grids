@@ -13,8 +13,8 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
  
-class BL_CustomGrid_Model_Custom_Column_Creditmemo_Items_Custom
-    extends BL_CustomGrid_Model_Custom_Column_Creditmemo_Items_Abstract
+class BL_CustomGrid_Model_Custom_Column_Creditmemo_Items_Custom extends
+    BL_CustomGrid_Model_Custom_Column_Creditmemo_Items_Abstract
 {
     protected function _isCustomizableList()
     {
@@ -40,7 +40,7 @@ class BL_CustomGrid_Model_Custom_Column_Creditmemo_Items_Custom
     
     protected function _getItemValuesEventName()
     {
-       return 'blcg_custom_column_creditmemo_items_custom_values';
+        return 'blcg_custom_column_creditmemo_items_custom_values';
     }
     
     protected function _getColumnBlockRenderer()

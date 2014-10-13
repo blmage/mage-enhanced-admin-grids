@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_Grid_Type_Tax_Rate
-    extends BL_CustomGrid_Model_Grid_Type_Abstract
+class BL_CustomGrid_Model_Grid_Type_Tax_Rate extends BL_CustomGrid_Model_Grid_Type_Abstract
 {
     protected function _getSupportedBlockTypes()
     {
@@ -42,8 +41,6 @@ class BL_CustomGrid_Model_Grid_Type_Tax_Rate
             ),
             // All the other fields are using dependences
         );
-        
-        return $fields;
     }
     
     protected function _getEntityRowIdentifiersKeys($blockType)

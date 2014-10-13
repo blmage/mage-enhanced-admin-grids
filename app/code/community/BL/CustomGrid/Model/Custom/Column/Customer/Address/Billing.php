@@ -13,8 +13,8 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_Custom_Column_Customer_Address_Billing
-    extends BL_CustomGrid_Model_Custom_Column_Customer_Address_Abstract
+class BL_CustomGrid_Model_Custom_Column_Customer_Address_Billing extends
+    BL_CustomGrid_Model_Custom_Column_Customer_Address_Abstract
 {
     public function getAddressType()
     {

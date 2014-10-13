@@ -13,18 +13,14 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Grid_ProfileController
-    extends BL_CustomGrid_Controller_Grid_Action
+class BL_CustomGrid_Grid_ProfileController extends BL_CustomGrid_Controller_Grid_Action
 {
-    const PERMISSIONS_MODE_OR  = 'or';
-    const PERMISSIONS_MODE_AND = 'and';
-    
     protected function _setActionSuccessJsonResponse(array $actions=array())
     {
         return parent::_setActionSuccessJsonResponse(array('actions' => $actions));
     }
     
-    protected function _prepareFormLayout($actionCode, $permissions=null, $permissionsMode=self::PERMISSIONS_MODE_OR)
+    protected function _prepareFormLayout($actionCode, $permissions=null, $anyPermission=true)
     {
         $handles = array('blcg_empty');
         $error = false;
@@ -34,26 +30,7 @@ class BL_CustomGrid_Grid_ProfileController
             $gridProfile = $this->_initGridProfile();
             
             if (!is_null($permissions)) {
-                $isAllowed = false;
-                
-                if (!is_array($permissions)) {
-                    $permissions = array($permissions);
-                }
-                
-                foreach ($permissions as $permission) {
-                    if ($gridModel->checkUserActionPermission($permission)) {
-                        $isAllowed = true;
-                        
-                        if ($permissionsMode == self::PERMISSIONS_MODE_OR) {
-                            break;
-                        }
-                    } elseif ($permissionsMode == self::PERMISSIONS_MODE_AND) {
-                        $isAllowed = false;
-                        break;
-                    }
-                }
-                
-                if (!$isAllowed) {
+                if (!$gridModel->checkUserPermissions($permissions, null, $anyPermission)) {
                     Mage::throwException($this->__('You are not allowed to use this action'));
                 }
             }
@@ -73,8 +50,7 @@ class BL_CustomGrid_Grid_ProfileController
             }
         } elseif ($containerBlock = $this->getLayout()->getBlock('blcg.grid_profile.form_container')) {
             $containerBlock->setProfileId($gridProfile->getId())
-                ->setActionCode($actionCode)
-                ->setProfilesBarJsObjectName($this->getRequest()->getParam('js_object_name'));
+                ->setActionCode($actionCode);
         }
         
         return $this;
@@ -116,7 +92,7 @@ class BL_CustomGrid_Grid_ProfileController
                 $data = $this->getRequest()->getPost();
                 $gridModel   = $this->_initGridModel();
                 $gridProfile = $this->_initGridProfile();
-                $newValues   = $gridModel->chooseProfileAsDefault($gridProfile->getId(), $data);
+                $gridModel->chooseProfileAsDefault($gridProfile->getId(), $data);
                 
                 $this->_getBlcgSession()->addSuccess($this->__('The profile has been successfully chosen as default'));
                 $this->_setActionSuccessJsonResponse();
@@ -292,7 +268,6 @@ class BL_CustomGrid_Grid_ProfileController
     {
         if ($this->getRequest()->isPost()) {
             try {
-                $data = $this->getRequest()->getPost();
                 $gridModel   = $this->_initGridModel();
                 $gridProfile = $this->_initGridProfile();
                 $isSessionProfile = ($gridProfile->getId() === $gridModel->getSessionProfileId());

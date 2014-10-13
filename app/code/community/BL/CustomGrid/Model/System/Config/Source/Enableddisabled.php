@@ -18,8 +18,14 @@ class BL_CustomGrid_Model_System_Config_Source_Enableddisabled
     public function toOptionArray()
     {
         return array(
-            array('value' => 1, 'label' => Mage::helper('customgrid')->__('Enabled')),
-            array('value' => 0, 'label' => Mage::helper('customgrid')->__('Disabled')),
+            array(
+                'value' => 1,
+                'label' => Mage::helper('customgrid')->__('Enabled'),
+            ),
+            array(
+                'value' => 0,
+                'label' => Mage::helper('customgrid')->__('Disabled'),
+            ),
         );
     }
 }

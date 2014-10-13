@@ -26,8 +26,7 @@
 <?php endif ?>
 <?php
 $_formHtmlId = $this->getFormHtmlId();
-$_profilesJsObjectName = $this->getProfilesBarJsObjectName();
-$_profilesJsObjectName = $this->helper('customgrid/string')->sanitizeJsObjectName($_profilesJsObjectName);
+$_profilesJsObjectName = $this->getProfilesJsObjectName();
 ?>
 <script type="text/javascript">
 //<![CDATA[
@@ -53,18 +52,20 @@ blcgGridProfileForm.submit = function(url) {
         alert('<?php echo $this->jsQuoteEscape($this->__('Can\'t find profiles JS object')) ?>');
     }
     <?php else: ?>
-        alert('<?php echo $this->jsQuoteEscape($this->__('Can\'t find profiles JS object')) ?>');
+    alert('<?php echo $this->jsQuoteEscape($this->__('Can\'t find profiles JS object')) ?>');
     <?php endif ?>
     return false;
 }.bind(blcgGridProfileForm);
 
-$('<?php echo $_formHtmlId ?>').observe('keydown', function(e) {
+var blcgGridProfileFormFirstInput = $('<?php echo $_formHtmlId ?>').observe('keydown', function(e) {
     if (e.keyCode == Event.KEY_RETURN) {
         e.stop();
         blcgGridProfileForm.submit();
         return;
     }
-}).select('input[type!=hidden], select, textarea').first().focus();
+})
+
+blcg.Tools.focusFirstInput('<?php echo $_formHtmlId ?>');
 //]]>
 </script>
 <?php echo $this->getFormScripts() ?>

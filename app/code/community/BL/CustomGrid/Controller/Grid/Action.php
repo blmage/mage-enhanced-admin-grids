@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Controller_Grid_Action
-    extends Mage_Adminhtml_Controller_Action
+class BL_CustomGrid_Controller_Grid_Action extends Mage_Adminhtml_Controller_Action
 {
     /**
      * Return our own session model
@@ -38,11 +37,11 @@ class BL_CustomGrid_Controller_Grid_Action
     }
     
     /**
-    * Save the states (collapsed or not) of some config form fieldsets,
-    * if the information is present in the current request
-    * 
-    * @return this
-    */
+     * Save the states (collapsed or not) of some config form fieldsets,
+     * if the information is present in the current request
+     * 
+     * @return this
+     */
     protected function _saveConfigFormFieldsetsStates()
     {
         if (is_array($fieldsetsStates = $this->getRequest()->getParam('blcg_form_config_fieldsets_states'))) {
@@ -58,7 +57,7 @@ class BL_CustomGrid_Controller_Grid_Action
      * @param array $additional Additional values
      * @return array
      */
-    protected function _setActionJsonResponse($type, array $additional=array())
+    protected function _setActionJsonResponse($type, array $additional = array())
     {
         $messagesBlock = $this->getLayout()
             ->createBlock('customgrid/messages')
@@ -94,7 +93,7 @@ class BL_CustomGrid_Controller_Grid_Action
      * @param array $additional Additional values
      * @return this
      */
-    protected function _setActionSuccessJsonResponse(array $additional=array())
+    protected function _setActionSuccessJsonResponse(array $additional = array())
     {
         return $this->_setActionJsonResponse('success', $additional);
     }
@@ -120,12 +119,12 @@ class BL_CustomGrid_Controller_Grid_Action
         return $gridModel;
     }
     
-     /**
-      * Initialize and register the grid profile from the current request
-      * 
-      * @return BL_CustomGrid_Model_Grid_Profile
-      */
-    protected function _initGridProfile($temporary=true, $baseIfNone=false)
+    /**
+     * Initialize and register the grid profile from the current request
+     * 
+     * @return BL_CustomGrid_Model_Grid_Profile
+     */
+    protected function _initGridProfile($temporary = true, $baseIfNone = false)
     {
         $profileId = false;
         $profile = false;

@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Grid_Edit_Tabs
-    extends Mage_Adminhtml_Block_Widget_Tabs
+class BL_CustomGrid_Block_Grid_Edit_Tabs extends Mage_Adminhtml_Block_Widget_Tabs
 {
     public function __construct()
     {
@@ -28,28 +27,40 @@ class BL_CustomGrid_Block_Grid_Edit_Tabs
     {
         $gridModel = $this->getGridModel();
         
-        if ($gridModel->checkUserActionPermission(BL_CustomGrid_Model_Grid::ACTION_CUSTOMIZE_COLUMNS)) {
+        if ($gridModel->checkUserPermissions(array(
+                BL_CustomGrid_Model_Grid::ACTION_EDIT_FORCED_TYPE,
+                BL_CustomGrid_Model_Grid::ACTION_ENABLE_DISABLE,
+            ))) {
+            $this->addTab('infos', 'customgrid/grid_edit_tab_infos');
+        }
+        
+        if ($gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_CUSTOMIZE_COLUMNS)) {
             $this->addTab('columns', 'customgrid/grid_edit_tab_columns');
         }
         
-        if ($gridModel->checkUserActionPermission(BL_CustomGrid_Model_Grid::ACTION_EDIT_DEFAULT_PARAMS_BEHAVIOURS)
-            || $gridModel->checkUserActionPermission(BL_CustomGrid_Model_Grid::ACTION_EDIT_CUSTOMIZATION_PARAMS)
-            || $gridModel->checkUserActionPermission(BL_CustomGrid_Model_Grid::ACTION_ASSIGN_PROFILES)) {
+        if ($gridModel->checkUserPermissions(array(
+                BL_CustomGrid_Model_Grid::ACTION_EDIT_DEFAULT_PARAMS_BEHAVIOURS,
+                BL_CustomGrid_Model_Grid::ACTION_EDIT_CUSTOMIZATION_PARAMS,
+                BL_CustomGrid_Model_Grid::ACTION_ASSIGN_PROFILES,
+            ))) {
             $this->addTab('settings', 'customgrid/grid_edit_tab_settings');
         }
         
-        if ($gridModel->checkUserActionPermission(BL_CustomGrid_Model_Grid::ACTION_EDIT_ROLES_PERMISSIONS)) {
+        if ($gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_EDIT_ROLES_PERMISSIONS)) {
             $roles = Mage::getModel('admin/roles')->getCollection();
             
             foreach ($roles as $role) {
-                $this->addTab('role_' . $role->getRoleId(), array(
-                    'label'   => $this->__('%s Role', $role->getRoleName()),
-                    'active'  => false,
-                    'content' => $this->getLayout()
-                        ->createBlock('customgrid/grid_edit_tab_role')
-                        ->setRole($role)
-                        ->toHtml(),
-                ));
+                $this->addTab(
+                    'role_' . $role->getRoleId(),
+                    array(
+                        'label'   => $this->__('%s Role', $role->getRoleName()),
+                        'active'  => false,
+                        'content' => $this->getLayout()
+                            ->createBlock('customgrid/grid_edit_tab_role')
+                            ->setRole($role)
+                            ->toHtml(),
+                    )
+                );
             }
         }
         
