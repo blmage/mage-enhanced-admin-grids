@@ -684,7 +684,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract extends BL_CustomGrid_
         $blockType = $gridModel->getBlockType();
         
         if (!isset(self::$_blockVerificationsCache[$blockType])) {
-            $behaviour = $this->_getConfigHelper()->getCustomColumnUnverifiedBlockBehaviour();
+            $behaviour = $this->_getConfigHelper()->getCustomColumnsUnverifiedBlockBehaviour();
             
             if ($behaviour == self::UNVERIFIED_BEHAVIOUR_NONE) {
                 $result = true;
@@ -747,7 +747,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract extends BL_CustomGrid_
         $blockType = $gridModel->getBlockType();
         
         if (!isset(self::$_collectionVerificationsCache[$blockType])) {
-            $behaviour = $this->_getConfigHelper()->getCustomColumnUnverifiedCollectionBehaviour();
+            $behaviour = $this->_getConfigHelper()->getCustomColumnsUnverifiedCollectionBehaviour();
             
             if ($behaviour == self::UNVERIFIED_BEHAVIOUR_NONE) {
                 $result = true;

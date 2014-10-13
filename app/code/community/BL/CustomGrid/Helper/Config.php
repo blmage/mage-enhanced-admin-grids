@@ -50,7 +50,9 @@ class BL_CustomGrid_Helper_Config extends Mage_Core_Helper_Abstract
     const CONFIG_PATH_PROFILES_DEFAULT_ASSIGNED_TO = 'customgrid/profiles/default_assigned_to';
     
     // Custom columns
-    const CONFIG_PATH_GROUP_IN_CUSTOM_COLUMNS_DEFAULT_HEADER = 'customgrid/custom_columns/group_in_default_header';
+    const CONFIG_PATH_GROUP_IN_CC_DEFAULT_HEADER         = 'customgrid/custom_columns/group_in_default_header';
+    const CONFIG_PATH_CC_UNVERIFIED_BLOCK_BEHAVIOUR      = 'customgrid/custom_columns/unverified_block_behaviour';
+    const CONFIG_PATH_CC_UNVERIFIED_COLLECTION_BEHAVIOUR = 'customgrid/custom_columns/unverified_collection_behaviour';
     
     protected $_configCache = array();
     
@@ -363,6 +365,26 @@ class BL_CustomGrid_Helper_Config extends Mage_Core_Helper_Abstract
      */
     public function getAddGroupToCustomColumnsDefaultHeader()
     {
-        return Mage::getStoreConfigFlag(self::CONFIG_PATH_GROUP_IN_CUSTOM_COLUMNS_DEFAULT_HEADER);
+        return Mage::getStoreConfigFlag(self::CONFIG_PATH_GROUP_IN_CC_DEFAULT_HEADER);
+    }
+    
+    /**
+     * Getter for the config value "Custom Columns" > "Behaviour When Unverified Grid Block"
+     *
+     * @return string
+     */
+    public function getCustomColumnsUnverifiedBlockBehaviour()
+    {
+        return Mage::getStoreConfig(self::CONFIG_PATH_CC_UNVERIFIED_BLOCK_BEHAVIOUR);
+    }
+    
+    /**
+     * Getter for the config value "Custom Columns" > "Behaviour When Unverified Grid Collection"
+     *
+     * @return string
+     */
+    public function getCustomColumnsUnverifiedCollectionBehaviour()
+    {
+        return Mage::getStoreConfig(self::CONFIG_PATH_CC_UNVERIFIED_COLLECTION_BEHAVIOUR);
     }
 }
