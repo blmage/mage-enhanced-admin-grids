@@ -698,21 +698,23 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract extends BL_CustomGrid_
                     $result = true;
                     
                     if ($this->_canDisplayVerificationMessage('warning', 'block', $blockType)) {
-                        Mage::getSingleton('customgrid/session')
-                            ->addWarning(
+                        $warningMessage = $this->_getBaseHelper()
+                            ->__(
                                 'The "%s" block type was not completely verified, some custom columns may not be '
                                     . 'working (partially or fully)',
                                 $blockType
                             );
+                        Mage::getSingleton('customgrid/session')->addWarning($warningMessage);
                     }
                 } else {
                     if ($this->_canDisplayVerificationMessage('error', 'block', $blockType)) {
-                        Mage::getSingleton('customgrid/session')
-                            ->addError(
+                        $errorMessage = $this->_getBaseHelper()
+                            ->__(
                                 'The "%s" block type was not completely verified, the corresponding custom columns '
                                     . 'will not be applied',
                                 $blockType
                             );
+                        Mage::getSingleton('customgrid/session')->addError($errorMessage);
                     }
                 }
             }
@@ -761,21 +763,23 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract extends BL_CustomGrid_
                     $result = true;
                     
                     if ($this->_canDisplayVerificationMessage('warning', 'collection', $blockType)) {
-                        Mage::getSingleton('customgrid/session')
-                            ->addWarning(
+                        $warningMessage = $this->_getBaseHelper()
+                            ->__(
                                 'The collection for the "%s" block type was not completely verified, some custom '
                                     . 'columns may not be working (partially or fully)',
                                 $blockType
                             );
+                        Mage::getSingleton('customgrid/session')->addWarning($warningMessage);
                     }
                 } else {
                     if ($this->_canDisplayVerificationMessage('error', 'collection', $blockType)) {
-                        Mage::getSingleton('customgrid/session')
-                            ->addError(
+                        $errorMessage = $this->_getBaseHelper()
+                            ->__(
                                 'The collection for "%s" block type was not completely verified, the corresponding '
                                     . 'custom columns will not be applied',
                                 $blockType
                             );
+                        Mage::getSingleton('customgrid/session')->addError($errorMessage);
                     }
                 }
             }

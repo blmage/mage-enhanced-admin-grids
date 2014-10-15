@@ -434,6 +434,29 @@ blcg.Grid.Tools = {
         // If the grid does not reload itself with AJAX and have reload params, then the given URL would not be used
         gridObject.url = blcg.Grid.Tools.getGridReloadUrl(gridObject, removableParams, additionalParams);
         gridObject.reload();
+    },
+    
+    reapplyDefaultFilter: function(gridObjectName, reapplyDefaultFilterUrl, filterResetRequestValue)
+    {
+        var gridObject = blcg.Grid.Tools.getGridObject(gridObjectName);
+        
+        if (gridObject) {
+            var additionalReloadParams = {};
+            additionalReloadParams[gridObject.filterVar] = filterResetRequestValue;
+            
+            new Ajax.Request(reapplyDefaultFilterUrl, {
+                method: 'post',
+                
+                onSuccess: blcg.Tools.handleAjaxOnSuccessResponse.curry(
+                    blcg.Grid.Tools.reloadGrid.curry(gridObjectName, [], additionalReloadParams),
+                    blcg.Tools.translate('An error occured while reapplying the default filter')
+                ),
+                
+                onFailure: blcg.Tools.handleAjaxOnErrorResponse.curry(
+                    blcg.Tools.translate('An error occured while reapplying the default filter')
+                )
+            });
+        }
     }
 };
 
@@ -1997,7 +2020,7 @@ blcg.Grid.ConfigForm.prototype = {
 };
 
 blcg.Grid.ColumnsConfigForm = Class.create(blcg.Grid.Form, {
-    initialize: function($super, containerId, rowClassName, saveUrl, reapplyDefaultFilterUrl, config)
+    initialize: function($super, containerId, rowClassName, saveUrl, config)
     {
         this.config = Object.extend({
             tableIdSuffix: '-table',
@@ -2018,8 +2041,7 @@ blcg.Grid.ColumnsConfigForm = Class.create(blcg.Grid.Form, {
             useDnd: false,
             dndHandleClassName: 'blcg-drag-handle',
             gridObjectName: '',
-            additionalSaveParams: {},
-            filterResetRequestValue: ''
+            additionalSaveParams: {}
         }, config || {});
         
         $super(containerId, saveUrl, {
@@ -2054,7 +2076,6 @@ blcg.Grid.ColumnsConfigForm = Class.create(blcg.Grid.Form, {
         this.containerId  = containerId;
         this.rowClassName = rowClassName;
         this.saveUrl = saveUrl;
-        this.reapplyDefaultFilterUrl = reapplyDefaultFilterUrl;
         
         this.container = $(this.containerId);
         this.table     = $(this.containerId + this.config.tableIdSuffix);
@@ -2373,30 +2394,6 @@ blcg.Grid.ColumnsConfigForm = Class.create(blcg.Grid.Form, {
             return false;
         }
         return this.save();
-    },
-    
-    reapplyDefaultFilter: function()
-    {
-        var gridObject = blcg.Grid.Tools.getGridObject(this.config.gridObjectName);
-        
-        if (gridObject) {
-            var additionalReloadParams = {};
-            additionalReloadParams[gridObject.filterVar] = this.config.filterResetRequestValue;
-            
-            new Ajax.Request(this.reapplyDefaultFilterUrl, {
-                method: 'post',
-                parameters: this.config.additionalSaveParams,
-                
-                onSuccess: blcg.Tools.handleAjaxOnSuccessResponse.curry(
-                    blcg.Grid.Tools.reloadGrid.curry(this.config.gridObjectName, [], additionalReloadParams),
-                    blcg.Tools.translate('An error occured while reapplying the default filter')
-                ),
-                
-                onFailure: blcg.Tools.handleAjaxOnErrorResponse.curry(
-                    blcg.Tools.translate('An error occured while reapplying the default filter')
-                )
-            });
-        }
     }
 });
 
@@ -2680,9 +2677,8 @@ blcg.Grid.CustomColumn.ConfigButton.prototype = {
 
 blcg.Grid.CustomColumn.ConfigForm = Class.create(blcg.Grid.ConfigForm);
 
-blcg.Grid.CustomColumn.OptionsColor = Class.create();
-blcg.Grid.CustomColumn.OptionsColor.prototype = {
-    registerRowChange: function(childId, backgroundColor, textColor, onlyCell)
+blcg.Grid.CustomColumn.RowColorizer = {
+    colorizeRow: function(childId, backgroundColor, textColor, onlyCell)
     {
         var element   = $(childId);
         var upElement = null;
@@ -2755,26 +2751,35 @@ blcg.Grid.Editor.prototype = {
         this.initCells();
     },
     
+    getElementIndex: function(element)
+    {
+        var index = element.readAttribute('blcg-index');
+        
+        if (index === null) {
+            index = element.previousSiblings().length;
+            element.writeAttribute('blcg-index', index);
+        }
+        
+        return index;
+    },
+    
     initCells: function()
     {
-        this.cellsRowIndices  = $H();
-        this.cellsConfigs     = $H();
         this.editedCell       = null;
         this.previousValue    = null;
         this.hasPreviousValue = false;
         
-        this.table.up().select('#' + this.tableId + ' > tbody > tr').each(function(row, rowIndex) {
+        this.table.up().select('#' + this.tableId + ' > tbody > tr > td').each(function(cell) {
+            var row = cell.up();
+            var rowIndex= this.getElementIndex(row);
+            
             if (this.rowsIds[rowIndex]) {
-                row.childElements('td').each(function(cell, cellIndex) {
-                    if (this.cells[cellIndex]) {
-                        var cellId = cell.identify();
-                        this.cellsRowIndices[cellId] = rowIndex;
-                        this.cellsConfigs[cellId] = this.cells[cellIndex];
-                        
-                        cell.observe('mouseover', this.onCellMouseOver.bind(this, cell));
-                        cell.observe('mouseout',  this.onCellMouseOut.bind(this,  cell));
-                    }
-                }.bind(this));
+                var cellIndex = this.getElementIndex(cell);
+                
+                if (this.cells[cellIndex]) {
+                    cell.observe('mouseover', this.onCellMouseOver.bind(this, cell));
+                    cell.observe('mouseout',  this.onCellMouseOut.bind(this,  cell));
+                }
             }
         }.bind(this));
         
@@ -2972,9 +2977,8 @@ blcg.Grid.Editor.prototype = {
     
     getCellParamsHash: function(cell)
     {
-        var cellId = cell.identify();
-        var config = this.cellsConfigs[cellId];
-        var rowIds = this.rowsIds[this.cellsRowIndices[cellId]];
+        var config = this.cells[this.getElementIndex(cell)];
+        var rowIds = this.rowsIds[this.getElementIndex(cell.up())];
         var params = $H();
         
         $H(rowIds).each(function(pair) {
@@ -3033,7 +3037,7 @@ blcg.Grid.Editor.prototype = {
         if (!this.compareCells(this.editedCell, cell)) {
             this.cancelEdit();
             this.editedCell = cell;
-            var cellConfig  = this.cellsConfigs[cell.identify()];
+            var cellConfig  = this.cells[this.getElementIndex(cell)];
             var editUrl     = cellConfig.editUrl;
             var editParams  = this.getCellParamsHash(this.editedCell);
             
@@ -3136,7 +3140,7 @@ blcg.Grid.Editor.prototype = {
             var cell   = this.editedCell;
             var cellId = cell.identify();
             var params = null;
-            var cellConfig = this.cellsConfigs[cellId];
+            var cellConfig = this.cells[this.getElementIndex(cell)];
             
             if (cellConfig.inGrid) {
                 var form = $(this.config.formIdBase + cellId);
@@ -3221,7 +3225,7 @@ blcg.Grid.Editor.prototype = {
                 this.hasPreviousValue = false;
             }
             
-            var cellConfig = this.cellsConfigs[this.editedCell.identify()];
+            var cellConfig = this.cells[this.getElementIndex(this.editedCell)];
             this.previousValue = null;
             this.editedCell.removeClassName(this.config.editedCellClassName);
             this.editedCell.removeClassName(this.config.requiredCellClassName);

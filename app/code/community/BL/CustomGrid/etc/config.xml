@@ -153,8 +153,8 @@
                 <merge_base_pagination>0</merge_base_pagination>
                 <pin_header>1</pin_header>
                 <rss_links_window>1</rss_links_window>
-                <hide_original_export>1</hide_original_export>
-                <hide_filter_reset>1</hide_filter_reset>
+                <hide_original_export_block>1</hide_original_export_block>
+                <hide_filter_reset_button>1</hide_filter_reset_button>
             </customization_params>
             <default_params_behaviours>
                 <page>default</page>

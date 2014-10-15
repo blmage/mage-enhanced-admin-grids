@@ -23,11 +23,6 @@
 ?>
 <div class="blcg-custom-grid-config" id="<?php echo $this->getHtmlId() ?>" <?php if (!$this->isStandAlone()): ?>style="display:none;"<?php endif ?>>
     <div id="<?php echo $this->getHtmlId() ?>-header">
-        <?php if (!$this->isStandAlone()): ?>
-            <input type="hidden" name="form_key" value="<?php echo $this->getFormKey() ?>" />
-            <input type="hidden" name="grid_id" value="<?php echo $_gridModel->getGridId() ?>" />
-            <input type="hidden" name="profile_id" value="<?php echo $_gridModel->getProfileId() ?>" />
-        <?php endif ?>
         <table class="massaction" cellspacing="0" cellpadding="0">
             <tr>
                 <td>
@@ -266,7 +261,6 @@ var blcgStoreSelectTemplate = <?php echo $this->getStoreSelectHtml() ?>;
     '<?php echo $_htmlId ?>',
     '<?php echo $_htmlId ?>-table-column',
     '<?php echo $this->getSaveUrl() ?>',
-    '<?php echo $this->getReapplyDefaultFilterUrl() ?>',
     {
         newRowId: '<?php echo $this->getTableRowCssId() ?>',
         orderInputId: '<?php echo $this->getOrderInputCssId() ?>',
@@ -299,8 +293,7 @@ var blcgStoreSelectTemplate = <?php echo $this->getStoreSelectHtml() ?>;
         orderPitch: <?php echo $this->getColumnsOrderPitch() ?>, 
         useDnd: <?php if ($this->getUseDragNDrop()): ?>true<?php else: ?>false<?php endif ?>,
         gridObjectName: '<?php echo $this->jsQuoteEscape($this->getGridJsObjectName()) ?>',
-        additionalSaveParams: <?php echo $this->getAdditionalParamsJsonConfig() ?>,
-        filterResetRequestValue: '<?php echo $this->jsQuoteEscape($this->getFilterResetRequestValue()) ?>'
+        additionalSaveParams: <?php echo $this->getAdditionalParamsJsonConfig() ?>
     }
 );
 
@@ -312,7 +305,6 @@ var blcgStoreSelectTemplate = <?php echo $this->getStoreSelectHtml() ?>;
     '<?php echo $_htmlId ?>',
     '<?php echo $_htmlId ?>-table-column',
     '<?php echo $this->getSaveUrl() ?>',
-    '<?php echo $this->getReapplyDefaultFilterUrl() ?>',
     {
         newRowId: '<?php echo $this->getTableRowCssId() ?>',
         orderInputId: '<?php echo $this->getOrderInputCssId() ?>',
@@ -322,8 +314,7 @@ var blcgStoreSelectTemplate = <?php echo $this->getStoreSelectHtml() ?>;
         orderPitch: <?php echo $this->getColumnsOrderPitch() ?>,
         useDnd: <?php if ($this->getUseDragNDrop()): ?>true<?php else: ?>false<?php endif ?>,
         gridObjectName: '<?php echo $this->jsQuoteEscape($this->getGridJsObjectName()) ?>',
-        additionalSaveParams: <?php echo $this->getAdditionalParamsJsonConfig() ?>,
-        filterResetRequestValue: '<?php echo $this->jsQuoteEscape($this->getFilterResetRequestValue()) ?>'
+        additionalSaveParams: <?php echo $this->getAdditionalParamsJsonConfig() ?>
     }
 );
 

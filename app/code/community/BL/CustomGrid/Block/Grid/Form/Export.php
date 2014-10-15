@@ -48,7 +48,7 @@ class BL_CustomGrid_Block_Grid_Form_Export extends BL_CustomGrid_Block_Grid_Form
             $exportSizes[$paginationValue] = $paginationValue;
         }
         
-        $exportSizes[''] = $this->__('Other');
+        $exportSizes['_other_'] = $this->__('Other');
         return $exportSizes;
     }
     
@@ -60,7 +60,7 @@ class BL_CustomGrid_Block_Grid_Form_Export extends BL_CustomGrid_Block_Grid_Form
                 ->createBlock('customgrid/widget_form_element_dependence')
                 ->addFieldMap($sizeFieldId, 'size')
                 ->addFieldMap($customSizeFieldId, 'custom_size')
-                ->addFieldDependence('custom_size', 'size', '')
+                ->addFieldDependence('custom_size', 'size', '_other_')
         );
     }
     

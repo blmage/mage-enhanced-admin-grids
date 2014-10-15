@@ -466,22 +466,21 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
                     ->setIsNewGridModel($isNewGridModel)
             );
         
-        // Rearrange filter buttons
-        $configBlock = $gridBlock->getChild('blcg_grid_config');
-        $filterButtonsList   = $layout->createBlock('core/text_list');
-        $resetFilterButton   = $gridBlock->getChild('reset_filter_button');
-        $defaultFilterButton = $layout->createBlock('adminhtml/widget_button')
-            ->setData(array(
-                'label'   => Mage::helper('adminhtml')->__('Reapply Default Filter'),
-                'onclick' => $configBlock->getJsObjectName() . '.reapplyDefaultFilter()',
-            ));
-        
-        if (!$gridModel->getHideFilterResetButton() && $resetFilterButton) {
-            $filterButtonsList->append($resetFilterButton);
+        if (!$isNewGridModel) {
+            // Rearrange filter buttons
+            $filterButtonsList   = $layout->createBlock('core/text_list');
+            $resetFilterButton   = $gridBlock->getChild('reset_filter_button');
+            $defaultFilterButton = $layout->createBlock('customgrid/widget_grid_button_default_filter_reapply')
+                ->setGridBlock($gridBlock)
+                ->setGridModel($gridModel);
+            
+            if (!$gridModel->getHideFilterResetButton() && $resetFilterButton) {
+                $filterButtonsList->append($resetFilterButton);
+            }
+            
+            $filterButtonsList->append($defaultFilterButton);
+            $gridBlock->setChild('reset_filter_button', $filterButtonsList);
         }
-        
-        $filterButtonsList->append($defaultFilterButton);
-        $gridBlock->setChild('reset_filter_button', $filterButtonsList);
         
         // Apply custom template
         if ($helper->isMageVersionGreaterThan(1, 5)) {

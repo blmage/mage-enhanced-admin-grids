@@ -15,6 +15,8 @@
 
 abstract class BL_CustomGrid_Block_Column_Renderer_Attribute_Abstract extends Mage_Adminhtml_Block_Template
 {
+    protected $_attributesCodes = null;
+    
     protected function _getAttributes()
     {
         $attributes = array();
@@ -24,6 +26,18 @@ abstract class BL_CustomGrid_Block_Column_Renderer_Attribute_Abstract extends Ma
         }
         
         return $attributes;
+    }
+    
+    public function getAttributesCodes()
+    {
+        if (is_null($this->_attributesCodes)) {
+            $this->_attributesCodes = array();
+            
+            foreach ($this->_getAttributes() as $attribute) {
+                $this->_attributesCodes[] = $attribute->getAttributeCode();
+            }
+        }
+        return $this->_attributesCodes;
     }
     
     protected function _getAvailableRenderers($withEmpty = false)

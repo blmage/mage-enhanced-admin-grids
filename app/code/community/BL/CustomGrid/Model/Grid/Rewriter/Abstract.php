@@ -198,11 +198,13 @@ abstract class BL_CustomGrid_Model_Grid_Rewriter_Abstract extends BL_CustomGrid_
                 $originalCollection = $this->getCollection();
             }
             if ($originalCollection->isLoaded()) {
-                Mage::throwException(Mage::helper(\'customgrid\')->__(
-                    \'This grid does not seem to be compatible with the custom export.\'
-                        . \' If you wish to report this problem, please indicate this class name : "%s"\',
-                    get_class($this)
-                ));
+                $errorMessage = Mage::helper(\'customgrid\')
+                    ->__(
+                        \'This grid does not seem to be compatible with the custom export.\'
+                            . \' If you wish to report this problem, please indicate this class name : "%s"\',
+                        get_class($this)
+                    );
+                Mage::throwException($errorMessage);
             }
             
             $pageSize = (isset($this->_exportPageSize) ? $this->_exportPageSize : 1000);
@@ -215,9 +217,9 @@ abstract class BL_CustomGrid_Model_Grid_Rewriter_Abstract extends BL_CustomGrid_
             }
             
             $fromResult = (isset($config[\'from_result\']) ? (int) $config[\'from_result\'] : 1);
-            $pageSize   = min($total, $pageSize);
-            $page  = ceil($fromResult/$pageSize);
-            $pitchSize  = ($fromResult > 1 ? $fromResult-1 - ($page-1)*$pageSize : 0);
+            $pageSize = min($total, $pageSize);
+            $page = ceil($fromResult/$pageSize);
+            $pitchSize = ($fromResult > 1 ? $fromResult-1 - ($page-1)*$pageSize : 0);
             $break = false;
             $first = false;
             $count = null;

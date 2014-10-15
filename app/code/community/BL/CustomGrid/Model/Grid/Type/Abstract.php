@@ -506,15 +506,28 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      */
     protected function _getFieldActionUrl($blockType, $fieldId, BL_CustomGrid_Model_Grid_Edit_Config $config, $route)
     {
-        return Mage::helper('adminhtml')->getUrl(
-            $route,
-            array(
-                'grid_type'   => $this->getCode(),
-                'block_type'  => Mage::helper('core')->urlEncode($blockType),
-                'id'          => $fieldId,
-                'origin'      => self::EDITABLE_TYPE_FIELD,
-                'is_external' => (!$config->getInGrid() ? 1 : 0),
-            )
+        $blockTypeCode = str_replace('/', '_', $blockType);
+        $routeCode = str_replace('/', '_', $route);
+        
+        if (!$baseUrl = $this->getData('field_action_base_urls/' . $blockTypeCode . '/' . $routeCode)) {
+            $baseUrl = Mage::helper('adminhtml')->getUrl(
+                $route,
+                 array(
+                    'grid_type'   => $this->getCode(),
+                    'block_type'  => Mage::helper('core')->urlEncode($blockType),
+                    'id'          => '{{field_id}}',
+                    'origin'      => self::EDITABLE_TYPE_FIELD,
+                    'is_external' => '{{in_grid}}',
+                )
+            );
+            
+            $this->setData('field_action_base_urls/' . $blockTypeCode . '/' . $routeCode, $baseUrl);
+        }
+        
+        return str_replace(
+            array('{{field_id}}', '{{in_grid}}'),
+            array($fieldId, (!$config->getInGrid() ? 1 : 0)),
+            $baseUrl
         );
     }
     
@@ -566,15 +579,28 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
         BL_CustomGrid_Model_Grid_Edit_Config $config,
         $route
     ) {
-        return Mage::helper('adminhtml')->getUrl(
-            $route,
-            array(
-                'grid_type'   => $this->getCode(),
-                'block_type'  => Mage::helper('core')->urlEncode($blockType),
-                'id'          => $attributeCode,
-                'origin'      => self::EDITABLE_TYPE_ATTRIBUTE,
-                'is_external' => (!$config->getInGrid() ? 1 : 0),
-            )
+        $blockTypeCode = str_replace('/', '_', $blockType);
+        $routeCode = str_replace('/', '_', $route);
+        
+        if (!$baseUrl = $this->getData('attribute_action_base_urls/' . $blockTypeCode . '/' . $routeCode)) {
+            $baseUrl = Mage::helper('adminhtml')->getUrl(
+                $route,
+                array(
+                    'grid_type'   => $this->getCode(),
+                    'block_type'  => Mage::helper('core')->urlEncode($blockType),
+                    'id'          => '{{attribute_code}}',
+                    'origin'      => self::EDITABLE_TYPE_ATTRIBUTE,
+                    'is_external' => '{{in_grid}}',
+                )
+            );
+            
+            $this->setData('attribute_action_base_urls/' . $blockTypeCode . '/' . $routeCode, $baseUrl);
+        }
+        
+        return str_replace(
+            array('{{attribute_code}}', '{{in_grid}}'),
+            array($attributeCode, (!$config->getInGrid() ? 1 : 0)),
+            $baseUrl
         );
     }
     

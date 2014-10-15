@@ -15,8 +15,8 @@
 ?>
 <div class="nobr">
     <select name="<?php echo $this->getSelectName() ?>" id="<?php echo $this->getSelectId() ?>" class="<?php echo $this->getSelectClassNames() ?>">
-    <?php foreach ($this->_getAttributes() as $_attribute): ?>
-        <option value="<?php echo $this->htmlEscape($_attribute->getAttributeCode()) ?>"<?php if ($this->getAttributeCode() == $_attribute->getAttributeCode()): ?> selected="selected"<?php endif ?>><?php echo $this->htmlEscape($_attribute->getAttributeCode()) ?></option>
+    <?php foreach ($this->getAttributesCodes() as $_attributeCode): ?>
+        <option value="<?php echo $this->htmlEscape($_attributeCode) ?>"<?php if ($this->getAttributeCode() == $_attributeCode): ?> selected="selected"<?php endif ?>><?php echo $this->htmlEscape($_attributeCode) ?></option>
     <?php endforeach ?>
     </select>
     <?php if ($this->getRendererTargetName()): ?>

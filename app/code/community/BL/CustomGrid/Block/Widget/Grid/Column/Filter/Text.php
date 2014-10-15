@@ -43,7 +43,7 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Text extends Mage_Adminhtml_
     }
     
     public function applyFilterShortcutsToValue(
-        $value,
+        &$value,
         $filterMode,
         $filterModeShortcut,
         $isNegative,
@@ -117,7 +117,7 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Text extends Mage_Adminhtml_
             }
         }
         
-        if ($filterMode == self::MODE_INSIDE_LIKE) {
+        if (($filterMode == self::MODE_INSIDE_LIKE) && ($searchedValue !== '')) {
             $searchedValue = '%' . $searchedValue . '%';
         }
         
@@ -127,7 +127,7 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Text extends Mage_Adminhtml_
     public function getCondition()
     {
         $columnBlock = $this->getColumn();
-        $collection  = $this->helper('customgrid/grid')->getColumnBlockCollection($columnBlock);
+        $collection  = $this->helper('customgrid/grid')->getColumnBlockGridCollection($columnBlock);
         $condition   = null;
         $value = $this->getValue();
         

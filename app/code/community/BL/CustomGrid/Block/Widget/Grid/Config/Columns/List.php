@@ -136,11 +136,6 @@ class BL_CustomGrid_Block_Widget_Grid_Config_Columns_List extends Mage_Adminhtml
         return $this->getUrl('customgrid/grid/saveColumns');
     }
     
-    public function getReapplyDefaultFilterUrl()
-    {
-        return $this->getUrl('customgrid/grid/reapplyDefaultFilter');
-    }
-    
     public function getCustomColumnConfigUrl()
     {
         return $this->getUrl('customgrid/custom_column_config/index');
@@ -159,11 +154,6 @@ class BL_CustomGrid_Block_Widget_Grid_Config_Columns_List extends Mage_Adminhtml
             );
         }
         return $this->_getData('additional_params_json_config');
-    }
-    
-    public function getFilterResetRequestValue()
-    {
-        return BL_CustomGrid_Model_Observer::GRID_FILTER_RESET_REQUEST_VALUE;
     }
     
     public function getIdPlaceholder()

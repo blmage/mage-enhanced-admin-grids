@@ -28,10 +28,10 @@ div.blcg-collapseable a.open { background:url(images/collapse_arrow_up.png) 100%
 
 /* MESSAGES LIST */
 
-.blcg-messages-wrapper { position:fixed; right:0; bottom:0; width:100%;  z-index:10; }
-.blcg-messages-tabs { height:32px; margin-right:16px; }
+.blcg-messages-wrapper { position:fixed; right:0; bottom:0; width:100%;  z-index:10; pointer-events:none; }
+.blcg-messages-tabs { margin-right:16px; pointer-events:auto; }
 .blcg-messages-tab { float:right; display:block; height:32px; line-height:34px; margin-left:8px; padding:0 10px 0 30px; font-weight:bold; background-repeat:no-repeat; background-position:6px center; border-style:solid; border-width:1px 1px 0; cursor:pointer; }
-.blcg-messages-lists { clear:both; }
+.blcg-messages-lists { clear:both; pointer-events:auto; }
 .blcg-messages-list-wrapper { max-height:200px; overflow-y:auto; border-width:1px 0 0; border-style:solid; }
 .blcg-messages-list { padding:8px 12px; }
 .blcg-messages-content-date { margin:0 0 4px; font-size:14px; font-weight:bold; }

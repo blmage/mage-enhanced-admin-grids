@@ -49,6 +49,6 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Order_Status_Color extends
     
     public function renderExport(Varien_Object $row)
     {
-        return $this->_renderRow($row, parent::renderExport($row), true);
+        return $this->_renderRow($row, parent::render($row), true);
     }
 }
