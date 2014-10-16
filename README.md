@@ -22,7 +22,7 @@ _Backwards compatibility is assured for all the previously existing data. **If y
 - refined permissions
 - various bug fixes
 
-### Continuous changes :
+### Continuous changes (primary todo list) :
 - new custom columns for different grids (especially the sales grids)
 - better compatibility with certain grids
 - various small improvements

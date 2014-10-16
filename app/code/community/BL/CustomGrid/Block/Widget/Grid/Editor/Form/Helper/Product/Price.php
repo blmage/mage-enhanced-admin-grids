@@ -50,7 +50,7 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Helper_Product_Price extends
                 $html.= ' <strong>[' . $this->_getTaxHelper()->__('Inc. Tax')
                     . '<span id="' . $this->getTaxObservingSpanId() . '"></span>'
                     . ']</strong>'
-                    . $this->_getTaxObservingCode();
+                    . $this->_getTaxObservingCode($attribute);
             }
         }
         
