@@ -205,14 +205,22 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Product_Categories_Chooser e
         return $ids;
     }
     
-    public function getLoadTreeUrl()
+    public function getLoadTreeUrl($expanded = null)
     {
         return $this->getUrl('customgrid/grid_column_filter/categoriesJson', array('_current' => true));
     }
     
+    public function getJsObjectName($sanitize = true)
+    {
+        if ($jsObjectName = $this->_getData('js_object_name')) {
+            $jsObjectName = $this->helper('customgrid/string')->sanitizeJsObjectName($jsObjectName);
+        }
+        return $jsObjectName;
+    }
+    
     public function getApplyButtonHtml()
     {
-        return !$this->getJsObjectName()
+        return !$this->getJsObjectName(false)
             ? ''
             : $this->getLayout()
                   ->createBlock('adminhtml/widget_button')

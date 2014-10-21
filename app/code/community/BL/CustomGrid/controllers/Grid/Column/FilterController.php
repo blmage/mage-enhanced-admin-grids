@@ -19,10 +19,9 @@ class BL_CustomGrid_Grid_Column_FilterController extends Mage_Adminhtml_Controll
     {
         $this->loadLayout();
         
-        if ($chooserBlock = $this->getLayout()->getBlock('blcg.Grid.Filter.categories.chooser')) {
-            $jsObjectName = $this->getRequest()->getParam('js_object_name', null);
+        if ($chooserBlock = $this->getLayout()->getBlock('blcg.filter.categories.chooser')) {
             $categoryIds = array_unique(explode(',', $this->getRequest()->getParam('ids', '')));
-            $chooserBlock->setJsObjectName($jsObjectName);
+            $chooserBlock->setJsObjectName($this->getRequest()->getParam('js_object_name'));
             $chooserBlock->setCategoryIds($categoryIds);
         }
         
