@@ -324,6 +324,24 @@
                     </model_params>
                 </store_id>
                 
+                <payment_method model="customgrid/custom_column_order_payment" module="customgrid">
+                    <name>Method</name>
+                    <group>Payment</group>
+                    <allow_renderers>1</allow_renderers>
+                    <model_params>
+                        <payment_field>method</payment_field>
+                    </model_params>
+                </payment_method>
+                
+                <cc_type model="customgrid/custom_column_order_payment" module="customgrid">
+                    <name>CC Type</name>
+                    <group>Payment</group>
+                    <allow_renderers>1</allow_renderers>
+                    <model_params>
+                        <payment_field>cc_type</payment_field>
+                    </model_params>
+                </cc_type>
+                
                 <status_color model="customgrid/custom_column_order_status_color" module="customgrid">
                     <name>Status (With Color)</name>
                     <description>Displays the status and colorizes the row</description>
