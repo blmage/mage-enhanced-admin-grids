@@ -137,7 +137,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Sales_Abstract
         
         // Payment fields
         $columns['payment_method'] = $this->_getPaymentCustomColumn('payment_method', $helper->__('Method'), $helper->__('Payment'), 'method');
-        $columns['cc_type'] = $this->_getPaymentCustomColumn('cc_type', $helper->__('Type'), $helper->__('Payment'), 'type');
+        $columns['cc_type'] = $this->_getPaymentCustomColumn('cc_type', $helper->__('CC Type'), $helper->__('Payment'), 'CC type');
         
         // Items
         $columns['default_items'] = $this->_getItemsCustomColumn('default_items');
