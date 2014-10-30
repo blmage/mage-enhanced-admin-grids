@@ -83,7 +83,7 @@ class BL_CustomGrid_Block_Messages extends Mage_Adminhtml_Block_Messages
         if ($messages = $this->getMessages($type)) {
             foreach ($messages as $message) {
                 if ($messageId = $message->getIdentifier()) {
-                    list($messageId, $date) = explode('|', $messageId);
+                    list(, $date) = explode('|', $messageId);
                     
                     if (!empty($date)) {
                         if (isset($datedMessages[$date])) {

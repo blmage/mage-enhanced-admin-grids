@@ -54,7 +54,7 @@ abstract class BL_CustomGrid_Model_Column_Renderer_Config_Abstract extends BL_Cu
             }
             if (isset($windowValues['title'])) {
                 $useDefaultTitle = false;
-                $configWindow['title'] = $values['title'];
+                $configWindow['title'] = $windowValues['title'];
             }
             
             $configWindow += $windowValues;

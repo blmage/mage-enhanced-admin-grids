@@ -260,7 +260,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Sales_Items_Abstract extends BL
         $firstTime
     );
     
-    protected function _applyToGridCollection(
+    public function applyToGridCollection(
         Varien_Data_Collection_Db $collection,
         Mage_Adminhtml_Block_Widget_Grid $gridBlock,
         BL_CustomGrid_Model_Grid $gridModel,
@@ -356,7 +356,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Sales_Items_Abstract extends BL
     
     abstract protected function _getColumnBlockRenderer();
     
-    protected function _getForcedBlockValues(
+    public function getForcedBlockValues(
         Mage_Adminhtml_Block_Widget_Grid $gridBlock,
         BL_CustomGrid_Model_Grid $gridModel,
         $columnBlockId,

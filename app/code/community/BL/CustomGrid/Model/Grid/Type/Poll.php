@@ -17,7 +17,7 @@ class BL_CustomGrid_Model_Grid_Type_Poll extends BL_CustomGrid_Model_Grid_Type_A
 {
     protected function _getSupportedBlockTypes()
     {
-        return 'adminhtml/poll_grid';
+        return array('adminhtml/poll_grid');
     }
     
     public function getPollStoreIds($blockType, BL_CustomGrid_Object $config, array $params, $entity)

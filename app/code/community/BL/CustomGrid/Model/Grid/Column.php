@@ -15,11 +15,51 @@
 
 class BL_CustomGrid_Model_Grid_Column extends BL_CustomGrid_Object
 {
+    /**
+     * Possible column alignments values
+     */
+    const ALIGNMENT_LEFT   = 'left';
+    const ALIGNMENT_CENTER = 'center';
+    const ALIGNMENT_RIGHT  = 'right';
+    
+    /**
+     * Alignments options hash
+     * 
+     * @var array
+     */
+    static protected $_alignmentsHash = null;
+    
+    /**
+     * Column origins
+     */
+    const ORIGIN_GRID       = 'grid';
+    const ORIGIN_COLLECTION = 'collection';
+    const ORIGIN_ATTRIBUTE  = 'attribute';
+    const ORIGIN_CUSTOM     = 'custom';
+    
+    /**
+     * Origins options hash
+     * 
+     * @var array
+     */
+    static protected $_originsHash = null;
+    
+    /**
+     * Return this column's ID
+     *
+     * @return int
+     */
     public function getId()
     {
         return $this->_getData('column_id');
     }
     
+    /**
+     * Return this column's grid model
+     *
+     * @param bool $graceful Whether to throw an exception if the grid model is invalid, otherwise return null
+     * @return BL_CustomGrid_Model_Grid|null
+     */
     public function getGridModel($graceful = false)
     {
         if (($gridModel = $this->_getData('grid_model')) instanceof BL_CustomGrid_Model_Grid) {
@@ -30,31 +70,62 @@ class BL_CustomGrid_Model_Grid_Column extends BL_CustomGrid_Object
         return null;
     }
     
+    /**
+     * Return whether this is a grid column
+     *
+     * @return bool
+     */
     public function isGrid()
     {
-        return ($this->getOrigin() == BL_CustomGrid_Model_Grid::COLUMN_ORIGIN_GRID);
+        return ($this->getOrigin() == self::ORIGIN_GRID);
     }
     
+    /**
+     * Return whether this is a collection column
+     *
+     * @return bool
+     */
     public function isCollection()
     {
-        return ($this->getOrigin() == BL_CustomGrid_Model_Grid::COLUMN_ORIGIN_COLLECTION);
+        return ($this->getOrigin() == self::ORIGIN_COLLECTION);
     }
     
+    /**
+     * Return whether this is an attribute column
+     *
+     * @return bool
+     */
     public function isAttribute()
     {
-        return ($this->getOrigin() == BL_CustomGrid_Model_Grid::COLUMN_ORIGIN_ATTRIBUTE);
+        return ($this->getOrigin() == self::ORIGIN_ATTRIBUTE);
     }
     
+    /**
+     * Return whether this is a custom column
+     *
+     * @return bool
+     */
     public function isCustom()
     {
-        return ($this->getOrigin() == BL_CustomGrid_Model_Grid::COLUMN_ORIGIN_CUSTOM);
+        return ($this->getOrigin() == self::ORIGIN_CUSTOM);
     }
     
+    /**
+     * Return whether this column is editable
+     *
+     * @return bool
+     */
     public function isEditable()
     {
         return ($this->_getData('edit_config') instanceof BL_CustomGrid_Object);
     }
     
+    /**
+     * Return the corresponding custom column model
+     *
+     * @param bool $graceful Whether to throw an exception if the custom column model is invalid, otherwise return null
+     * @return BL_CustomGrid_Model_Custom_Column_Abstract|null
+     */
     public function getCustomColumnModel($graceful = true)
     {
         $customColumn = null;
@@ -72,8 +143,281 @@ class BL_CustomGrid_Model_Grid_Column extends BL_CustomGrid_Object
         return $customColumn;
     }
     
+    /**
+     * Compare this column's order to the given column
+     *
+     * @param BL_CustomGrid_Model_Grid_Column $column Column against which to compare the order
+     * @return int
+     */
     public function compareOrderTo(BL_CustomGrid_Model_Grid_Column $column)
     {
         return $this->compareIntDataTo('order', $column);
+    }
+    
+    /**
+     * Parse proper column values from the given array of user values
+     *
+     * @param array $column Column values
+     * @param bool $allowStore Whether store ID value is allowed
+     * @param bool $allowRenderer Whether renderer values are allowed
+     * @param bool $requireRendererType Whether renderer type is required
+     * @param bool $allowEditable Whether editability value is allowed
+     * @param bool $allowCustomizationParams Whether customization parameters are allowed
+     * @return array
+     */
+    protected function _parseUserColumnValues(
+        array $column,
+        $allowStore = false,
+        $allowRenderer = false,
+        $requireRendererType = true,
+        $allowEditable = false,
+        $allowCustomizationParams = false
+    ) {
+        // Using an object allows to drastically reduce complexity
+        $column = new BL_CustomGrid_Object($column);
+        
+        $values = array();
+        $values['is_visible'] = (bool) $column->getData('is_visible');
+        $values['is_only_filterable'] = ($values['is_visible'] && $column->getData('filter_only'));
+        $values['align']  = Mage::getSingleton('customgrid/grid')->getValidAlignment($column->getData('align'));
+        $values['header'] = $column->getData('header');
+        $values['order']  = (int) $column->getData('order');
+        $values['width']  = $column->getData('width');
+        $values['is_edit_allowed'] = ($allowEditable && $column->getData('editable'));
+        
+        if ($allowStore && (($storeId = $column->getData('store_id')) !== '')) {
+            $values['store_id'] = $storeId;
+        } else {
+            $values['store_id'] = null;
+        }
+        if ($allowRenderer && (!$requireRendererType || $column->getData('renderer_type'))) {
+             $values['renderer_type'] = ($requireRendererType ? $column->getData('renderer_type') : null);
+             $values['renderer_params'] = (($params = $column->getData('renderer_params')) ? $params : null);
+        } else {
+            $values['renderer_type'] = null;
+            $values['renderer_params'] = null;
+        }
+        if ($allowCustomizationParams && ($params = $column->getData('customization_params'))) {
+            $values['customization_params'] = $params;
+        } else {
+            $values['customization_params'] = null;
+        }
+        
+        return $values;
+    }
+    
+    /**
+     * Update the given grid model's columns from the given user values
+     *
+     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @param array $columns New column values
+     * @return BL_CustomGrid_Model_Grid
+     */
+    public function updateGridModelColumns(BL_CustomGrid_Model_Grid $gridModel, array $columns)
+    {
+        if (!$gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_CUSTOMIZE_COLUMNS)) {
+            $gridModel->throwPermissionException();
+        }
+        
+        $this->setGridModel($gridModel);
+        $gridModel->getColumnIdsByOrigin();
+        $allowEditable = $gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_CHOOSE_EDITABLE_COLUMNS);
+        $availableAttributeCodes = $gridModel->getAvailableAttributesCodes();
+        
+        // Update existing columns
+        foreach ($gridModel->getColumns(true, true) as $columnBlockId => $column) {
+            $columnId = $column->getId();
+            
+            if (isset($columns[$columnId])) {
+                $userValues   = $columns[$columnId]; 
+                $isCollection = $column->isCollection();
+                $isAttribute  = $column->isAttribute();
+                $isCustom     = $column->isCustom();
+                $customColumn = ($isCustom ? $column->getCustomColumnModel() : null);
+                $columnValues =  $this->_parseUserColumnValues(
+                    $userValues,
+                    ($isCustom || ($customColumn && $customColumn->getAllowStore())),
+                    ($isCollection || $isAttribute || ($customColumn && $customColumn->getAllowRenderers())),
+                    ($isCollection || $isCustom),
+                    ($allowEditable && $column->isEditable()),
+                    $isCustom
+                );
+                
+                if ($isAttribute
+                    && isset($userValues['index'])
+                    && in_array($userValues['index'], $availableAttributeCodes, true)) {
+                    $columnValues['index'] = $userValues['index'];
+                }
+                
+                $gridModel->updateColumn($columnBlockId, $columnValues);
+                
+                // At the end, there should only remain in $columns the new attribute columns (without a valid ID yet)
+                unset($columns[$columnId]);
+            } else {
+                $gridModel->removeColumn($columnBlockId);
+            }
+        }
+        
+        // Add new attribute columns
+        if ($gridModel->canHaveAttributeColumns()) {
+            foreach ($columns as $columnId => $column) {
+                if (($columnId < 0) // Concerned columns IDs should be < 0, so assume other IDs are obsolete ones
+                    && isset($column['index'])
+                    && in_array($column['index'], $availableAttributeCodes, true)) {
+                    $newColumnBlockId = $gridModel->getNextAttributeColumnBlockId();
+                    
+                    $columnValues = array_merge(
+                        array(
+                            'grid_id'              => $gridModel->getId(),
+                            'block_id'             => $newColumnBlockId,
+                            'index'                => $column['index'],
+                            'width'                => '',
+                            'align'                => self::ALIGNMENT_LEFT,
+                            'header'               => '',
+                            'order'                => $gridModel->getNextColumnOrder(),
+                            'origin'               => self::ORIGIN_ATTRIBUTE,
+                            'is_visible'           => true,
+                            'is_only_filterable'   => false,
+                            'is_system'            => false,
+                            'is_missing'           => false,
+                            'store_id'             => null,
+                            'renderer_type'        => null,
+                            'renderer_params'      => null,
+                            'is_edit_allowed'      => true,
+                            'customization_params' => null,
+                        ),
+                        $this->_parseUserColumnValues($column, true, true, false, $allowEditable)
+                    );
+                    
+                    $gridModel->addColumn($columnValues);
+                }
+            }
+        }
+        
+        return $gridModel->setDataChanges(true);
+    }
+    
+    /**
+     * Update the given grid model's available custom columns with the given custom columns codes
+     *
+     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @param array $columnsCodes New custom columns codes
+     * @return this
+     */
+    public function updateGridModelCustomColumns(BL_CustomGrid_Model_Grid $gridModel, array $columnsCodes)
+    {
+        if (!$gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_CUSTOMIZE_COLUMNS)) {
+            $gridModel->throwPermissionException();
+        }
+        if ($typeModel = $gridModel->getTypeModel()) {
+            $typeCode = $typeModel->getCode();
+        } else {
+            return $gridModel;
+        }
+        
+        $helper = Mage::helper('customgrid');
+        $columns = $gridModel->getColumns();
+        $originalBlockIds = $gridModel->getColumnIdsByOrigin(self::ORIGIN_CUSTOM);
+        
+        $availableCustomColumns = $gridModel->getAvailableCustomColumns();
+        $availableCodes = array_keys($availableCustomColumns);
+        
+        $appliedCodes = $columnsCodes;
+        $currentCodes = array();
+        $removedColumnBlockIds = array();
+        
+        foreach ($originalBlockIds as $columnBlockId) {
+            if (isset($columns[$columnBlockId])) {
+                $parts = explode('/', $column[$columnBlockId]->getIndex());
+                
+                if (($typeCode == $parts[0])
+                    && in_array($parts[1], $appliedCodes)
+                    && in_array($parts[1], $availableCodes)) {
+                    $currentCodes[] = $parts[1];
+                } else {
+                    $gridModel->removeColumn($columnBlockId);
+                    unset($columns[$columnBlockId]);
+                }
+            }
+        }
+        
+        $newCodes = array_intersect($availableCodes, array_diff($appliedCodes, $currentCodes));
+        $customColumnsGroups = $gridModel->getCustomColumnsGroups();
+        $addGroupsToHeaders  = Mage::helper('customgrid/config')->getAddGroupToCustomColumnsDefaultHeader();
+        
+        foreach ($newCodes as $customColumnCode) {
+            $columnBlockId = $gridModel->getNextCustomColumnBlockId();
+            $columnModel = $availableColumns[$customColumnCode];
+            $groupId = $columnModel->getGroupId();
+            
+            if (isset($columnsGroups[$groupId]) && $addGroupsToHeaders) {
+                $header = $helper->__('%s (%s)', $columnModel->getName(), $customColumnsGroups[$groupId]);
+            } else {
+                $header = $columnModel->getName();
+            }
+            
+            $columnValues = array(
+                'grid_id'              => $gridModel->getId(),
+                'block_id'             => $columnBlockId,
+                'index'                => $typeCode . '/' . $code,
+                'width'                => '',
+                'align'                => self::ALIGNMENT_LEFT,
+                'header'               => $header,
+                'order'                => $gridModel->getNextColumnOrder(),
+                'origin'               => self::ORIGIN_CUSTOM,
+                'is_visible'           => true,
+                'is_only_filterable'   => false,
+                'is_system'            => false,
+                'is_missing'           => false,
+                'store_id'             => null,
+                'renderer_type'        => null,
+                'renderer_params'      => null,
+                'is_edit_allowed'      => false,
+                'customization_params' => null,
+            );
+            
+            $gridModel->addColumn($columnValues);
+        }
+        
+        return $gridModel->setDataChanges(true);
+    }
+    
+    /**
+     * Return alignments options hash
+     *
+     * @return array
+     */
+    public function getAlignments()
+    {
+        if (is_null(self::$_alignmentsHash)) {
+            $helper = Mage::helper('customgrid');
+            
+            self::$_alignmentsHash = array(
+                self::ALIGNMENT_LEFT   => $helper->__('Left'),
+                self::ALIGNMENT_CENTER => $helper->__('Middle'),
+                self::ALIGNMENT_RIGHT  => $helper->__('Right'),
+            );
+        }
+        return self::$_alignmentsHash;
+    }
+    
+    /**
+     * Return origins options hash
+     *
+     * @return array
+     */
+    public function getOrigins()
+    {
+        if (is_null(self::$_originsHash)) {
+            $helper = Mage::helper('customgrid');
+            
+            self::$_originsHash = array(
+                self::ORIGIN_GRID       => $helper->__('Grid'),
+                self::ORIGIN_COLLECTION => $helper->__('Collection'),
+                self::ORIGIN_ATTRIBUTE  => $helper->__('Attribute'),
+                self::ORIGIN_CUSTOM     => $helper->__('Custom'),
+            );
+        }
+        return self::$_originsHash;
     }
 }

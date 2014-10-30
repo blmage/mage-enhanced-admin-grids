@@ -26,6 +26,7 @@ class BL_CustomGrid_Block_Grid_Profile_Form_Copy_Existing extends BL_CustomGrid_
         $profileId = $this->getGridProfile()->getId();
         $profiles  = $gridModel->getProfiles(true, true, true);
         
+        $gridParams  = Mage::getSingleton('customgrid/system_config_source_grid_param')->toOptionArray(false);
         $yesNoValues = Mage::getSingleton('customgrid/system_config_source_yesno')->toOptionArray();
         $profilesValues = array();
         
@@ -83,26 +84,19 @@ class BL_CustomGrid_Block_Grid_Profile_Form_Copy_Existing extends BL_CustomGrid_
             )
         );
         
-        $copiableParams = array(
-            'default_page'   => $this->__('Page Number'),
-            'default_limit'  => $this->__('Page Size'),
-            'default_sort'   => $this->__('Sort'),
-            'default_dir'    => $this->__('Sort Direction'),
-            'default_filter' => $this->__('Filters'),
-        );
-        
-        foreach ($copiableParams as $key => $label) {
-             $fieldset->addField(
-                $key,
+        foreach ($gridParams as $gridParam) {
+            $fieldset->addField(
+                'default_' . $gridParam['value'],
                 'select',
                 array(
-                    'name'   => 'default_params[' . $key . ']',
-                    'label'  => $label,
+                    'name'   => $gridParam['value'],
+                    'label'  => $gridParam['label'],
                     'values' => $yesNoValues,
                 )
-             );
+            );
         }
         
+        $this->_addSuffixToFieldsetFieldNames($fieldset, 'default_params');
         return $this;
     }
 }

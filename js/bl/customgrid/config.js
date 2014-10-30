@@ -106,7 +106,7 @@ blcg.Tools = {
         var dialogWindow = Dialog.info(null, windowConfig);
         
         if (windowUrl) {
-            // We can safely set URL now, the Dialog class will not interfere anymore
+            // We can safely set the URL now, the Dialog class will not interfere anymore
             dialogWindow.setURL(windowUrl);
         }
         if (!otherWindow) {
@@ -117,21 +117,55 @@ blcg.Tools = {
         return dialogWindow;
     },
     
+    checkDialogAjaxResponse: function(transport)
+    {
+        var isValid = false;
+        
+        try {
+            if (transport.responseText.isJSON()) {
+                response = transport.responseText.evalJSON();
+                
+                if (response.error) {
+                    alert(response.message);
+                } else if (response.type && (response.type == 'error')) {
+                    if (response.message) {
+                        alert(response.message);
+                    }
+                } else if (!response.ajaxExpired) {
+                    isValid = true;
+                }
+            } else {
+                isValid = true;
+            }
+        } catch (e) {
+            isValid = true;
+        }
+        
+        return isValid;
+    },
+    
     openDialogFromUrl: function(url, windowConfig)
     {
-        this.openDialog(windowConfig);
+        var window = this.openDialog(windowConfig);
         var loadingClassName = (windowConfig.loadingClassName || 'blcg-loading');
         $('modal_dialog_message').addClassName(loadingClassName);
         
         new Ajax.Updater('modal_dialog_message', url, {
             evalScripts: true,
-            onComplete: function() { $('modal_dialog_message').removeClassName(loadingClassName); }
+            onComplete: function(transport) {
+                if (!blcg.Tools.checkDialogAjaxResponse(transport)) {
+                    blcg.Tools.closeDialog(window);
+                }
+                $('modal_dialog_message').removeClassName(loadingClassName);
+            }
         });
+        
+        return window;
     },
     
     openDialogFromPost: function(url, data, windowConfig)
     {
-        this.openDialog(windowConfig);
+        var window = this.openDialog(windowConfig);
         var loadingClassName = (windowConfig.loadingClassName || 'blcg-loading');
         $('modal_dialog_message').addClassName(loadingClassName);
         
@@ -139,20 +173,29 @@ blcg.Tools = {
             method: 'post',
             parameters: $H(data).toQueryString(),
             evalScripts: true,
-            onComplete: function() { $('modal_dialog_message').removeClassName(loadingClassName); }
+            onComplete: function(transport) {
+                if (!blcg.Tools.checkDialogAjaxResponse(transport)) {
+                    blcg.Tools.closeDialog(window);
+                }
+                $('modal_dialog_message').removeClassName(loadingClassName);
+            }
         });
+        
+        return window;
     },
     
     openDialogFromElement: function(elementId, windowConfig)
     {
-        this.openDialog(windowConfig);
+        var window = this.openDialog(windowConfig);
         $('modal_dialog_message').update($(elementId).innerHTML);
+        return window;
     },
     
     openDialogWithContent: function(content, windowConfig)
     {
-        this.openDialog(windowConfig);
+        var window = this.openDialog(windowConfig);
         $('modal_dialog_message').update(content);
+        return window;
     },
     
     openIframeDialog: function(iframeUrl, windowConfig, otherWindow)

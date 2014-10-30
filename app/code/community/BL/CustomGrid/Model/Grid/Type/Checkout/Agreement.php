@@ -17,7 +17,7 @@ class BL_CustomGrid_Model_Grid_Type_Checkout_Agreement extends BL_CustomGrid_Mod
 {
     protected function _getSupportedBlockTypes()
     {
-        return 'adminhtml/checkout_agreement_grid';
+        return array('adminhtml/checkout_agreement_grid');
     }
     
     protected function _getBaseEditableFields($blockType)

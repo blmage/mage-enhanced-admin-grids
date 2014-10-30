@@ -20,25 +20,6 @@ class BL_CustomGrid_Model_Custom_Column_Product_Categories extends BL_CustomGrid
     const FILTER_MODE_ALL_CHOOSEN  = 'all_choosen';
     const FILTER_MODE_NONE_CHOOSEN = 'none_choosen';
     
-    public function getCustomFilterOperators($asOptionArray = false)
-    {
-        $helper = $this->_getBaseHelper();
-        
-        if (!$this->hasData('custom_filter_operators')) {
-            $this->setData('custom_filter_operators', array(
-                '>'  => $helper->__('Greater than'),
-                '>=' => $helper->__('Greater than or equal to'),
-                '='  => $helper->__('Equal'),
-                '!=' => $helper->__('Not equal'),
-                '<=' => $helper->__('Lesser than or equal to'),
-                '<'  => $helper->__('Lesser than'),
-            ));
-        }
-        
-        $operators = $this->_getData('custom_filter_operators');
-        return ($asOptionArray ? $helper->getOptionArrayFromOptionHash($operators) : $operators);
-    }
-    
     protected function _prepareConfig()
     {
         $helper = $this->_getBaseHelper();
@@ -273,7 +254,7 @@ class BL_CustomGrid_Model_Custom_Column_Product_Categories extends BL_CustomGrid
         return $this;
     }
     
-    protected function _getForcedBlockValues(
+    public function getForcedBlockValues(
         Mage_Adminhtml_Block_Widget_Grid $gridBlock,
         BL_CustomGrid_Model_Grid $gridModel,
         $columnBlockId, $columnIndex,
@@ -321,5 +302,24 @@ class BL_CustomGrid_Model_Custom_Column_Product_Categories extends BL_CustomGrid
             'blcg_filter_params' => $params,
             'filter_condition_callback' => array($this, 'addFilterToGridCollection'),
         );
+    }
+    
+    public function getCustomFilterOperators($asOptionArray = false)
+    {
+        $helper = $this->_getBaseHelper();
+        
+        if (!$this->hasData('custom_filter_operators')) {
+            $this->setData('custom_filter_operators', array(
+                '>'  => $helper->__('Greater than'),
+                '>=' => $helper->__('Greater than or equal to'),
+                '='  => $helper->__('Equal'),
+                '!=' => $helper->__('Not equal'),
+                '<=' => $helper->__('Lesser than or equal to'),
+                '<'  => $helper->__('Lesser than'),
+            ));
+        }
+        
+        $operators = $this->_getData('custom_filter_operators');
+        return ($asOptionArray ? $helper->getOptionArrayFromOptionHash($operators) : $operators);
     }
 }

@@ -40,7 +40,6 @@ class BL_CustomGrid_Block_Grid_Form_Custom_Columns extends BL_CustomGrid_Block_G
     {
         parent::_addFieldsToForm($form);
         
-        $yesNoValues = Mage::getSingleton('customgrid/system_config_source_yesno')->toOptionArray();
         $groups = $this->getGridModel()->getCustomColumnsGroups();
         $customColumns = $this->getGridModel()->getAvailableCustomColumns(true);
         

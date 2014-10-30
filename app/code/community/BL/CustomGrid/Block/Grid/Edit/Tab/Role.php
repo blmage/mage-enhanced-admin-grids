@@ -13,15 +13,15 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Grid_Edit_Tab_Role extends Mage_Adminhtml_Block_Widget_Form
+class BL_CustomGrid_Block_Grid_Edit_Tab_Role extends BL_CustomGrid_Block_Widget_Form
 {
     protected function _prepareForm()
     {
         $role    = $this->getRole();
         $roleId  = $role->getId();
         $options = Mage::getSingleton('customgrid/system_config_source_boolean_config')->getOptions();
-        $gridModel  = Mage::registry('blcg_grid');
-        $roleConfig = $gridModel->getRolesConfig($roleId);
+        $gridModel  = $this->getGridModel();
+        $roleConfig = $gridModel->getRoleConfig($roleId);
         
         $form = new Varien_Data_Form();
         $form->setHtmlIdPrefix('role_permissions_' . $roleId . '_');

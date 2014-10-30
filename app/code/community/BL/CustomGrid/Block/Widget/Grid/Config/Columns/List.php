@@ -83,12 +83,18 @@ class BL_CustomGrid_Block_Widget_Grid_Config_Columns_List extends Mage_Adminhtml
     
     public function getColumnAlignments()
     {
-        return $this->getDataSetDefault('column_alignments', $this->getGridModel()->getColumnAlignments());
+        return $this->getDataSetDefault(
+            'column_alignments',
+            Mage::getSingleton('customgrid/grid_column')->getAlignments()
+        );
     }
     
     public function getColumnOrigins()
     {
-        return $this->getDataSetDefault('column_origins', $this->getGridModel()->getColumnOrigins());
+        return $this->getDataSetDefault(
+            'column_origins',
+            Mage::getSingleton('customgrid/grid_column')->getOrigins()
+        );
     }
     
     public function getColumns()

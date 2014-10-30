@@ -33,55 +33,58 @@ class BL_CustomGrid_Block_Options_Source_Grid extends Mage_Adminhtml_Block_Widge
     protected function _prepareColumns()
     {
         $this->addColumn(
-                'source_id',
-                array(
-                    'header' => $this->__('ID'),
-                    'index'  => 'source_id',
-                    'type'   => 'number',
-                    'width'  => '50px',
-                )
+            'source_id',
+            array(
+                'header' => $this->__('ID'),
+                'index'  => 'source_id',
+                'type'   => 'number',
+                'width'  => '50px',
             )
-            ->addColumn(
-                'name',
-                array(
-                    'header' => $this->__('Name'),
-                    'index'  => 'name',
-                )
+        );
+        
+        $this->addColumn(
+            'name',
+            array(
+                'header' => $this->__('Name'),
+                'index'  => 'name',
             )
-            ->addColumn(
-                'type',
-                array(
-                    'header'  => $this->__('Type'),
-                    'index'   => 'type',
-                    'type'    => 'options',
-                    'options' => Mage::getModel('customgrid/options_source')->getTypesAsOptionHash(),
-                )
+        );
+        
+        $this->addColumn(
+            'type',
+            array(
+                'header'  => $this->__('Type'),
+                'index'   => 'type',
+                'type'    => 'options',
+                'options' => Mage::getModel('customgrid/options_source')->getTypesAsOptionHash(),
             )
-            ->addColumn(
-                'action',
-                array(
-                    'header'  => $this->__('Actions'),
-                    'width'   => '120px',
-                    'type'    => 'action',
-                    'getter'  => 'getId',
-                    'actions' => array(
-                        array(
-                            'caption' => $this->__('Edit'),
-                            'url'     => array('base' => '*/*/edit',),
-                            'field'   => 'id',
-                        ),
-                        array(
-                            'caption' => $this->__('Delete'),
-                            'confirm' => $this->__('Are you sure?'),
-                            'url'     => array('base' => '*/*/delete',),
-                            'field'   => 'id'
-                        ),
+        );
+        
+        $this->addColumn(
+            'action',
+            array(
+                'header'  => $this->__('Actions'),
+                'width'   => '120px',
+                'type'    => 'action',
+                'getter'  => 'getId',
+                'actions' => array(
+                    array(
+                        'caption' => $this->__('Edit'),
+                        'url'     => array('base' => '*/*/edit',),
+                        'field'   => 'id',
                     ),
-                    'filter'   => false,
-                    'sortable' => false,
-                    'index'    => 'id',
-                )
-            );
+                    array(
+                        'caption' => $this->__('Delete'),
+                        'confirm' => $this->__('Are you sure?'),
+                        'url'     => array('base' => '*/*/delete',),
+                        'field'   => 'id'
+                    ),
+                ),
+                'filter'   => false,
+                'sortable' => false,
+                'index'    => 'id',
+            )
+        );
         
         return parent::_prepareColumns();
     }

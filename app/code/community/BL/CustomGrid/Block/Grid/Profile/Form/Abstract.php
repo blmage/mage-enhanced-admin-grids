@@ -24,9 +24,4 @@ abstract class BL_CustomGrid_Block_Grid_Profile_Form_Abstract extends BL_CustomG
     {
         return $this->getActionCode();
     }
-    
-    public function getGridProfile()
-    {
-        return $this->getGridModel()->getProfile();
-    }
 }

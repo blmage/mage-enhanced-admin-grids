@@ -17,7 +17,7 @@ class BL_CustomGrid_Model_Grid_Type_Product_Review extends BL_CustomGrid_Model_G
 {
     protected function _getSupportedBlockTypes()
     {
-        return 'adminhtml/review_grid';
+        return array('adminhtml/review_grid');
     }
     
     public function canExport($blockType)

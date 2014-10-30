@@ -17,7 +17,7 @@ class BL_CustomGrid_Model_Grid_Type_Invoice extends BL_CustomGrid_Model_Grid_Typ
 {
     protected function _getSupportedBlockTypes()
     {
-        return 'adminhtml/sales_invoice_grid';
+        return array('adminhtml/sales_invoice_grid');
     }
     
     protected function _getItemsCustomColumnModel($customizable=false)

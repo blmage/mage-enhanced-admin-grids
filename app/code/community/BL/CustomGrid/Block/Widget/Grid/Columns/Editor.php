@@ -115,6 +115,8 @@ class BL_CustomGrid_Block_Widget_Grid_Columns_Editor extends Mage_Adminhtml_Bloc
                 $columns[$columnBlockId] = false;
             }
         }
+        
+        return $columns;
     }
     
     public function getEditableColumnsJsonConfig()

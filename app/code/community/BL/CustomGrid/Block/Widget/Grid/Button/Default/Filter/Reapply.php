@@ -39,14 +39,16 @@ class BL_CustomGrid_Block_Widget_Grid_Button_Default_Filter_Reapply extends Mage
     protected function _beforeToHtml()
     {
         if ($this->getGridBlock() && $this->getGridModel()) {
-            $this->setData(array(
-                'label'   => $this->__('Reapply Default Filter'),
-                'onclick' => 'blcg.Grid.Tools.reapplyDefaultFilter('
-                    . '\'' . $this->jsQuoteEscape($this->getGridBlockJsObjectName()) . '\','
-                    . '\'' . $this->getReapplyDefaultFilterUrl() . '\','
-                    . '\'' . $this->jsQuoteEscape($this->getFilterResetRequestValue()) . '\''
-                    . ')',
-            ));
+            $this->setData(
+                array(
+                    'label'   => $this->__('Reapply Default Filter'),
+                    'onclick' => 'blcg.Grid.Tools.reapplyDefaultFilter('
+                        . '\'' . $this->jsQuoteEscape($this->getGridBlockJsObjectName()) . '\','
+                        . '\'' . $this->getReapplyDefaultFilterUrl() . '\','
+                        . '\'' . $this->jsQuoteEscape($this->getFilterResetRequestValue()) . '\''
+                        . ')',
+                )
+            );
         }
         return parent::_beforeToHtml();
     }

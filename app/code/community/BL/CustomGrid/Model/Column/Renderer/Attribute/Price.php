@@ -39,8 +39,8 @@ class BL_CustomGrid_Model_Column_Renderer_Attribute_Price extends BL_CustomGrid_
             $columnType = $this->getData('values/' . $baseCode . '_currency_column_type');
             $isFixedCurrency = false;
             
-            if (($columnType == BL_CustomGrid_Model_Grid::COLUMN_ORIGIN_ATTRIBUTE)
-                || ($columnType == BL_CustomGrid_Model_Grid::COLUMN_ORIGIN_CUSTOM)) {
+            if (($columnType == BL_CustomGrid_Model_Grid_Column::ORIGIN_ATTRIBUTE)
+                || ($columnType == BL_CustomGrid_Model_Grid_Column::ORIGIN_CUSTOM)) {
                 $currency = $gridModel->getColumnIndexFromCode(
                     $this->getData('values/' . $baseCode . '_currency_column_index'),
                     $columnType,

@@ -124,21 +124,21 @@ abstract class BL_CustomGrid_Model_Grid_Type_Sales_Abstract extends BL_CustomGri
         
         $columns = array(
             'shipping_method' => $this->_getOrderBaseCustomColumn(
-                    'shipping_method',
-                    $helper->__('Method'),
-                    $helper->__('Shipping')
-                ),
+                'shipping_method',
+                $helper->__('Method'),
+                $helper->__('Shipping')
+            ),
             'shipping_description' => $this->_getOrderBaseCustomColumn(
-                    'shipping_description',
-                    $helper->__('Description'),
-                    $helper->__('Shipping')
-                ),
+                'shipping_description',
+                $helper->__('Description'),
+                $helper->__('Shipping')
+            ),
             'payment_method' => $this->_getPaymentCustomColumn(
-                    'payment_method',
-                    $helper->__('Method'),
-                    $helper->__('Payment'),
-                    'method'
-                ),
+                'payment_method',
+                $helper->__('Method'),
+                $helper->__('Payment'),
+                'method'
+            ),
             'default_items' => $this->_getItemsCustomColumn('default_items'),
             'custom_items'  => $this->_getItemsCustomColumn('custom_items', true),
         );

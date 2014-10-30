@@ -34,15 +34,17 @@ class BL_CustomGrid_Model_Grid_Type_Product_Tab extends BL_CustomGrid_Model_Grid
          * and the _beforeLoad() corresponding collections methods join another tables each time,
          * then twice on the same selects (resulting in correlations errors)
          */
-        return !in_array(
+        if ($this->isSupportedBlockType($blockType)) {
+            return !in_array(
                 $blockType,
                 array(
                     'adminhtml/catalog_product_edit_tab_related',
                     'adminhtml/catalog_product_edit_tab_upsell',
                     'adminhtml/catalog_product_edit_tab_crosssell',
                 )
-            )
-            || !$this->isSupportedBlockType($blockType);
+            );
+        }
+        return true;
     }
     
     protected function _getProductId()
@@ -58,10 +60,12 @@ class BL_CustomGrid_Model_Grid_Type_Product_Tab extends BL_CustomGrid_Model_Grid
         $productId = $this->_getProductId();
         
         foreach ($exportTypes as $exportType) {
-            $exportType->addData(array(
-                'url_params/id' => $productId,
-                'url_params/product_id' => $productId,
-            ));
+            $exportType->addData(
+                array(
+                    'url_params/id' => $productId,
+                    'url_params/product_id' => $productId,
+                )
+            );
         }
         
         return $exportTypes;
@@ -75,13 +79,15 @@ class BL_CustomGrid_Model_Grid_Type_Product_Tab extends BL_CustomGrid_Model_Grid
                     $product = Mage::getModel('catalog/product')->load($productId);
                 } else {
                     // No product given : use a dummy object
-                    $product = new Varien_Object(array(
-                        'id' => false,
-                        'entity_id' => false,
-                        'related_products'    => array(),
-                        'up_sell_products'    => array(),
-                        'cross_sell_products' => array(),
-                    ));
+                    $product = new Varien_Object(
+                        array(
+                            'id'                  => false,
+                            'entity_id'           => false,
+                            'related_products'    => array(),
+                            'up_sell_products'    => array(),
+                            'cross_sell_products' => array(),
+                        )
+                    );
                 }
                 
                 Mage::register('current_product', $product);

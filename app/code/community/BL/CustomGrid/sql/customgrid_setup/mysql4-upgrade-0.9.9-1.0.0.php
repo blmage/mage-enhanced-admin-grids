@@ -18,12 +18,22 @@ $installer->startSetup();
 $connection = $installer->getConnection();
 
 $tables = array(
-    'grid' => $installer->getTable('customgrid/grid'),
+    'grid'         => $installer->getTable('customgrid/grid'),
+    'grid_profile' => $installer->getTable('customgrid/grid_profile'),
+    'grid_role'     => $installer->getTable('customgrid/grid_role'),
 );
 
 /**
  * Changes to "grid" table
  */
+
+// New columns
+
+$connection->addColumn(
+    $tables['grid'],
+    'profiles_remembered_session_params',
+    'varchar(255) default NULL'
+);
 
 // New flag columns
 
@@ -42,5 +52,29 @@ foreach ($flagColumns as $columnName) {
         'tinyint(1) unsigned default NULL'
     );
 }
+
+/**
+ * Changes to "grid_profile" table
+ */
+
+// New columns
+ 
+$connection->addColumn(
+    $tables['grid_profile'],
+    'remembered_session_params',
+    'varchar(255) default NULL'
+);
+
+/**
+ * Changes to "grid_role" table
+ */
+
+// New columns
+ 
+$connection->addColumn(
+    $tables['grid_role'],
+    'base_profile_assigned',
+    'tinyint(1) NOT NULL default 1'
+);
 
 $installer->endSetup();

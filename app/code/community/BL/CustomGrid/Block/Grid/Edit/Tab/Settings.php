@@ -13,17 +13,17 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Grid_Edit_Tab_Settings extends Mage_Adminhtml_Block_Widget_Form implements
+class BL_CustomGrid_Block_Grid_Edit_Tab_Settings extends BL_CustomGrid_Block_Widget_Form implements
     Mage_Adminhtml_Block_Widget_Tab_Interface
 {
     public function getTabLabel()
     {
-        return $this->__('Settings');
+        return $this->__('Settings (Grid)');
     }
     
     public function getTabTitle()
     {
-        return $this->__('Settings');
+        return $this->__('Settings (Grid)');
     }
     
     public function canShowTab()
@@ -46,6 +46,9 @@ class BL_CustomGrid_Block_Grid_Edit_Tab_Settings extends Mage_Adminhtml_Block_Wi
                         . 'permission to assign profiles to roles',
                     'profiles_default_assigned_to' => 'Will be used for profiles created by users who do not have the '
                         . 'permission to assign profiles to roles',
+                    'profiles_remembered_session_params' => 'Session parameters that will be restored upon returning '
+                        . 'to a profile previously used during the same session.<br /><i>Only applies to the grids '
+                        . 'having their parameters saved in session</i>',
                     'pagination_values' => 'Numeric values separated by commas. If none is set, base pagination values '
                         . 'will be used (ie 20, 30, 50, 100, 200)',
                     'default_pagination_value' => 'This value will replace the original default value from the grids. '
@@ -62,8 +65,10 @@ class BL_CustomGrid_Block_Grid_Edit_Tab_Settings extends Mage_Adminhtml_Block_Wi
         return $this->getData('form_field_notes/' . $noteKey);
     }
     
-    protected function _addAssignProfilesFieldsToForm(Varien_Data_Form $form)
+    protected function _addProfilesFieldsToForm(Varien_Data_Form $form)
     {
+        $gridModel = $this->getGridModel();
+        
         $fieldset = $form->addFieldset(
             'profiles',
             array(
@@ -72,28 +77,44 @@ class BL_CustomGrid_Block_Grid_Edit_Tab_Settings extends Mage_Adminhtml_Block_Wi
             )
         );
         
-        $fieldset->addField(
-            'profiles_default_restricted',
-            'select',
-            array(
-                'name'   => 'profiles_defaults[restricted]',
-                'label'  => $this->__('Restricted'),
-                'values' => Mage::getSingleton('customgrid/system_config_source_yesno')->toOptionArray(),
-                'note'   => $this->__($this->getFormFieldNote('profiles_default_restricted')),
-            )
-        );
+        if ($gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_ASSIGN_PROFILES)) {
+            $fieldset->addField(
+                'profiles_default_restricted',
+                'select',
+                array(
+                    'name'   => 'restricted',
+                    'label'  => $this->__('Restricted'),
+                    'values' => Mage::getSingleton('customgrid/system_config_source_yesno')->toOptionArray(),
+                    'note'   => $this->__($this->getFormFieldNote('profiles_default_restricted')),
+                )
+            );
+            
+            $fieldset->addField(
+                'profiles_default_assigned_to',
+                'multiselect',
+                array(
+                    'name'   => 'assigned_to',
+                    'label'  => $this->__('Assigned To'),
+                    'values' => Mage::getSingleton('customgrid/system_config_source_admin_role')->toOptionArray(),
+                    'note'   => $this->__($this->getFormFieldNote('profiles_default_assigned_to')),
+                )
+            );
+        }
         
-        $fieldset->addField(
-            'profiles_default_assigned_to',
-            'multiselect',
-            array(
-                'name'   => 'profiles_defaults[assigned_to]',
-                'label'  => $this->__('Assigned To'),
-                'values' => Mage::getSingleton('customgrid/system_config_source_admin_role')->toOptionArray(),
-                'note'   => $this->__($this->getFormFieldNote('profiles_default_assigned_to')),
-            )
-        );
+        if ($gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_EDIT_PROFILES)) {
+            $fieldset->addField(
+                'profiles_remembered_session_params',
+                'multiselect',
+                array(
+                    'name'   => 'remembered_session_params',
+                    'label'  => $this->__('Remembered Session Parameters'),
+                    'values' => Mage::getSingleton('customgrid/system_config_source_grid_param')->toOptionArray(),
+                    'note'   => $this->__($this->getFormFieldNote('profiles_remembered_session_params')),
+                )
+            );
+        }
         
+        $this->_addSuffixToFieldsetFieldNames($fieldset, 'profiles_defaults');
         return $fieldset;
     }
     
@@ -113,7 +134,7 @@ class BL_CustomGrid_Block_Grid_Edit_Tab_Settings extends Mage_Adminhtml_Block_Wi
             'display_system_part',
             'select',
             array(
-                'name'   => 'customization_params[display_system_part]',
+                'name'   => 'display_system_part',
                 'label'  => $this->__('Display "System" Column'),
                 'values' => $yesNoValues,
             )
@@ -123,7 +144,7 @@ class BL_CustomGrid_Block_Grid_Edit_Tab_Settings extends Mage_Adminhtml_Block_Wi
             'ignore_custom_headers',
             'select',
             array(
-                'name'   => 'customization_params[ignore_custom_headers]',
+                'name'   => 'ignore_custom_headers',
                 'label'  => $this->__('Ignore Custom Headers (Base Grid Columns)'),
                 'values' => $yesNoValues,
             )
@@ -133,7 +154,7 @@ class BL_CustomGrid_Block_Grid_Edit_Tab_Settings extends Mage_Adminhtml_Block_Wi
             'ignore_custom_widths',
             'select',
             array(
-                'name'   => 'customization_params[ignore_custom_widths]',
+                'name'   => 'ignore_custom_widths',
                 'label'  => $this->__('Ignore Custom Widths (Base Grid Columns)'),
                 'values' => $yesNoValues,
             )
@@ -143,7 +164,7 @@ class BL_CustomGrid_Block_Grid_Edit_Tab_Settings extends Mage_Adminhtml_Block_Wi
             'ignore_custom_alignments',
             'select',
             array(
-                'name'   => 'customization_params[ignore_custom_alignments]',
+                'name'   => 'ignore_custom_alignments',
                 'label'  => $this->__('Ignore Custom Alignments (Base Grid Columns)'),
                 'values' => $yesNoValues,
             )
@@ -152,8 +173,8 @@ class BL_CustomGrid_Block_Grid_Edit_Tab_Settings extends Mage_Adminhtml_Block_Wi
         $fieldset->addField(
             'pagination_values',
             'text',
-             array(
-                'name'  => 'customization_params[pagination_values]',
+            array(
+                'name'  => 'pagination_values',
                 'label' => $this->__('Custom Pagination Values'),
                 'note'  => $this->__($this->getFormFieldNote('pagination_values')),
              )
@@ -163,7 +184,7 @@ class BL_CustomGrid_Block_Grid_Edit_Tab_Settings extends Mage_Adminhtml_Block_Wi
             'default_pagination_value',
             'text',
             array(
-                'name'  => 'customization_params[default_pagination_value]',
+                'name'  => 'default_pagination_value',
                 'label' => $this->__('Default Pagination Value'),
                 'note'  => $this->__($this->getFormFieldNote('default_pagination_value')),
             )
@@ -173,7 +194,7 @@ class BL_CustomGrid_Block_Grid_Edit_Tab_Settings extends Mage_Adminhtml_Block_Wi
             'merge_base_pagination',
             'select',
             array(
-                'name'   => 'customization_params[merge_base_pagination]',
+                'name'   => 'merge_base_pagination',
                 'label'  => $this->__('Merge Base Pagination Values'),
                 'values' => $yesNoValues,
                 'note'   => $this->__($this->getFormFieldNote('merge_base_pagination')),
@@ -184,7 +205,7 @@ class BL_CustomGrid_Block_Grid_Edit_Tab_Settings extends Mage_Adminhtml_Block_Wi
             'pin_header',
             'select',
             array(
-                'name'   => 'customization_params[pin_header]',
+                'name'   => 'pin_header',
                 'label'  => $this->__('Pin Pager And Mass-Actions Block'),
                 'values' => $yesNoValues,
             )
@@ -194,7 +215,7 @@ class BL_CustomGrid_Block_Grid_Edit_Tab_Settings extends Mage_Adminhtml_Block_Wi
             'rss_links_window',
             'select',
             array(
-                'name'   => 'customization_params[rss_links_window]',
+                'name'   => 'rss_links_window',
                 'label'  => $this->__('Move RSS Links in a Dedicated Window'),
                 'values' => $yesNoValues,
             )
@@ -204,7 +225,7 @@ class BL_CustomGrid_Block_Grid_Edit_Tab_Settings extends Mage_Adminhtml_Block_Wi
             'hide_original_export_block',
             'select',
             array(
-                'name'   => 'customization_params[hide_original_export_block]',
+                'name'   => 'hide_original_export_block',
                 'label'  => $this->__('Hide Original Export Block'),
                 'values' => $yesNoValues,
             )
@@ -214,20 +235,23 @@ class BL_CustomGrid_Block_Grid_Edit_Tab_Settings extends Mage_Adminhtml_Block_Wi
             'hide_filter_reset_button',
             'select',
             array(
-                'name'   => 'customization_params[hide_filter_reset_button]',
+                'name'   => 'hide_filter_reset_button',
                 'label'  => $this->__('Hide Original Filter Reset Button'),
                 'values' => $yesNoValues,
             )
         );
         
+        $this->_addSuffixToFieldsetFieldNames($fieldset, 'customization_params');
         return $fieldset;
     }
     
     protected function _addDefaultParamsFieldsToForm(Varien_Data_Form $form)
     {
-        $arrayOptions  = Mage::getSingleton('customgrid/system_config_source_default_param_behaviour_array')
+        $gridParams = Mage::getSingleton('customgrid/system_config_source_grid_param')
+            ->toOptionArray(false);
+        $arrayOptions   = Mage::getSingleton('customgrid/system_config_source_default_param_behaviour_array')
             ->toOptionArray();
-        $scalarOptions = Mage::getSingleton('customgrid/system_config_source_default_param_behaviour_scalar')
+        $scalarOptions  = Mage::getSingleton('customgrid/system_config_source_default_param_behaviour_scalar')
             ->toOptionArray();
         
         $fieldset = $form->addFieldset(
@@ -238,73 +262,40 @@ class BL_CustomGrid_Block_Grid_Edit_Tab_Settings extends Mage_Adminhtml_Block_Wi
             )
         );
         
-        $fieldset->addField(
-            'default_page_behaviour',
-            'select',
-            array(
-                'name'   => 'default_params_behaviours[page]',
-                'label'  => $this->__('Page Number'),
-                'values' => $scalarOptions,
-                'note'   => $this->__($this->getFormFieldNote('default_scalar_behaviour')),
-            )
-        );
+        foreach ($gridParams as $gridParam) {
+            if ($isFilterGridParam = ($gridParam['value'] == BL_CustomGrid_Model_Grid::GRID_PARAM_FILTER)) {
+                $formFieldNoteKey = 'default_array_behaviour';
+            } else {
+                $formFieldNoteKey = 'default_scalar_behaviour';
+            }
+            
+            $fieldset->addField(
+                'default_' . $gridParam['value'] . '_behaviour',
+                'select',
+                array(
+                    'name'   => $gridParam['value'],
+                    'label'  => $gridParam['label'],
+                    'values' => ($isFilterGridParam ? $arrayOptions : $scalarOptions),
+                    'note'   => $this->__($this->getFormFieldNote($formFieldNoteKey)),
+                )
+            );
+        }
         
-        $fieldset->addField(
-            'default_limit_behaviour',
-            'select',
-            array(
-                'name'   => 'default_params_behaviours[limit]',
-                'label'  => $this->__('Page Size'),
-                'values' => $scalarOptions,
-                'note'   => $this->__($this->getFormFieldNote('default_scalar_behaviour')),
-            )
-        );
-        
-        $fieldset->addField(
-            'default_sort_behaviour',
-            'select',
-            array(
-                'name'   => 'default_params_behaviours[sort]',
-                'label'  => $this->__('Sort'),
-                'values' => $scalarOptions,
-                'note'   => $this->__($this->getFormFieldNote('default_scalar_behaviour')),
-            )
-        );
-        
-        $fieldset->addField(
-            'default_dir_behaviour',
-            'select',
-            array(
-                'name'   => 'default_params_behaviours[dir]',
-                'label'  => $this->__('Sort Direction'),
-                'values' => $scalarOptions,
-                'note'   => $this->__($this->getFormFieldNote('default_scalar_behaviour')),
-            )
-        );
-        
-        $fieldset->addField(
-            'default_filter_behaviour',
-            'select',
-            array(
-                'name'   => 'default_params_behaviours[filter]',
-                'label'  => $this->__('Filters'),
-                'values' => $arrayOptions,
-                'note'   => $this->__($this->getFormFieldNote('default_array_behaviour')),
-            )
-        );
-        
+        $this->_addSuffixToFieldsetFieldNames($fieldset, 'default_params_behaviours');
         return $fieldset;
     }
     
     protected function _prepareForm()
     {
-        $gridModel = Mage::registry('blcg_grid');
+        $gridModel = $this->getGridModel();
+        
         $form = new Varien_Data_Form();
         $form->setHtmlIdPrefix('blcg_grid_' . $gridModel->getId() . '_settings_');
         $useConfigFieldsets = array();
         
-        if ($gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_ASSIGN_PROFILES)) {
-            $useConfigFieldsets[] = $this->_addAssignProfilesFieldsToForm($form);
+        if ($gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_ASSIGN_PROFILES)
+            || $gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_EDIT_PROFILES)) {
+            $useConfigFieldsets[] = $this->_addProfilesFieldsToForm($form);
         }
         if ($gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_EDIT_CUSTOMIZATION_PARAMS)) {
             $useConfigFieldsets[] = $this->_addCustomizationParamsFieldsToForm($form);
@@ -315,11 +306,7 @@ class BL_CustomGrid_Block_Grid_Edit_Tab_Settings extends Mage_Adminhtml_Block_Wi
         
         foreach ($useConfigFieldsets as $fieldset) {
             foreach ($fieldset->getElements() as $field) {
-                if (is_null($gridModel->getData($field->getId()))) {
-                    $field->setDisabled(true);
-                    $field->addClass('disabled');
-                }
-                $field->setAfterElementHtml($this->_getUseConfigCheckboxHtml($field));
+                $this->applyUseConfigCheckboxToElement($field, is_null($gridModel->getData($field->getId())));
             }
         }
         
@@ -327,28 +314,5 @@ class BL_CustomGrid_Block_Grid_Edit_Tab_Settings extends Mage_Adminhtml_Block_Wi
         $this->setForm($form);
         
         return parent::_prepareForm();
-    }
-    
-    protected function _getUseConfigCheckboxHtml(Varien_Data_Form_Element_Abstract $element)
-    {
-        $htmlId  = $element->getHtmlId() . '-uc-checkbox';
-        $checked = $element->getDisabled();
-        
-        if (preg_match('#^([a-zA-Z_]+)(\[([a-zA-Z_]+)\])?(\[\])?$#', $element->getName(), $nameParts)) {
-            $name = 'use_config[' . $nameParts[1] . ']';
-            
-            if ($nameParts[3] !== '') {
-                $name .= '[' . $nameParts[3] . ']';
-            }
-        } else {
-            $name = 'use_config[' . $element->getName() . ']';
-        }
-        
-        return '<div class="blcg-use-config-wrapper">'
-            . '<input type="checkbox" class="checkbox" id="' . $htmlId . '" ' . 'name="' . $name . '" value="1" '
-            . ($checked ? 'checked="checked" ' : '')
-            . 'onclick="toggleValueElements(this, Element.up(this.parentNode));" />'
-            . '<label for="' . $htmlId . '">' . $this->__('Use Config') . '</label>'
-            . '</div>';
     }
 }

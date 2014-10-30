@@ -31,58 +31,60 @@ $tables = array(
 
 // Note: the "grid_profile" one and related columns from "grid_role" / "grid_user" are for potential further use
 
-$installer->run("
-CREATE TABLE IF NOT EXISTS `{$tables['grid_profile']}` (
-`profile_id` int(10) unsigned NOT NULL auto_increment,
-`grid_id` int(10) unsigned NOT NULL,
-`name` varchar(255) character set utf8 NOT NULL,
-`default_page` int(10) unsigned default NULL,
-`default_limit` int(10) unsigned default NULL,
-`default_sort` varchar(255) character set utf8 default NULL,
-`default_direction` enum('asc', 'desc') character set utf8 default NULL,
-`default_filters` text character set utf8 default NULL,
-PRIMARY KEY (`profile_id`),
-KEY `FK_CUSTOM_GRID_GRID_PROFILE_GRID` (`grid_id`),
-CONSTRAINT `FK_CUSTOM_GRID_GRID_PROFILE_GRID`
-    FOREIGN KEY (`grid_id`) REFERENCES `{$tables['grid']}` (`grid_id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+$installer->run(
+    "
+    CREATE TABLE IF NOT EXISTS `{$tables['grid_profile']}` (
+    `profile_id` int(10) unsigned NOT NULL auto_increment,
+    `grid_id` int(10) unsigned NOT NULL,
+    `name` varchar(255) character set utf8 NOT NULL,
+    `default_page` int(10) unsigned default NULL,
+    `default_limit` int(10) unsigned default NULL,
+    `default_sort` varchar(255) character set utf8 default NULL,
+    `default_direction` enum('asc', 'desc') character set utf8 default NULL,
+    `default_filters` text character set utf8 default NULL,
+    PRIMARY KEY (`profile_id`),
+    KEY `FK_CUSTOM_GRID_GRID_PROFILE_GRID` (`grid_id`),
+    CONSTRAINT `FK_CUSTOM_GRID_GRID_PROFILE_GRID`
+        FOREIGN KEY (`grid_id`) REFERENCES `{$tables['grid']}` (`grid_id`) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS `{$tables['grid_role']}` (
-`grid_role_id` int(10) unsigned NOT NULL auto_increment,
-`grid_id` int(10) unsigned NOT NULL,
-`role_id` int(10) unsigned NOT NULL,
-`permissions` text character set utf8 default NULL,
-`default_profile_id` int(10) unsigned default NULL,
-`available_profiles` text character set utf8 default NULL,
-PRIMARY KEY (`grid_role_id`),
-KEY `FK_CUSTOM_GRID_GRID_ROLE_GRID` (`grid_id`),
-KEY `FK_CUSTOM_GRID_GRID_ROLE_ROLE` (`role_id`),
-KEY `FK_CUSTOM_GRID_GRID_ROLE_DEFAULT_PROFILE` (`default_profile_id`),
-CONSTRAINT `FK_CUSTOM_GRID_GRID_ROLE_GRID`
-    FOREIGN KEY (`grid_id`) REFERENCES `{$tables['grid']}` (`grid_id`) ON DELETE CASCADE,
-CONSTRAINT `FK_CUSTOM_GRID_GRID_ROLE_ROLE`
-    FOREIGN KEY (`role_id`) REFERENCES `{$this->getTable('admin/role')}` (`role_id`) ON DELETE CASCADE,
-CONSTRAINT `FK_CUSTOM_GRID_GRID_ROLE_DEFAULT_PROFILE`
-    FOREIGN KEY (`default_profile_id`) REFERENCES `{$tables['grid_profile']}` (`profile_id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+    CREATE TABLE IF NOT EXISTS `{$tables['grid_role']}` (
+    `grid_role_id` int(10) unsigned NOT NULL auto_increment,
+    `grid_id` int(10) unsigned NOT NULL,
+    `role_id` int(10) unsigned NOT NULL,
+    `permissions` text character set utf8 default NULL,
+    `default_profile_id` int(10) unsigned default NULL,
+    `available_profiles` text character set utf8 default NULL,
+    PRIMARY KEY (`grid_role_id`),
+    KEY `FK_CUSTOM_GRID_GRID_ROLE_GRID` (`grid_id`),
+    KEY `FK_CUSTOM_GRID_GRID_ROLE_ROLE` (`role_id`),
+    KEY `FK_CUSTOM_GRID_GRID_ROLE_DEFAULT_PROFILE` (`default_profile_id`),
+    CONSTRAINT `FK_CUSTOM_GRID_GRID_ROLE_GRID`
+        FOREIGN KEY (`grid_id`) REFERENCES `{$tables['grid']}` (`grid_id`) ON DELETE CASCADE,
+    CONSTRAINT `FK_CUSTOM_GRID_GRID_ROLE_ROLE`
+        FOREIGN KEY (`role_id`) REFERENCES `{$this->getTable('admin/role')}` (`role_id`) ON DELETE CASCADE,
+    CONSTRAINT `FK_CUSTOM_GRID_GRID_ROLE_DEFAULT_PROFILE`
+        FOREIGN KEY (`default_profile_id`) REFERENCES `{$tables['grid_profile']}` (`profile_id`) ON DELETE SET NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS `{$tables['grid_user']}` (
-`grid_user_id` int(10) unsigned NOT NULL auto_increment,
-`grid_id` int(10) unsigned NOT NULL,
-`user_id` mediumint(9) unsigned NOT NULL,
-`default_profile_id` int(10) unsigned default NULL,
-PRIMARY KEY (`grid_user_id`),
-KEY `FK_CUSTOM_GRID_GRID_USER_GRID` (`grid_id`),
-KEY `FK_CUSTOM_GRID_GRID_USER_USER` (`user_id`),
-KEY `FK_CUSTOM_GRID_GRID_USER_DEFAULT_PROFILE` (`default_profile_id`),
-CONSTRAINT `FK_CUSTOM_GRID_GRID_USER_GRID`
-    FOREIGN KEY (`grid_id`) REFERENCES `{$tables['grid']}` (`grid_id`) ON DELETE CASCADE,
-CONSTRAINT `FK_CUSTOM_GRID_GRID_USER_USER`
-    FOREIGN KEY (`user_id`) REFERENCES `{$this->getTable('admin/user')}` (`user_id`) ON DELETE CASCADE,
-CONSTRAINT `FK_CUSTOM_GRID_GRID_USER_DEFAULT_PROFILE`
-    FOREIGN KEY (`default_profile_id`) REFERENCES `{$tables['grid_profile']}` (`profile_id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-");
+    CREATE TABLE IF NOT EXISTS `{$tables['grid_user']}` (
+    `grid_user_id` int(10) unsigned NOT NULL auto_increment,
+    `grid_id` int(10) unsigned NOT NULL,
+    `user_id` mediumint(9) unsigned NOT NULL,
+    `default_profile_id` int(10) unsigned default NULL,
+    PRIMARY KEY (`grid_user_id`),
+    KEY `FK_CUSTOM_GRID_GRID_USER_GRID` (`grid_id`),
+    KEY `FK_CUSTOM_GRID_GRID_USER_USER` (`user_id`),
+    KEY `FK_CUSTOM_GRID_GRID_USER_DEFAULT_PROFILE` (`default_profile_id`),
+    CONSTRAINT `FK_CUSTOM_GRID_GRID_USER_GRID`
+        FOREIGN KEY (`grid_id`) REFERENCES `{$tables['grid']}` (`grid_id`) ON DELETE CASCADE,
+    CONSTRAINT `FK_CUSTOM_GRID_GRID_USER_USER`
+        FOREIGN KEY (`user_id`) REFERENCES `{$this->getTable('admin/user')}` (`user_id`) ON DELETE CASCADE,
+    CONSTRAINT `FK_CUSTOM_GRID_GRID_USER_DEFAULT_PROFILE`
+        FOREIGN KEY (`default_profile_id`) REFERENCES `{$tables['grid_profile']}` (`profile_id`) ON DELETE SET NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+    "
+);
 
 /**
  * New columns for "customgrid_grid" table

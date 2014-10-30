@@ -81,7 +81,8 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Static_Default extends
     
     protected function _getAdditionalChoicesFieldValues(BL_CustomGrid_Model_Grid_Edit_Config $editConfig)
     {
-        // Options
+        $values = array();
+        $sourceType  = null;
         $sourceTypes = array('options', 'values');
         $sourceOptions = null;
         
@@ -115,6 +116,8 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Static_Default extends
         } else {
             Mage::throwException($this->__('Can\'t find any option to use for edited value'));
         }
+        
+        return $values;
     }
     
     protected function _getAdditionalDateFieldValues(BL_CustomGrid_Model_Grid_Edit_Config $editConfig)

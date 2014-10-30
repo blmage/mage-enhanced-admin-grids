@@ -17,7 +17,7 @@ class BL_CustomGrid_Model_Grid_Type_Cms_Block extends BL_CustomGrid_Model_Grid_T
 {
     protected function _getSupportedBlockTypes()
     {
-        return 'adminhtml/cms_block_grid';
+        return array('adminhtml/cms_block_grid');
     }
     
     protected function _getBaseEditableFields($blockType)

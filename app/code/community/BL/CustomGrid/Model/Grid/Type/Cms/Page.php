@@ -17,7 +17,7 @@ class BL_CustomGrid_Model_Grid_Type_Cms_Page extends BL_CustomGrid_Model_Grid_Ty
 {
     protected function _getSupportedBlockTypes()
     {
-        return 'adminhtml/cms_page_grid';
+        return array('adminhtml/cms_page_grid');
     }
     
     protected function _getColumnsLockedValues($blockType)
@@ -25,11 +25,17 @@ class BL_CustomGrid_Model_Grid_Type_Cms_Page extends BL_CustomGrid_Model_Grid_Ty
         return array(
             'store_code' => array(
                 'renderer' => '',
-                'config_values' => array('filter' => false, 'sortable' => false),
+                'config_values' => array(
+                    'filter' => false,
+                    'sortable' => false
+                ),
             ),
             '_first_store_id' => array(
                 'renderer' => '',
-                'config_values' => array('filter' => false,'sortable' => false),
+                'config_values' => array(
+                    'filter' => false,
+                    'sortable' => false
+                ),
             ),
         );
     }

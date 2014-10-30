@@ -13,34 +13,47 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-abstract class BL_CustomGrid_Block_Grid_Form_Abstract extends Mage_Adminhtml_Block_Widget_Form
+abstract class BL_CustomGrid_Block_Grid_Form_Abstract extends BL_CustomGrid_Block_Widget_Form
 {
     protected function _prepareLayout()
     {
         parent::_prepareLayout();
         
-        Varien_Data_Form::setFieldsetRenderer(
-            $this->getLayout()
-                ->createBlock('customgrid/widget_form_renderer_fieldset')
-                ->setDefaultCollapseState($this->getDefaultFieldsetCollapseState())
-        );
+        if (!$this->isTabForm()) {
+            Varien_Data_Form::setFieldsetRenderer(
+                $this->getLayout()
+                    ->createBlock('customgrid/widget_form_renderer_fieldset')
+                    ->setDefaultCollapseState($this->getDefaultFieldsetCollapseState())
+            );
+        }
         
         return $this;
     }
     
     protected function _prepareForm()
     {
-        $form = new Varien_Data_Form(array(
-            'id'     => $this->getFormId(),
-            'action' => $this->getFormAction(),
-            'method' => 'post',
-            'use_container'  => true,
-            'html_id_prefix' => $this->_getFormHtmlIdPrefix(),
-        ));
+        if (!$this->isTabForm()) {
+            $this->setForm(
+                new Varien_Data_Form(
+                    array(
+                        'id'     => $this->getFormId(),
+                        'action' => $this->getFormAction(),
+                        'method' => 'post',
+                        'use_container'     => true,
+                        'html_id_prefix'    => $this->_getFormHtmlIdPrefix(),
+                        'field_name_suffix' => $this->_getFormFieldNameSuffix(),
+                    )
+                )
+            );
+        }
         
-        $this->_addFieldsToForm($form);
-        $this->setForm($form);
+        $this->_addFieldsToForm($this->getForm());
         return parent::_prepareForm();
+    }
+    
+    public function isTabForm()
+    {
+        return ($this instanceof Mage_Adminhtml_Block_Widget_Tab_Interface);
     }
     
     public function getFormId()
@@ -51,6 +64,11 @@ abstract class BL_CustomGrid_Block_Grid_Form_Abstract extends Mage_Adminhtml_Blo
     protected function _getFormHtmlIdPrefix()
     {
         return $this->getFormId() . '_' . $this->_getFormType() . '_';
+    }
+    
+    protected function _getFormFieldNameSuffix()
+    {
+        return null;
     }
     
     protected function _getFormType()
@@ -88,33 +106,29 @@ abstract class BL_CustomGrid_Block_Grid_Form_Abstract extends Mage_Adminhtml_Blo
         return true;
     }
     
-    public function getGridModel()
-    {
-        return Mage::registry('blcg_grid');
-    }
-    
     protected function _addFieldsToForm(Varien_Data_Form $form)
     {
-        $gridModel = $this->getGridModel();
-        
-        $form->addField(
-            'grid_id',
-            'hidden',
-            array(
-                'name'  => 'grid_id',
-                'value' => $gridModel->getId(),
-            )
-        );
-        
-        $form->addField(
-            'profile_id',
-            'hidden',
-            array(
-                'name'  => 'profile_id',
-                'value' => $gridModel->getProfileId(),
-            )
-        );
-        
+        if (!$this->isTabForm()) {
+            $gridModel = $this->getGridModel();
+            
+            $form->addField(
+                'grid_id',
+                'hidden',
+                array(
+                    'name'  => 'grid_id',
+                    'value' => $gridModel->getId(),
+                )
+            );
+            
+            $form->addField(
+                'profile_id',
+                'hidden',
+                array(
+                    'name'  => 'profile_id',
+                    'value' => $gridModel->getProfileId(),
+                )
+            );
+        }
         return $this;
     }
 }

@@ -39,8 +39,6 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Select extends
     
     protected function _getOptions()
     {
-        $options = array();
-        
         if ($this->getColumn()->getFilterMode() == self::MODE_WITH_WITHOUT) {
             $options = array(
                 array(
@@ -55,7 +53,6 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Select extends
         } else {
             $options = $this->getColumn()->getOptions();
         }
-        
         return (is_array($options) ? $options : array());
     }
     
@@ -119,7 +116,6 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Select extends
     
     public function getMultipleCondition($value, Varien_Data_Collection_Db $collection, $filterIndex, $isNegative)
     {
-        $condition = null;
         $columnBlock = $this->getColumn();
         
         if ($columnBlock->getImplodedValues()) {
@@ -182,7 +178,6 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Select extends
     
     public function getSingleCondition($value, Varien_Data_Collection_Db $collection, $filterIndex, $isNegative)
     {
-        $condition = null;
         $columnBlock = $this->getColumn();
         
         if ($columnBlock->getImplodedValues()) {
@@ -217,7 +212,6 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Select extends
         $filterIndex = $this->helper('customgrid/grid')->getColumnBlockFilterIndex($columnBlock);
         $filterMode  = $this->getColumn()->getFilterMode();
         $isNegative  = (bool) $this->getColumn()->getNegativeFilter();
-        $condition   = null;
         $value = $this->getValue();
         
         if ($filterMode == self::MODE_MULTIPLE) {

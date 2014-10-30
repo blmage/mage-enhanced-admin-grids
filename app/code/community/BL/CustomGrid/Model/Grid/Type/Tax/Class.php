@@ -17,7 +17,7 @@ class BL_CustomGrid_Model_Grid_Type_Tax_Class extends BL_CustomGrid_Model_Grid_T
 {
     protected function _getSupportedBlockTypes()
     {
-        return 'adminhtml/tax_class_grid';
+        return array('adminhtml/tax_class_grid');
     }
     
     public function canExport($blockType)

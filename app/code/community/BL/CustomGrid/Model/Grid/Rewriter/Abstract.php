@@ -153,7 +153,7 @@ abstract class BL_CustomGrid_Model_Grid_Rewriter_Abstract extends BL_CustomGrid_
     {
         if (!$this->_blcg_holdPrepareCollection) {
             if (!is_null($this->_blcg_gridModel)) {
-                $data = $this->_blcg_gridModel->verifyGridBlockFilters($this, $data);
+                $data = $this->_blcg_gridModel->getApplier()->verifyGridBlockFilters($this, $data);
             }
             
             $this->_blcg_launchCollectionCallbacks(\'before_set_filters\', array($this, $this->_collection, $data));
@@ -284,7 +284,7 @@ abstract class BL_CustomGrid_Model_Grid_Rewriter_Abstract extends BL_CustomGrid_
     public function setDefaultPage($page)
     {
         if (!is_null($this->_blcg_gridModel)) {
-            $page = $this->_blcg_gridModel->getGridBlockDefaultParamValue(
+            $page = $this->_blcg_gridModel->getApplier()->getGridBlockDefaultParamValue(
                 \'page\',
                 $page,
                 null,
@@ -299,7 +299,8 @@ abstract class BL_CustomGrid_Model_Grid_Rewriter_Abstract extends BL_CustomGrid_
     {
         if (!is_null($this->_blcg_gridModel)) {
             $default = $this->_defaultLimit;
-            $limit = $this->_blcg_gridModel->getGridBlockDefaultParamValue(\'limit\', $limit, null, false, $default);
+            $limit = $this->_blcg_gridModel->getApplier()
+                ->getGridBlockDefaultParamValue(\'limit\', $limit, null, false, $default);
         }
         return parent::setDefaultLimit($limit);
     }
@@ -308,7 +309,8 @@ abstract class BL_CustomGrid_Model_Grid_Rewriter_Abstract extends BL_CustomGrid_
     {
         if (!is_null($this->_blcg_gridModel)) {
             $default = $this->_defaultSort;
-            $sort = $this->_blcg_gridModel->getGridBlockDefaultParamValue(\'sort\', $sort, null, false, $default);
+            $sort = $this->_blcg_gridModel->getApplier()
+                ->getGridBlockDefaultParamValue(\'sort\', $sort, null, false, $default);
         }
         return parent::setDefaultSort($sort);
     }
@@ -317,7 +319,8 @@ abstract class BL_CustomGrid_Model_Grid_Rewriter_Abstract extends BL_CustomGrid_
     {
         if (!is_null($this->_blcg_gridModel)) {
             $default = $this->_defaultDir;
-            $dir = $this->_blcg_gridModel->getGridBlockDefaultParamValue(\'dir\', $dir, null, false, $default);
+            $dir = $this->_blcg_gridModel->getApplier()
+                ->getGridBlockDefaultParamValue(\'dir\', $dir, null, false, $default);
         }
         return parent::setDefaultDir($dir);
     }
@@ -326,7 +329,8 @@ abstract class BL_CustomGrid_Model_Grid_Rewriter_Abstract extends BL_CustomGrid_
     {
         if (!is_null($this->_blcg_gridModel)) {
             $default = $this->_defaultFilter;
-            $filter = $this->_blcg_gridModel->getGridBlockDefaultParamValue(\'filter\', $filter, null, false, $default);
+            $filter = $this->_blcg_gridModel->getApplier()
+                ->getGridBlockDefaultParamValue(\'filter\', $filter, null, false, $default);
         }
         return parent::setDefaultFilter($filter);
     }
@@ -335,7 +339,8 @@ abstract class BL_CustomGrid_Model_Grid_Rewriter_Abstract extends BL_CustomGrid_
     {
         if (!is_null($this->_blcg_gridModel)) {
             $default = $this->_defaultPage;
-            $page = $this->_blcg_gridModel->getGridBlockDefaultParamValue(\'page\', $default, $page, true);
+            $page = $this->_blcg_gridModel->getApplier()
+                ->getGridBlockDefaultParamValue(\'page\', $default, $page, true);
         }
         return parent::setDefaultPage($page);
     }
@@ -344,7 +349,8 @@ abstract class BL_CustomGrid_Model_Grid_Rewriter_Abstract extends BL_CustomGrid_
     {
         if (!$forced && !is_null($this->_blcg_gridModel)) {
             $default = $this->_defaultLimit;
-            $limit = $this->_blcg_gridModel->getGridBlockDefaultParamValue(\'limit\', $default, $limit, true);
+            $limit = $this->_blcg_gridModel->getApplier()
+                ->getGridBlockDefaultParamValue(\'limit\', $default, $limit, true);
         }
         return parent::setDefaultLimit($limit);
     }
@@ -353,7 +359,8 @@ abstract class BL_CustomGrid_Model_Grid_Rewriter_Abstract extends BL_CustomGrid_
     {
         if (!is_null($this->_blcg_gridModel)) {
             $default = $this->_defaultSort;
-            $sort = $this->_blcg_gridModel->getGridBlockDefaultParamValue(\'sort\', $default, $sort, true);
+            $sort = $this->_blcg_gridModel->getApplier()
+                ->getGridBlockDefaultParamValue(\'sort\', $default, $sort, true);
         }
         return parent::setDefaultSort($sort);
     }
@@ -362,7 +369,8 @@ abstract class BL_CustomGrid_Model_Grid_Rewriter_Abstract extends BL_CustomGrid_
     {
         if (!is_null($this->_blcg_gridModel)) {
             $default = $this->_defaultDir;
-            $dir = $this->_blcg_gridModel->getGridBlockDefaultParamValue(\'dir\', $default, $dir, true);
+            $dir = $this->_blcg_gridModel->getApplier()
+                ->getGridBlockDefaultParamValue(\'dir\', $default, $dir, true);
         }
         return parent::setDefaultDir($dir);
     }
@@ -371,7 +379,8 @@ abstract class BL_CustomGrid_Model_Grid_Rewriter_Abstract extends BL_CustomGrid_
     {
         if (!is_null($this->_blcg_gridModel)) {
             $default = $this->_defaultFilter;
-            $filter = $this->_blcg_gridModel->getGridBlockDefaultParamValue(\'filter\', $default, $filter, true);
+            $filter = $this->_blcg_gridModel->getApplier()
+                ->getGridBlockDefaultParamValue(\'filter\', $default, $filter, true);
         }
         return parent::setDefaultFilter($filter);
     }

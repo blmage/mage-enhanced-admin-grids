@@ -25,7 +25,6 @@ _Backwards compatibility is assured for all the previously existing data. **If y
 ### Final steps before beta release
 - last waves of code refactoring/cleanup (including Scrutinizer CI setup)
 - allow to assign the base profile to the admin roles just as for the other profiles (_if an user has not any available profile, the default profile will always be available regardless of whether it is assigned or not to this user_)
-- allow to specify the session parameters that should be remembered and restored upon returning to a previously used profile (_for compatible grids only_)
 - rework the sales items columns (implement the advanced text filter, improve their extensibility, and allow to display a customizable value when exported)
 
 ### Continuous changes (primary todo list) :

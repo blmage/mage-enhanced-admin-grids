@@ -25,20 +25,6 @@ class BL_CustomGrid_Block_Grid_Form_Default_Params extends BL_CustomGrid_Block_G
         return false;
     }
     
-    public function getDefaultParamTypes()
-    {
-        return $this->getDataSetDefault(
-            'default_param_types',
-            array(
-                'page'   => $this->__('Page Number'),
-                'limit'  => $this->__('Page Size'),
-                'sort'   => $this->__('Sort'),
-                'dir'    => $this->__('Sort Direction'),
-                'filter' => $this->__('Filter'),
-            )
-        );
-    }
-    
     protected function _isPossiblyEmptyFilterValue($value)
     {
         $isEmpty = false;
@@ -55,11 +41,11 @@ class BL_CustomGrid_Block_Grid_Form_Default_Params extends BL_CustomGrid_Block_G
         return $isEmpty;
     }
     
-    protected function _rendererDefaultFilterValue($value, $isAppliable, BL_CustomGrid_Model_Grid $gridModel)
+    protected function _renderDefaultFilterValue($value, $isAppliable, BL_CustomGrid_Model_Grid $gridModel)
     {
         if ($isAppliable) {
             if (!is_array($value)) {
-                $value = $gridModel->decodeGridFiltersString($value);
+                $value = $gridModel->getApplier()->decodeGridFiltersString($value);
             }
         }
         if (is_array($value) || is_array($value = @unserialize($value))) {
@@ -85,23 +71,27 @@ class BL_CustomGrid_Block_Grid_Form_Default_Params extends BL_CustomGrid_Block_G
     
     protected function _renderDefaultParamValue($type, $value, $isAppliable, BL_CustomGrid_Model_Grid $gridModel)
     {
-        if (($type == 'page') || ($type == 'limit')) {
+        if (($type == BL_CustomGrid_Model_Grid::GRID_PARAM_PAGE)
+            || ($type == BL_CustomGrid_Model_Grid::GRID_PARAM_LIMIT)) {
             $value = (int) $value;
-        } elseif ($type == 'sort') {
+        } elseif ($type == BL_CustomGrid_Model_Grid::GRID_PARAM_SORT) {
             $value = $this->__('column "%s"', (($header = $gridModel->getColumnHeader($value)) ? $header : $value));
-        } elseif ($type == 'dir') {
+        } elseif ($type == BL_CustomGrid_Model_Grid::GRID_PARAM_DIR) {
             $value = $this->__(strtolower($type) == 'asc' ? 'ascending' : 'descending');
-        } elseif ($type == 'filter') {
-            $value = $this->_rendererDefaultFilterValue($value, $isAppliable, $gridModel);
+        } elseif ($type == BL_CustomGrid_Model_Grid::GRID_PARAM_FILTER) {
+            $value = $this->_renderDefaultFilterValue($value, $isAppliable, $gridModel);
         }
         return $value;
     }
     
-    protected function _addRemovableParamsFieldsToForm(
-        Varien_Data_Form $form,
-        BL_CustomGrid_Block_Widget_Form_Element_Dependence $dependenceBlock,
-        BL_CustomGrid_Model_Grid $gridModel
-    ) {
+    protected function _addRemovableParamsFieldsToForm(Varien_Data_Form $form)
+    {
+        $gridModel = $this->getGridModel();
+        $dependenceBlock = $this->getDependenceBlock();
+        $gridParams  = Mage::getSingleton('customgrid/system_config_source_grid_param')->toOptionArray(false);
+        $yesNoValues = Mage::getSingleton('customgrid/system_config_source_yesno')->toOptionArray();
+        $hasNoDefaultParam = true;
+        
         $fieldset = $form->addFieldset(
             'remove',
             array(
@@ -110,32 +100,29 @@ class BL_CustomGrid_Block_Grid_Form_Default_Params extends BL_CustomGrid_Block_G
             )
         );
         
-        $yesNoValues = Mage::getSingleton('customgrid/system_config_source_yesno')->toOptionArray();
-        $noDefaultParam = true;
-        
-        foreach ($this->getDefaultParamTypes() as $typeKey => $typeLabel) {
-            if (!is_null($currentValue = $gridModel->getData('default_' . $typeKey))) {
-                $noDefaultParam = false;
-                $renderedValue = $this->_renderDefaultParamValue($typeKey, $currentValue, false, $gridModel);
+        foreach ($gridParams as $gridParam) {
+            if (!is_null($currentValue = $gridModel->getData('default_' . $gridParam['value']))) {
+                $hasNoDefaultParam = false;
+                $renderedValue = $this->_renderDefaultParamValue($gridParam['value'], $currentValue, false, $gridModel);
                 
                 $field = $fieldset->addField(
-                    'remove_' . $typeKey,
+                    'remove_' . $gridParam['value'],
                     'select',
                     array(
-                        'name'   => 'removable_default_params[' . $typeKey . ']',
-                        'label'  => $typeLabel,
+                        'name'   => $gridParam['value'],
+                        'label'  => $gridParam['label'],
                         'note'   => $this->__('Current Value : <strong>%s</strong>', $renderedValue),
                         'values' => $yesNoValues,
                     )
                 );
                 
-                $dependenceBlock->addFieldMap($field->getHtmlId(), 'remove_' . $typeKey);
-                $dependenceBlock->addFieldDependence('remove_' . $typeKey, 'apply_' . $typeKey, '0');
+                $dependenceBlock->addFieldMap($field->getHtmlId(), 'remove_' . $gridParam['value'])
+                    ->addFieldDependence('remove_' . $gridParam['value'], 'apply_' . $gridParam['value'], '0');
             }
         }
         
-        if ($noDefaultParam) {
-            $field = $fieldset->addField(
+        if ($hasNoDefaultParam) {
+            $fieldset->addField(
                 'remove_no_default_param',
                 'note',
                 array(
@@ -145,14 +132,18 @@ class BL_CustomGrid_Block_Grid_Form_Default_Params extends BL_CustomGrid_Block_G
             );
         }
         
+        $this->_addSuffixToFieldsetFieldNames($fieldset, 'removable_default_params');
         return $this;
     }
     
-    protected function _addAppliableParamsFieldsToForm(
-        Varien_Data_Form $form,
-        BL_CustomGrid_Block_Widget_Form_Element_Dependence $dependenceBlock,
-        BL_CustomGrid_Model_Grid $gridModel
-    ) {
+    protected function _addAppliableParamsFieldsToForm(Varien_Data_Form $form)
+    {
+        $gridModel = $this->getGridModel();
+        $dependenceBlock = $this->getDependenceBlock();
+        $defaultParams   = (array) $this->getDataSetDefault('default_params', array());
+        $gridParams  = Mage::getSingleton('customgrid/system_config_source_grid_param')->toOptionArray(false);
+        $yesNoValues = Mage::getSingleton('customgrid/system_config_source_yesno')->toOptionArray();
+        
         $fieldset = $form->addFieldset(
             'apply',
             array(
@@ -161,53 +152,49 @@ class BL_CustomGrid_Block_Grid_Form_Default_Params extends BL_CustomGrid_Block_G
             )
         );
         
-        $yesNoValues = Mage::getSingleton('customgrid/system_config_source_yesno')->toOptionArray();
-        $defaultParams = (array) $this->getDataSetDefault('default_params', array());
-        
-        foreach ($this->getDefaultParamTypes() as $typeKey => $typeLabel) {
-            if (isset($defaultParams[$typeKey])) {
-                $currentValue  = $gridModel->getData('default_' . $typeKey);
-                $renderedValue = $this->_renderDefaultParamValue($typeKey, $defaultParams[$typeKey], true, $gridModel);
+        foreach ($gridParams as $gridParam) {
+            if (isset($defaultParams[$gridParam['value']])) {
+                $renderedValue = $this->_renderDefaultParamValue(
+                    $gridParam['value'],
+                    $defaultParams[$gridParam['value']],
+                    true,
+                    $gridModel
+                );
                 
                 $field = $fieldset->addField(
-                    'apply_' . $typeKey,
+                    'apply_' . $gridParam['value'],
                     'select',
                     array(
-                        'name'   => 'appliable_default_params[' . $typeKey . ']',
-                        'label'  => $typeLabel,
+                        'name'   => $form->addSuffixToName($gridParam['value'], 'appliable_default_params'),
+                        'label'  => $gridParam['label'],
                         'note'   => $this->__('New Value : <strong>%s</strong>', $renderedValue),
                         'values' => $yesNoValues,
                     )
                 );
                 
                 $fieldset->addField(
-                    'apply_' . $typeKey . '_value',
+                    'apply_' . $gridParam['value'] . '_value',
                     'hidden',
                     array(
-                        'name'  => 'appliable_values[' . $typeKey . ']',
-                        'value' => $defaultParams[$typeKey],
+                        'name'  => $form->addSuffixToName($gridParam['value'], 'appliable_values'),
+                        'value' => $defaultParams[$gridParam['value']],
                     )
                 );
                 
-                $dependenceBlock->addFieldMap($field->getHtmlId(), 'apply_' . $typeKey);
-                $dependenceBlock->addFieldDependence('apply_' . $typeKey, 'remove_' . $typeKey, '0');
+                $dependenceBlock->addFieldMap($field->getHtmlId(), 'apply_' . $gridParam['value'])
+                    ->addFieldDependence('apply_' . $gridParam['value'], 'remove_' . $gridParam['value'], '0');
             }
         }
+        
+        return $this;
     }
     
     protected function _addFieldsToForm(Varien_Data_Form $form)
     {
         parent::_addFieldsToForm($form);
-        $gridModel = $this->getGridModel();
-        
-        $dependenceBlock = $this->getLayout()
-            ->createBlock('customgrid/widget_form_element_dependence')
-            ->addConfigOptions(array('chainHidden' => false));
-        
-        $this->setChild('form_after', $dependenceBlock);
-        $this->_addRemovableParamsFieldsToForm($form, $dependenceBlock, $gridModel);
-        $this->_addAppliableParamsFieldsToForm($form, $dependenceBlock, $gridModel);
-        
+        $this->_addRemovableParamsFieldsToForm($form);
+        $this->_addAppliableParamsFieldsToForm($form);
+        $this->getDependenceBlock()->addConfigOptions(array('chainHidden' => false));
         return $this;
     }
 }

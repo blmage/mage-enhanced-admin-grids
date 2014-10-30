@@ -13,7 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Options_Source_Edit_Tab_Settings extends Mage_Adminhtml_Block_Widget_Form implements
+class BL_CustomGrid_Block_Options_Source_Edit_Tab_Settings extends BL_CustomGrid_Block_Widget_Form implements
     Mage_Adminhtml_Block_Widget_Tab_Interface
 {
     public function getTabLabel()
@@ -42,11 +42,13 @@ class BL_CustomGrid_Block_Options_Source_Edit_Tab_Settings extends Mage_Adminhtm
             'continue_button',
             $this->getLayout()
                 ->createBlock('adminhtml/widget_button')
-                ->setData(array(
-                    'label'   => $this->__('Continue'),
-                    'onclick' => "setSettings('" . $this->getContinueUrl() . "', 'options_source_type')",
-                    'class'   => 'save',
-                ))
+                ->setData(
+                    array(
+                        'label'   => $this->__('Continue'),
+                        'onclick' => "setSettings('" . $this->getContinueUrl() . "', 'options_source_type')",
+                        'class'   => 'save',
+                    )
+                )
         );
         
         return parent::_prepareLayout();

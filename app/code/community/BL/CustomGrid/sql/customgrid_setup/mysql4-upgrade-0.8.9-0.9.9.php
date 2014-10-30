@@ -307,21 +307,23 @@ $connection->addKey(
  * New "role_profile" table
  */
 
-$installer->run("
-CREATE TABLE IF NOT EXISTS `{$tables['role_profile']}` (
-`role_profile_id` int(10) unsigned NOT NULL auto_increment,
-`role_id` int(10) unsigned NOT NULL,
-`profile_id` int(10) unsigned NOT NULL,
-PRIMARY KEY (`role_profile_id`),
-UNIQUE KEY `UNQ_CUSTOM_GRID_ROLE_PROFILE_ROLE_PROFILE` (`role_id`, `profile_id`),
-KEY `FK_CUSTOM_GRID_ROLE_PROFILE_ROLE` (`role_id`),
-KEY `FK_CUSTOM_GRID_ROLE_PROFILE_PROFILE` (`profile_id`),
-CONSTRAINT `FK_CUSTOM_GRID_ROLE_PROFILE_ROLE`
-    FOREIGN KEY (`role_id`) REFERENCES `{$this->getTable('admin/role')}` (`role_id`) ON DELETE CASCADE,
-CONSTRAINT `FK_CUSTOM_GRID_ROLE_PROFILE_PROFILE`
-    FOREIGN KEY (`profile_id`) REFERENCES `{$tables['grid_profile']}` (`profile_id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-");
+$installer->run(
+    "
+    CREATE TABLE IF NOT EXISTS `{$tables['role_profile']}` (
+    `role_profile_id` int(10) unsigned NOT NULL auto_increment,
+    `role_id` int(10) unsigned NOT NULL,
+    `profile_id` int(10) unsigned NOT NULL,
+    PRIMARY KEY (`role_profile_id`),
+    UNIQUE KEY `UNQ_CUSTOM_GRID_ROLE_PROFILE_ROLE_PROFILE` (`role_id`, `profile_id`),
+    KEY `FK_CUSTOM_GRID_ROLE_PROFILE_ROLE` (`role_id`),
+    KEY `FK_CUSTOM_GRID_ROLE_PROFILE_PROFILE` (`profile_id`),
+    CONSTRAINT `FK_CUSTOM_GRID_ROLE_PROFILE_ROLE`
+        FOREIGN KEY (`role_id`) REFERENCES `{$this->getTable('admin/role')}` (`role_id`) ON DELETE CASCADE,
+    CONSTRAINT `FK_CUSTOM_GRID_ROLE_PROFILE_PROFILE`
+        FOREIGN KEY (`profile_id`) REFERENCES `{$tables['grid_profile']}` (`profile_id`) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+    "
+);
 
 /**
  * Changes to the system configuration

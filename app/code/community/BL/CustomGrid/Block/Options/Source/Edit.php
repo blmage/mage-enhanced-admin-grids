@@ -30,43 +30,51 @@ class BL_CustomGrid_Block_Options_Source_Edit extends Mage_Adminhtml_Block_Widge
             'back_button',
             $this->getLayout()
                 ->createBlock('adminhtml/widget_button')
-                ->setData(array(
-                    'label'   => $this->__('Back'),
-                    'onclick' => 'setLocation(\'' . $this->getUrl('*/*/') . '\')',
-                    'class'   => 'back',
-                ))
+                ->setData(
+                    array(
+                        'label'   => $this->__('Back'),
+                        'onclick' => 'setLocation(\'' . $this->getUrl('*/*/') . '\')',
+                        'class'   => 'back',
+                    )
+                )
         );
         
         $this->setChild(
             'reset_button',
             $this->getLayout()
                 ->createBlock('adminhtml/widget_button')
-                ->setData(array(
-                    'label'   => $this->__('Reset'),
-                    'onclick' => 'setLocation(\'' . $this->getUrl('*/*/*', array('_current' => true)) . '\')',
-                ))
+                ->setData(
+                    array(
+                        'label'   => $this->__('Reset'),
+                        'onclick' => 'setLocation(\'' . $this->getUrl('*/*/*', array('_current' => true)) . '\')',
+                    )
+                )
         );
         
         $this->setChild(
             'save_button',
             $this->getLayout()
                 ->createBlock('adminhtml/widget_button')
-                ->setData(array(
-                    'label'   => $this->__('Save'),
-                    'onclick' => 'blcgOptionsSourceForm.submit()',
-                    'class'   => 'save',
-                ))
+                ->setData(
+                    array(
+                        'label'   => $this->__('Save'),
+                        'onclick' => 'blcgOptionsSourceForm.submit()',
+                        'class'   => 'save',
+                    )
+                )
         );
         
         $this->setChild(
             'save_and_edit_button',
             $this->getLayout()
                 ->createBlock('adminhtml/widget_button')
-                ->setData(array(
-                    'label'   => $this->__('Save and Continue Edit'),
-                    'onclick' => 'saveAndContinueEdit(\'' . $this->getSaveAndContinueUrl() . '\')',
-                    'class'   => 'save',
-                ))
+                ->setData(
+                    array(
+                        'label'   => $this->__('Save and Continue Edit'),
+                        'onclick' => 'saveAndContinueEdit(\'' . $this->getSaveAndContinueUrl() . '\')',
+                        'class'   => 'save',
+                    )
+                )
         );
         
         if ($source->getId()) {
@@ -74,12 +82,14 @@ class BL_CustomGrid_Block_Options_Source_Edit extends Mage_Adminhtml_Block_Widge
                 'delete_button',
                 $this->getLayout()
                     ->createBlock('adminhtml/widget_button')
-                    ->setData(array(
-                        'label'   => $this->__('Delete'),
-                        'onclick' => 'confirmSetLocation(\''
-                            . $this->__('Are you sure?').'\', \'' . $this->getDeleteUrl() . '\')',
-                        'class'   => 'delete',
-                    ))
+                    ->setData(
+                        array(
+                            'label'   => $this->__('Delete'),
+                            'onclick' => 'confirmSetLocation(\''
+                                . $this->__('Are you sure?').'\', \'' . $this->getDeleteUrl() . '\')',
+                            'class'   => 'delete',
+                        )
+                    )
             );
         }
         
@@ -113,7 +123,6 @@ class BL_CustomGrid_Block_Options_Source_Edit extends Mage_Adminhtml_Block_Widge
     
     public function getHeader()
     {
-        $header = '';
         $optionsSource = $this->getOptionsSource();
         
         if ($optionsSource->getId()) {

@@ -27,7 +27,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
         if (($gridModel = $this->getGridModel())
             && (($gridBlock = $this->getGridBlock()) || $gridModel->getId())) {
             if (!$gridModel->getId()) {
-                $gridModel->initWithGridBlock($gridBlock)->save();
+                $gridModel->getAbsorber()->initGridModelFromGridBlock($gridBlock);
                 $this->setIsNewGridModel(true);
             } elseif ($gridBlock && !$this->helper('customgrid')->isRewritedGridBlock($gridBlock)) {
                 return '';
@@ -213,11 +213,12 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
         
         if ($gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_EDIT_PROFILES)) {
             $actions['edit'] = array(
-                'label'     => $this->__('Edit'),
-                'mode'      => 'window',
-                'confirm'   => false,
-                'url'       => $this->getUrl($actionsRoute . 'edit', $actionsParams),
-                'windowUrl' => $this->getUrl($actionsRoute . 'editForm', $actionsParams),
+                'label'        => $this->__('Edit'),
+                'mode'         => 'window',
+                'confirm'      => false,
+                'url'          => $this->getUrl($actionsRoute . 'edit', $actionsParams),
+                'windowUrl'    => $this->getUrl($actionsRoute . 'editForm', $actionsParams),
+                'windowConfig' => array('height' => 490),
                 'appliesToBase'    => false,
                 'appliesToCurrent' => true,
             );
@@ -359,11 +360,11 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
             if (($gridBlock = $this->getRewritedGridBlock())
                 && $gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_EDIT_DEFAULT_PARAMS)) {
                 $defaultParams = serialize(array(
-                    'page'   => $gridBlock->blcg_getPage(),
-                    'limit'  => $gridBlock->blcg_getLimit(),
-                    'sort'   => $gridBlock->blcg_getSort(),
-                    'dir'    => $gridBlock->blcg_getDir(),
-                    'filter' => $gridBlock->blcg_getFilterParam(),
+                    BL_CustomGrid_Model_Grid::GRID_PARAM_PAGE   => $gridBlock->blcg_getPage(),
+                    BL_CustomGrid_Model_Grid::GRID_PARAM_LIMIT  => $gridBlock->blcg_getLimit(),
+                    BL_CustomGrid_Model_Grid::GRID_PARAM_SORT   => $gridBlock->blcg_getSort(),
+                    BL_CustomGrid_Model_Grid::GRID_PARAM_DIR    => $gridBlock->blcg_getDir(),
+                    BL_CustomGrid_Model_Grid::GRID_PARAM_FILTER => $gridBlock->blcg_getFilterParam(),
                 ));
                 
                 $functionName = $this->_prepareButtonScript(
@@ -392,7 +393,8 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
         if (!$this->hasData('export_form_button_html')) {
             $buttonHtml = '';
             
-            if ($gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_EXPORT_RESULTS)
+            if ($gridModel->getExporter()->canExport()
+                && $gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_EXPORT_RESULTS)
                 && ($gridBlock = $this->getRewritedGridBlock())) {
                 $params = array(
                     'total_size'  => $gridBlock->blcg_getCollectionSize(),
@@ -477,6 +479,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
                     BL_CustomGrid_Model_Grid::ACTION_EDIT_DEFAULT_PARAMS_BEHAVIOURS,
                     BL_CustomGrid_Model_Grid::ACTION_EDIT_ROLES_PERMISSIONS,
                     BL_CustomGrid_Model_Grid::ACTION_ASSIGN_PROFILES,
+                    BL_CustomGrid_Model_Grid::ACTION_EDIT_PROFILES,
                 ))) {
                 $buttonHtml = $this->getButtonHtml(
                     $this->__('Edit Grid'),

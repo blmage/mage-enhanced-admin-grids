@@ -62,14 +62,6 @@ class BL_CustomGrid_Block_Grid_Profile_Form_Container extends BL_CustomGrid_Bloc
     
     public function getProfilesJsObjectName()
     {
-        if (!$this->hasData('profiles_js_object_name')) {
-            if ($jsObjectName = $this->getRequest()->getParam('profiles_js_object_name', false)) {
-                $jsObjectName = $this->helper('customgrid/string')->sanitizeJsObjectName($jsObjectName);
-            } else {
-                $jsObjectName = false;
-            }
-            $this->setData('profiles_js_object_name', $jsObjectName);
-        }
-        return $this->_getData('profiles_js_object_name');
+        return $this->_getJsObjectName('profiles_js_object_name');
     }
 }

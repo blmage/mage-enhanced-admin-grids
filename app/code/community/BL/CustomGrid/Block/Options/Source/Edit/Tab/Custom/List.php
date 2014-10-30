@@ -13,7 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Options_Source_Edit_Tab_Custom_List extends Mage_Adminhtml_Block_Widget_Form implements
+class BL_CustomGrid_Block_Options_Source_Edit_Tab_Custom_List extends BL_CustomGrid_Block_Widget_Form implements
     Varien_Data_Form_Element_Renderer_Interface
 {
     protected $_element;
@@ -29,20 +29,17 @@ class BL_CustomGrid_Block_Options_Source_Edit_Tab_Custom_List extends Mage_Admin
             'add_button',
             $this->getLayout()
                 ->createBlock('adminhtml/widget_button')
-                ->setData(array(
-                    'name'    => 'add_custom_option_item_button',
-                    'label'   => $this->helper('catalog')->__('Add Option'),
-                    'onclick' => 'return blcgOptionsSourceControl.addItem()',
-                    'class'   => 'add',
-                ))
+                ->setData(
+                    array(
+                        'name'    => 'add_custom_option_item_button',
+                        'label'   => $this->helper('catalog')->__('Add Option'),
+                        'onclick' => 'return blcgOptionsSourceControl.addItem()',
+                        'class'   => 'add',
+                    )
+                )
         );
         
         return parent::_prepareLayout();
-    }
-    
-    public function getOptionsSource()
-    {
-        return Mage::registry('options_source');
     }
     
     protected function _sortValues($valueA, $valueB)

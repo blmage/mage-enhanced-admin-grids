@@ -73,7 +73,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Invoice_Items_Abstract extends
                 }
             } else {
                 foreach ($collection as $invoice) {
-                    $creditmemo->setData('_blcg_items_init_error', true);
+                    $invoice->setData('_blcg_items_init_error', true);
                 }
                 
                 Mage::getSingleton('customgrid/session')

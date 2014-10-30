@@ -13,7 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Options_Source_Edit_Tab_Model extends Mage_Adminhtml_Block_Widget_Form implements
+class BL_CustomGrid_Block_Options_Source_Edit_Tab_Model extends BL_CustomGrid_Block_Widget_Form implements
     Mage_Adminhtml_Block_Widget_Tab_Interface
 {
     public function getTabLabel()
@@ -38,42 +38,42 @@ class BL_CustomGrid_Block_Options_Source_Edit_Tab_Model extends Mage_Adminhtml_B
     
     protected function _prepareDependenceBlock()
     {
-        return $this->setChild(
-            'form_after',
-            $this->getLayout()
-                ->createBlock('customgrid/widget_form_element_dependence')
-                ->addFieldMap(array(
+        $this->getDependenceBlock()
+            ->addFieldMap(
+                array(
                     'return_type' => 'return_type',
                     'value_key'   => 'value_key',
                     'label_key'   => 'label_key',
-                ))
-                ->addFieldDependence(
-                    array(
-                        'value_key',
-                        'label_key',
-                    ), 
-                    'return_type', 
-                    array(
-                        BL_CustomGrid_Model_Options_Source::RETURN_TYPE_OPTION_ARRAY,
-                        BL_CustomGrid_Model_Options_Source::RETURN_TYPE_VARIEN_OBJECT_COLLECTION,
-                    )
                 )
-        );
+            )
+            ->addFieldDependence(
+                array(
+                    'value_key',
+                    'label_key',
+                ), 
+                'return_type', 
+                array(
+                    BL_CustomGrid_Model_Options_Source::RETURN_TYPE_OPTION_ARRAY,
+                    BL_CustomGrid_Model_Options_Source::RETURN_TYPE_VARIEN_OBJECT_COLLECTION,
+                )
+            );
+        
+        return $this;
     }
     
     protected function _prepareForm()
     {
-        $source = Mage::registry('blcg_options_source');
-        $form   = new Varien_Data_Form();
+        $optionsSource = $this->getOptionsSource();
+        $form = new Varien_Data_Form();
         $fieldset = $form->addFieldset('general', array('legend' => $this->__('Model')));
         
-        if ($source->getId()) {
+        if ($optionsSource->getId()) {
             $fieldset->addField(
                 'model_id',
                 'hidden',
                 array(
                     'name'  => 'model_id',
-                    'value' => $source->getModelId(),
+                    'value' => $optionsSource->getModelId(),
                 )
             );
         }
@@ -153,7 +153,7 @@ class BL_CustomGrid_Block_Options_Source_Edit_Tab_Model extends Mage_Adminhtml_B
         );
         
         $this->_prepareDependenceBlock();
-        $form->setValues($source->getData());
+        $form->setValues($optionsSource->getData());
         $this->setForm($form);
         
         return $this;

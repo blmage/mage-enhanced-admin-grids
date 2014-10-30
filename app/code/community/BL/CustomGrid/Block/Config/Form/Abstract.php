@@ -38,7 +38,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-abstract class BL_CustomGrid_Block_Config_Form_Abstract extends Mage_Adminhtml_Block_Widget_Form
+abstract class BL_CustomGrid_Block_Config_Form_Abstract extends BL_CustomGrid_Block_Widget_Form
 {
     abstract public function getFormId();
     abstract protected function _getFormCode();
@@ -60,18 +60,17 @@ abstract class BL_CustomGrid_Block_Config_Form_Abstract extends Mage_Adminhtml_B
     {
         $helper = $this->getTranslationHelper();
         
-        $form = new Varien_Data_Form(array(
-            'id'     => $this->getFormId(),
-            'action' => $this->_getFormAction(),
-            'method' => 'post',
-            'use_container' => true,
-        ));
+        $form = new Varien_Data_Form(
+            array(
+                'id'     => $this->getFormId(),
+                'action' => $this->_getFormAction(),
+                'method' => 'post',
+                'use_container' => true,
+            )
+        );
         
         $this->setForm($form);
-        $formCode = $this->_getFormCode();
-        $dependenceBlock = $this->getLayout()->createBlock('customgrid/widget_form_element_dependence');
-        $this->setChild('form_after', $dependenceBlock);
-        
+        $formCode  = $this->_getFormCode();
         $fieldsets = array();
         $fields = $this->_getFormFields();
         
@@ -104,7 +103,6 @@ abstract class BL_CustomGrid_Block_Config_Form_Abstract extends Mage_Adminhtml_B
     
     protected function _getFieldDefaultValue(Varien_Object $parameter)
     {
-        $value = null;
         $fieldName = $parameter->getKey();
         
         if (is_array($values = $this->getConfigValues()) && isset($values[$fieldName])) {
@@ -128,10 +126,7 @@ abstract class BL_CustomGrid_Block_Config_Form_Abstract extends Mage_Adminhtml_B
         if ($sourceModel = $parameter->getSourceModel()) {
             try {
                 if (is_array($sourceModel)) {
-                    $values = call_user_func(array(
-                        Mage::getModel($sourceModel['model']),
-                        $sourceModel['method'],
-                    ));
+                    $values = call_user_func(array(Mage::getModel($sourceModel['model']), $sourceModel['method']));
                 } else {
                     $values = Mage::getModel($sourceModel)->toOptionArray();
                 }
@@ -168,26 +163,26 @@ abstract class BL_CustomGrid_Block_Config_Form_Abstract extends Mage_Adminhtml_B
     
     protected function _prepareFieldDependences(Varien_Object $parameter, Varien_Data_Form_Element_Abstract $field)
     {
-        if ($dependenceBlock = $this->getChild('form_after')) {
-            $fieldName = $parameter->getKey();
-            $dependenceBlock->addFieldMap($field->getId(), $fieldName);
-            
-            if (is_array($depends = $parameter->getDepends())) {
-                foreach ($depends as $fromFieldName => $fromValue) {
-                    if (is_array($fromValue)) {
-                        if (isset($fromValue['value'])) {
-                            $fromValue = (string) $fromValue['value'];
-                        } elseif (isset($fromValue['values'])) {
-                            $fromValue = array_values($fromValue['values']);
-                        } else {
-                            $fromValue = array_values($fromValue);
-                        }
+        $dependenceBlock = $this->getDependenceBlock();
+        $fieldName = $parameter->getKey();
+        $dependenceBlock->addFieldMap($field->getId(), $fieldName);
+        
+        if (is_array($depends = $parameter->getDepends())) {
+            foreach ($depends as $fromFieldName => $fromValue) {
+                if (is_array($fromValue)) {
+                    if (isset($fromValue['value'])) {
+                        $fromValue = (string) $fromValue['value'];
+                    } elseif (isset($fromValue['values'])) {
+                        $fromValue = array_values($fromValue['values']);
+                    } else {
+                        $fromValue = array_values($fromValue);
                     }
-                    
-                    $dependenceBlock->addFieldDependence($fieldName, $fromFieldName, $fromValue);
                 }
+                
+                $dependenceBlock->addFieldDependence($fieldName, $fromFieldName, $fromValue);
             }
         }
+        
         return $this;
     }
     

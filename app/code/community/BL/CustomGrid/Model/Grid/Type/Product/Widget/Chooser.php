@@ -17,7 +17,7 @@ class BL_CustomGrid_Model_Grid_Type_Product_Widget_Chooser extends BL_CustomGrid
 {
     protected function _getSupportedBlockTypes()
     {
-        return 'adminhtml/catalog_product_widget_chooser';
+        return array('adminhtml/catalog_product_widget_chooser');
     }
     
     public function matchGridBlock($blockType, $blockId, BL_CustomGrid_Model_Grid $gridModel) 

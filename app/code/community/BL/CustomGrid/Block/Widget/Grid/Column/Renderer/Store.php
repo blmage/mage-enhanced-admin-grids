@@ -97,7 +97,7 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Store extends
         $skipStore      = (bool) $this->getColumn()->getSkipStore();
         $skipStoreView  = (bool) $this->getColumn()->getSkipStoreView();
         $skipAllViews   = (bool) $this->getColumn()->getSkipAllViews();
-        $flatValueKey   = ($flatValueKey = $this->getColumn()->getFlatValueKey() ? $flatValueKey : 'store_name');
+        $flatValueKey   = (($flatValueKey = $this->getColumn()->getFlatValueKey()) ? $flatValueKey : 'store_name');
         
         if (is_null($originalStores) && ($flatValue = $row->getData($flatValueKey))) {
             return $this->_renderFlatValue($flatValue, $space, $break, $skipWebsite, $skipStore, $skipStoreView);

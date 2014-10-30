@@ -54,9 +54,4 @@ class BL_CustomGrid_Block_Custom_Column_Config_Form extends BL_CustomGrid_Block_
         }
         return $this->_getData('translation_module');
     }
-    
-    public function getCustomColumn()
-    {
-        return Mage::registry('blcg_custom_column');
-    }
 }

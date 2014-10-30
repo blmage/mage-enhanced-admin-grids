@@ -479,8 +479,8 @@
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>
-                            <model>customgrid/grid</model>
-                            <method>getColumnOrigins</method>
+                            <model>customgrid/grid_column</model>
+                            <method>getOrigins</method>
                         </source_model>
                         <sort_order>20</sort_order>
                         <depends>
@@ -557,8 +557,8 @@
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>
-                            <model>customgrid/grid</model>
-                            <method>getColumnOrigins</method>
+                            <model>customgrid/grid_column</model>
+                            <method>getOrigins</method>
                         </source_model>
                         <sort_order>60</sort_order>
                         <depends>
@@ -1367,8 +1367,8 @@
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>
-                            <model>customgrid/grid</model>
-                            <method>getColumnOrigins</method>
+                            <model>customgrid/grid_column</model>
+                            <method>getOrigins</method>
                         </source_model>
                         <sort_order>20</sort_order>
                         <depends>
@@ -1445,8 +1445,8 @@
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>
-                            <model>customgrid/grid</model>
-                            <method>getColumnOrigins</method>
+                            <model>customgrid/grid_column</model>
+                            <method>getOrigins</method>
                         </source_model>
                         <sort_order>60</sort_order>
                         <depends>

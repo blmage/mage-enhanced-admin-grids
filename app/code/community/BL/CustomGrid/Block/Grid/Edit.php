@@ -30,42 +30,50 @@ class BL_CustomGrid_Block_Grid_Edit extends Mage_Adminhtml_Block_Widget
             'back_button',
             $this->getLayout()
                 ->createBlock('adminhtml/widget_button')
-                ->setData(array(
-                    'label'   => $this->__('Back'),
-                    'onclick' => 'setLocation(\'' . $this->getUrl('*/*/') . '\')',
-                    'class'   => 'back',
-                ))
+                ->setData(
+                    array(
+                        'label'   => $this->__('Back'),
+                        'onclick' => 'setLocation(\'' . $this->getUrl('*/*/') . '\')',
+                        'class'   => 'back',
+                    )
+                )
         );
         
         $this->setChild(
             'reset_button',
             $this->getLayout()
                 ->createBlock('adminhtml/widget_button')
-                ->setData(array(
-                    'label'   => $this->__('Reset'),
-                    'onclick' => 'setLocation(\'' . $this->getUrl('*/*/*', array('_current' => true)) . '\')',
-                ))
+                ->setData(
+                    array(
+                        'label'   => $this->__('Reset'),
+                        'onclick' => 'setLocation(\'' . $this->getUrl('*/*/*', array('_current' => true)) . '\')',
+                    )
+                )
         );
         
         $this->setChild(
             'save_button',
             $this->getLayout()
                 ->createBlock('adminhtml/widget_button')
-                ->setData(array(
-                    'label'   => $this->__('Save'),
-                    'onclick' => 'blcgGridForm.submit()',
-                    'class'   => 'save',
-                ))
+                ->setData(
+                    array(
+                        'label'   => $this->__('Save'),
+                        'onclick' => 'blcgGridForm.submit()',
+                        'class'   => 'save',
+                    )
+                )
         );
         
         $this->setChild('save_and_edit_button',
             $this->getLayout()
                 ->createBlock('adminhtml/widget_button')
-                ->setData(array(
-                    'label'   => $this->__('Save and Continue Edit'),
-                    'onclick' => 'saveAndContinueEdit(\'' . $this->getSaveAndContinueUrl() . '\')',
-                    'class'   => 'save',
-                ))
+                ->setData(
+                    array(
+                        'label'   => $this->__('Save and Continue Edit'),
+                        'onclick' => 'saveAndContinueEdit(\'' . $this->getSaveAndContinueUrl() . '\')',
+                        'class'   => 'save',
+                    )
+                )
         );
         
         if ($gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_DELETE)) {
@@ -73,12 +81,14 @@ class BL_CustomGrid_Block_Grid_Edit extends Mage_Adminhtml_Block_Widget
                 'delete_button',
                 $this->getLayout()
                     ->createBlock('adminhtml/widget_button')
-                    ->setData(array(
-                        'label'   => $this->__('Delete'),
-                        'onclick' => 'confirmSetLocation(\'' . $this->__('Are you sure?') . '\', '
-                            . '\'' . $this->getDeleteUrl() . '\')',
-                        'class'   => 'delete',
-                    ))
+                    ->setData(
+                        array(
+                            'label'   => $this->__('Delete'),
+                            'onclick' => 'confirmSetLocation(\'' . $this->__('Are you sure?') . '\', '
+                                . '\'' . $this->getDeleteUrl() . '\')',
+                            'class'   => 'delete',
+                        )
+                    )
             );
         }
         

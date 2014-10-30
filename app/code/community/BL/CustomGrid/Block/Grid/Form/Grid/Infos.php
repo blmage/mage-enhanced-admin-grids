@@ -82,7 +82,7 @@ class BL_CustomGrid_Block_Grid_Form_Grid_Infos extends BL_CustomGrid_Block_Grid_
             'note',
             array(
                 'label' => $this->__('Grid Type'),
-                'text'  => $gridModel->getTypeModelName($this->__('none')),
+                'text'  => $gridModel->getBaseTypeModelName($this->__('none')),
             )
         );
         

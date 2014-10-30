@@ -17,7 +17,7 @@ class BL_CustomGrid_Model_Grid_Type_Customer_Group extends BL_CustomGrid_Model_G
 {
     protected function _getSupportedBlockTypes()
     {
-        return 'adminhtml/customer_group_grid';
+        return array('adminhtml/customer_group_grid');
     }
     
     protected function _getBaseEditableFields($blockType)

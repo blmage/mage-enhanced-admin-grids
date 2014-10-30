@@ -1,0 +1,121 @@
+<?php
+/**
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
+ *
+ * @category   BL
+ * @package    BL_CustomGrid
+ * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+class BL_CustomGrid_Model_Grid_Exporter extends BL_CustomGrid_Model_Grid_Worker
+{
+    /**
+     * Return whether the current grid model's results can be exported
+     *
+     * @return bool
+     */
+    public function canExport()
+    {
+        return ($typeModel = $this->getGridModel()->getTypeModel())
+            && $typeModel->canExport($this->getGridModel()->getBlockType());
+    }
+    
+    /**
+     * Return the available export types for the current grid model
+     *
+     * @return array
+     */
+    public function getExportTypes()
+    {
+        return ($typeModel = $this->getGridModel()->getTypeModel())
+            ? $typeModel->getExportTypes($this->getGridModel()->getBlockType())
+            : array();
+    }
+    
+    /**
+     * If allowed and possible, export current grid's results in given format
+     *
+     * @param string $format Export format
+     * @param array|null $config Export configuration
+     * @return string
+     */
+    protected function _exportTo($format, $config = null)
+    {
+        $gridModel = $this->getGridModel();
+        
+        if (!$gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_EXPORT_RESULTS)) {
+            $gridModel->throwPermissionException(
+                Mage::helper('customgrid')->__('You are not allowed to export this grid results')
+            );
+        }
+        if (!$this->canExport($gridModel)) {
+            Mage::throwException(Mage::helper('customgrid')->__('This grid results can not be exported'));
+        }
+        
+        $typeModel = $gridModel->getTypeModel();
+        $typeModel->beforeGridExport($format, null);
+        $gridBlock = Mage::getSingleton('core/layout')->createBlock($gridModel->getBlockType());
+        $exportOutput = '';
+        
+        if (is_array($config)) {
+            $gridBlock->blcg_setExportConfig($config);
+        }
+        
+        $typeModel->beforeGridExport($format, $gridBlock);
+        
+        switch ($format) {
+            case 'csv':
+                $exportOutput = $gridBlock->getCsvFile();
+                break;
+            case 'xml':
+                $exportOutput = $gridBlock->getExcelFile();
+                break;
+            default:
+                $exportOutput = null;
+                break;
+        }
+        
+        $typeModel->afterGridExport($format, $gridBlock);
+        return $exportOutput;
+    }
+    
+    /**
+     * Export the current grid model's results in CSV format
+     *
+     * @param array|null $config Export configuration
+     * @return string
+     */
+    public function exportToCsv($config = null)
+    {
+        return $this->_exportTo('csv', $config);
+    }
+    
+    /**
+     * Export the current grid model's results in XML Excel format
+     *
+     * @param array|null $config Export configuration
+     * @return string
+     */
+    public function exportToExcel($config = null)
+    {
+        return $this->_exportTo('xml', $config);
+    }
+    
+    /**
+     * Return whether the given request corresponds to an export request for the current grid model
+     *
+     * @param Mage_Core_Controller_Request_Http $request Request object
+     * @return bool
+     */
+    public function isExportRequest(Mage_Core_Controller_Request_Http $request)
+    {
+        return ($typeModel = $this->getGridModel()->getTypeModel())
+            && $typeModel->isExportRequest($this->getGridModel()->getBlockType(), $request);
+    }
+}

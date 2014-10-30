@@ -34,7 +34,7 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Text extends
             } elseif ($cmsProcessorType == self::CMS_TEMPLATE_PROCESSOR_PAGE) {
                 $cmsProcessor = $this->helper('cms')->getPageTemplateProcessor();
             }
-            if (!is_null($cmsProcessor) && method_exists(array($cmsProcessor, 'filter'))) {
+            if (!is_null($cmsProcessor) && method_exists($cmsProcessor, 'filter')) {
                 $text = $cmsProcessor->filter($text);
             }
         }

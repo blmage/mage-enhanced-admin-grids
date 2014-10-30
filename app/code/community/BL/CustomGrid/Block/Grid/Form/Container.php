@@ -106,14 +106,6 @@ class BL_CustomGrid_Block_Grid_Form_Container extends BL_CustomGrid_Block_Widget
     
     public function getGridJsObjectName()
     {
-        if (!$this->hasData('grid_js_object_name')) {
-            if ($jsObjectName = $this->getRequest()->getParam('grid_js_object_name', false)) {
-                $jsObjectName = $this->helper('customgrid/string')->sanitizeJsObjectName($jsObjectName);
-            } else {
-                $jsObjectName = false;
-            }
-            $this->setData('grid_js_object_name', $jsObjectName);
-        }
-        return $this->_getData('grid_js_object_name');
+        return $this->_getJsObjectName('grid_js_object_name');
     }
 }

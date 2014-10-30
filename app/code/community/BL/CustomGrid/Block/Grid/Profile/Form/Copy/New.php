@@ -20,18 +20,6 @@ class BL_CustomGrid_Block_Grid_Profile_Form_Copy_New extends BL_CustomGrid_Block
         return 'copy_new';
     }
     
-    protected function _prepareDependenceBlock($restrictedFieldId, $assignedToFieldId)
-    {
-        return $this->setChild(
-            'form_after',
-            $this->getLayout()
-                ->createBlock('customgrid/widget_form_element_dependence')
-                ->addFieldMap($restrictedFieldId, 'is_restricted')
-                ->addFieldMap($assignedToFieldId, 'assigned_to')
-                ->addFieldDependence('assigned_to', 'is_restricted', '1')
-        );
-    }
-    
     protected function _addFieldsToForm(Varien_Data_Form $form)
     {
         $gridModel = $this->getGridModel();
@@ -80,7 +68,10 @@ class BL_CustomGrid_Block_Grid_Profile_Form_Copy_New extends BL_CustomGrid_Block
                 )
             );
             
-            $this->_prepareDependenceBlock($restrictedField->getHtmlId(), $assignedToField->getHtmlId());
+            $this->getDependenceBlock()
+                ->addFieldMap($restrictedField->getHtmlId(), 'is_restricted')
+                ->addFieldMap($assignedToField->getHtmlId(), 'assigned_to')
+                ->addFieldDependence('assigned_to', 'is_restricted', '1');
         }
         
         return $this;

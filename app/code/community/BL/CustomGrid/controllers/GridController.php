@@ -88,8 +88,9 @@ class BL_CustomGrid_GridController extends BL_CustomGrid_Controller_Grid_Action
         try {
             $gridModel = $this->_initGridModel();
             $this->_initGridProfile();
+            $blockFilterVarName = $gridModel->getBlockVarName(BL_CustomGrid_Model_Grid::GRID_PARAM_FILTER);
             
-            if ($sessionKey = $gridModel->getBlockParamSessionKey($gridModel->getBlockVarName('filter'))) {
+            if ($sessionKey = $gridModel->getBlockParamSessionKey($blockFilterVarName)) {
                 $this->_getSession()->unsetData($sessionKey);
             }
             
@@ -123,8 +124,10 @@ class BL_CustomGrid_GridController extends BL_CustomGrid_Controller_Grid_Action
             $gridModel = $this->_initGridModel();
             $this->_initGridProfile();
             
-            $gridModel->updateColumns($columns);
-            $gridModel->save();
+            Mage::getSingleton('customgrid/grid_column')
+                ->updateGridModelColumns($gridModel, $columns)
+                ->save();
+            
             $isSuccess = true;
             
         } catch (Mage_Core_Exception $e) {
@@ -263,44 +266,42 @@ class BL_CustomGrid_GridController extends BL_CustomGrid_Controller_Grid_Action
             ->renderLayout();
     }
     
-    public function exportCsvAction()
+    protected function _exportAction($format, $fileName)
     {
         try {
             $gridModel = $this->_initGridModel();
             $this->_initGridProfile();
-            $data     = $this->getRequest()->getParams();
-            $config   = (isset($data['export']) && is_array($data['export']) ? $data['export'] : null);
-            $fileName = 'export.csv';
-            $this->_prepareDownloadResponse($fileName, $gridModel->exportCsvFile($config));
             
+            if (!is_array($config = $this->getRequest()->getParam('export'))) {
+                $config = null;
+            }
+            if ($format == 'csv') {
+                $exportOutput = $gridModel->getExporter()->exportToCsv($config);
+            } elseif ($format == 'xml') {
+                $exportOutput = $gridModel->getExporter()->exportToExcel($config);
+            } else {
+                $exportOutput = '';
+            }
+            
+            $this->_prepareDownloadResponse($fileName, $exportOutput);
         } catch (Mage_Core_Exception $e) {
             $this->_getSession()->addError($e->getMessage());
         } catch (Exception $e) {
             Mage::logException($e);
-            $this->_getSession()->addError('An error occured while exporting grid results');
+            $this->_getSession()->addError($this->__('An error occured while exporting grid results'));
             
         }
         $this->_redirectReferer();
     }
     
+    public function exportCsvAction()
+    {
+        $this->_exportAction('csv', 'export.csv');
+    }
+    
     public function exportExcelAction()
     {
-        try {
-            $gridModel = $this->_initGridModel();
-            $this->_initGridProfile();
-            $data     = $this->getRequest()->getParams();
-            $config   = (isset($data['export']) && is_array($data['export']) ? $data['export'] : null);
-            $fileName = 'export.xml';
-            $this->_prepareDownloadResponse($fileName, $gridModel->exportExcelFile($config));
-            
-        } catch (Mage_Core_Exception $e) {
-            $this->_getSession()->addError($e->getMessage());
-        } catch (Exception $e) {
-            Mage::logException($e);
-            $this->_getSession()->addError('An error occured while exporting grid results');
-            
-        }
-        $this->_redirectReferer();
+        $this->_exportAction('xml', 'export.xml');
     }
     
     public function gridInfosAction()
@@ -380,6 +381,91 @@ class BL_CustomGrid_GridController extends BL_CustomGrid_Controller_Grid_Action
             ->renderLayout();
     }
     
+    protected function _applyGridInfosValues(BL_CustomGrid_Model_Grid $gridModel, array $values)
+    {
+        if (isset($values['disabled'])) {
+            $gridModel->setDisabled((bool) $values['disabled']);
+        }
+        if (isset($values['forced_type_code'])) {
+            $gridModel->updateForcedType($values['forced_type_code']);
+        }
+        return $this;
+    }
+    
+    protected function _saveGridEditValues(
+        BL_CustomGrid_Model_Grid $gridModel,
+        BL_CustomGrid_Model_Grid_Profile $gridProfile,
+        array $data
+    ) {
+        $updateCallbacks = array(
+            'columns' => array(
+                'type' => 'grid',
+                'callback' => array(Mage::getSingleton('customgrid/grid_column'), 'updateGridModelColumns'),
+                'params_before' => array($gridModel),
+            ),
+            'grid' => array(
+                'type' => 'grid',
+                'callback' => array($this, '_applyGridInfosValues'),
+                'params_before' => array($gridModel),
+            ),
+            'profiles_defaults' => array(
+                'type' => 'grid',
+                'callback' => array($gridModel, 'updateProfilesDefaults'),
+            ),
+            'customization_params' => array(
+                'type' => 'grid',
+                'callback' => array($gridModel, 'updateCustomizationParameters'),
+            ),
+            'default_params_behaviours' => array(
+                'type' => 'grid',
+                'callback' => array($gridModel, 'updateDefaultParametersBehaviours'),
+            ),
+            'roles_permissions' => array(
+                'type' => 'grid',
+                'callback' => array($gridModel, 'updateRolesPermissions'),
+            ),
+            'profile_edit' => array(
+                'type' => 'profile',
+                'callback' => array($gridProfile, 'update'),
+            ),
+            'profile_assign' => array(
+                'type' => 'profile',
+                'callback' => array($gridProfile, 'assign'),
+            ),
+        );
+        
+        $transaction = Mage::getModel('customgrid/resource_transaction');
+        $transaction->addObject($gridModel);
+        
+        foreach ($updateCallbacks as $key => $updateCallback) {
+            if (isset($data[$key]) && is_array($data[$key])) {
+                if (isset($updateCallback['params_before'])) {
+                    $params = $updateCallback['params_before'];
+                } else {
+                    $params = array();
+                }
+                
+                $params[] = $data[$key];
+                
+                if (isset($updateCallback['params_after'])) {
+                    $params = array_merge($params, $updateCallback['params_after']);
+                }
+                
+                if ($updateCallback['type'] == 'profile') {
+                    $transaction->addParameterizedCommitCallback($updateCallback['callback'], array($data[$key]));
+                } else {
+                    call_user_func_array($updateCallback['callback'], $params);
+                }
+            }
+        }
+        
+        $gridProfile->setIsBulkSaveMode(true);
+        $transaction->save();
+        $gridProfile->setIsBulkSaveMode(false);
+        
+        return $this;
+    }
+    
     public function saveAction()
     {
         $isSuccess = false;
@@ -391,43 +477,11 @@ class BL_CustomGrid_GridController extends BL_CustomGrid_Controller_Grid_Action
             }
             
             $gridModel = $this->_initGridModel();
-            $this->_initGridProfile();
+            $gridProfile = $this->_initGridProfile();
             $data = $this->getRequest()->getPost();
             
-            if (isset($data['use_config']) && is_array($data['use_config'])) {
-                foreach ($data['use_config'] as $key => $value) {
-                    if (is_array($value)) {
-                        $data['use_config'][$key] = array_fill_keys(array_keys($value), '');
-                    } else {
-                        unset($data['use_config'][$key]);
-                    }
-                }
-                $data = array_merge_recursive($data['use_config'], $data);
-                unset($data['use_config']);
-            }
-            if (isset($data['columns']) && is_array($data['columns'])) {
-                $gridModel->updateColumns($data['columns']);
-            }
-            if (isset($data['disabled'])) {
-                $gridModel->setDisabled((bool) $data['disabled']);
-            }
-            if (isset($data['forced_type_code'])) {
-                $gridModel->updateForcedType($data['forced_type_code']);
-            }
-            if (isset($data['profiles_defaults']) && is_array($data['profiles_defaults'])) {
-                $gridModel->updateProfilesDefaults($data['profiles_defaults']);
-            }
-            if (isset($data['customization_params']) && is_array($data['customization_params'])) {
-                $gridModel->updateCustomizationParameters($data['customization_params']);
-            }
-            if (isset($data['default_params_behaviours']) && is_array($data['default_params_behaviours'])) {
-                $gridModel->updateDefaultParametersBehaviours($data['default_params_behaviours']);
-            }
-            if (isset($data['roles_permissions']) && is_array($data['roles_permissions'])) {
-                $gridModel->updateRolesPermissions($data['roles_permissions']);
-            }
-            
-            $gridModel->save();
+            $this->_applyUseConfigValuesToRequestData($data);
+            $this->_saveGridEditValues($gridModel, $gridProfile, $data);
             $isSuccess = true;
             
         } catch (Mage_Core_Exception $e) {

@@ -20,18 +20,6 @@ class BL_CustomGrid_Block_Grid_Profile_Form_Assign extends BL_CustomGrid_Block_G
         return 'assign';
     }
     
-    protected function _prepareDependenceBlock($restrictedFieldId, $assignedToFieldId)
-    {
-        return $this->setChild(
-            'form_after',
-            $this->getLayout()
-                ->createBlock('customgrid/widget_form_element_dependence')
-                ->addFieldMap($restrictedFieldId, 'is_restricted')
-                ->addFieldMap($assignedToFieldId, 'assigned_to')
-                ->addFieldDependence('assigned_to', 'is_restricted', '1')
-        );
-    }
-    
     protected function _addFieldsToForm(Varien_Data_Form $form)
     {
         $gridProfile = $this->getGridProfile();
@@ -52,6 +40,7 @@ class BL_CustomGrid_Block_Grid_Profile_Form_Assign extends BL_CustomGrid_Block_G
                 'label'    => $this->__('Restricted'),
                 'required' => true,
                 'values'   => Mage::getSingleton('customgrid/system_config_source_yesno')->toOptionArray(),
+                'value'    => ($gridProfile->isRestricted() ? '1' : '0')
             )
         );
         
@@ -63,15 +52,14 @@ class BL_CustomGrid_Block_Grid_Profile_Form_Assign extends BL_CustomGrid_Block_G
                 'label'    => $this->__('Assigned To'),
                 'required' => true,
                 'values'   => Mage::getSingleton('customgrid/system_config_source_admin_role')->toOptionArray(false),
+                'value'    => $gridProfile->getAssignedToRoleIds(),
             )
         );
         
-        $this->_prepareDependenceBlock($restrictedField->getHtmlId(), $assignedToField->getHtmlId());
-        
-        $form->setValues(array(
-            'is_restricted' => ($gridProfile->isRestricted() ? '1' : '0'),
-            'assigned_to'   => $gridProfile->getAssignedToRolesIds(),
-        ));
+        $this->getDependenceBlock()
+            ->addFieldMap($restrictedField->getHtmlId(), 'is_restricted')
+            ->addFieldMap($assignedToField->getHtmlId(), 'assigned_to')
+            ->addFieldDependence('assigned_to', 'is_restricted', '1');
         
         return $this;
     }

@@ -90,9 +90,10 @@ class BL_CustomGrid_Grid_ProfileController extends BL_CustomGrid_Controller_Grid
         if ($this->getRequest()->isPost()) {
             try {
                 $data = $this->getRequest()->getPost();
-                $gridModel   = $this->_initGridModel();
+                $gridModel = $this->_initGridModel();
                 $gridProfile = $this->_initGridProfile();
-                $gridModel->chooseProfileAsDefault($gridProfile->getId(), $data);
+                
+                $gridProfile->chooseAsDefault($data);
                 
                 $this->_getBlcgSession()->addSuccess($this->__('The profile has been successfully chosen as default'));
                 $this->_setActionSuccessJsonResponse();
@@ -121,7 +122,8 @@ class BL_CustomGrid_Grid_ProfileController extends BL_CustomGrid_Controller_Grid
                 $data = $this->getRequest()->getPost();
                 $gridModel = $this->_initGridModel();
                 $copiedProfile = $this->_initGridProfile();
-                $newProfileId  = $gridModel->copyProfileToNew($copiedProfile->getId(), $data);
+                
+                $newProfileId  = $copiedProfile->copyToNew($data);
                 $actions = array();
                 
                 if ($gridModel->isAvailableProfile($newProfileId)) {
@@ -171,10 +173,16 @@ class BL_CustomGrid_Grid_ProfileController extends BL_CustomGrid_Controller_Grid
                     Mage::throwException($this->__('Invalid request'));
                 }
                 
-                $gridModel->copyProfileToExisting($copiedProfile->getId(), $toProfileId, $data);
+                $isCopyToSessionProfile = ($toProfileId === $gridModel->getSessionProfileId());
+                $copiedProfile->copyToExisting($toProfileId, $data);
+                $actions = array();
+                
+                if ($isCopyToSessionProfile) {
+                    $actions[] = array('type' => 'reload');
+                }
                 
                 $this->_getBlcgSession()->addSuccess($this->__('The profile has been successfully copied')); 
-                $this->_setActionSuccessJsonResponse();
+                $this->_setActionSuccessJsonResponse($actions);
                 
             } catch (Mage_Core_Exception $e) {
                 $this->_setActionErrorJsonResponse($e->getMessage());
@@ -200,13 +208,16 @@ class BL_CustomGrid_Grid_ProfileController extends BL_CustomGrid_Controller_Grid
                 $data = $this->getRequest()->getPost();
                 $gridModel   = $this->_initGridModel();
                 $gridProfile = $this->_initGridProfile();
-                $gridModel->updateProfile($gridProfile->getId(), $data);
                 
-                $actions = array(array(
-                    'type'        => 'rename',
-                    'profileId'   => $gridProfile->getId(),
-                    'profileName' => trim($data['name']),
-                ));
+                $gridProfile->update($data);
+                
+                $actions = array(
+                    array(
+                        'type'        => 'rename',
+                        'profileId'   => $gridProfile->getId(),
+                        'profileName' => trim($data['name']),
+                    )
+                );
                 
                 $this->_getBlcgSession()->addSuccess($this->__('The profile has been successfully edited'));
                 $this->_setActionSuccessJsonResponse($actions);
@@ -236,7 +247,8 @@ class BL_CustomGrid_Grid_ProfileController extends BL_CustomGrid_Controller_Grid
                 $gridModel   = $this->_initGridModel();
                 $gridProfile = $this->_initGridProfile();
                 $isSessionProfile = ($gridProfile->getId() === $gridModel->getSessionProfileId());
-                $gridModel->assignProfile($gridProfile->getId(), $data);
+                
+                $gridProfile->assign($data);
                 $actions = array();
                 
                 if (!$gridModel->isAvailableProfile($gridProfile->getId())) {
@@ -271,12 +283,15 @@ class BL_CustomGrid_Grid_ProfileController extends BL_CustomGrid_Controller_Grid
                 $gridModel   = $this->_initGridModel();
                 $gridProfile = $this->_initGridProfile();
                 $isSessionProfile = ($gridProfile->getId() === $gridModel->getSessionProfileId());
-                $gridModel->deleteProfile($gridProfile->getId());
                 
-                $actions = array(array(
-                    'type'      => 'delete',
-                    'profileId' => $gridProfile->getId(),
-                ));
+                $gridProfile->delete();
+                
+                $actions = array(
+                    array(
+                        'type'      => 'delete',
+                        'profileId' => $gridProfile->getId(),
+                    )
+                );
                 
                 if ($isSessionProfile) {
                     $actions[] = array('type' => 'reload');

@@ -36,7 +36,10 @@ class BL_CustomGrid_Model_Grid_Type_Product extends BL_CustomGrid_Model_Grid_Typ
         return array(
             'is_salable' => array(
                 'renderer' => '',
-                'config_values' => array('filter' => false, 'sortable' => false),
+                'config_values' => array(
+                    'filter' => false,
+                    'sortable' => false
+                ),
             ),
         );
     }
@@ -115,13 +118,15 @@ class BL_CustomGrid_Model_Grid_Type_Product extends BL_CustomGrid_Model_Grid_Typ
             $config->setInGrid(true);
         }
         
-        $config->addData(array(
-            'edit_block_type' => 'product',
-            'layout_handles'  => array(
-                'blcg_grid_editor_handle_editor',
-                'blcg_grid_editor_handle_product',
-            ),
-        ));
+        $config->addData(
+            array(
+                'edit_block_type' => 'product',
+                'layout_handles'  => array(
+                    'blcg_grid_editor_handle_editor',
+                    'blcg_grid_editor_handle_product',
+                ),
+            )
+        );
         
         return parent::_prepareEditableAttributeCommonConfig($blockType, $attributeCode, $attribute, $config);
     }
@@ -345,7 +350,7 @@ class BL_CustomGrid_Model_Grid_Type_Product extends BL_CustomGrid_Model_Grid_Typ
             if ($stockItem = $entity->getData('_blcg_gtp_stock_item')) {
                 $stockItem->save();
             }
-            return $this;
+            return true;
         }
         return parent::_saveEditedFieldValue($blockType, $config, $params, $entity, $value);
     }

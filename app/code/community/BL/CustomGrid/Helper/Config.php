@@ -46,8 +46,9 @@ class BL_CustomGrid_Helper_Config extends Mage_Core_Helper_Abstract
     const CONFIG_PATH_DEFAULT_PARAMETER_BEHAVIOUR_BASE_KEY = 'customgrid/default_params_behaviours/%s';
     
     // Profiles
-    const CONFIG_PATH_PROFILES_DEFAULT_RESTRICTED  = 'customgrid/profiles/default_restricted';
-    const CONFIG_PATH_PROFILES_DEFAULT_ASSIGNED_TO = 'customgrid/profiles/default_assigned_to';
+    const CONFIG_PATH_PROFILES_DEFAULT_RESTRICTED        = 'customgrid/profiles/default_restricted';
+    const CONFIG_PATH_PROFILES_DEFAULT_ASSIGNED_TO       = 'customgrid/profiles/default_assigned_to';
+    const CONFIG_PATH_PROFILES_REMEMBERED_SESSION_PARAMS = 'customgrid/profiles/remembered_session_params';
     
     // Custom columns
     const CONFIG_PATH_GROUP_IN_CC_DEFAULT_HEADER         = 'customgrid/custom_columns/group_in_default_header';
@@ -341,6 +342,20 @@ class BL_CustomGrid_Helper_Config extends Mage_Core_Helper_Abstract
     public function getProfilesDefaultRestricted()
     {
         return Mage::getStoreConfigFlag(self::CONFIG_PATH_PROFILES_DEFAULT_RESTRICTED); 
+    }
+    
+    /**
+     * Getter for the config value "Profiles - Default Values" > "Remembered Session Parameters"
+     *
+     * @return array
+     */
+    public function getProfilesRememberedSessionParams()
+    {
+        if (!isset($this->_configCache['profiles_remembered_session_params'])) {
+            $value = Mage::getStoreConfig(self::CONFIG_PATH_PROFILES_REMEMBERED_SESSION_PARAMS);
+            $this->_configCache['profiles_remembered_session_params'] = explode(',', $value);
+        }
+        return $this->_configCache['profiles_remembered_session_params'];
     }
     
     /**

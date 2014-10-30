@@ -3,7 +3,7 @@
 class BL_CustomGrid_Model_Custom_Column_Order_Customer_Group extends
     BL_CustomGrid_Model_Custom_Column_Order_Base
 {
-    protected function _getForcedBlockValues(
+    public function getForcedBlockValues(
         Mage_Adminhtml_Block_Widget_Grid $gridBlock,
         BL_CustomGrid_Model_Grid $gridModel,
         $columnBlockId,

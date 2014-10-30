@@ -19,15 +19,15 @@ class BL_CustomGrid_Model_System_Config_Source_Custom_Column_Unverified_Behaviou
     {
         return array(
             array(
-                'value' => BL_CustomGrid_Model_Custom_Column_Abstract::UNVERIFIED_BEHAVIOUR_NONE,
+                'value' => BL_CustomGrid_Model_Custom_Column_Applier::UNVERIFIED_BEHAVIOUR_NONE,
                 'label' => Mage::helper('customgrid')->__('None'),
             ),
             array(
-                'value' => BL_CustomGrid_Model_Custom_Column_Abstract::UNVERIFIED_BEHAVIOUR_WARNING,
+                'value' => BL_CustomGrid_Model_Custom_Column_Applier::UNVERIFIED_BEHAVIOUR_WARNING,
                 'label' => Mage::helper('customgrid')->__('Display a warning message'),
             ),
             array(
-                'value' => BL_CustomGrid_Model_Custom_Column_Abstract::UNVERIFIED_BEHAVIOUR_STOP,
+                'value' => BL_CustomGrid_Model_Custom_Column_Applier::UNVERIFIED_BEHAVIOUR_STOP,
                 'label' => Mage::helper('customgrid')->__('Do not apply the column and display an error message'),
             ),
         );

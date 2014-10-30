@@ -145,4 +145,26 @@ class BL_CustomGrid_Controller_Grid_Action extends Mage_Adminhtml_Controller_Act
         Mage::register('blcg_grid_profile', $profile);
         return $profile;
     }
+    
+    /**
+     * Parse and apply the "Use config" checkboxes values from/to the given request data
+     * 
+     * @param array $data Request data
+     * @return this
+     */
+    protected function _applyUseConfigValuesToRequestData(array &$data)
+    {
+        if (isset($data['use_config']) && is_array($data['use_config'])) {
+            foreach ($data['use_config'] as $key => $value) {
+                if (is_array($value)) {
+                    $data['use_config'][$key] = array_fill_keys(array_keys($value), '');
+                } else {
+                    unset($data['use_config'][$key]);
+                }
+            }
+            $data = array_merge_recursive($data['use_config'], $data);
+            unset($data['use_config']);
+        }
+        return $this;
+    }
 }

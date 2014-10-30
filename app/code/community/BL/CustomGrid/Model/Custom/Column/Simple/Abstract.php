@@ -44,7 +44,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Simple_Abstract extends BL_Cust
         return $this;
     }
     
-    protected function _applyToGridCollection(
+    public function applyToGridCollection(
         Varien_Data_Collection_Db $collection,
         Mage_Adminhtml_Block_Widget_Grid $gridBlock,
         BL_CustomGrid_Model_Grid $gridModel,

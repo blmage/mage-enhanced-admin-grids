@@ -17,7 +17,7 @@ class BL_CustomGrid_Model_Grid_Type_Shipment extends BL_CustomGrid_Model_Grid_Ty
 {
     protected function _getSupportedBlockTypes()
     {
-        return 'adminhtml/sales_shipment_grid';
+        return array('adminhtml/sales_shipment_grid');
     }
     
     protected function _getItemsCustomColumnModel($customizable = false)

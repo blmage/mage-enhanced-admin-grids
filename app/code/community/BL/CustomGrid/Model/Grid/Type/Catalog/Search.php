@@ -17,7 +17,7 @@ class BL_CustomGrid_Model_Grid_Type_Catalog_Search extends BL_CustomGrid_Model_G
 {
     protected function _getSupportedBlockTypes()
     {
-        return 'adminhtml/catalog_search_grid';
+        return array('adminhtml/catalog_search_grid');
     }
     
     protected function _getBaseEditableFields($blockType)

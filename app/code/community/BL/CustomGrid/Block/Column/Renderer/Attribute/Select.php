@@ -63,9 +63,11 @@ class BL_CustomGrid_Block_Column_Renderer_Attribute_Select extends
     public function getEditableJsonConfig()
     {
         return $this->helper('core')
-            ->jsonEncode(array(
-                'editableContainerId' => $this->_getData('editable_container_id'),
-                'editableCheckboxId'  => $this->_getData('editable_checkbox_id'),
-            ));
+            ->jsonEncode(
+                array(
+                    'editableContainerId' => $this->_getData('editable_container_id'),
+                    'editableCheckboxId'  => $this->_getData('editable_checkbox_id'),
+                )
+            );
     }
 }

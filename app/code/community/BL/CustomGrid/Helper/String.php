@@ -117,7 +117,7 @@ class BL_CustomGrid_Helper_String extends Mage_Core_Helper_Abstract
         preg_match_all('/(<.+?>)?([^<>]*)/s', $string, $lines, PREG_SET_ORDER);
         $totalLength = $helper->strlen($etc);
         
-        if ($length-$totalLength <= 0) {
+        if (!is_array($lines) || ($length-$totalLength <= 0)) {
             return '';
         }
         

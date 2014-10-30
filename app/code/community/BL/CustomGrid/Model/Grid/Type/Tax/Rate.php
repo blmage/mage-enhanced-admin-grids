@@ -17,7 +17,7 @@ class BL_CustomGrid_Model_Grid_Type_Tax_Rate extends BL_CustomGrid_Model_Grid_Ty
 {
     protected function _getSupportedBlockTypes()
     {
-        return 'adminhtml/tax_rate_grid';
+        return array('adminhtml/tax_rate_grid');
     }
     
     public function getTaxRateRateNumber($blockType, BL_CustomGrid_Object $config, array $params, $entity)

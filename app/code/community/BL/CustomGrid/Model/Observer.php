@@ -292,15 +292,17 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
                 // Register rewrite in config (this will also replace previous rewrite if existing)
                 $rewriteXml = new Varien_Simplexml_Config();
                 
-                $rewriteXml->loadString('<config><global>'
-                        . '<blocks>'
-                            . '<' . $configGroup . '>'
-                                . '<rewrite>'
-                                    . '<' . $configClass . '>' . $blcgClass . '</' . $configClass . '>'
-                                . '</rewrite>'
-                            . '</' . $configGroup . '>'
-                        . '</blocks>'
-                    . '</global></config>');
+                $rewriteXml->loadString(
+                    '<config><global>'
+                    . '<blocks>'
+                    . '<' . $configGroup . '>'
+                    . '<rewrite>'
+                    . '<' . $configClass . '>' . $blcgClass . '</' . $configClass . '>'
+                    . '</rewrite>'
+                    . '</' . $configGroup . '>'
+                    . '</blocks>'
+                    . '</global></config>'
+                );
                 
                 $this->_getMageConfig()->extend($rewriteXml, true);
                 $this->addRewritedBlockType($blockType);
@@ -329,7 +331,7 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
             || !$gridModel->getId()
             || $gridModel->getDisabled()
             || $this->isExcludedGridModel($gridModel)
-            || !$gridModel->isExportRequest($request)
+            || !$gridModel->getExporter()->isExportRequest($request)
             || !$this->_rewriteGridBlock($gridModel->getBlockType())) {
             $gridModel = null;
         }
@@ -445,26 +447,28 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
         
         // Apply main blocks
         $gridBlock->setChild(
-                'blcg_grid_config',
-                $layout->createBlock('customgrid/widget_grid_config')
-                    ->setGridBlock($gridBlock)
-                    ->setGridModel($gridModel)
-                    ->setIsNewGridModel($isNewGridModel)
-            )
-            ->setChild(
-                'blcg_grid_columns_editor',
-                $layout->createBlock('customgrid/widget_grid_columns_editor')
-                    ->setGridBlock($gridBlock)
-                    ->setGridModel($gridModel)
-                    ->setIsNewGridModel($isNewGridModel)
-            )
-            ->setChild(
-                'blcg_grid_columns_filters',
-                $layout->createBlock('customgrid/widget_grid_columns_filters')
-                    ->setGridBlock($gridBlock)
-                    ->setGridModel($gridModel)
-                    ->setIsNewGridModel($isNewGridModel)
-            );
+            'blcg_grid_config',
+            $layout->createBlock('customgrid/widget_grid_config')
+                ->setGridBlock($gridBlock)
+                ->setGridModel($gridModel)
+                ->setIsNewGridModel($isNewGridModel)
+        );
+        
+        $gridBlock->setChild(
+            'blcg_grid_columns_editor',
+            $layout->createBlock('customgrid/widget_grid_columns_editor')
+                ->setGridBlock($gridBlock)
+                ->setGridModel($gridModel)
+                ->setIsNewGridModel($isNewGridModel)
+        );
+        
+        $gridBlock->setChild(
+            'blcg_grid_columns_filters',
+            $layout->createBlock('customgrid/widget_grid_columns_filters')
+                ->setGridBlock($gridBlock)
+                ->setGridModel($gridModel)
+                ->setIsNewGridModel($isNewGridModel)
+        );
         
         if (!$isNewGridModel) {
             // Rearrange filter buttons
@@ -576,10 +580,10 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
                 $request->setParam($gridBlock->getVarNameFilter(), null);
             }
             
-            $gridModel->applyBaseDefaultLimitToGridBlock($gridBlock);
+            $gridModel->getApplier()->applyBaseDefaultLimitToGridBlock($gridBlock);
             
             if ($gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_USE_DEFAULT_PARAMS)) {
-                $gridModel->applyDefaultsToGridBlock($gridBlock);
+                $gridModel->getApplier()->applyDefaultsToGridBlock($gridBlock);
             }
             
             /**
@@ -604,18 +608,18 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
         if ($gridModel = $this->getGridModel($blockType, $blockId)) {
             if ($collection = $gridBlock->getCollection()) {
                 $collection->setPageSize(1)->setCurPage(1)->load();
-                $applyFromCollection = $gridModel->checkColumnsAgainstGridBlock($gridBlock);
+                $applyFromCollection = $gridModel->getAbsorber()->checkGridModelAgainstGridBlock($gridBlock);
                 
                 if ($gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_USE_CUSTOMIZED_COLUMNS)) {
-                    $gridModel->applyColumnsToGridBlock($gridBlock, $applyFromCollection);
+                    $gridModel->getApplier()->applyGridModelColumnsToGridBlock($gridBlock, $applyFromCollection);
                 }
                 
                 $gridBlock->blcg_finishPrepareCollection();
             } else {
-                $gridModel->checkColumnsAgainstGridBlock($gridBlock);
+                $gridModel->getAbsorber()->checkGridModelAgainstGridBlock($gridBlock);
                 
                 if ($gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_USE_CUSTOMIZED_COLUMNS)) {
-                    $gridModel->applyColumnsToGridBlock($gridBlock, false);
+                    $gridModel->getApplier()->applyGridModelColumnsToGridBlock($gridBlock, false);
                 }
             }
         }

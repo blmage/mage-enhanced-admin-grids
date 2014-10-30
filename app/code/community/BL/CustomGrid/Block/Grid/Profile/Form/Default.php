@@ -20,11 +20,10 @@ class BL_CustomGrid_Block_Grid_Profile_Form_Default extends BL_CustomGrid_Block_
         return 'default';
     }
     
-    protected function _addUsersFieldsToFieldset(
-        Varien_Data_Form_Element_Fieldset $fieldset,
-        BL_CustomGrid_Model_Grid $gridModel,
-        $profileId
-    ) {
+    protected function _addUsersFieldsToFieldset(Varien_Data_Form_Element_Fieldset $fieldset)
+    {
+        $gridModel   = $this->getGridModel();
+        $profileId   = $this->getGridProfile()->getProfileId();
         $sessionUser = $gridModel->getSessionUser();
         $permissions = array(
             'own_user' => BL_CustomGrid_Model_Grid::ACTION_CHOOSE_OWN_USER_DEFAULT_PROFILE,
@@ -32,7 +31,7 @@ class BL_CustomGrid_Block_Grid_Profile_Form_Default extends BL_CustomGrid_Block_
         );
         
         if ($gridModel->checkUserPermissions($permissions['other_users'])) {
-            $usersValues   = Mage::getSingleton('customgrid/system_config_source_admin_user')->toOptionArray();
+            $usersValues = Mage::getSingleton('customgrid/system_config_source_admin_user')->toOptionArray();
             $defaultValues = array();
              
             foreach ($usersValues as $key => $userValue) {
@@ -61,7 +60,7 @@ class BL_CustomGrid_Block_Grid_Profile_Form_Default extends BL_CustomGrid_Block_
                 'users',
                 'multiselect',
                 array(
-                    'name'   => 'users[]',
+                    'name'   => 'users',
                     'label'  => $this->__('Users'),
                     'values' => $usersValues,
                     'value'  => (empty($defaultValues) ? array('') : $defaultValues),
@@ -87,11 +86,10 @@ class BL_CustomGrid_Block_Grid_Profile_Form_Default extends BL_CustomGrid_Block_
         return $this;
     }
     
-    protected function _addRolesFieldsToFieldset(
-        Varien_Data_Form_Element_Fieldset $fieldset,
-        BL_CustomGrid_Model_Grid $gridModel,
-        $profileId
-    ) {
+    protected function _addRolesFieldsToFieldset(Varien_Data_Form_Element_Fieldset $fieldset)
+    {
+        $gridModel   = $this->getGridModel();
+        $profileId   = $this->getGridProfile()->getProfileId();
         $sessionRole = $gridModel->getSessionRole();
         $permissions = array(
             'own_role'   => BL_CustomGrid_Model_Grid::ACTION_CHOOSE_OWN_ROLE_DEFAULT_PROFILE,
@@ -128,7 +126,7 @@ class BL_CustomGrid_Block_Grid_Profile_Form_Default extends BL_CustomGrid_Block_
                 'roles',
                 'multiselect',
                 array(
-                    'name'   => 'roles[]',
+                    'name'   => 'roles',
                     'label'  => $this->__('Roles'),
                     'values' => $rolesValues,
                     'value'  => (empty($defaultValues) ? array('') : $defaultValues),
@@ -154,11 +152,11 @@ class BL_CustomGrid_Block_Grid_Profile_Form_Default extends BL_CustomGrid_Block_
         return $this;
     }
     
-    protected function _addGlobalFieldsToFieldset(
-        Varien_Data_Form_Element_Fieldset $fieldset,
-        BL_CustomGrid_Model_Grid $gridModel,
-        $profileId
-    ) {
+    protected function _addGlobalFieldsToFieldset(Varien_Data_Form_Element_Fieldset $fieldset)
+    {
+        $gridModel   = $this->getGridModel();
+        $profileId   = $this->getGridProfile()->getProfileId();
+        
         if ($gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_CHOOSE_GLOBAL_DEFAULT_PROFILE)) {
             if (($profileId === $gridModel->getBaseProfileId()) && is_null($gridModel->getGlobalDefaultProfileId())) {
                 $fieldset->addField(
@@ -184,14 +182,12 @@ class BL_CustomGrid_Block_Grid_Profile_Form_Default extends BL_CustomGrid_Block_
                 );
             }
         }
+        
         return $this;
     }
     
     protected function _addFieldsToForm(Varien_Data_Form $form)
     {
-        $gridModel = $this->getGridModel();
-        $profileId = $gridModel->getProfileId();
-        
         $fieldset = $form->addFieldset(
             'values',
             array(
@@ -200,6 +196,9 @@ class BL_CustomGrid_Block_Grid_Profile_Form_Default extends BL_CustomGrid_Block_
             )
         );
         
+        $noteSummary = 'Priorities for the current profile choice (the first value that is set and available will be '
+            . 'used) :';
+        
         $fieldset->addField(
             'priorities_note',
             'note',
@@ -207,8 +206,7 @@ class BL_CustomGrid_Block_Grid_Profile_Form_Default extends BL_CustomGrid_Block_
                 // Use "after_element_html" rather than "note" for better semantic correctness
                 // (the "note" value is wrapped in a <span>)
                 'after_element_html' => '<div class="blcg-form-note-text">'
-                        . $this->__('Priorities for the current profile choice '
-                        . '(the first value that is set and available will be used) :')
+                        . $this->__($noteSummary)
                         . '<ul>'
                             . '<li>' . $this->__('Session current profile')  . '</li>'
                             . '<li>' . $this->__('User default profile')     . '</li>'
@@ -220,9 +218,9 @@ class BL_CustomGrid_Block_Grid_Profile_Form_Default extends BL_CustomGrid_Block_
             )
         );
         
-        $this->_addUsersFieldsToFieldset($fieldset, $gridModel, $profileId)
-            ->_addRolesFieldsToFieldset($fieldset, $gridModel, $profileId)
-            ->_addGlobalFieldsToFieldset($fieldset, $gridModel, $profileId);
+        $this->_addUsersFieldsToFieldset($fieldset)
+            ->_addRolesFieldsToFieldset($fieldset)
+            ->_addGlobalFieldsToFieldset($fieldset);
         
         return $this;
     }

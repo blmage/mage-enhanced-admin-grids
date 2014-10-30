@@ -27,7 +27,7 @@ class BL_CustomGrid_Block_Grid_Profile_Form_Edit extends BL_CustomGrid_Block_Gri
         $fieldset = $form->addFieldset(
             'values',
             array(
-                'legend' => $this->__('Profile Values'),
+                'legend' => $this->__('Values'),
                 'class'  => 'fielset-wide',
             )
         );
@@ -41,6 +41,28 @@ class BL_CustomGrid_Block_Grid_Profile_Form_Edit extends BL_CustomGrid_Block_Gri
                 'required' => true,
                 'value'    => $gridProfile->getName(),
             )
+        );
+        
+        $sessionParamsNote = 'Session parameters that will be restored upon returning to this profile, after it had '
+            . 'been previously used during the same session.<br /><i>Only applies to the grids having their parameters '
+            . 'saved in session</i>';
+        
+        $sessionParamsField = $fieldset->addField(
+            'remembered_session_params',
+            'multiselect',
+            array(
+                'name'   => 'remembered_session_params',
+                'label'  => $this->__('Remembered Session Parameters'),
+                'values' => Mage::getSingleton('customgrid/system_config_source_grid_param')->toOptionArray(),
+                'value'  => $gridProfile->getData('remembered_session_params'),
+                'note'   => $this->__($sessionParamsNote),
+            )
+        );
+        
+        $this->applyUseConfigCheckboxToElement(
+            $sessionParamsField,
+            is_null($gridProfile->getData('remembered_session_params')),
+            $this->__('Use Grid')
         );
         
         return $this;

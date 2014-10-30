@@ -15,6 +15,11 @@
 
 class BL_CustomGrid_Block_Grid_Form_Export extends BL_CustomGrid_Block_Grid_Form_Abstract
 {
+    protected function _getFormFieldNameSuffix()
+    {
+        return 'export';
+    }
+    
     public function getUseFieldValueForUrl()
     {
         return $this->getFormatFieldHtmlId();
@@ -25,11 +30,18 @@ class BL_CustomGrid_Block_Grid_Form_Export extends BL_CustomGrid_Block_Grid_Form
         return false;
     }
     
+    protected function _getExportTypes()
+    {
+        return $this->getGridModel()
+            ->getExporter()
+            ->getExportTypes();
+    }
+    
     protected function _getExportTypesHash()
     {
         $exportTypes = array();
         
-        foreach ($this->getGridModel()->getExportTypes() as $exportType) {
+        foreach ($this->_getExportTypes() as $exportType) {
             $exportTypes[$exportType->getUrl()] = $exportType->getLabel();
         }
         
@@ -52,18 +64,6 @@ class BL_CustomGrid_Block_Grid_Form_Export extends BL_CustomGrid_Block_Grid_Form
         return $exportSizes;
     }
     
-    protected function _prepareDependenceBlock($sizeFieldId, $customSizeFieldId)
-    {
-        return $this->setChild(
-            'form_after',
-            $this->getLayout()
-                ->createBlock('customgrid/widget_form_element_dependence')
-                ->addFieldMap($sizeFieldId, 'size')
-                ->addFieldMap($customSizeFieldId, 'custom_size')
-                ->addFieldDependence('custom_size', 'size', '_other_')
-        );
-    }
-    
     protected function _addFieldsToForm(Varien_Data_Form $form)
     {
         parent::_addFieldsToForm($form);
@@ -80,7 +80,7 @@ class BL_CustomGrid_Block_Grid_Form_Export extends BL_CustomGrid_Block_Grid_Form
             'format',
             'select',
             array(
-                'name'     => 'export[format]',
+                'name'     => 'format',
                 'label'    => $this->__('Format'),
                 'required' => true,
                 'values'   => $this->_getExportTypesHash(),
@@ -97,7 +97,7 @@ class BL_CustomGrid_Block_Grid_Form_Export extends BL_CustomGrid_Block_Grid_Form
             'size',
             'select',
             array(
-                'name'     => 'export[size]',
+                'name'     => 'size',
                 'label'    => $this->__('Size'),
                 'required' => true,
                 'values'   => $exportSizes,
@@ -109,7 +109,7 @@ class BL_CustomGrid_Block_Grid_Form_Export extends BL_CustomGrid_Block_Grid_Form
             'custom_size',
             'text',
             array(
-                'name'     => 'export[custom_size]',
+                'name'     => 'custom_size',
                 'label'    => $this->__('Custom Size'),
                 'required' => true,
                 'class'    => 'validate-greater-than-zero',
@@ -120,7 +120,7 @@ class BL_CustomGrid_Block_Grid_Form_Export extends BL_CustomGrid_Block_Grid_Form
             'from_result',
             'text',
             array(
-                'name'     => 'export[from_result]',
+                'name'     => 'from_result',
                 'label'    => $this->__('From Result'),
                 'required' => true,
                 'class'    => 'validate-greater-than-zero',
@@ -128,7 +128,11 @@ class BL_CustomGrid_Block_Grid_Form_Export extends BL_CustomGrid_Block_Grid_Form
             )
         );
         
-        $this->_prepareDependenceBlock($sizeField->getHtmlId(), $customSizeField->getHtmlId());
+        $this->getDependenceBlock()
+            ->addFieldMap($sizeField->getHtmlId(), 'size')
+            ->addFieldMap($customSizeField->getHtmlId(), 'custom_size')
+            ->addFieldDependence('custom_size', 'size', '_other_');
+        
         return $this;
     }
 }

@@ -153,7 +153,7 @@ class BL_CustomGrid_Model_Custom_Column_Product_Inventory extends BL_CustomGrid_
                         );
                 }
             } else {
-                if ($column->getCanUseConfig()) {
+                if ($columnBlock->getCanUseConfig()) {
                     $conditionBase = new Zend_Db_Expr(
                         'IF('
                         . $qi($tableAlias . '.' . $this->getUseConfigFieldName()) . ','
@@ -238,7 +238,7 @@ class BL_CustomGrid_Model_Custom_Column_Product_Inventory extends BL_CustomGrid_
         return $values;
     }
     
-    protected function _getForcedBlockValues(
+    public function _getForcedBlockValues(
         Mage_Adminhtml_Block_Widget_Grid $gridBlock,
         BL_CustomGrid_Model_Grid $gridModel,
         $columnBlockId,

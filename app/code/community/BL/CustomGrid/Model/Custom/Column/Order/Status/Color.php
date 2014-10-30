@@ -67,7 +67,7 @@ class BL_CustomGrid_Model_Custom_Column_Order_Status_Color extends BL_CustomGrid
         return 'status';
     }
     
-    protected function _getForcedBlockValues(
+    public function getForcedBlockValues(
         Mage_Adminhtml_Block_Widget_Grid $gridBlock,
         BL_CustomGrid_Model_Grid $gridModel,
         $columnBlockId,

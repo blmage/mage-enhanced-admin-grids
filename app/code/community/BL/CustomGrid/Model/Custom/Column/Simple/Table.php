@@ -128,7 +128,7 @@ class BL_CustomGrid_Model_Custom_Column_Simple_Table extends BL_CustomGrid_Model
         return $this->_addFieldToSelect($select, $columnIndex, $tableAlias, $params, $gridBlock, $collection);
     }
     
-    protected function _getForcedBlockValues(
+    public function getForcedBlockValues(
         Mage_Adminhtml_Block_Widget_Grid $gridBlock,
         BL_CustomGrid_Model_Grid $gridModel,
         $columnBlockId,

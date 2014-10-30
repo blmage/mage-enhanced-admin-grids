@@ -13,7 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Options_Source_Edit_Tab_General extends Mage_Adminhtml_Block_Widget_Form implements
+class BL_CustomGrid_Block_Options_Source_Edit_Tab_General extends BL_CustomGrid_Block_Widget_Form implements
     Mage_Adminhtml_Block_Widget_Tab_Interface
 {
     public function getTabLabel()
@@ -38,11 +38,11 @@ class BL_CustomGrid_Block_Options_Source_Edit_Tab_General extends Mage_Adminhtml
     
     protected function _prepareForm()
     {
-        $source = Mage::registry('blcg_options_source');
-        $form   = new Varien_Data_Form();
+        $optionsSource = $this->getOptionsSource();
+        $form = new Varien_Data_Form();
         $fieldset = $form->addFieldset('general', array('legend' => $this->__('General')));
         
-        if (!$source->getId()) {
+        if (!$optionsSource->getId()) {
             $fieldset->addField(
                 'type',
                 'hidden',
@@ -75,8 +75,9 @@ class BL_CustomGrid_Block_Options_Source_Edit_Tab_General extends Mage_Adminhtml
             )
         );
         
-        $form->setValues($source->getData());
+        $form->setValues($optionsSource->getData());
         $this->setForm($form);
+        
         return $this;
     }
 }

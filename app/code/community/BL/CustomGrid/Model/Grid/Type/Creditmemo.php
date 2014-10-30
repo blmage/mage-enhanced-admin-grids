@@ -17,7 +17,7 @@ class BL_CustomGrid_Model_Grid_Type_Creditmemo extends BL_CustomGrid_Model_Grid_
 {
     protected function _getSupportedBlockTypes()
     {
-        return 'adminhtml/sales_creditmemo_grid';
+        return array('adminhtml/sales_creditmemo_grid');
     }
     
     protected function _getItemsCustomColumnModel($customizable=false)

@@ -17,7 +17,7 @@ class BL_CustomGrid_Model_Grid_Type_Order extends BL_CustomGrid_Model_Grid_Type_
 {
     protected function _getSupportedBlockTypes()
     {
-        return 'adminhtml/sales_order_grid';
+        return array('adminhtml/sales_order_grid');
     }
     
     protected function _isOrdersGrid()

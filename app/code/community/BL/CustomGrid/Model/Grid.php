@@ -18,15 +18,11 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     /**
      * Session keys
      */
-    const SESSION_BASE_KEY_CURRENT_PROFILE = '_blcg_session_key_current_profile_';
-    const SESSION_BASE_KEY_APPLIED_FILTERS = '_blcg_session_key_applied_filters_';
-    const SESSION_BASE_KEY_REMOVED_FILTERS = '_blcg_session_key_removed_filters_';
+    const SESSION_BASE_KEY_CURRENT_PROFILE = '_blcg_current_profile_';
+    const SESSION_BASE_KEY_APPLIED_FILTERS = '_blcg_applied_filters_';
+    const SESSION_BASE_KEY_REMOVED_FILTERS = '_blcg_removed_filters_';
+    const SESSION_BASE_KEY_PROFILE_SESSION_VALUES = '_blcg_profile_session_values_';
     const SESSION_BASE_KEY_TOKEN = '_blcg_session_key_token_';
-    
-    /**
-     * Parameter name to use to hold grid token value (used for filters verification)
-     */
-    const GRID_TOKEN_PARAM_NAME  = '_blcg_token_';
     
     /**
      * Base profile ID
@@ -60,33 +56,27 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     static protected $_defaultPaginationValues = array(20, 30, 50, 100, 200);
     
     /**
-     * Possible column alignments values
+     * Grid parameters base keys
      */
-    const COLUMN_ALIGNMENT_LEFT   = 'left';
-    const COLUMN_ALIGNMENT_CENTER = 'center';
-    const COLUMN_ALIGNMENT_RIGHT  = 'right';
+    const GRID_PARAM_NONE   = 'none';
+    const GRID_PARAM_PAGE   = 'page';
+    const GRID_PARAM_LIMIT  = 'limit';
+    const GRID_PARAM_SORT   = 'sort';
+    const GRID_PARAM_DIR    = 'dir';
+    const GRID_PARAM_FILTER = 'filter';
     
     /**
-     * Column alignments options hash
+     * Grid parameters base keys
      * 
      * @var array
      */
-    static protected $_columnAlignments = null;
-    
-    /**
-     * Column origins
-     */
-    const COLUMN_ORIGIN_GRID       = 'grid';
-    const COLUMN_ORIGIN_COLLECTION = 'collection';
-    const COLUMN_ORIGIN_ATTRIBUTE  = 'attribute';
-    const COLUMN_ORIGIN_CUSTOM     = 'custom';
-    
-    /**
-     * Column origins options hash
-     * 
-     * @var array
-     */
-    static protected $_columnOrigins = null;
+    static protected $_gridParamsKeys = array(
+        self::GRID_PARAM_PAGE,
+        self::GRID_PARAM_LIMIT,
+        self::GRID_PARAM_SORT,
+        self::GRID_PARAM_DIR,
+        self::GRID_PARAM_FILTER,
+    );
     
     /**
      * Grid actions (used to set and check permissions)
@@ -203,11 +193,50 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     }
     
     /**
+     * Return the absorber model usable to initialize/update the grid model values from a grid block
+     * 
+     * @return BL_CustomGrid_Model_Grid_Absorber
+     */
+    public function getAbsorber()
+    {
+        return $this->getDataSetDefault(
+            'absorber',
+            Mage::getModel('customgrid/grid_absorber')->setGridModel($this)
+        );
+    }
+    
+    /**
+     * Return the applier model usable to apply the grid model values to a grid block
+     * 
+     * @return BL_CustomGrid_Model_Grid_Applier
+     */
+    public function getApplier()
+    {
+        return $this->getDataSetDefault(
+            'applier',
+            Mage::getModel('customgrid/grid_applier')->setGridModel($this)
+        );
+    }
+    
+    /**
+     * Return the exporter model usable to export the grid results
+     * 
+     * @return BL_CustomGrid_Model_Grid_Exporter
+     */
+    public function getExporter()
+    {
+        return $this->getDataSetDefault(
+            'exporter',
+            Mage::getModel('customgrid/grid_exporter')->setGridModel($this)
+        );
+    }
+    
+    /**
      * Throw a permission-related exception
      * 
      * @param string|null $message Custom exception message
      */
-    protected function _throwPermissionException($message = null)
+    public function throwPermissionException($message = null)
     {
         $message = (is_null($message) ? $this->_getHelper()->__('You are not allowed to use this action') : $message);
         throw new BL_CustomGrid_Grid_Permission_Exception($message); 
@@ -303,9 +332,9 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
      *
      * @return this
      */
-    protected function _resetTypeValues()
+    public function resetTypeValues()
     {
-        return $this->_resetKeys(array('type_code', 'type_model'));
+        return $this->_resetKeys(array('type_code', 'type_model', 'base_type_model'));
     }
     
     /**
@@ -313,7 +342,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
      *
      * @return this
      */
-    protected function _resetColumnsValues()
+    public function resetColumnsValues()
     {
         return $this->_resetKeys(array('columns', 'max_order', 'origin_ids', 'appliable_default_filter'));
     }
@@ -323,7 +352,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
      *
      * @return this
      */
-    protected function _resetUsersConfigValues()
+    public function resetUsersConfigValues()
     {
         return $this->_resetKeys(array('users_config'));
     }
@@ -333,7 +362,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
      *
      * @return this
      */
-    protected function _resetRolesConfigValues()
+    public function resetRolesConfigValues()
     {
         return $this->_resetKeys(array('roles_config'));
     }
@@ -343,9 +372,9 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
      *
      * @return this
      */
-    protected function _resetProfilesValues()
+    public function resetProfilesValues()
     {
-        $this->_resetAvailableProfilesValues();
+        $this->resetAvailableProfilesValues();
         return $this->_resetKeys(array('base_profile', 'profiles', 'profile_id'));
     }
     
@@ -354,7 +383,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
      * 
      * @return this
      */
-    protected function _resetAvailableProfilesValues()
+    public function resetAvailableProfilesValues()
     {
         return $this->_resetKeys(array('available_profiles_ids'));
     }
@@ -364,13 +393,13 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
      *
      * @return this
      */
-    protected function _resetSubValues()
+    public function resetSubValues()
     {
-        $this->_resetTypeValues();
-        $this->_resetColumnsValues();
-        $this->_resetRolesConfigValues();
-        $this->_resetUsersConfigValues();
-        $this->_resetProfilesValues();
+        $this->resetTypeValues();
+        $this->resetColumnsValues();
+        $this->resetRolesConfigValues();
+        $this->resetUsersConfigValues();
+        $this->resetProfilesValues();
         return $this;
     }
     
@@ -419,7 +448,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     protected function _afterSave()
     {
         parent::_afterSave();
-        $this->_resetSubValues();
+        $this->resetSubValues();
         return $this;
     }
     
@@ -431,7 +460,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     protected function _beforeDelete()
     {
         return !$this->checkUserPermissions(self::ACTION_DELETE)
-            ? $this->_throwPermissionException()
+            ? $this->throwPermissionException()
             : parent::_beforeDelete();
     }
     
@@ -480,7 +509,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     {
         if ($blockType != $this->getBlockType()) {
             // Reset type model if the block type has changed
-            $this->_resetTypeValues();
+            $this->resetTypeValues();
             $this->setData('block_type', $blockType);
         }
         return $this;
@@ -495,7 +524,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     public function setDisabled($disabled)
     {
         return !$this->checkUserPermissions(self::ACTION_ENABLE_DISABLE)
-            ? $this->_throwPermissionException()
+            ? $this->throwPermissionException()
             : $this->setData('disabled', (bool) $disabled);
     }
     
@@ -550,13 +579,30 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     }
     
     /**
+     * Return grid parameters base keys
+     * 
+     * @param bool $withNone Whether "None" option should be included
+     * @return array
+     */
+    public function getGridParamsKeys($withNone = false)
+    {
+        $keys = self::$_gridParamsKeys;
+        
+        if ($withNone) {
+            array_unshift($keys, self::GRID_PARAM_NONE);
+        }
+        
+        return $keys;
+    }
+    
+    /**
      * Return the keys corresponding to the variable names used by grid blocks
      * 
      * @return array
      */
     public function getBlockVarNameKeys()
     {
-        return array('page', 'limit', 'sort', 'dir', 'filter');
+        return $this->getGridParamsKeys();
     }
     
     /**
@@ -567,26 +613,12 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     public function getBlockVarNameDefaults()
     {
         return array(
-            'page'   => 'page',
-            'limit'  => 'limit',
-            'sort'   => 'sort',
-            'dir'    => 'dir',
-            'filter' => 'filter'
+            self::GRID_PARAM_PAGE   => 'page',
+            self::GRID_PARAM_LIMIT  => 'limit',
+            self::GRID_PARAM_SORT   => 'sort',
+            self::GRID_PARAM_DIR    => 'dir',
+            self::GRID_PARAM_FILTER => 'filter',
         );
-    }
-    
-    /**
-     * Set variable names, retrieved from the given block
-     *
-     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
-     * @return this
-     */
-    protected function _setVarNamesFromBlock(Mage_Adminhtml_Block_Widget_Grid $gridBlock)
-    {
-        foreach ($this->getBlockVarNameKeys() as $key) {
-            $this->setData('var_name_' . $key, $gridBlock->getDataUsingMethod('var_name' . $key));
-        }
-        return $this;
     }
     
     /**
@@ -649,6 +681,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
                         $this->addData(array(
                             'type_code'  => $code,
                             'type_model' => $typeModel,
+                            'base_type_model' => $typeModel,
                         ));
                         break;
                     }
@@ -666,14 +699,25 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     }
     
     /**
-     * Return type model name, or given default value if the grid is associated to no type model
+     * Return active type model name, or given default value if the grid has no base type nor forced type
      *
      * @param string $default Default value
-     * @return mixed
+     * @return string
      */
     public function getTypeModelName($default = '')
     {
         return (($typeModel = $this->getTypeModel()) ? $typeModel->getName() : $default);
+    }
+    
+    /**
+     * Return base type model name, or given default value if the grid has no base type
+     *
+     * @param string $default Default value
+     * @return string
+     */
+    public function getBaseTypeModelName($default = '')
+    {
+        return ($this->getTypeModel() && ($typeModel = $this->getBaseTypeModel()) ? $typeModel->getName() : $default);
     }
     
     /**
@@ -685,7 +729,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     public function updateForcedType($forcedTypeCode)
     {
         if (!$this->checkUserPermissions(self::ACTION_EDIT_FORCED_TYPE)) {
-            $this->_throwPermissionException();
+            $this->throwPermissionException();
         }
         
         $helper = $this->_getHelper();
@@ -700,7 +744,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
             $forcedTypeCode = null;
         }
         
-        $this->_resetTypeValues();
+        $this->resetTypeValues();
         $this->setForcedTypeCode($forcedTypeCode);
         
         return $this;
@@ -714,8 +758,8 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
      */
     public function setProfiles(array $profiles)
     {
-        $this->_resetColumnsValues();
-        $this->_resetProfilesValues();
+        $this->resetColumnsValues();
+        $this->resetProfilesValues();
         
         foreach ($profiles as $key => $profile) {
             if (is_array($profile)) {
@@ -845,7 +889,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
             $roleId = (($role = $this->getSessionRole()) ? $role->getId() : null);
         }
         if (!is_null($roleId)
-            && ($roleConfig = $this->getRolesConfig($roleId))) {
+            && ($roleConfig = $this->getRoleConfig($roleId))) {
             $assignedProfilesIds = $roleConfig->getDataSetDefault('assigned_profiles_ids', array());
         }
         
@@ -897,6 +941,14 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
         return in_array($profileId, $this->getAvailableProfilesIds(true), true);
     }
     
+    protected function _getProfileSessionValuesSessionKey($profileId = null)
+    {
+        if (is_null($profileId)) {
+            $profileId = $this->getProfileId();
+        }
+        return self::SESSION_BASE_KEY_PROFILE_SESSION_VALUES . $this->getId() . '_' . $profileId;
+    }
+    
     /**
      * Set current profile ID (either for temporary or "permanent" use)
      *
@@ -914,7 +966,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
             Mage::throwException($this->_getHelper()->__('This profile is not available'));
         }
         
-        $this->_resetColumnsValues();
+        $this->resetColumnsValues();
         $this->_restoreBaseProfileValues();
         $this->setData('profile_id', $profileId);
         
@@ -933,20 +985,48 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
                 $session->setData($sessionKey, $profileId);
                 
                 if ($profileId !== $previousProfileId) {
-                    /**
-                     * Remove all session parameters that were specific to the previous profile in some way
-                     * Doing so (and removing parameters from the URL - what is done by the JS part of the extension)
-                     * ensures that the new profile's default parameters will be used
-                     */
-                    foreach ($this->getBlockVarNames() as $varName) {
+                    $rememberableValuesSessionKey = $this->_getProfileSessionValuesSessionKey($profileId);
+                    $rememberedValuesSessionKey = $this->_getProfileSessionValuesSessionKey($previousProfileId);
+                    
+                    if (isset($profiles[$previousProfileId])) {
+                        $rememberableValues = $profiles[$previousProfileId]->getRememberedSessionParams();
+                    } else {
+                        $rememberableValues = array();
+                    }
+                    if (!is_array($rememberedValues = $session->getData($rememberedValuesSessionKey))) {
+                        $rememberedValues = array();
+                    } else {
+                        $rememberedValues = array_intersect_key(
+                            $rememberedValues,
+                            array_flip($profiles[$profileId]->getRememberedSessionParams())
+                        );
+                    }
+                    
+                    foreach ($this->getBlockVarNames() as $gridParam => $varName) {
+                        $isRememberableValue = in_array($gridParam, $rememberableValues);
+                        $isRememberedValue = isset($rememberedValues[$gridParam]);
+                        
                         if ($sessionKey = $this->getBlockParamSessionKey($varName)) {
-                            $session->unsetData($sessionKey);
+                            if ($isRememberableValue) {
+                                if ($session->hasData($sessionKey)) {
+                                    $rememberableValues[$gridParam] = $session->getData($sessionKey);
+                                }
+                            }
+                            if ($isRememberedValue) {
+                                $session->setData($sessionKey, $rememberedValues[$gridParam]);
+                            } else {
+                                $session->unsetData($sessionKey);
+                            }
+                        }
+                        if (($varName == self::GRID_PARAM_FILTER) && !$isRememberableValue) {
+                            // Ensure that the next filters verification won't mess with the default filters when
+                            // switching back to the previous profile
+                            $session->unsetData($this->getAppliedFiltersSessionKey($previousProfileId));
+                            $session->unsetData($this->getRemovedFiltersSessionKey($previousProfileId));
                         }
                     }
                     
-                    // Ensure that the next filters verification won't mess with the new filters
-                    $session->unsetData($this->_getAppliedFiltersSessionKey($previousProfileId));
-                    $session->unsetData($this->_getRemovedFiltersSessionKey($previousProfileId));
+                    $session->setData($rememberableValuesSessionKey, $rememberableValues);
                 }
             } else {
                 $session->setData($sessionKey, $profileId);
@@ -996,7 +1076,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
             $userId = (($user = $this->getSessionUser()) ? $user->getId() : null);
         }
         if (!is_null($userId)
-            && ($userConfig = $this->getUsersConfig($userId))) {
+            && ($userConfig = $this->getUserConfig($userId))) {
             $defaultProfileId = $userConfig->getData('default_profile_id');
         }
         
@@ -1017,7 +1097,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
             $roleId = (($role = $this->getSessionRole()) ? $role->getId() : null);
         }
         if (!is_null($roleId)
-            && ($roleConfig = $this->getRolesConfig($roleId))) {
+            && ($roleConfig = $this->getRoleConfig($roleId))) {
             $defaultProfileId = $roleConfig->getData('default_profile_id');
         }
         
@@ -1102,7 +1182,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
      * Return a profile by its ID
      *
      * @param int|null $profileId Profile ID (if null, the current profile will be returned)
-     * @return array
+     * @return BL_CustomGrid_Model_Grid_Profile
      */
     public function getProfile($profileId = null)
     {
@@ -1145,6 +1225,19 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     }
     
     /**
+     * Return the session parameters that should be restored upon returning to a profile previously used during
+     * the same session
+     * 
+     * @return array
+     */
+    public function getProfilesRememberedSessionParams()
+    {
+        return is_null($value = $this->_getData('profiles_remembered_session_params'))
+            ? $this->_getConfigHelper()->getProfilesRememberedSessionParams()
+            : explode(',', $value);
+    }
+    
+    /**
      * Update profiles default values
      * 
      * @param array $defaults New profiles default values
@@ -1152,351 +1245,42 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
      */
     public function updateProfilesDefaults(array $defaults)
     {
-        $assignKeys = array('restricted', 'assigned_to');
-        $assignValues = array_intersect_key($defaults, array_flip($assignKeys));
-        
-        if (!empty($assignValues)) {
-            if (!$this->checkUserPermissions(self::ACTION_ASSIGN_PROFILES)) {
-                $this->_throwPermissionException();
-            }
-            if (isset($assignValues['restricted'])) {
-                $value = ($assignValues['restricted'] !== '' ? (bool) $assignValues['restricted'] : null);
-                $this->setData('profiles_default_restricted', $value);
-            }
-            if (isset($assignValues['assigned_to'])) {
-                $value = (is_array($assignValues['assigned_to']) ? implode(',', $assignValues['assigned_to']) : null);
-                $this->setData('profiles_default_assigned_to', $value);
-            }
-        }
-        
-        return $this;
-    }
-    
-    /**
-     * Check, complete and return the given array of user IDs for which a profile will be set as default
-     *
-     * @param array $users User IDs
-     * @return array
-     */
-    protected function _getProfileDefaultForUsers(array $users)
-    {
-        $defaultForUsers = array();
-        $users = array_filter($users);
-        $ownUserId = $this->getSessionUser()->getId();
-        $ownChosen = in_array($ownUserId, $users);
-        $otherChosenIds = array_diff($users, array($ownUserId));
-            
-        if ($this->checkUserPermissions(self::ACTION_CHOOSE_OWN_USER_DEFAULT_PROFILE)) {
-            if ($ownChosen) {
-                $defaultForUsers[] = $ownUserId;
-            }
-        } elseif ($ownChosen) {
-            $this->_throwPermissionException();
-        } elseif ($this->getUserDefaultProfileId() === $profileId) {
-            $defaultForUsers[] = $ownUserId;
-        }
-        
-        if ($this->checkUserPermissions(self::ACTION_CHOOSE_OTHER_USERS_DEFAULT_PROFILE)) {
-            $defaultForUsers = array_merge($defaultForUsers, $otherChosenIds);
-        } elseif (!empty($otherChosenIds)) {
-            $this->_throwPermissionException();
-        } else {
-            $usersIds = Mage::getModel('admin/user')
-                ->getCollection()
-                ->getAllIds();
-            
-            foreach ($usersIds as $userId) {
-                if (($userId != $ownUserId) && ($this->getUserDefaultProfileId($userId) === $profileId)) {
-                    $defaultForUsers[] = $userId;
-                }
-            }
-        }
-        
-        return $defaultForUsers;
-    }
-    
-    /**
-     * Check, complete and return the given array of role IDs for which a profile will be set as default
-     *
-     * @param array $roles Role IDs
-     * @return array
-     */
-    protected function _getProfileDefaultForRoles(array $roles)
-    {
-        $roles = array_filter($roles);
-        $defaultForRoles = array();
-        $ownRoleId = $this->getSessionRole()->getId();
-        $ownChosen = in_array($ownRoleId, $roles);
-        $otherChosenIds = array_diff($roles, array($ownRoleId));
-            
-        if ($this->checkUserPermissions(self::ACTION_CHOOSE_OWN_ROLE_DEFAULT_PROFILE)) {
-            if ($ownChosen) {
-                $defaultForRoles[] = $ownRoleId;
-            }
-        } elseif ($ownChosen) {
-            $this->_throwPermissionException();
-        } elseif ($this->getRoleDefaultProfileId() === $profileId) {
-            $defaultForRoles[] = $ownUserId;
-        }
-        if ($this->checkUserPermissions(self::ACTION_CHOOSE_OTHER_ROLES_DEFAULT_PROFILE)) {
-            $defaultForRoles = array_merge($defaultForRoles, $otherChosenIds);
-        } elseif (!empty($otherChosenIds)) {
-            $this->_throwPermissionException();
-        } else {
-            $rolesIds = Mage::getModel('admin/roles')
-                ->getCollection()
-                ->getAllIds();
-            
-            foreach ($rolesIds as $roleId) {
-                if (($roleId != $ownRoleId) && ($this->getRoleDefaultProfileId($roleId) === $profileId)) {
-                    $defaultForRoles[] = $roleId;
-                }
-            }
-        }
-        
-        return $defaultForRoles;
-    }
-    
-    /**
-     * (Un-)Choose given profile as default for given users and roles, and globally
-     * (expected values and corresponding possibilities depending on permissions)
-     * 
-     * @param int $profileId ID of the profile to (un-)choose as default
-     * @param array $values Array with "users", "roles" and "global" keys, holding corresponding value(s)
-     * @return this
-     */
-    public function chooseProfileAsDefault($profileId, array $values)
-    {
-        $helper = $this->_getHelper();
-        $profiles = $this->getProfiles(true, true);
-        $defaultFor = array();
-        
-        if (!isset($profiles[$profileId])) {
-            Mage::throwException($helper->__('This profile is not available'));
-        }
-        if (isset($values['users']) && is_array($values['users'])) {
-            $defaultFor['users'] = $this->_getProfileDefaultForUsers($values['users']);
-        }
-        if (isset($values['roles']) && is_array($values['roles'])) {
-            $defaultFor['roles'] = $this->_getProfileDefaultForRoles($values['roles']);
-        }
-        if (isset($values['global'])) {
-            if ($this->checkUserPermissions(self::ACTION_CHOOSE_GLOBAL_DEFAULT_PROFILE)) {
-                $defaultFor['global'] = (bool) $values['global'];
-            } else {
-                $this->_throwPermissionException();
-            }
-        }
-        
-        $this->_getResource()->chooseProfileAsDefault($this->getId(), $profileId, $defaultFor);
-        
-        if (isset($defaultFor['users'])) {
-             $this->_resetUsersConfigValues();
-        }
-        if (isset($defaultFor['roles'])) {
-            $this->_resetRolesConfigValues();
-        }
-        if (isset($defaultFor['global'])) {
-            $this->_resetProfilesValues();
-        }
-        
-        return $this;
-    }
-    
-    /**
-     * Copy given profile to a new one
-     *
-     * @param int $profileId Copied profile ID
-     * @param array $newValues New profile values
-     * @return int New profile ID
-     */
-    public function copyProfileToNew($profileId, array $values)
-    {
-        $helper = $this->_getHelper();
-        $profiles = $this->getProfiles(true, true);
-        
-        if (!$this->checkUserPermissions(self::ACTION_COPY_PROFILES_TO_NEW)) {
-            $this->_throwPermissionException();
-        } elseif (!isset($profiles[$profileId])) {
-            Mage::throwException($helper->__('The copied profile is not available'));
-        } elseif (!isset($values['name'])) {
-            Mage::throwException($helper->__('The profile name must be filled'));
-        }
-        
-        $values['name'] = trim($values['name']);
-        $assignedRolesIds = null;
-        
-        foreach ($profiles as $profile) {
-            if (trim($profile->getName()) === $values['name']) {
-                Mage::throwException($helper->__('Another profile from the same grid already has this name'));
-            }
-        }
-        
         if ($this->checkUserPermissions(self::ACTION_ASSIGN_PROFILES)) {
-            if ((isset($values['is_restricted']) && $values['is_restricted'])
-                && (isset($values['assigned_to']) && is_array($values['assigned_to']))) {
-                $assignedRolesIds = $values['assigned_to'];
+            if (isset($defaults['restricted']) && ($defaults['restricted'] !== '')) {
+                $this->setData('profiles_default_restricted', (bool) $defaults['restricted']);
+            } else {
+                $this->setData('profiles_default_restricted', null);
             }
-        } elseif ($this->getProfilesDefaultRestricted()) {
-            $assignedRolesIds = $this->getProfilesDefaultAssignedTo();
-            $sessionRoleId  = $this->getSessionRole()->getId();
-            $creatorRoleKey = array_search(
-                BL_CustomGrid_Model_System_Config_Source_Admin_Role::CREATOR_ROLE,
-                $assignedRolesIds
-            );
+            if (isset($defaults['assigned_to']) && is_array($defaults['assigned_to'])) {
+                $this->setData('profiles_default_assigned_to', implode(',', $defaults['assigned_to']));
+            } else {
+                $this->setData('profiles_default_assigned_to', null);
+            }
+        } elseif (isset($defaults['restricted']) || isset($defaults['assigned_to'])) {
+            $this->throwPermissionException();
+        }
+        
+        if ($this->checkUserPermissions(self::ACTION_EDIT_PROFILES)) {
+            $sessionParams = null;
             
-            if ($creatorRoleKey !== false) {
-                unset($assignedRolesIds[$creatorRoleKey]);
+            if (isset($defaults['remembered_session_params']) && is_array($defaults['remembered_session_params'])) {
+                $sessionParams = array_intersect(
+                    $defaults['remembered_session_params'],
+                    $this->getGridParamsKeys(true)
+                );
                 
-                if (!in_array($sessionRoleId, $assignedRolesIds)) {
-                    $assignedRolesIds[] = $sessionRoleId;
+                if (in_array(self::GRID_PARAM_NONE, $sessionParams)) {
+                    $sessionParams = array(self::GRID_PARAM_NONE);
                 }
             }
+            
+            $this->setData(
+                'profiles_remembered_session_params',
+                (empty($sessionParams) ? null : implode(',', $sessionParams))
+            );
+        } elseif (isset($defaults['remembered_session_params'])) {
+            $this->throwPermissionException();
         }
-        
-        $values['is_restricted'] = (is_array($assignedRolesIds) && !empty($assignedRolesIds));
-        $values['assigned_to'] = ($values['is_restricted'] ? $assignedRolesIds : null);
-        
-        $newProfileId = $this->_getResource()->copyProfileToNew($this->getId(), $profileId, $values);
-        $this->_resetProfilesValues();
-        
-        if ($values['is_restricted']) {
-            $this->_resetRolesConfigValues();
-        }
-        
-        return (int) $newProfileId;
-    }
-    
-    /**
-     * Copy given profile to another existing one
-     * 
-     * @param int $profileId ID of the copied profile
-     * @param int $toProfileId ID of the profile on which to copy
-     * @param array $values Copied values (columns and/or default parameters)
-     * @return this
-     */
-    public function copyProfileToExisting($profileId, $toProfileId, array $values)
-    {
-        $helper = $this->_getHelper();
-        $profiles = $this->getProfiles(true, true);
-        
-        if (!$this->checkUserPermissions(self::ACTION_COPY_PROFILES_TO_EXISTING)) {
-            $this->_throwPermissionException();
-        } elseif (!isset($profiles[$profileId])) {
-            Mage::throwException($helper->__('The copied profile is not available'));
-        } elseif (!isset($profiles[$toProfileId])) {
-            Mage::throwException($helper->__('The profile on which to copy is not available'));
-        } elseif ($profileId === $toProfileId) {
-            Mage::throwException($helper->__('A profile can not be copied to itself'));
-        }
-        
-        $this->_getResource()->copyProfileToExisting($this->getId(), $profileId, $toProfileId, $values);
-        $this->_resetProfilesValues();
-        
-        return $this;
-    }
-    
-    /**
-     * Update profile values
-     * 
-     * @param int $profileId Updated profile ID
-     * @param array $values New profile values
-     * @return this
-     */
-    public function updateProfile($profileId, array $values)
-    {
-        $helper = $this->_getHelper();
-        $profiles = $this->getProfiles(true, true);
-        
-        if (!$this->checkUserPermissions(self::ACTION_EDIT_PROFILES)) {
-            $this->_throwPermissionException();
-        } elseif (!isset($profiles[$profileId])) {
-            Mage::throwException($helper->__('This profile is not available'));
-        } elseif ($profileId === $this->getBaseProfileId()) {
-            Mage::throwException($helper->__('The base profile can not be edited'));
-        } elseif (!isset($values['name'])) {
-            Mage::throwException($helper->__('The profile name must be filled'));
-        }
-        
-        $editableKeys = array('name');
-        $values = array_intersect_key($values, array_flip($editableKeys));
-        $values['name'] = trim($values['name']);
-        
-        foreach ($profiles as $profile) {
-            if ((trim($profile->getName()) === $values['name'])
-                && ($profile->getId() !== $profileId)) {
-                Mage::throwException($helper->__('Another profile from the same grid already has this name'));
-            }
-        }
-        
-        $this->_getResource()->updateProfile($this->getId(), $profileId, $values);
-        $profiles[$profileId]->addData($values);
-        
-        return $this;
-    }
-    
-    /**
-     * (Un-)Restrict and/or (un-)assign given profile
-     * 
-     * @param int $profileId ID of the profile to (un-)restrict and/or (un-)assign
-     * @param array $values Array with "is_restricted" and "assigned_to" keys, holding corresponding value(s)
-     * @return this
-     */
-    public function assignProfile($profileId, array $values)
-    {
-        $helper = $this->_getHelper();
-        $profiles = $this->getProfiles(true, true);
-        
-        if (!$this->checkUserPermissions(self::ACTION_ASSIGN_PROFILES)) {
-            $this->_throwPermissionException();
-        } elseif (!isset($profiles[$profileId])) {
-            Mage::throwException($helper->__('This profile is not available'));
-        } elseif ($profileId === $this->getBaseProfileId()) {
-            Mage::throwException($helper->__('The base profile can not be assigned'));
-        }
-        
-        $editableKeys = array('is_restricted', 'assigned_to');
-        $values = array_intersect_key($values, array_flip($editableKeys));
-        
-        if ((isset($values['is_restricted']) && $values['is_restricted'])
-            && (isset($values['assigned_to']) && is_array($values['assigned_to']))) {
-            $values['is_restricted'] = (is_array($values['assigned_to']) && !empty($values['assigned_to']));
-            $values['assigned_to'] = ($values['is_restricted'] ? $values['assigned_to'] : null);
-        } else {
-            $values['is_restricted'] = false;
-            $values['assigned_to'] = null;
-        }
-        
-        $this->_getResource()->updateProfile($this->getId(), $profileId, $values);
-        $this->_resetProfilesValues();
-        $this->_resetRolesConfigValues();
-        
-        return $this;
-    }
-    
-    /**
-     * Delete given profile
-     * 
-     * @param int $profileId ID of the profile to delete
-     * @return this
-     */
-    public function deleteProfile($profileId)
-    {
-        $helper = $this->_getHelper();
-        $profiles = $this->getProfiles(true, true);
-        
-        if (!$this->checkUserPermissions(self::ACTION_DELETE_PROFILES)) {
-            $this->_throwPermissionException();
-        } elseif (!isset($profiles[$profileId])) {
-            Mage::throwException($helper->__('This profile is not available'));
-        } elseif ($profileId === $this->getBaseProfileId()) {
-            Mage::throwException($helper->__('The base profile can not be deleted'));
-        }
-        
-        $this->_getResource()->deleteProfile($this->getId(), $profileId);
-        $this->_resetProfilesValues();
-        $this->_resetUsersConfigValues();
-        $this->_resetRolesConfigValues();
         
         return $this;
     }
@@ -1506,15 +1290,29 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
      *
      * @return array
      */
-    public function getColumnIdsByOrigin()
+    protected function _getColumnIdsByOrigin()
     {
-        return $this->getDataSetDefault('column_ids_by_origin', array(
-            self::COLUMN_ORIGIN_GRID       => array(),
-            self::COLUMN_ORIGIN_COLLECTION => array(),
-            self::COLUMN_ORIGIN_ATTRIBUTE  => array(),
-            self::COLUMN_ORIGIN_CUSTOM     => array(),
-            
-        ));
+        return $this->getDataSetDefault(
+            'column_ids_by_origin',
+            array(
+                BL_CustomGrid_Model_Grid_Column::ORIGIN_GRID       => array(),
+                BL_CustomGrid_Model_Grid_Column::ORIGIN_COLLECTION => array(),
+                BL_CustomGrid_Model_Grid_Column::ORIGIN_ATTRIBUTE  => array(),
+                BL_CustomGrid_Model_Grid_Column::ORIGIN_CUSTOM     => array(),
+            )
+        );
+    }
+    
+    /**
+     * Return columns IDs by column origin
+     *
+     * @param string $origin If specified, only the column block IDs from this origin will be returned
+     * @return array
+     */
+    public function getColumnIdsByOrigin($origin = null)
+    {
+        $originIds = $this->_getColumnIdsByOrigin();
+        return (is_null($origin) ? $originIds : (isset($originIds[$origin]) ? $originIds[$origin] : array()));
     }
     
     /**
@@ -1564,7 +1362,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
      *
      * @return int
      */
-    protected function _getNextColumnOrder()
+    public function getNextColumnOrder()
     {
         $this->setData('columns_max_order', $this->getColumnsMaxOrder() + $this->getColumnsOrderPitch());
         return $this->getColumnsMaxOrder();
@@ -1573,19 +1371,76 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     /**
      * Add a column to the columns list
      *
-     * @param array $column Column values
+     * @param array $data Column values
      * @return this
      */
-    protected function _addColumn(array $column)
+    public function addColumn(array $data)
     {
         $this->getColumns();
         $this->getColumnIdsByOrigin();
-        $column['grid_model'] = $this;
-        $blockId = $column['block_id'];
-        $this->_data['columns'][$blockId] = Mage::getModel('customgrid/grid_column', $column);
-        $this->_data['column_ids_by_origin'][$column['origin']][] = $blockId;
-        $this->_recomputeColumnsMaxOrder($column['order']);
+        $data['grid_model'] = $this;
+        $blockId = $data['block_id'];
+        $this->_data['columns'][$blockId] = Mage::getModel('customgrid/grid_column', $data);
+        $this->_data['column_ids_by_origin'][$data['origin']][] = $blockId;
+        $this->_recomputeColumnsMaxOrder($data['order']);
         $this->setDataChanges(true);
+        return $this;
+    }
+    
+    /**
+     * Update a column from the columns list
+     * 
+     * @param string $columnBlockId Column block ID
+     * @param array $data New column values
+     * @return this
+     */
+    public function updateColumn($columnBlockId, array $data)
+    {
+        if ($column = $this->getColumnByBlockId($columnBlockId)) {
+            $previousOrigin = $column->getOrigin();
+            $column->addData($data);
+            
+            if (isset($data['origin']) && ($data['origin'] != $previousOrigin)) {
+                $this->getColumnIdsByOrigin();
+                $previousKey = array_search($columnBlockId, $this->_data['column_ids_by_origin'][$previousOrigin]);
+                
+                if ($previousKey !== false) {
+                    unset($this->_data['column_ids_by_origin'][$previousOrigin][$previousKey]);
+                }
+                
+                $this->_data['column_ids_by_origin'][$data['origin']][] = $columnBlockId;
+            }
+            if (isset($data['order'])) {
+                $this->_recomputeColumnsMaxOrder($data['order']);
+            }
+            
+            $this->setDataChanges(true);
+        }
+        return $this;
+    }
+    
+    /**
+     * Remove a column from the columns list
+     * 
+     * @param string $columnBlockId Column block ID
+     * @return this
+     */
+    public function removeColumn($columnBlockId)
+    {
+        if ($column = $this->getColumnByBlockId($columnBlockId)) {
+            $this->getColumnIdsByOrigin();
+            unset($this->_data['columns'][$columnBlockId]);
+            
+            $origin = $column->getOrigin();
+            $originKey = array_search($columnBlockId, $this->_data['column_ids_by_origin'][$origin]);
+            
+            if ($originKey !== false) {
+                unset($this->_data['column_ids_by_origin'][$origin][$originKey]);
+            }
+            
+            $this->_recomputeColumnsMaxOrder();
+            $this->setDataChanges(true);
+        }
         return $this;
     }
     
@@ -1597,12 +1452,12 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
      */
     public function setColumns(array $columns)
     {
-        $this->_resetColumnsValues();
+        $this->resetColumnsValues();
         $this->setData('columns', array());
         
         foreach ($columns as $column) {
             if (isset($column['block_id'])) {
-                $this->_addColumn($column);
+                $this->addColumn($column);
             }
         }
         
@@ -1645,10 +1500,10 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
                 $columns = $typeModel->applyEditConfigsToColumns($this->getBlockType(), $columns);
             }
             if ($withCustomColumns) {
-                $originIds = $this->getColumnIdsByOrigin();
-                $customColumns = $this->getAvailableCustomColumns(false, true);
+                $columnBlockIds = $this->getColumnIdsByOrigin(BL_CustomGrid_Model_Grid_Column::ORIGIN_CUSTOM);
+                $customColumns  = $this->getAvailableCustomColumns(false, true);
                 
-                foreach ($originIds[self::COLUMN_ORIGIN_CUSTOM] as $blockId) {
+                foreach ($columnBlockIds as $blockId) {
                     if (isset($customColumns[$columns[$blockId]->getIndex()])) {
                         $columns[$blockId]->setCustomColumnModel($customColumns[$columns[$blockId]->getIndex()]);
                     }
@@ -1666,7 +1521,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
      * @param BL_CustomGrid_Model_Grid_Column $columnB Another column
      * @return int
      */
-    protected function _sortColumns(
+    public function sortColumns(
         BL_CustomGrid_Model_Grid_Column $columnA,
         BL_CustomGrid_Model_Grid_Column $columnB
     ) {
@@ -1707,7 +1562,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
             $columns[$columnBlockId] = $column;
         }
         
-        uasort($columns, array($this, '_sortColumns'));
+        uasort($columns, array($this, 'sortColumns'));
         return $columns;
     }
     
@@ -1756,7 +1611,8 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
         $columns = $this->getColumns();
         $originIds = $this->getColumnIdsByOrigin();
         
-        if (($origin == self::COLUMN_ORIGIN_ATTRIBUTE) || ($origin == self::COLUMN_ORIGIN_CUSTOM)) {
+        if (($origin == BL_CustomGrid_Model_Grid_Column::ORIGIN_ATTRIBUTE)
+            || ($origin == BL_CustomGrid_Model_Grid_Column::ORIGIN_CUSTOM)) {
             // Assume given code corresponds to attribute/custom column code
             $foundColumn = null;
             $correspondingColumns = array();
@@ -1767,7 +1623,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
                 }
             }
             
-            usort($correspondingColumns, '_sortColumns');
+            usort($correspondingColumns, 'sortColumns');
             $columnsCount = count($correspondingColumns);
             
             // If column is found, return the actual index that will be used for the grid block
@@ -1778,7 +1634,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
             }
             
             if (!is_null($foundColumn)) {
-                if ($origin == self::COLUMN_ORIGIN_ATTRIBUTE) {
+                if ($origin == BL_CustomGrid_Model_Grid_Column::ORIGIN_ATTRIBUTE) {
                     return self::ATTRIBUTE_COLUMN_GRID_ALIAS
                         . str_replace(self::ATTRIBUTE_COLUMN_ID_PREFIX, '', $foundColumn->getBlockId());
                 } else {
@@ -1786,7 +1642,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
                         . str_replace(self::CUSTOM_COLUMN_ID_PREFIX, '', $foundColumn->getBlockId());
                 }
             }
-        } elseif (array_key_exists($origin, $this->getColumnOrigins())) {
+        } elseif (array_key_exists($origin, Mage::getSingleton('customgrid/grid_column')->getOrigins())) {
             // Assume given code corresponds to column block ID
             if (isset($columns[$code]) && in_array($code, $originIds[$origin], true)) {
                 // Return column index only if column exists and comes from wanted origin
@@ -1795,174 +1651,6 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
         }
         
         return null;
-    }
-    
-    /**
-     * Extract column values from given array
-     *
-     * @param array $column Column values
-     * @param bool $allowStore Whether store ID value is allowed
-     * @param bool $allowRenderer Whether renderer values are allowed
-     * @param bool $requireRendererType Whether renderer type is required
-     * @param bool $allowEditable Whether editability value is allowed
-     * @param bool $allowCustomizationParams Whether customization parameters are allowed
-     * @return array
-     */
-    protected function _extractColumnValues(
-        array $column,
-        $allowStore = false,
-        $allowRenderer = false,
-        $requireRendererType = true,
-        $allowEditable = false,
-        $allowCustomizationParams = false
-    ) {
-        $values = array();
-        
-        if ($values['is_visible'] = (isset($column['is_visible']) && $column['is_visible'])) {
-            $values['is_only_filterable'] = (isset($column['filter_only']) && $column['filter_only']);
-        } else {
-            $values['is_only_filterable'] = false;
-        }
-        if (isset($column['align']) && array_key_exists($column['align'], $this->getColumnAlignments())) {
-            $values['align'] = $column['align'];
-        }
-        if (isset($column['header'])) {
-            $values['header'] = $column['header'];
-        }
-        if (isset($column['order'])) {
-            $values['order'] = (int) $column['order'];
-        }
-        if (isset($column['width'])) {
-            $values['width'] = $column['width'];
-        }
-        if ($allowStore && isset($column['store_id']) && ($column['store_id'] !== '')) {
-            $values['store_id'] = $column['store_id'];
-        } else {
-            $values['store_id'] = null;
-        }
-        if ($allowRenderer
-            && (!$requireRendererType || (isset($column['renderer_type']) && ($column['renderer_type'] !== '')))) {
-            $values['renderer_type'] = ($requireRendererType ? $column['renderer_type'] : null);
-            
-            if (isset($column['renderer_params']) && ($column['renderer_params'] !== '')) {
-                $values['renderer_params'] = $column['renderer_params'];
-            } else {
-                $values['renderer_params'] = null;
-            }
-        } else {
-            $values['renderer_type'] = null;
-            $values['renderer_params'] = null;
-        }
-        if ($allowEditable) {
-            $values['is_edit_allowed'] = (isset($column['editable']) && $column['editable']);
-        }
-        if ($allowCustomizationParams
-            && isset($column['customization_params']) && ($column['customization_params'] !== '')) {
-            $values['customization_params'] = $column['customization_params'];
-        } else {
-            $values['customization_params'] = null;
-        }
-        
-        return $values;
-    }
-    
-    /**
-     * Update columns according to given values
-     *
-     * @param array $columns New column values
-     * @return this
-     */
-    public function updateColumns(array $columns)
-    {
-        if (!$this->checkUserPermissions(self::ACTION_CUSTOMIZE_COLUMNS)) {
-            $this->_throwPermissionException();
-        }
-        
-        $this->getColumns(true);
-        $this->getColumnIdsByOrigin();
-        $allowEditable = $this->checkUserPermissions(self::ACTION_CHOOSE_EDITABLE_COLUMNS);
-        $availableAttributeCodes = $this->getAvailableAttributesCodes();
-        
-        // Update existing columns
-        foreach ($this->getColumns(true, true) as $columnBlockId => $column) {
-            $columnId = $column->getId();
-            
-            if (isset($columns[$columnId])) {
-                $newColumn     = $columns[$columnId]; 
-                $isCollection  = $column->isCollection();
-                $isAttribute   = $column->isAttribute();
-                $isCustom      = $column->isCustom();
-                $customColumn  = ($isCustom ? $column->getCustomColumnModel() : null);
-                
-                $this->_data['columns'][$columnBlockId]->addData($this->_extractColumnValues(
-                    $newColumn,
-                    ($isCustom || ($customColumn && $customColumn->getAllowStore())),
-                    ($isCollection || $isAttribute || ($customColumn && $customColumn->getAllowRenderers())),
-                    ($isCollection || $isCustom),
-                    ($allowEditable && $column->isEditable()),
-                    $isCustom
-                ));
-                
-                if ($isAttribute
-                    && isset($newColumn['index'])
-                    && in_array($newColumn['index'], $availableAttributeCodes, true)) {
-                    // Update index if possible for attribute columns
-                    $column->setIndex($newColumn['index']);
-                }
-                
-                // At the end, there should only remain in $columns new attribute columns (without a valid ID yet)
-                unset($columns[$columnId]);
-            } else {
-                // Assume deleted column
-                $columnOrigin = $this->_data['columns'][$columnBlockId]->getOrigin();
-                $originKey = array_search($columnBlockId, $this->_data['column_ids_by_origin'][$columnOrigin]);
-                
-                if ($originKey !== false) {
-                    unset($this->_data['column_ids_by_origin'][$columnOrigin][$originKey]);
-                }
-                
-                unset($this->_data['columns'][$columnBlockId]);
-            }
-        }
-        
-        // Add new attribute columns
-        if ($this->canHaveAttributeColumns()) {
-            foreach ($columns as $columnId => $column) {
-                if (($columnId < 0) // Concerned columns IDs should be < 0, so assume others IDs are inexisting ones
-                    && isset($column['index'])
-                    && in_array($column['index'], $availableAttributeCodes, true)) {
-                    $newColumnBlockId = $this->_getNextAttributeColumnBlockId();
-                    
-                    $newColumn = array_merge(
-                        array(
-                            'grid_id'             => $this->getId(),
-                            'block_id'             => $newColumnBlockId,
-                            'index'                => $column['index'],
-                            'width'                => '',
-                            'align'                => self::COLUMN_ALIGNMENT_LEFT,
-                            'header'               => '',
-                            'order'                => 0,
-                            'origin'               => self::COLUMN_ORIGIN_ATTRIBUTE,
-                            'is_visible'           => true,
-                            'is_only_filterable'   => false,
-                            'is_system'            => false,
-                            'is_missing'           => false,
-                            'store_id'             => null,
-                            'renderer_type'        => null,
-                            'renderer_params'      => null,
-                            'is_edit_allowed'      => true,
-                            'customization_params' => null,
-                        ),
-                        $this->_extractColumnValues($column, true, true, false, $allowEditable)
-                    );
-                    
-                    $this->_addColumn($newColumn);
-                }
-            }
-        }
-        
-        $this->setDataChanges(true);
-        return $this;
     }
     
     /**
@@ -2040,7 +1728,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
      *
      * @return string
      */
-    protected function _getNextAttributeColumnBlockId()
+    public function getNextAttributeColumnBlockId()
     {
         if (($maxId = $this->getMaxAttributeColumnBaseBlockId()) > 0) {
             $baseBlockId = $maxId + 1;
@@ -2100,9 +1788,9 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
         
         $codes = array();
         $columns = $this->getColumns();
-        $originIds = $this->getColumnIdsByOrigin();
+        $columnBlockIds = $this->getColumnIdsByOrigin(BL_CustomGrid_Model_Grid_Column::ORIGIN_CUSTOM);
         
-        foreach ($originIds[self::COLUMN_ORIGIN_CUSTOM] as $blockId) {
+        foreach ($columnBlockIds as $blockId) {
             $parts = explode('/', $columns[$blockId]->getIndex());
             
             if ($parts[0] == $typeCode) {
@@ -2203,7 +1891,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
      *
      * @return string
      */
-    protected function _getNextCustomColumnBlockId()
+    public function getNextCustomColumnBlockId()
     {
         if (($maxId = $this->getMaxCustomColumnBaseBlockId()) > 0) {
             $baseBlockId = $maxId + 1;
@@ -2212,98 +1900,6 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
         }
         $this->setMaxCustomColumnBaseBlockId($baseBlockId);
         return self::CUSTOM_COLUMN_ID_PREFIX . $baseBlockId;
-    }
-    
-    /**
-     * Update available custom columns
-     *
-     * @param array $columnsCodes New custom columns codes
-     * @return this
-     */
-    public function updateCustomColumns(array $columnsCodes)
-    {
-        if (!$this->checkUserPermissions(self::ACTION_CUSTOMIZE_COLUMNS)) {
-            $this->_throwPermissionException();
-        }
-        
-        if ($typeModel = $this->getTypeModel()) {
-            $typeCode = $typeModel->getCode();
-        } else {
-            return $this;
-        }
-        
-        $this->getColumns();
-        $this->getColumnIdsByOrigin();
-        $helper = $this->_getHelper();
-        
-        $availableColumns = $this->getAvailableCustomColumns();
-        $availableCodes   = array_keys($availableColumns);
-        
-        $appliedCodes = $columnsCodes;
-        $currentCodes = array();
-        $removedBlockIds = array();
-        
-        foreach ($this->_data['column_ids_by_origin'][self::COLUMN_ORIGIN_CUSTOM] as $columnBlockId) {
-            if (!is_null($typeCode)) {
-                $parts = explode('/', $this->_data['columns'][$columnBlockId]->getIndex());
-                
-                if (($typeCode == $parts[0])
-                    && in_array($parts[1], $appliedCodes)
-                    && in_array($parts[1], $availableCodes)) {
-                    $currentCodes[] = $parts[1];
-                } else {
-                    $removedBlockIds[] = $columnBlockId;
-                }
-            } else {
-                $removedBlockIds[] = $columnBlockId;
-            }
-        }
-        
-        $newCodes = array_intersect($availableCodes, array_diff($appliedCodes, $currentCodes));
-        $columnsGroups = $this->getCustomColumnsGroups();
-        
-        foreach ($newCodes as $code) {
-            $newColumnBlockId = $this->_getNextCustomColumnBlockId();
-            $columnModel = $availableColumns[$code];
-            
-            if (isset($columnsGroups[$columnModel->getGroupId()])
-                && $this->_getConfigHelper()->getAddGroupToCustomColumnsDefaultHeader()) {
-                $header = $helper->__('%s (%s)', $columnModel->getName(), $columnsGroups[$columnModel->getGroupId()]);
-            } else {
-                $header = $columnModel->getName();
-            }
-            
-            $newColumn = array(
-                'grid_id'              => $this->getId(),
-                'block_id'             => $newColumnBlockId,
-                'index'                => $typeCode . '/' . $code,
-                'width'                => '',
-                'align'                => self::COLUMN_ALIGNMENT_LEFT,
-                'header'               => $header,
-                'order'                => $this->_getNextColumnOrder(),
-                'origin'               => self::COLUMN_ORIGIN_CUSTOM,
-                'is_visible'           => true,
-                'is_only_filterable'   => false,
-                'is_system'            => false,
-                'is_missing'           => false,
-                'store_id'             => null,
-                'renderer_type'        => null,
-                'renderer_params'      => null,
-                'is_edit_allowed'      => false,
-                'customization_params' => null,
-            );
-            
-            $this->_addColumn($newColumn);
-        }
-        
-        foreach ($removedBlockIds as $columnBlockId) {
-            unset($this->_data['columns'][$columnBlockId]);
-        }
-        
-        $this->_recomputeColumnsMaxOrder();
-        $this->setDataChanges(true);
-        
-        return $this;
     }
     
     /**
@@ -2338,77 +1934,6 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     }
     
     /**
-     * Check the given alignment value, return "left" alignment by default if the given one is unknown
-     *
-     * @param string $alignment Alignment value to check
-     * @return string
-     */
-    protected function _getValidAlignment($alignment)
-    {
-        return array_key_exists($alignment, $this->getColumnAlignments())
-            ? $alignment
-            : self::COLUMN_ALIGNMENT_LEFT;
-    }
-    
-    /**
-     * Add a column to the list corresponding to the given column block instance
-     *
-     * @param Mage_Adminhtml_Block_Widget_Grid_Column $columnBlock Column block instance
-     * @param int $order Column order
-     * @return this
-     */
-    protected function _addColumnFromBlock(Mage_Adminhtml_Block_Widget_Grid_Column $columnBlock, $order)
-    {
-        return $this->_addColumn(array(
-            'block_id'             => $columnBlock->getId(),
-            'index'                => $columnBlock->getIndex(),
-            'width'                => $columnBlock->getWidth(),
-            'align'                => $this->_getValidAlignment($columnBlock->getAlign()),
-            'header'               => $columnBlock->getHeader(),
-            'order'                => $order,
-            'origin'               => self::COLUMN_ORIGIN_GRID,
-            'is_visible'           => true,
-            'is_only_filterable'   => false,
-            'is_system'            => (bool) $columnBlock->getIsSystem(),
-            'is_missing'           => false,
-            'store_id'             => null,
-            'renderer_type'        => null,
-            'renderer_params'      => null,
-            'is_edit_allowed'      => true,
-            'customization_params' => null,
-        ));
-    }
-    
-    /**
-     * Add a column to the list from collection row value
-     *
-     * @param string $key Row value key
-     * @param int $order Column order
-     * @return this
-     */
-    protected function _addColumnFromCollection($key, $order)
-    {
-        return $this->_addColumn(array(
-            'block_id'             => $key,
-            'index'                => $key,
-            'width'                => '',
-            'align'                => self::COLUMN_ALIGNMENT_LEFT,
-            'header'               => $this->_getHelper()->getColumnHeaderName($key),
-            'order'                => $order,
-            'origin'               => self::COLUMN_ORIGIN_COLLECTION,
-            'is_visible'           => false,
-            'is_only_filterable'   => false,
-            'is_system'            => false,
-            'is_missing'           => false,
-            'store_id'             => null,
-            'renderer_type'        => null,
-            'renderer_params'      => null,
-            'is_edit_allowed'      => true,
-            'customization_params' => null,
-        ));
-    }
-    
-    /**
      * Return whether given block type and block ID correspond to this grid
      *
      * @param string $blockType Block type
@@ -2418,283 +1943,6 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     public function matchGridBlock($blockType, $blockId)
     {
         return (($typeModel = $this->getTypeModel()) && $typeModel->matchGridBlock($blockType, $blockId, $this));
-    }
-    
-    /**
-     * Init values from grid block instance
-     *
-     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
-     * @return this
-     */
-    public function initWithGridBlock(Mage_Adminhtml_Block_Widget_Grid $gridBlock)
-    {
-        // Reset / Initialization
-        $this->setBlockId($gridBlock->getId());
-        $this->setHasVaryingBlockId(Mage::helper('customgrid/grid')->isVaryingGridBlockId($gridBlock->getId()));
-        $this->setBlockType($gridBlock->getType());
-        $this->_resetColumnsValues();
-        $this->getColumnIdsByOrigin();
-        $this->_setVarNamesFromBlock($gridBlock);
-        
-        $order = 0;
-        $gridIndices = array();
-        
-        foreach ($gridBlock->getColumns() as $columnBlock) {
-            // Take all columns from grid
-            $order++;
-            $this->_addColumnFromBlock($columnBlock, $order * $this->getColumnsOrderPitch(), self::COLUMN_ORIGIN_GRID);
-            $gridIndices[] = $columnBlock->getIndex();
-        }
-        
-        if ($gridBlock->getCollection() && ($gridBlock->getCollection()->count() > 0)) {
-            // Initialize collection columns if possible
-            $item = $gridBlock->getCollection()->getFirstItem();
-            
-            foreach ($item->getData() as $key => $value) {
-                if (!in_array($key, $gridIndices, true) 
-                    && !in_array($key, $this->_data['column_ids_by_origin'][self::COLUMN_ORIGIN_GRID], true)
-                    && (is_scalar($value) || is_null($value))) {
-                    $order++;
-                    $this->_addColumnFromCollection($key, $order * $this->getColumnsOrderPitch());
-                }
-            }
-        }
-        
-        return $this;
-    }
-    
-    /**
-     * Check values (columns, etc.) against grid block instance, and save up-to-date values
-     * 
-     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
-     * @return bool Whether collection columns have been checked (if false, using them could be "dangerous")
-     */
-    public function checkColumnsAgainstGridBlock(Mage_Adminhtml_Block_Widget_Grid $gridBlock)
-    {
-        $foundGridIds = array();
-        $gridIndices  = array();
-        $this->getColumns();
-        $this->getColumnIdsByOrigin();
-        $this->_setVarNamesFromBlock($gridBlock);
-        
-        // Grid columns
-        foreach ($gridBlock->getColumns() as $columnBlock) {
-            $columnBlockId = $columnBlock->getId();
-            
-            if (isset($this->_data['columns'][$columnBlockId])) {
-                $previousOrigin = $this->_data['columns'][$columnBlockId]->getOrigin();
-                
-                $this->_data['columns'][$columnBlockId]->addData(array(
-                    'block_id'   => $columnBlockId,
-                    'index'      => $columnBlock->getIndex(),
-                    'origin'     => self::COLUMN_ORIGIN_GRID,
-                    'is_system'  => (bool) $columnBlock->getIsSystem(),
-                    'is_missing' => false,
-                ));
-                
-                if ($previousOrigin != self::COLUMN_ORIGIN_GRID) {
-                    $previousKey = array_search($columnBlockId, $this->_data['column_ids_by_origin'][$previousOrigin]);
-                    unset($this->_data['column_ids_by_origin'][$previousOrigin][$previousKey]);
-                    $this->_data['column_ids_by_origin'][self::COLUMN_ORIGIN_GRID][] = $columnBlockId;
-                }
-            } else {
-                $this->_addColumnFromBlock($columnBlock, $this->_getNextColumnOrder());
-            }
-            
-            $gridIndices[]  = $columnBlock->getIndex();
-            $foundGridIds[] = $columnBlockId;
-        }
-        
-        $foundCollectionIds = array();
-        $checkedCollection  = false;
-        
-        // Collection columns
-        if ($gridBlock->getCollection() && ($gridBlock->getCollection()->count() > 0)) {
-            $item = $gridBlock->getCollection()->getFirstItem();
-            $checkedCollection = true;
-            
-            foreach ($item->getData() as $key => $value) {
-                if (is_scalar($value) || is_null($value)) {
-                    if (isset($this->_data['columns'][$key])) {
-                        $previousOrigin = $this->_data['columns'][$key]->getOrigin();
-                        
-                        if (!in_array($key, $foundGridIds, true)) {
-                            if (!in_array($key, $gridIndices, true)) {
-                                $this->_data['columns'][$key]->addData(array(
-                                    'block_id'   => $key,
-                                    'index'      => $key,
-                                    'origin'     => self::COLUMN_ORIGIN_COLLECTION,
-                                    'is_system'  => false,
-                                    'is_missing' => false,
-                                ));
-                                
-                                if ($previousOrigin != self::COLUMN_ORIGIN_COLLECTION) {
-                                    $previousKey = array_search(
-                                        $key,
-                                        $this->_data['column_ids_by_origin'][$previousOrigin]
-                                    );
-                                    unset($this->_data['column_ids_by_origin'][$previousOrigin][$previousKey]);
-                                    $this->_data['column_ids_by_origin'][self::COLUMN_ORIGIN_COLLECTION][] = $key;
-                                }
-                                
-                                $foundCollectionIds[] = $key;
-                            } else {
-                                unset($this->_data['columns'][$key]);
-                            }
-                        }
-                    } elseif (!in_array($key, $foundGridIds, true) && !in_array($key, $gridIndices, true)) {
-                        $this->_addColumnFromCollection($key, $this->_getNextColumnOrder());
-                        $foundCollectionIds[] = $key;
-                    }
-                }
-            }
-        }
-        
-        // Attribute columns
-        $foundAttributesIds = array();
-        
-        if ($this->canHaveAttributeColumns()) {
-            $columnsBlockIds = $this->_data['column_ids_by_origin'][self::COLUMN_ORIGIN_ATTRIBUTE];
-            $attributes = $this->getAvailableAttributesCodes();
-            
-            foreach ($columnsBlockIds as $columnBlockId) {
-                // Verify attributes existences
-                if (in_array($this->_data['columns'][$columnBlockId]->getIndex(), $attributes, true)) {
-                    $this->_data['columns'][$columnBlockId]->setIsMissing(false);
-                    $foundAttributesIds[] = $columnBlockId;
-                }
-            }
-        }
-        
-        // Custom columns
-        $foundCustomIds = array();
-        
-        if ($this->canHaveCustomColumns()) {
-            $columnsBlockIds = $this->_data['column_ids_by_origin'][self::COLUMN_ORIGIN_CUSTOM];
-            $availableCodes  = $this->getAvailableCustomColumnsCodes(true);
-            
-            foreach ($columnsBlockIds as $columnBlockId) {
-                // Verify custom columns existence / match
-                if (in_array($this->_data['columns'][$columnBlockId]->getIndex(), $availableCodes, true)) {
-                    $this->_data['columns'][$columnBlockId]->setIsMissing(false);
-                    $foundCustomIds[] = $columnBlockId;
-                }
-            }
-        }
-        
-        // Mark found to be missing columns as such
-        $foundIds = array_merge($foundGridIds, $foundCollectionIds, $foundAttributesIds, $foundCustomIds);
-        $missingIds = array_diff(array_keys($this->_data['columns']), $foundIds);
-        
-        foreach ($missingIds as $missingId) {
-            if ($checkedCollection
-                || !$this->_data['columns'][$missingId]->isCollection()) {
-                $this->_data['columns'][$missingId]->setIsMissing(true);
-            }
-        }
-        
-        $this->setDataChanges(true)->save();
-        return $checkedCollection;
-    }
-    
-    /**
-     * Return whether grid results can be exported
-     *
-     * @return bool
-     */
-    public function canExport()
-    {
-        return (($typeModel = $this->getTypeModel()) && $typeModel->canExport($this->getBlockType()));
-    }
-    
-    /**
-     * Return available export types
-     *
-     * @return array
-     */
-    public function getExportTypes()
-    {
-        return ($typeModel = $this->getTypeModel())
-            ? $typeModel->getExportTypes($this->getBlockType())
-            : array();
-    }
-    
-    /**
-     * Return whether current request corresponds to an export request for the active grid
-     *
-     * @param Mage_Core_Controller_Request_Http $request Request object
-     * @return bool
-     */
-    public function isExportRequest(Mage_Core_Controller_Request_Http $request)
-    {
-        return (($typeModel = $this->getTypeModel()) && $typeModel->isExportRequest($this->getBlockType(), $request));
-    }
-    
-    /**
-     * Export grid data in given format
-     *
-     * @param string $format Export format
-     * @param array|null $config Export configuration
-     * @return mixed
-     */
-    protected function _exportFile($format, $config = null)
-    {
-        if (!$this->checkUserPermissions(self::ACTION_EXPORT_RESULTS)) {
-            $this->_throwPermissionException();
-        }
-        if ($typeModel = $this->getTypeModel()) {
-            $typeModel->beforeGridExport($format, null);
-        }
-        
-        $gridBlock = Mage::getSingleton('core/layout')->createBlock($this->getBlockType());
-        $exportOutput = '';
-        
-        if (!is_null($config)) {
-            $gridBlock->blcg_setExportConfig($config);
-        }
-        if ($typeModel) {
-            $typeModel->beforeGridExport($format, $gridBlock);
-        }
-        
-        switch ($format) {
-            case 'csv':
-                $exportOutput = $gridBlock->getCsvFile();
-                break;
-            case 'xml':
-                $exportOutput = $gridBlock->getExcelFile();
-                break;
-            default:
-                $exportOutput = null;
-                break;
-        }
-        
-        if ($typeModel) {
-            $typeModel->afterGridExport($format, $gridBlock);
-        }
-        
-        return $exportOutput;
-    }
-    
-    /**
-     * Export grid data in CSV format
-     *
-     * @param array|null $config Export configuration
-     * @return mixed
-     */
-    public function exportCsvFile($config = null)
-    {
-        return $this->_exportFile('csv', $config);
-    }
-    
-    /**
-     * Export grid data in XML Excel format
-     *
-     * @param array|null $config Export configuration
-     * @return mixed
-     */
-    public function exportExcelFile($config = null)
-    {
-        return $this->_exportFile('xml', $config);
     }
     
     /**
@@ -2768,52 +2016,11 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     }
     
     /**
-     * Encode filters array
-     *
-     * @param array $filters Filters values
-     * @return string
-     */
-    public function encodeGridFiltersArray(array $filters)
-    {
-        return base64_encode(http_build_query($filters));
-    }
-    
-    /**
-     * Decode filters string
-     *
-     * @param string $filters Encoded filters string
-     * @return array
-     */
-    public function decodeGridFiltersString($filters)
-    {
-        return (is_string($filters) ? Mage::helper('adminhtml')->prepareFilterString($filters) : $filters);
-    }
-    
-    /**
-     * Compare grid filter values
-     *
-     * @param mixed $valueA One filter value
-     * @param mixed $valueB Another filter value
-     * @return bool Whether given values are equal
-     */
-    public function compareGridFilterValues($valueA, $valueB)
-    {
-        if (is_array($valueA) && is_array($valueB)) {
-            ksort($valueA);
-            ksort($valueB);
-            $valueA = $this->encodeGridFiltersArray($valueA);
-            $valueB = $this->encodeGridFiltersArray($valueB);
-            return ($valueA == $valueB);
-        }
-        return ($valueA === $valueB);
-    }
-    
-    /**
      * Return filters token session key
      *
      * @return string
      */
-    protected function _getFiltersTokenSessionKey()
+    public function getFiltersTokenSessionKey()
     {
         return self::SESSION_BASE_KEY_TOKEN . $this->getId();
     }
@@ -2824,7 +2031,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
      * @param int|null $profileId ID of the profile under which the filters are applied
      * @return string
      */
-    protected function _getAppliedFiltersSessionKey($profileId = null)
+    public function getAppliedFiltersSessionKey($profileId = null)
     {
         if (is_null($profileId)) {
             $profileId = $this->getProfileId();
@@ -2838,390 +2045,12 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
      * @param int|null $profileId ID of the profile under which the filters are removed
      * @return string
      */
-    protected function _getRemovedFiltersSessionKey($profileId = null)
+    protected function getRemovedFiltersSessionKey($profileId = null)
     {
         if (is_null($profileId)) {
             $profileId = $this->getProfileId();
         }
         return self::SESSION_BASE_KEY_REMOVED_FILTERS . $this->getId() . '_' . $profileId;
-    }
-    
-    /**
-     * Verify validities of filters applied to given grid block,
-     * and return safely appliable filters
-     * Mostly used for collection and custom columns, which may have their renderer changed at any time
-     * (and the new renderers may crash when given unexpected kind of filter values)
-     * 
-     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
-     * @param array $filters Applied filters
-     * @return array
-     */
-    public function verifyGridBlockFilters(Mage_Adminhtml_Block_Widget_Grid $gridBlock, array $filters)
-    {
-        // Get previous filtering informations from session
-        $session = Mage::getSingleton('adminhtml/session');
-        $tokenSessionKey   = $this->_getFiltersTokenSessionKey();
-        $appliedSessionKey = $this->_getAppliedFiltersSessionKey();
-        $removedSessionKey = $this->_getRemovedFiltersSessionKey();
-        
-        if (!is_array($sessionAppliedFilters = $session->getData($appliedSessionKey))) {
-            $sessionAppliedFilters = array();
-        }
-        if (!is_array($sessionRemovedFilters = $session->getData($removedSessionKey))) {
-            $sessionRemovedFilters = array();
-        }
-        
-        $foundFilterBlocksIds = array();
-        $removedFilterBlocksIds = array();
-        $attributesRenderers = $this->getAvailableAttributesRendererTypes();
-        
-        /*
-        Verify grid tokens, if request one does not correspond to session one,
-        then it is almost sure that we currently come from anywhere but from an acual grid action
-        (such as search, sort, export, pagination, ...)
-        May be too restrictive, but at the moment, rather be too restrictive than not enough
-        */
-        if ($gridBlock->getRequest()->has(self::GRID_TOKEN_PARAM_NAME)
-            && $session->hasData($tokenSessionKey)) {
-            $requestValue = $gridBlock->getRequest()->getParam(self::GRID_TOKEN_PARAM_NAME, null);
-            $sessionValue = $session->getData($tokenSessionKey);
-            $isGridAction = ($requestValue == $sessionValue);
-        } else {
-            $isGridAction = false;
-        }  
-        
-        $columns = $this->getColumns(false, true);
-        $typeModel = Mage::getSingleton('customgrid/grid_type_config');
-        
-        foreach ($filters as $columnBlockId => $data) {
-            if (isset($columns[$columnBlockId])) {
-                $column = $columns[$columnBlockId];
-                $columnIndex = $column->getIndex();
-                
-                if (isset($sessionAppliedFilters[$columnBlockId])) {
-                    /*
-                    Check if the column has changed significantly since the filter was applied
-                    (it may have became incompatible)
-                    If so, unvalidate the corresponding filter data for the current and upcoming requests,
-                    (until a new filter is applied on the same column)
-                    */
-                    $hasColumnChanged = false;
-                    $sessionFilter = $sessionAppliedFilters[$columnBlockId];
-                    
-                    if ($sessionFilter['origin'] != $column->getOrigin()) {
-                        $hasColumnChanged = true;
-                    } elseif ($column->isCollection()) {
-                        $hasColumnChanged = ($sessionFilter['renderer_type'] != $column->getRendererType());
-                    } elseif ($column->isAttribute()) {
-                        $previousIndex = $sessionFilter['index'];
-                        
-                        if (isset($attributesRenderers[$previousIndex])) {
-                            $previousRenderer = $attributesRenderers[$previousIndex];
-                            $columnRenderer   = $attributesRenderers[$columnIndex];
-                            $hasColumnChanged = ($previousRenderer != $columnRenderer);
-                        } else {
-                            $hasColumnChanged = true;
-                        }
-                    } elseif ($column->isCustom()) {
-                        $previousIndex = $sessionFilter['index'];
-                        
-                        $rendererTypes = array(
-                            'previous' => $sessionFilter['renderer_type'],
-                            'current'  => $column->getRendererType(),
-                        );
-                        $customizationParams = array(
-                            'previous' => $typeModel->decodeParameters($sessionFilter['customization_params'], true),
-                            'current'  => $typeModel->decodeParameters($column->getCustomizationParams(), true),
-                        );
-                        
-                        if (($previousIndex != $columnIndex)
-                            || (!$customColumn = $column->getCustomColumnModel())) {
-                            $hasColumnChanged = true;
-                        } else {
-                            $hasColumnChanged = $customColumn->shouldInvalidateFilters(
-                                $this,
-                                $column,
-                                $customizationParams,
-                                $rendererTypes
-                            );
-                        }
-                    }
-                    
-                    if ($hasColumnChanged) {
-                        unset($filters[$columnBlockId]);
-                        unset($sessionAppliedFilters[$columnBlockId]);
-                        $sessionRemovedFilters[$columnBlockId] = $data;
-                        $removedFilterBlocksIds[] = $columnBlockId;
-                    }
-                } elseif (isset($sessionRemovedFilters[$columnBlockId]) && !$isGridAction) {
-                    if ($this->compareGridFilterValues($sessionRemovedFilters[$columnBlockId], $data)) {
-                        // The same filter was invalidated before, remove it again
-                        unset($filters[$columnBlockId]);
-                    }
-                } else {
-                    $sessionAppliedFilters[$columnBlockId] = array(
-                        'index'  => $column->getIndex(),
-                        'origin' => $column->getOrigin(),
-                        'renderer_type' => $column->getRendererType(),
-                        'customization_params' => $column->getCustomizationParams(),
-                    );
-                }
-                
-                $foundFilterBlocksIds[] = $columnBlockId;
-            } else {
-                // Unexisting column : unneeded filter
-                unset($filters[$columnBlockId]);
-            }
-        }
-        
-        /**
-         * Note : adding new parameters to the request object will make them be added to, eg,
-         * URLs retrieved later with the use of the current values
-         * (eg. with Mage::getUrl('module/controller/action', array('_current' => true)))
-         */
-        
-        /*
-        Add our token to current request and session
-        Use ":" in hash to force Varien_Db_Adapter_Pdo_Mysql::query() using a bind param instead of full request path,
-        (as it uses this condition : strpos($sql, ':') !== false),
-        when querying core_url_rewrite table, else the query could be too long, 
-        making Zend_Db_Statement::_stripQuoted() sometimes crash on one of its call to preg_replace()
-        */
-        $tokenValue = Mage::helper('core')->uniqHash('blcg:');
-        $gridBlock->getRequest()->setParam(self::GRID_TOKEN_PARAM_NAME, $tokenValue);
-        $session->setData($tokenSessionKey, $tokenValue);
-        
-        // Remove obsolete filters and save up-to-date filters array to session
-        $obsoleteFilterBlocksIds = array_diff(array_keys($sessionAppliedFilters), $foundFilterBlocksIds);
-        
-        foreach ($obsoleteFilterBlocksIds as $columnBlockId) {
-            unset($sessionAppliedFilters[$columnBlockId]);
-        }
-        
-        $session->setData($appliedSessionKey, $sessionAppliedFilters);
-        
-        if ($isGridAction) {
-            /*
-            Apply newly removed filters only when a grid action is done
-            The only remaining potential source of "maybe wrong" filters could come from  the use of an old URL with
-            obsolete filter(s) in it (eg from browser history), but there is no way at the moment to detect them
-            (at least not any simple one with only few impacts)
-            */
-            $session->setData($removedSessionKey, array_intersect_key($sessionRemovedFilters, $removedFilterBlocksIds));
-        } else {
-            $session->setData($removedSessionKey, $sessionRemovedFilters);
-        }
-        
-        $filterParam = $this->encodeGridFiltersArray($filters);
-        
-        if ($gridBlock->blcg_getSaveParametersInSession()) {
-            $session->setData($gridBlock->blcg_getSessionParamKey($gridBlock->getVarNameFilter()), $filterParam);
-        }
-        if ($gridBlock->getRequest()->has($gridBlock->getVarNameFilter())) {
-            $gridBlock->getRequest()->setParam($gridBlock->getVarNameFilter(), $filterParam);
-        }
-        
-        $gridBlock->blcg_setFilterParam($filterParam);
-        return $filters;
-    }
-    
-    /**
-     * Return the value of "default_filter", stripped of all the obsolete or invalid values
-     * 
-     * @return null|array
-     */
-    public function getAppliableDefaultFilter()
-    {
-        if (!$this->hasData('appliable_default_filter')) {
-            $appliableDefaultFilter = null;
-            
-            if (($filters = $this->_getData('default_filter')) && is_array($filters = @unserialize($filters))) {
-                $columns = $this->getColumns(false, true);
-                $appliableDefaultFilter = array();
-                $attributesRenderers = $this->getAvailableAttributesRendererTypes();
-                
-                foreach ($filters as $columnBlockId => $filter) {
-                    if (isset($columns[$columnBlockId])) {
-                        $column = $columns[$columnBlockId];
-                        $columnIndex = $column->getIndex();
-                        
-                        // Basically, those are the same verifications than the ones used in verifyGridBlockFilters()
-                        if ($filter['column']['origin'] != $column->getOrigin()) {
-                            continue;
-                        }
-                        
-                        $isValidFilter = true;
-                        $previousRendererType = $filter['column']['renderer_type'];
-                        $previousCustomizationParams = $filter['column']['customization_params'];
-                        
-                        if ($column->isCollection()) {
-                            $isValidFilter = ($previousRendererType == $column->getRendererType());
-                        } elseif ($column->isAttribute()) {
-                            $previousIndex = $filter['column']['index'];
-                            
-                            if (isset($attributesRenderers[$previousIndex])) {
-                                $previousRenderer = $attributesRenderers[$previousIndex];
-                                $columnRenderer = $attributesRenderers[$columnIndex];
-                                $isValidFilter  = ($previousRenderer == $columnRenderer);
-                            } else {
-                                $isValidFilter = false;
-                            }
-                        } elseif ($column->isCustom()) {
-                            $previousIndex = $filter['column']['index'];
-                            $typeModel = Mage::getSingleton('customgrid/grid_type_config');
-                            
-                            $rendererTypes = array(
-                                'previous' => $previousRendererType,
-                                'current'  => $column->getRendererType(),
-                            );
-                            $customizationParams = array(
-                                'previous' => $typeModel->decodeParameters($previousCustomizationParams, true),
-                                'current'  => $typeModel->decodeParameters($column->getCustomizationParams(), true),
-                            );
-                            
-                            if (($previousIndex != $columnIndex)
-                                || (!$customColumn = $column->getCustomColumnModel())) {
-                                $isValidFilter = false;
-                            } else {
-                                $isValidFilter = !$customColumn->shouldInvalidateFilters(
-                                    $this,
-                                    $column,
-                                    $customizationParams,
-                                    $rendererTypes
-                                );
-                            }
-                        }
-                        
-                        if ($isValidFilter) {
-                            $appliableDefaultFilter[$columnBlockId] = $filter['value'];
-                        }
-                    }
-                }
-            }
-            
-            $this->setData('appliable_default_filter', $appliableDefaultFilter);
-        }
-        return $this->_getData('appliable_default_filter');
-    }
-    
-    /**
-     * Return appliable default parameter value depending on the available values and the defined behaviour
-     *
-     * @param string $type Parameter type (eg "limit" or "filter")
-     * @param mixed $blockValue Base value
-     * @param mixed $customValue User-defined value
-     * @param bool $fromCustomSetter Whether this function is called from a setter applying user-defined values
-     * @param mixed $originalValue Current value (to be replaced)
-     * @return mixed
-     */
-    public function getGridBlockDefaultParamValue(
-        $type,
-        $blockValue,
-        $customValue = null,
-        $fromCustomSetter = false,
-        $originalValue = null
-    ) {
-        $value = $blockValue;
-        
-        if (!$fromCustomSetter) {
-            if ($type == 'filter') {
-                $customValue = $this->getAppliableDefaultFilter();
-            } else {
-                $customValue = $this->getData('default_' . $type);
-            }
-        }
-        
-        if (!$behaviour = $this->_getData('default_' . $type . '_behaviour')) {
-            $behaviour = $this->_getConfigHelper()->geDefaultParameterBehaviour($type);
-        }
-        if ($behaviour == self::DEFAULT_PARAM_FORCE_CUSTOM) {
-            if (!is_null($customValue)) {
-                $value = $customValue;
-            }
-        } elseif ($behaviour == self::DEFAULT_PARAM_FORCE_ORIGINAL) {
-            if (is_null($blockValue) && $fromCustomSetter) {
-                $value = $blockValue;
-            }
-        } elseif (($type == 'filter')
-                  && (($behaviour == self::DEFAULT_PARAM_MERGE_DEFAULT)
-                      || ($behaviour == self::DEFAULT_PARAM_MERGE_BASE_CUSTOM)
-                      || ($behaviour == self::DEFAULT_PARAM_MERGE_BASE_ORIGINAL))) {
-            $blockFilters  = (is_array($blockValue)  ? $blockValue  : array());
-            $customFilters = (is_array($customValue) ? $customValue : array());
-            
-            if ($behaviour == self::DEFAULT_PARAM_MERGE_BASE_CUSTOM) {
-                $value = array_merge($customFilters, $blockFilters);
-            } elseif ($behaviour == self::DEFAULT_PARAM_MERGE_BASE_ORIGINAL) {
-                $value = array_merge($blockFilters, $customFilters);
-            } elseif ($fromCustomSetter) {
-                $value = array_merge($blockFilters, $customFilters);
-            } else {
-                $value = array_merge($customFilters, $blockFilters);
-            }
-        } else {
-            if (!is_null($customValue) && $fromCustomSetter) {
-                $value = $customValue;
-            }
-        }
-        
-        if ($type == 'limit') {
-            if (!in_array($value, $this->getAppliablePaginationValues())) {
-                $value = (is_null($originalValue) ? $blockValue : $originalValue);
-            }
-        }
-        
-        return $value;
-    }
-    
-    /**
-     * Apply base default limit to the given grid block instance (possibly based on custom pagination values)
-     *
-     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
-     * @return this
-     */
-    public function applyBaseDefaultLimitToGridBlock(Mage_Adminhtml_Block_Widget_Grid $gridBlock)
-    {
-        $customLimit  = $this->getDefaultPaginationValue();
-        $blockLimit   = $gridBlock->getDefaultLimit();
-        $defaultLimit = null;
-        $values = $this->getAppliablePaginationValues();
-        
-        if (!empty($customLimit) && in_array($customLimit, $values)) {
-            $defaultLimit = $customLimit;
-        } elseif (!empty($blockLimit) && in_array($blockLimit, $values)) {
-            $defaultLimit = $blockLimit;
-        } else {
-            $defaultLimit = array_shift($values);
-        }
-        
-        $gridBlock->blcg_setDefaultLimit($defaultLimit, true);
-        return $this;
-    }
-    
-    /**
-     * Apply default parameters to given grid block instance
-     *
-     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
-     * @return this
-     */
-    public function applyDefaultsToGridBlock(Mage_Adminhtml_Block_Widget_Grid $gridBlock)
-    {
-        if ($defaultValue = $this->_getData('default_page')) {
-            $gridBlock->blcg_setDefaultPage($defaultValue);
-        }
-        if ($defaultValue = $this->_getData('default_limit')) {
-            $gridBlock->blcg_setDefaultLimit($defaultValue);
-        }
-        if ($defaultValue = $this->_getData('default_sort')) {
-            $gridBlock->blcg_setDefaultSort($defaultValue);
-        }
-        if ($defaultValue = $this->_getData('default_dir')) {
-            $gridBlock->blcg_setDefaultDir($defaultValue);
-        }
-        if (is_array($defaultValue = $this->getAppliableDefaultFilter())) {
-            $gridBlock->blcg_setDefaultFilter($defaultValue);
-        }
-        return $this;
     }
     
     /**
@@ -3234,83 +2063,39 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     public function updateDefaultParameters(array $appliable, array $removable)
     {
         if (!$this->checkUserPermissions(self::ACTION_EDIT_DEFAULT_PARAMS)) {
-            $this->_throwPermissionException();
+            $this->throwPermissionException();
         }
         
-        $this->getColumns();
-        
-        if (isset($appliable['page'])) {
-            $this->setData('default_page', (int) $appliable['page']);
+        if (isset($appliable[self::GRID_PARAM_PAGE])) {
+            $this->setData('default_page', (int) $appliable[self::GRID_PARAM_PAGE]);
         }
-        if (isset($appliable['limit'])) {
-            $this->setData('default_limit', (int) $appliable['limit']);
+        if (isset($appliable[self::GRID_PARAM_LIMIT])) {
+            $this->setData('default_limit', (int) $appliable[self::GRID_PARAM_LIMIT]);
         }
-        if (isset($appliable['sort'])) {
-            if (isset($this->_data['columns'][$appliable['sort']])) {
-                $this->setData('default_sort', $appliable['sort']);
+        if (isset($appliable[self::GRID_PARAM_SORT])) {
+            if ($this->getColumnByBlockId($appliable[self::GRID_PARAM_SORT])) {
+                $this->setData('default_sort', $appliable[self::GRID_PARAM_SORT]);
             } else {
                 $this->setData('default_sort', null);
             }
         }
-        if (isset($appliable['dir'])) {
-            if (($appliable['dir'] == 'asc') || ($appliable['dir'] == 'desc')) {
-                $this->setData('default_dir', $appliable['dir']);
+        if (isset($appliable[self::GRID_PARAM_DIR])) {
+            if (($appliable[self::GRID_PARAM_DIR] == 'asc') || ($appliable[self::GRID_PARAM_DIR] == 'desc')) {
+                $this->setData('default_dir', $appliable[self::GRID_PARAM_DIR]);
             } else {
                 $this->setData('default_dir', null);
             }
         }
-        if (isset($appliable['filter'])) {
-            $filters = $appliable['filter'];
-            
-            if (!is_array($filters)) {
-                $filters = $this->decodeGridFiltersString($filters);
-            }
-            if (is_array($filters) && !empty($filters)) {
-                // Add some informations from current column values to filters, to later be able to check their validity
-                $columns = $this->getColumns();
-                $attributesRenderers = $this->getAvailableAttributesRendererTypes();
-                
-                foreach ($filters as $columnBlockId => $value) {
-                    if (isset($columns[$columnBlockId])) {
-                        $column = $columns[$columnBlockId];
-                        
-                        if ($column->isCollection()) {
-                            $rendererType = $column->getRendererType();
-                        } elseif ($column->isAttribute()) {
-                            $rendererType = $attributesRenderers[$column->getIndex()];
-                        } elseif ($column->isCustom()) {
-                            $rendererType = $column->getRendererType();
-                        } else {
-                            $rendererType = null;
-                        }
-                        
-                        $filters[$columnBlockId] = array(
-                            'value'  => $value,
-                            'column' => array(
-                                'origin' => $column->getOrigin(),
-                                'index'  => $column->getIndex(),
-                                'renderer_type' => $rendererType,
-                                'customization_params' => $column->getCustomizationParams(),
-                            ),
-                        );
-                    } else {
-                        unset($filters[$columnBlockId]);
-                    }
-                }
-                
-                $this->setData('default_filter', serialize($filters));
-            } else {
-                $this->setData('default_filter', null);
-            }
+        if (isset($appliable[self::GRID_PARAM_FILTER])) {
+            $this->setData(
+                'default_filter',
+                $this->getApplier()->prepareDefaultFilterValue($appliable[self::GRID_PARAM_FILTER])
+            );
         }
         
-        if (is_array($removable)) {
-            $keys = array('page', 'limit', 'sort', 'dir', 'filter');
-            
-            foreach ($keys as $key) {
-                if (isset($removable[$key]) && $removable[$key]) {
-                    $this->setData('default_' . $key, null);
-                }
+        foreach ($this->getGridParamsKeys() as $key) {
+            if (isset($removable[$key]) && $removable[$key]) {
+                $this->setData('default_' . $key, null);
             }
         }
         
@@ -3327,16 +2112,11 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     public function updateDefaultParametersBehaviours(array $behaviours)
     {
         if (!$this->checkUserPermissions(self::ACTION_EDIT_DEFAULT_PARAMS_BEHAVIOURS)) {
-            $this->_throwPermissionException();
+            $this->throwPermissionException();
         }
         
-        $keys = array(
-            'page'   => false,
-            'limit'  => false,
-            'sort'   => false,
-            'dir'    => false,
-            'filter' => true,
-        );
+        $keys = array_fill_keys($this->getGridParamsKeys(), false);
+        $keys[self::GRID_PARAM_FILTER] = true;
         
         $scalarValues = array(
             self::DEFAULT_PARAM_DEFAULT,
@@ -3375,7 +2155,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
      */
     public function setUsersConfig(array $usersConfig)
     {
-        $this->_resetUsersConfigValues();
+        $this->resetUsersConfigValues();
         
         foreach ($usersConfig as $key => $userConfig) {
             if (is_array($userConfig)) {
@@ -3399,7 +2179,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
      *
      * @return array
      */
-    protected function _getUsersConfig()
+    public function getUsersConfig()
     {
         if (!$this->hasData('users_config')) {
             $usersConfig = (($id = $this->getId()) ? $this->_getResource()->getGridUsers($id) : array());
@@ -3409,17 +2189,14 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     }
     
     /**
-     * Return possibly filtered users config
+     * Return the config corresponding to the given user ID, or null if none exists
      *
-     * @param int|null $userId User ID on which to filter, if not set the whole users config will be returned
-     * @return array
+     * @return BL_CustomGrid_Object|null
      */
-    public function getUsersConfig($userId = null)
+    public function getUserConfig($userId)
     {
-        $usersConfig = $this->_getUsersConfig();
-        return !is_null($userId)
-            ? (isset($usersConfig[$userId]) ? $usersConfig[$userId] : null)
-            : $usersConfig;
+        $usersConfig = $this->getUsersConfig();
+        return (isset($usersConfig[$userId]) ? $usersConfig[$userId] : null);
     }
     
     /**
@@ -3430,7 +2207,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
      */
     public function setRolesConfig(array $rolesConfig)
     {
-        $this->_resetRolesConfigValues();
+        $this->resetRolesConfigValues();
         
         foreach ($rolesConfig as $key => $roleConfig) {
             if (is_array($roleConfig)) {
@@ -3466,7 +2243,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
      *
      * @return array
      */
-    protected function _getRolesConfig()
+    public function getRolesConfig()
     {
         if (!$this->hasData('roles_config')) {
             $rolesConfig = (($id = $this->getId()) ? $this->_getResource()->getGridRoles($id) : array());
@@ -3476,17 +2253,14 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     }
     
     /**
-     * Return possibly filtered roles config
+     * Return the config corresponding to the given role ID, or null if none exists
      *
-     * @param int $roleId Role ID on which to filter, if not set the whole roles config will be returned
-     * @return mixed
+     * @return BL_CustomGrid_Object|null
      */
-    public function getRolesConfig($roleId = null)
+    public function getRoleConfig($roleId)
     {
-        $rolesConfig = $this->_getRolesConfig();
-        return !is_null($roleId)
-            ? (isset($rolesConfig[$roleId]) ? $rolesConfig[$roleId] : null)
-            : $rolesConfig;
+        $rolesConfig = $this->getRolesConfig();
+        return (isset($rolesConfig[$roleId]) ? $rolesConfig[$roleId] : null);
     }
     
     /**
@@ -3498,7 +2272,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
      */
     public function getRolePermissions($roleId, $default = array())
     {
-        return ($roleConfig = $this->getRolesConfig($roleId))
+        return ($roleConfig = $this->getRoleConfig($roleId))
             ? $roleConfig->getDataSetDefault('permissions', array())
             : $default;
     }
@@ -3512,7 +2286,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     public function updateRolesPermissions(array $permissions)
     {
         if (!$this->checkUserPermissions(self::ACTION_EDIT_ROLES_PERMISSIONS)) {
-            $this->_throwPermissionException();
+            $this->throwPermissionException();
         }
         
         $flags = array(
@@ -3764,7 +2538,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     public function updateCustomizationParameters(array $params)
     {
         if (!$this->checkUserPermissions(self::ACTION_EDIT_CUSTOMIZATION_PARAMS)) {
-            $this->_throwPermissionException();
+            $this->throwPermissionException();
         }
         
         $booleanKeys = array(
@@ -3795,341 +2569,6 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
         }
         
         return $this;
-    }
-    
-    /**
-     * Return column block values for given collection column
-     *
-     * @param string $index Column index
-     * @param string $rendererType Renderer type code
-     * @param string $rendererParams Encoded renderer parameters
-     * @param Mage_Core_Model_Store $store Current store
-     * @return array
-     */
-    protected function _getCollectionColumnBlockValues(
-        $index,
-        $rendererType,
-        $rendererParams,
-        Mage_Core_Model_Store $store
-    ) {
-        $config = Mage::getSingleton('customgrid/column_renderer_config_collection');
-        
-        if ($renderer = $config->getRendererInstanceByCode($rendererType)) {
-            if (is_array($params = $config->decodeParameters($rendererParams))) {
-                $renderer->setValues($params);
-            } else {
-                $renderer->setValues(array());
-            }
-            
-            return $renderer->getColumnBlockValues($index, $store, $this);
-        }
-        
-        return array();
-    }
-    
-    /**
-     * Return column block values for given attribute column
-     * 
-     * @param Mage_Eav_Model_Entity_Attribute $attribute Corresponding attribute model
-     * @param string $rendererParams Encoded renderer parameters
-     * @param Mage_Core_Model_Store $store Current store
-     * @return array
-     */
-    protected function _getAttributeColumnBlockValues($attribute, $rendererParams, Mage_Core_Model_Store $store)
-    {
-        $config = Mage::getSingleton('customgrid/column_renderer_config_attribute');
-        $renderers = $config->getRenderersInstances();
-        $values = array();
-        
-        foreach ($renderers as $renderer) {
-            if ($renderer->isAppliableToAttribute($attribute, $this)) {
-                if (is_array($params = $config->decodeParameters($rendererParams))) {
-                    $renderer->setValues($params);
-                } else {
-                    $renderer->setValues(array());
-                }
-                
-                $values = $renderer->getColumnBlockValues($attribute, $store, $this);
-                $values = (is_array($values) ? $values : array());
-                break;
-            }
-        }
-        
-        return $values;
-    }
-    
-    /**
-     * Return column block values for given custom column
-     *
-     * @param string $columnBlockId Column block ID
-     * @param string $columnIndex Column index
-     * @param BL_CustomGrid_Model_Custom_Column_Abstract $customColumn Custom column model
-     * @param string $rendererType Renderer type code
-     * @param string $rendererParams Encoded renderer parameters
-     * @param string $customizationParams Encoded customization parameters
-     * @param Mage_Core_Model_Store $store Current store
-     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
-     * @return array
-     */
-    protected function _getCustomColumnBlockValues(
-        $columnBlockId,
-        $columnIndex,
-        BL_CustomGrid_Model_Custom_Column_Abstract $customColumn,
-        $rendererType,
-        $rendererParams,
-        $customizationParams,
-        Mage_Core_Model_Store $store,
-        Mage_Adminhtml_Block_Widget_Grid $gridBlock
-    ) {
-        if ($customColumn->getAllowRenderers()) {
-            if ($customColumn->getLockedRenderer()
-                && ($customColumn->getLockedRenderer() != $rendererType)) {
-                $rendererType = $customColumn->getLockedRenderer();
-                $rendererParams = null;
-            }
-            
-            $config = Mage::getSingleton('customgrid/column_renderer_config_collection');
-            
-            if ($renderer = $config->getRendererInstanceByCode($rendererType)) {
-                if (is_array($params = $config->decodeParameters($rendererParams))) {
-                    $renderer->setValues($params);
-                } else {
-                    $renderer->setValues(array());
-                }
-            }
-        } else {
-            $renderer = null;
-        }
-        
-        if (!empty($customizationParams)) {
-            $customizationParams = Mage::getSingleton('customgrid/grid_type_config')
-                ->decodeParameters($customizationParams);
-        } else {
-            $customizationParams = array();
-        }
-        
-        return $customColumn->applyToGridBlock(
-            $gridBlock,
-            $this,
-            $columnBlockId,
-            $columnIndex,
-            (is_array($customizationParams) ? $customizationParams : array()),
-            $store,
-            $renderer
-        );
-    }
-    
-    /**
-     * Apply columns customization to the given grid block instance
-     *
-     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
-     * @param bool $applyFromCollection Whether collection columns should be added to the grid block
-     * @return this
-     */
-    public function applyColumnsToGridBlock(Mage_Adminhtml_Block_Widget_Grid $gridBlock, $applyFromCollection)
-    {
-        $gridIds = array_keys($gridBlock->getColumns());
-        $columnsOrders = array();
-        $columns = $this->getColumns(false, true);
-        uasort($columns, array($this, '_sortColumns'));
-        $attributes = $this->getAvailableAttributes();
-        $addedAttributes = array();
-        
-        foreach ($columns as $column) {
-            if (!in_array($column->getBlockId(), $gridIds, true)) {
-                if ($column->isVisible() && !$column->isMissing()
-                    && (!$column->isCollection() || $applyFromCollection)) {
-                    $lockedValues = $this->getColumnLockedValues($column->getBlockId());
-                    
-                    $data = array(
-                        'header' => $column->getHeader(),
-                        'align'  => $column->getAlign(),
-                        'width'  => $column->getWidth(),
-                        'index'  => $column->getIndex(),
-                    );
-                    $data = array_merge($data, array_intersect_key($lockedValues, $data));
-                    
-                    if ($column->isCollection()) {
-                        if (isset($lockedValues['renderer']) || $column->getRendererType()) {
-                            if (isset($lockedValues['renderer'])) {
-                                $rendererType = $lockedValues['renderer'];
-                                $rendererParams = ($rendererType == $column->getRendererType())
-                                    ? $column->getRendererParams()
-                                    : array();
-                            } else {
-                                $rendererType = $column->getRendererType();
-                                $rendererParams = $column->getRendererParams();
-                            }
-                            
-                            $data = array_merge(
-                                $data, 
-                                $this->_getCollectionColumnBlockValues(
-                                    $column->getIndex(),
-                                    $rendererType,
-                                    $rendererParams,
-                                    $gridBlock->blcg_getStore()
-                                )
-                            );
-                        }
-                        
-                    } elseif ($column->isAttribute()) {
-                        if (!isset($attributes[$column->getIndex()])) {
-                            continue;
-                        }
-                        
-                        $store = is_null($column->getStoreId())
-                            ? $gridBlock->blcg_getStore()
-                            : Mage::app()->getStore($column->getStoreId());
-                        $attributeKey = $column->getIndex() . '_' . $store->getId();
-                        
-                        if (!isset($addedAttributes[$attributeKey])) {
-                            $data['index'] = $alias = self::ATTRIBUTE_COLUMN_GRID_ALIAS
-                                . str_replace(self::ATTRIBUTE_COLUMN_ID_PREFIX, '', $column->getBlockId());
-                            
-                            $gridBlock->blcg_addAdditionalAttribute(array(
-                                'alias'     => $alias,
-                                'attribute' => $attributes[$column->getIndex()],
-                                'bind'      => 'entity_id',
-                                'filter'    => null,
-                                'join_type' => 'left',
-                                'store_id'  => $store->getId(),
-                            ));
-                            
-                            $addedAttributes[$attributeKey] = $alias;
-                        } else {
-                            $data['index'] = $addedAttributes[$attributeKey];
-                        }
-                        
-                        $data = array_merge(
-                            $data,
-                            $this->_getAttributeColumnBlockValues(
-                                $attributes[$column->getIndex()],
-                                $column->getRendererParams(),
-                                $store
-                            )
-                        );
-                        
-                    } elseif ($column->isCustom()) {
-                        if (!$customColumn = $column->getCustomColumnModel()) {
-                            continue;
-                        } 
-                        
-                        $store = is_null($column->getStoreId())
-                            ? $gridBlock->blcg_getStore()
-                            : Mage::app()->getStore($column->getStoreId());
-                        
-                         $data['index'] = $alias = self::CUSTOM_COLUMN_GRID_ALIAS
-                            . str_replace(self::CUSTOM_COLUMN_ID_PREFIX, '', $column->getBlockId());
-                        
-                        $customValues = $this->_getCustomColumnBlockValues(
-                            $column->getBlockId(),
-                            $data['index'],
-                            $customColumn,
-                            $column->getRendererType(),
-                            $column->getRendererParams(),
-                            $column->getCustomizationParams(),
-                            $store,
-                            $gridBlock
-                        );
-                        
-                        if (!is_array($customValues)) {
-                            continue;
-                        }
-                        
-                        $data = array_merge($data, $customValues);
-                    }
-                    
-                    if (isset($lockedValues['config_values']) && is_array($lockedValues['config_values'])) {
-                        $data = array_merge($data, $lockedValues['config_values']);
-                    }
-                    
-                    $gridBlock->addColumn($column->getBlockId(), $data);
-                    $columnsOrders[] = $column->getBlockId();
-                }
-                
-            } else {
-                if ($column->isVisible()) {
-                    if ($gridColumn = $gridBlock->getColumn($column->getBlockId())) {
-                        if (!$this->getIgnoreCustomWidths()) {
-                            $gridColumn->setWidth($column->getWidth());
-                        }
-                        if (!$this->getIgnoreCustomAlignments()) {
-                            $gridColumn->setAlign($column->getAlign());
-                        }
-                        if (!$this->getIgnoreCustomHeaders()) {
-                            $gridColumn->setHeader($column->getHeader());
-                        }
-                    }
-                    $columnsOrders[] = $column->getBlockId();
-                    
-                } else {
-                    $gridBlock->blcg_removeColumn($column->getBlockId());
-                }
-            }
-            
-            if ($column->isOnlyFilterable()
-                && ($columnBlock = $gridBlock->getColumn($column->getBlockId()))) {
-                $columnBlock->setBlcgFilterOnly(true);
-                
-                if ($gridBlock->blcg_isExport()) {
-                    // Columns with is_system flag set won't be exported, so forcing it will save us two overloads
-                    $columnBlock->setIsSystem(true);
-                }
-            }
-        }
-        
-        $gridBlock->blcg_resetColumnsOrder();
-        $previousBlockId = null;
-        
-        foreach ($columnsOrders as $columnBlockId) {
-            if (!is_null($previousBlockId)) {
-                $gridBlock->addColumnsOrder($columnBlockId, $previousBlockId);
-            }
-            $previousBlockId = $columnBlockId;
-        }
-        
-        $gridBlock->sortColumnsByOrder();
-        
-        return $this;
-    }
-    
-    /**
-     * Return column alignments options hash
-     *
-     * @return array
-     */
-    public function getColumnAlignments()
-    {
-        if (is_null(self::$_columnAlignments)) {
-            $helper = Mage::helper('customgrid');
-            
-            self::$_columnAlignments = array(
-                self::COLUMN_ALIGNMENT_LEFT   => $helper->__('Left'),
-                self::COLUMN_ALIGNMENT_CENTER => $helper->__('Middle'),
-                self::COLUMN_ALIGNMENT_RIGHT  => $helper->__('Right'),
-            );
-        }
-        return self::$_columnAlignments;
-    }
-    
-    /**
-     * Return column origins options hash
-     *
-     * @return array
-     */
-    public function getColumnOrigins()
-    {
-        if (is_null(self::$_columnOrigins)) {
-            $helper = Mage::helper('customgrid');
-            
-            self::$_columnOrigins = array(
-                self::COLUMN_ORIGIN_GRID       => $helper->__('Grid'),
-                self::COLUMN_ORIGIN_COLLECTION => $helper->__('Collection'),
-                self::COLUMN_ORIGIN_ATTRIBUTE  => $helper->__('Attribute'),
-                self::COLUMN_ORIGIN_CUSTOM     => $helper->__('Custom'),
-            );
-        }
-        return self::$_columnOrigins;
     }
     
     /**

@@ -495,7 +495,7 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
             try {
                 $mapProperty->setValue($collection, $filtersMap);
             } catch (ReflectionException $e) {
-                $mapProperty = null;
+                // Can this ever happen ?
             }
         }
         return $this;

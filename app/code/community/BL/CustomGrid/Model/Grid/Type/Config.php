@@ -32,13 +32,13 @@ class BL_CustomGrid_Model_Grid_Type_Config extends BL_CustomGrid_Model_Config_Ab
             
             unset($params['@']);
         } else {
-            $translate = array();
+            $translate = false;
         }
         
         foreach ($params as $key => $param) {
             if (is_array($param)) {
                 if (isset($param[0])) {
-                    if (in_array($key, $translate)) {
+                    if (is_array($translate) && in_array($key, $translate)) {
                         $params[$key] = $helper->__((string) $param[0]);
                     } else {
                         $params[$key] = $param[0];
@@ -46,7 +46,7 @@ class BL_CustomGrid_Model_Grid_Type_Config extends BL_CustomGrid_Model_Config_Ab
                 } else {
                     $params[$key] = $this->_prepareCustomColumnBaseParams($param);
                 }
-            } elseif (in_array($key, $translate)) {
+            } elseif (is_array($translate) && in_array($key, $translate)) {
                 $params[$key] = $helper->__((string) $param);
             }
         }

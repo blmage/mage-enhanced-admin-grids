@@ -142,7 +142,7 @@ class BL_CustomGrid_Model_Custom_Column_Product_Stats_Wishlist extends BL_Custom
         return $this;
     }
     
-    protected function _getForcedBlockValues(
+    public function getForcedBlockValues(
         Mage_Adminhtml_Block_Widget_Grid $gridBlock,
         BL_CustomGrid_Model_Grid $gridModel,
         $columnBlockId,

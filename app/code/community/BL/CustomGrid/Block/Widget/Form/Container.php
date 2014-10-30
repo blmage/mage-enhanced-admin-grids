@@ -43,4 +43,20 @@ class BL_CustomGrid_Block_Widget_Form_Container extends Mage_Adminhtml_Block_Wid
     {
         return $this->getDataSetDefault('use_default_form', true);
     }
+    
+    protected function _getJsObjectName($key, $requestKey = null)
+    {
+        if (!$this->hasData($key)) {
+            if (is_null($requestKey)) {
+                $requestKey = $key;
+            }
+            if ($jsObjectName = $this->getRequest()->getParam($requestKey, false)) {
+                $jsObjectName = $this->helper('customgrid/string')->sanitizeJsObjectName($jsObjectName);
+            } else {
+                $jsObjectName = false;
+            }
+            $this->setData($key, $jsObjectName);
+        }
+        return $this->_getData($key);
+    }
 }

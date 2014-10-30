@@ -17,7 +17,7 @@ class BL_CustomGrid_Model_Grid_Type_Sitemap extends BL_CustomGrid_Model_Grid_Typ
 {
     protected function _getSupportedBlockTypes()
     {
-        return 'adminhtml/sitemap_grid';
+        return array('adminhtml/sitemap_grid');
     }
     
     protected function _getBaseEditableFields($blockType)

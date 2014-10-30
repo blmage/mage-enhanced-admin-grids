@@ -29,9 +29,10 @@ class BL_CustomGrid_Model_Grid_Rewriter_File extends BL_CustomGrid_Model_Grid_Re
         // Use open() to initialize Varien_Io_File::$_iwd
         // Prevents a warning when chdir() is used without error control in Varien_Io_File::read()
         if ($ioFile->fileExists($fileName, true) && $ioFile->open()) {
+            $isUpToDate = false;
+            
             if ($content = $ioFile->read($fileName)) {
                 $lines = preg_split('#\R#', $content, 3);
-                $isUpToDate = false;
                 
                 if (isset($lines[0])
                     && isset($lines[1])

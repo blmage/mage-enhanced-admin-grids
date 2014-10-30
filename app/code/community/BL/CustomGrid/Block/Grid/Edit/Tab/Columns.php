@@ -18,12 +18,12 @@ class BL_CustomGrid_Block_Grid_Edit_Tab_Columns extends BL_CustomGrid_Block_Widg
 {
     public function getTabLabel()
     {
-        return $this->__('Columns');
+        return $this->__('Columns (Profile)');
     }
     
     public function getTabTitle()
     {
-        return $this->__('Columns');
+        return $this->__('Columns (Profile)');
     }
     
     public function canShowTab()
