@@ -219,12 +219,12 @@ abstract class BL_CustomGrid_Model_Custom_Column_Sales_Items_Abstract extends BL
                         'value'        => ($itemValue->getDefault() ? 1 : 0),
                     ),
                     ($position -= 10)
-                 );
+                );
             }
             
-            $this->setCustomizationWindowConfig(array('height' => 500));
+            $this->setCustomizationWindowConfig(array('height' => 500), true);
         } else {
-            $this->setCustomizationWindowConfig(array('height' => 300));
+            $this->setCustomizationWindowConfig(array('height' => 300), true);
         }
         
         return parent::_prepareConfig();
@@ -304,8 +304,9 @@ abstract class BL_CustomGrid_Model_Custom_Column_Sales_Items_Abstract extends BL
                 array($oiAlias => $collection->getTable('sales/order_item')),
                 $qi($itemAlias . '.order_item_id') . ' = ' . $qi($oiAlias . '.item_id'),
                 array()
-                )
-                ->where($qi($oiAlias . '.parent_item_id') . ' IS NULL');
+            );
+            
+            $select->where($qi($oiAlias . '.parent_item_id') . ' IS NULL');
         } else {
             $select->where($qi($itemAlias . '.parent_item_id') . ' IS NULL');
         }

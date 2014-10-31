@@ -30,7 +30,7 @@ class BL_CustomGrid_Block_Grid_Form_Custom_Columns extends BL_CustomGrid_Block_G
         $note = $customColumn->getDescription();
         
         if ($warning = $customColumn->getWarning()) {
-            $note .= '<br /><strong>' . $this->__('Warning:') . '</strong> ' . $warning;
+            $note .= ($note ? '<br />' : '') . '<strong>' . $this->__('Warning:') . '</strong> ' . $warning;
         }
         
         return $note;

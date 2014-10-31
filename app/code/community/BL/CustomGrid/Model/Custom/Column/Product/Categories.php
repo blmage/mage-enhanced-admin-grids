@@ -160,7 +160,7 @@ class BL_CustomGrid_Model_Custom_Column_Product_Categories extends BL_CustomGrid
             90
         );
         
-        $this->setCustomizationWindowConfig(array('height' => 520));
+        $this->setCustomizationWindowConfig(array('height' => 520), true);
         return parent::_prepareConfig();
     }
     

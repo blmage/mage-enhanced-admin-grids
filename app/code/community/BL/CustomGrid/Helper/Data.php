@@ -16,6 +16,18 @@
 class BL_CustomGrid_Helper_Data extends Mage_Core_Helper_Abstract
 {
     /**
+     * Return the base helper of the given module, or this helper if the other is not accessible
+     * 
+     * @param string $module Helper module
+     * @return Mage_Core_Helper_Abstract
+     */
+    public function getSafeHelper($module)
+    {
+        $helperClassName = Mage::getConfig()->getHelperClassName($module);
+        return (class_exists($helperClassName, true) ? Mage::helper($module) : $this);
+    }
+    
+    /**
      * Implode the given value, return an empty string if it is not an array
      * 
      * @param array $array Value to implode

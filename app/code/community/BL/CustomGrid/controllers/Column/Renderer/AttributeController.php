@@ -56,8 +56,8 @@ class BL_CustomGrid_Column_Renderer_AttributeController extends BL_CustomGrid_Co
                     strtolower($this->getFullActionName()),
                     'customgrid_column_renderer_attribute_unknown',
                 )
-                )
-                ->renderLayout();
+            );
+            $this->renderLayout();
         }
     }
     

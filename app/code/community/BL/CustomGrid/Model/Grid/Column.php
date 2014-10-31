@@ -302,7 +302,7 @@ class BL_CustomGrid_Model_Grid_Column extends BL_CustomGrid_Object
      *
      * @param BL_CustomGrid_Model_Grid $gridModel Grid model
      * @param array $columnsCodes New custom columns codes
-     * @return this
+     * @return BL_CustomGrid_Model_Grid
      */
     public function updateGridModelCustomColumns(BL_CustomGrid_Model_Grid $gridModel, array $columnsCodes)
     {

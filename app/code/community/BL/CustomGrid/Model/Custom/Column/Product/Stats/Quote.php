@@ -80,7 +80,7 @@ class BL_CustomGrid_Model_Custom_Column_Product_Stats_Quote extends BL_CustomGri
             40
         );
         
-        $this->setCustomizationWindowConfig(array('height' => 330));
+        $this->setCustomizationWindowConfig(array('height' => 330), true);
         return parent::_prepareConfig();
     }
     

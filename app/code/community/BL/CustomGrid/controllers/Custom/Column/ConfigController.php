@@ -55,8 +55,8 @@ class BL_CustomGrid_Custom_Column_ConfigController extends BL_CustomGrid_Control
                     strtolower($this->getFullActionName()),
                     'customgrid_custom_column_config_unknown',
                 )
-                )
-                ->renderLayout();
+            );
+            $this->renderLayout();
         }
     }
     

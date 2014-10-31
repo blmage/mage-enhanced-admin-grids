@@ -1,3 +1,5 @@
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/mage-eag/mage-enhanced-admin-grids/badges/quality-score.png?b=1.0.0-wip)](https://scrutinizer-ci.com/g/mage-eag/mage-enhanced-admin-grids/?branch=1.0.0-wip) [![Build Status](https://scrutinizer-ci.com/g/mage-eag/mage-enhanced-admin-grids/badges/build.png?b=1.0.0-wip)](https://scrutinizer-ci.com/g/mage-eag/mage-enhanced-admin-grids/build-status/1.0.0-wip)
+
 # Enhanced Admin Grids
 ## Version 1.0.0 (work-in-progress)
 

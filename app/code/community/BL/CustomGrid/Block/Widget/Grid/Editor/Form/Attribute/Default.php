@@ -33,7 +33,11 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Attribute_Default extends
         $fieldset = $form->addFieldset(
             'base_fieldset',
             array(
-                'legend' => $this->__('%s : %s', $this->getEditedEntityName(), $attribute->getFrontendLabel() . $required),
+                'legend' => $this->__(
+                    '%s : %s',
+                    $this->getEditedEntityName(),
+                    $attribute->getFrontendLabel() . $required
+                ),
                 'class'  => 'fieldset-wide blcg-editor-fieldset',
             )
         );

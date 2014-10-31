@@ -78,9 +78,9 @@ class BL_CustomGrid_Options_SourceController extends Mage_Adminhtml_Controller_A
                 strtolower($this->getFullActionName()),
                 'customgrid_options_source_' . $source->getType()
             )
-            )
-            ->_title($this->__('New Options Source'))
-            ->renderLayout();
+        );
+        
+        $this->_title($this->__('New Options Source'))->renderLayout();
     }
     
     public function editAction()
@@ -102,8 +102,9 @@ class BL_CustomGrid_Options_SourceController extends Mage_Adminhtml_Controller_A
                 strtolower($this->getFullActionName()),
                 'customgrid_options_source_' . $source->getType()
             )
-            )
-            ->_title($source->getName())
+        );
+        
+        $this->_title($source->getName())
             ->_addBreadcrumb($source->getName(), $source->getName())
             ->renderLayout();
     }

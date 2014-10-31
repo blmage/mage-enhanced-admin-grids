@@ -141,8 +141,8 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract extends BL_CustomGrid_
      */
     protected function _initializeConfig()
     {
-        // Initialize data keys
-        $boolKeys = array(
+        // Initialize base data keys
+        $booleanKeys = array(
             'allow_store',
             'allow_renderers',
             'allow_customization',
@@ -162,9 +162,22 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract extends BL_CustomGrid_
             'customization_window_config',
         );
         
-        $this->addData(array_fill_keys($boolKeys, false));
+        $this->addData(array_fill_keys($booleanKeys, false));
         $this->addData(array_fill_keys($arrayKeys, array()));
+        
+        // Initialize from XML values if possible
+        if (is_array($xmlValues = $this->getData('xml_values'))
+            && (($xmlElement = $this->getData('xml_element')) instanceof Varien_Simplexml_Element)) {
+            Mage::getSingleton('customgrid/custom_column_config')
+                ->initializeCustomColumnFromXmlConfig($this, $xmlElement, $xmlValues);
+        }
+        
+        $this->unsetData('xml_element');
+        $this->unsetData('xml_values');
+        
+        // Finish config preparation
         $this->_prepareConfig();
+        
         return $this;
     }
     

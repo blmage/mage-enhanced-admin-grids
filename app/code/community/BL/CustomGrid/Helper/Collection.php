@@ -682,7 +682,7 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
         Mage_Adminhtml_Block_Widget_Grid $gridBlock,
         BL_CustomGrid_Model_Grid $gridModel
     ) {
-        return $this->addFilterToCollectionMap(
+        $this->addFilterToCollectionMap(
             $collection,
             $this->buildFiltersMapArray(
                 array(
@@ -697,8 +697,9 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
                 ),
                 $this->getCollectionMainTableAlias($collection)
             )
-            )
-            ->addFilterToCollectionMap($collection, $this->getAttributeTableAlias('qty') . '.qty', 'qty');
+        );
+        
+        return $this->addFilterToCollectionMap($collection, $this->getAttributeTableAlias('qty') . '.qty', 'qty');
     }
     
     /**

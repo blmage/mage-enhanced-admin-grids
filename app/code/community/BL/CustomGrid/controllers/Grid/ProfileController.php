@@ -81,8 +81,8 @@ class BL_CustomGrid_Grid_ProfileController extends BL_CustomGrid_Controller_Grid
                 BL_CustomGrid_Model_Grid::ACTION_CHOOSE_OTHER_ROLES_DEFAULT_PROFILE,
                 BL_CustomGrid_Model_Grid::ACTION_CHOOSE_GLOBAL_DEFAULT_PROFILE,
             )
-            )
-            ->renderLayout();
+        );
+        $this->renderLayout();
     }
     
     public function defaultAction()

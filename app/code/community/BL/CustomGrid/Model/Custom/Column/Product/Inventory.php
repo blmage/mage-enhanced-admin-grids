@@ -51,7 +51,7 @@ class BL_CustomGrid_Model_Custom_Column_Product_Inventory extends BL_CustomGrid_
             );
             
             $this->setWarning($helper->__($notes['warning']));
-            $this->setCustomizationWindowConfig(array('height' => 280), true);
+            $this->setCustomizationWindowConfig(array('height' => 350), true);
         }
         
         return parent::_prepareConfig();
@@ -111,6 +111,7 @@ class BL_CustomGrid_Model_Custom_Column_Product_Inventory extends BL_CustomGrid_
     protected function _addFieldToSelect(
         Varien_Db_Select $select,
         $columnIndex,
+        $fieldName,
         $tableAlias,
         array $params,
         Mage_Adminhtml_Block_Widget_Grid $gridBlock,
@@ -119,7 +120,6 @@ class BL_CustomGrid_Model_Custom_Column_Product_Inventory extends BL_CustomGrid_
         $helper = $this->_getCollectionHelper();
         list(, $qi) = $this->_getCollectionAdapter($collection, true);
         
-        $fieldName = $this->getTableFieldName();
         $select->columns(array($columnIndex => $tableAlias . '.' . $fieldName), $tableAlias);
         $helper->addFilterToCollectionMap($collection, $qi($tableAlias . '.' . $fieldName), $columnIndex);
         
@@ -135,15 +135,16 @@ class BL_CustomGrid_Model_Custom_Column_Product_Inventory extends BL_CustomGrid_
     
     public function addFilterToGridCollection($collection, Mage_Adminhtml_Block_Widget_Grid_Column $columnBlock)
     {
-        $fieldName  = ($columnBlock->getFilterIndex() ? $columnBlock->getFilterIndex() : $columnBlock->getIndex());
-        $tableAlias = $columnBlock->getBlcgTableAlias();
-        $condition  = $columnBlock->getFilter()->getCondition();
-        $params = $columnBlock->getBlcgFilterParams();
+        $columnIndex  = $columnBlock->getIndex();
+        $fieldName    = ($columnBlock->getFilterIndex() ? $columnBlock->getFilterIndex() : $columnIndex);
+        $filterParams = $columnBlock->getBlcgFilterParams();
+        $tableAlias   = $this->_getJoinedTableAlias($columnIndex, $filterParams, $columnBlock->getGrid(), $collection);
+        $condition    = $columnBlock->getFilter()->getCondition();
         
         if ($fieldName && is_array($condition) && $tableAlias) {
             list($adapter, $qi) = $this->_getCollectionAdapter($collection, true);
             
-            if (is_array($params) && $this->_extractBoolParam($params, 'use_config_filter', false)) {
+            if (is_array($filterParams) && $this->_extractBoolParam($filterParams, 'use_config_filter', false)) {
                 if (isset($condition['eq'])) {
                     $collection->getSelect()
                         ->where(
@@ -225,7 +226,7 @@ class BL_CustomGrid_Model_Custom_Column_Product_Inventory extends BL_CustomGrid_
             $values['filter']  = 'customgrid/widget_grid_column_filter_select';
             $values['options'] = array(
                 array('value' => 1, 'label' => $helper->__('Use Config')),
-                array('value' => 0, 'label' => $helper->__('Do Not Use Config')),
+                array('value' => 0, 'label' => $helper->__('Own Value')),
             );
         } elseif ($fieldType == 'boolean') {
             $values['filter'] = 'customgrid/widget_grid_column_filter_yesno';
@@ -238,7 +239,7 @@ class BL_CustomGrid_Model_Custom_Column_Product_Inventory extends BL_CustomGrid_
         return $values;
     }
     
-    public function _getForcedBlockValues(
+    public function getForcedBlockValues(
         Mage_Adminhtml_Block_Widget_Grid $gridBlock,
         BL_CustomGrid_Model_Grid $gridModel,
         $columnBlockId,

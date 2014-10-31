@@ -71,4 +71,20 @@ abstract class BL_CustomGrid_Model_Custom_Column_Simple_Abstract extends BL_Cust
         
         return $this;
     }
+    
+    protected function _addFieldToSelect(
+        Varien_Db_Select $select,
+        $columnIndex,
+        $fieldName,
+        $tableAlias,
+        array $params,
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock,
+        Varien_Data_Collection_Db $collection
+    ) {
+        $helper = $this->_getCollectionHelper();
+        list(, $qi) = $this->_getCollectionAdapter($collection, true);
+        $select->columns(array($columnIndex => $tableAlias . '.' . $fieldName), $tableAlias);
+        $helper->addFilterToCollectionMap($collection, $qi($tableAlias . '.' . $fieldName), $columnIndex);
+        return $this;
+    }
 }

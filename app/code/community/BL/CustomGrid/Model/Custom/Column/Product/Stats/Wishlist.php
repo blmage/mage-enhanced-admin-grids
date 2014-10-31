@@ -57,7 +57,7 @@ class BL_CustomGrid_Model_Custom_Column_Product_Stats_Wishlist extends BL_Custom
             20
         );
         
-        $this->setCustomizationWindowConfig(array('height' => 280));
+        $this->setCustomizationWindowConfig(array('height' => 280), true);
         return parent::_prepareConfig();
     }
     

@@ -112,10 +112,7 @@ abstract class BL_CustomGrid_Model_Config_Abstract extends BL_CustomGrid_Object
             
             foreach ($this->getRootXmlElement()->children() as $xmlElement) {
                 $module = ($xmlElement->getAttribute('module') ? $xmlElement->getAttribute('module') : 'customgrid');
-                
-                if (!$helper = Mage::helper($module)) {
-                    $helper = Mage::helper('customgrid');
-                }
+                $helper = Mage::helper('customgrid')->getSafeHelper((string) $module);
                 
                 $values =  array(
                     'code' => $xmlElement->getName(),
@@ -202,11 +199,8 @@ abstract class BL_CustomGrid_Model_Config_Abstract extends BL_CustomGrid_Object
         $object->unsetData('@');
         
         // Apply translations
+        $helper = Mage::helper('customgrid')->getSafeHelper($object->getModule());
         $translatableKeys = array('name', 'description', 'help');
-        
-        if (!$helper = Mage::helper($object->getModule())) {
-            $helper = Mage::helper('customgrid');
-        }
         
         foreach ($translatableKeys as $key) {
             if ($object->hasData($key)) {
@@ -265,10 +259,8 @@ abstract class BL_CustomGrid_Model_Config_Abstract extends BL_CustomGrid_Object
                 if (!$module = $element->getAttribute('module')) {
                     $module = 'customgrid';
                 }
-                if (!$helper = Mage::helper($module)) {
-                    $helper = Mage::helper('customgrid');
-                }
                 
+                $helper = Mage::helper('customgrid')->getSafeHelper($module);
                 $model->setCode($code);
                 $model->setName($helper->__((string) $element->name));
             }

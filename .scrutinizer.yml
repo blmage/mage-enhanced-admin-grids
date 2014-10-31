@@ -1,0 +1,34 @@
+# language: php
+
+inherit: true
+
+filter:
+    excluded_paths: [js/*, skin/*]
+
+checks:
+    php:
+        code_rating: true
+        duplication: true
+
+tools:
+    external_code_coverage: false
+    php_code_coverage: false
+    php_code_sniffer:
+        config:
+            standard: 'Zend'
+    php_sim: true
+    php_cs_fixer: true
+    php_mess_detector: true
+    php_pdepend: true
+    php_analyzer: true
+    sensiolabs_security_checker: true
+
+build:
+    environment:
+        php: '5.4.28'
+
+build_failure_conditions:
+    - 'elements.rating(<= D).exists'
+    - 'issues.count > 40'
+    - 'issues.severity(>= MAJOR).exists'
+    - 'project.metric("scrutinizer.quality", < 9)'

@@ -26,12 +26,14 @@ class BL_CustomGrid_Model_Custom_Column_Simple_Duplicate extends BL_CustomGrid_M
         Mage_Adminhtml_Block_Widget_Grid $gridBlock,
         Varien_Data_Collection_Db $collection
     ) {
-        $helper = $this->_getCollectionHelper();
-        $mainAlias = $helper->getCollectionMainTableAlias($collection);
-        list(, $qi) = $this->_getCollectionAdapter($collection, true);
-        $fieldName = $this->getDuplicatedFieldName();
-        $collection->getSelect()->columns(array($columnIndex => $mainAlias . '.' . $fieldName));
-        $helper->addFilterToCollectionMap($collection, $qi($mainAlias . '.' . $fieldName), $columnIndex);
-        return $this;
+        return $this->_addFieldToSelect(
+            $collection->getSelect(),
+            $columnIndex,
+            $this->getDuplicatedFieldName(),
+            $this->_getCollectionHelper()->getCollectionMainTableAlias($collection),
+            $params,
+            $gridBlock,
+            $collection
+        );
     }
 }

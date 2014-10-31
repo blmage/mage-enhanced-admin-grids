@@ -45,7 +45,7 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Default extends
     {
         // Must work like the edit block does (see BL_CustomGrid_Block_Widget_Grid_Editor_Form_Static_Default)
         $callbackKey = $key . '_callback';
-        $callbackParamsKey  = $callbackKey . '_params';
+        $callbackParamsKey = $callbackKey . '_params';
         $choiceValues = null;
         
         if (isset($formOptions[$key])) {
@@ -55,12 +55,17 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Default extends
             $editParams   = $this->getEditParams();
             $editedEntity = $this->getEditedEntity();
             
-            $choiceValues = call_user_func_array(
-                $formOptions[$callbackKey],
-                isset($formOptions[$callbackParamsKey])
-                    ? (is_array($formOptions[$callbackParamsKey]) ? $formOptions[$callbackParamsKey] : array())
-                    : array($this->getGridBlockType(), $editedValue, $editParams, $editedEntity)
-            );
+            if (isset($formOptions[$callbackParamsKey])) {
+                if (is_array($formOptions[$callbackParamsKey])) {
+                    $callbackParams = $formOptions[$callbackParamsKey];
+                } else {
+                    $callbackParams = array();
+                }
+            } else {
+                $callbackParams = array($this->getGridBlockType(), $editedValue, $editParams, $editedEntity);
+            }
+            
+            $choiceValues = call_user_func_array($formOptions[$callbackKey], $callbackParams);
         }
         
         return $choiceValues;
@@ -291,7 +296,8 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Default extends
                             $option['value'],
                             $pathId . '_' . (++$pathsCount),
                             $pathLabels
-                        ));
+                        )
+                    );
                     
                     array_pop($pathLabels);
                 } else {
@@ -432,7 +438,7 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Default extends
         return $renderableValue->toString(
             $this->_getDateOutputFormat($renderOptions),
             null,
-             $this->_getDateOutputLocale($renderOptions)
+            $this->_getDateOutputLocale($renderOptions)
         );
     }
     

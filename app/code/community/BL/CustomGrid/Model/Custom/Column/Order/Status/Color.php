@@ -58,7 +58,7 @@ class BL_CustomGrid_Model_Custom_Column_Order_Status_Color extends BL_CustomGrid
             );
         }
         
-        $this->setCustomizationWindowConfig(array('height' => 450));
+        $this->setCustomizationWindowConfig(array('height' => 450), true);
         return parent::_prepareConfig();
     }
     
