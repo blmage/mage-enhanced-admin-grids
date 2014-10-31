@@ -140,7 +140,7 @@ class BL_CustomGrid_Model_Options_Source extends Mage_Core_Model_Abstract
     {
         if (!is_array(self::$_predefinedTypes)) {
             $types = $this->_getPredefinedTypes();
-            $response = new Varien_Object(array('types' => $types));
+            $response = new BL_CustomGrid_Object(array('types' => $types));
             Mage::dispatchEvent('blcg_options_source_predefined_types', array('response' => $response));
             
             if (is_array($types = $response->getTypes())) {

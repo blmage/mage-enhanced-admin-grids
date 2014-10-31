@@ -144,11 +144,13 @@ abstract class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Sales_Items_Custo
         $result = '';
         
         if (is_array($itemValues = $this->getColumn()->getItemValues()) && !empty($itemValues)) {
-            $value = new Varien_Object(array(
-                'item_values' => $itemValues,
-                'hide_header' => (bool) $this->getColumn()->getHideHeader(),
-                $this->_getRowKey() => $row,
-            ));
+            $value = new Varien_Object(
+                array(
+                    'item_values' => $itemValues,
+                    'hide_header' => (bool) $this->getColumn()->getHideHeader(),
+                    $this->_getRowKey() => $row,
+                )
+            );
             
             $result = $this->_renderResult($value);
         }

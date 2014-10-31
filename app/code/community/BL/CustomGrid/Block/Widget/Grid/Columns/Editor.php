@@ -154,10 +154,12 @@ class BL_CustomGrid_Block_Widget_Grid_Columns_Editor extends Mage_Adminhtml_Bloc
     public function getGlobalParamsJson()
     {
         return $this->helper('core')
-            ->jsonEncode(array(
-                'grid_id' => $this->getGridModel()->getId(),
-                'profile_id' => $this->getGridModel()->getProfileId(),
-                'editor_js_object_name' => $this->getJsObjectName(),
-            ));
+            ->jsonEncode(
+                array(
+                    'grid_id' => $this->getGridModel()->getId(),
+                    'profile_id' => $this->getGridModel()->getProfileId(),
+                    'editor_js_object_name' => $this->getJsObjectName(),
+                )
+            );
     }
 }

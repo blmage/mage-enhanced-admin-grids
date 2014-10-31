@@ -128,7 +128,6 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Text extends Mage_Adminhtml_
     {
         $columnBlock = $this->getColumn();
         $collection  = $this->helper('customgrid/grid')->getColumnBlockGridCollection($columnBlock);
-        $condition   = null;
         $value = $this->getValue();
         
         $filterModeShortcut = (bool) $columnBlock->getFilterModeShortcut();
@@ -137,10 +136,7 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Text extends Mage_Adminhtml_
         $filterMode  = $columnBlock->getFilterMode();
         $isNegative  = (!$negativeShortcut && $columnBlock->getNegativeFilter());
         
-        if ($filterMode == self::MODE_WITH_WITHOUT) {
-            $filterModeShortcut = false;
-            $negativeShortcut   = false;
-        } else {
+        if ($filterMode != self::MODE_WITH_WITHOUT) {
             list($filterMode, $isNegative) = $this->applyFilterShortcutsToValue(
                 $value,
                 $filterMode,

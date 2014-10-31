@@ -152,11 +152,13 @@ class BL_CustomGrid_Block_Widget_Grid_Config_Columns_List extends Mage_Adminhtml
         if (!$this->hasData('additional_params_json_config')) {
             $this->setData(
                 'additional_params_json_config',
-                Mage::helper('core')->jsonEncode(array(
-                    'form_key'   => $this->getFormKey(),
-                    'grid_id'    => $this->getGridModel()->getId(),
-                    'profile_id' => $this->getGridModel()->getProfileId(),
-                ))
+                Mage::helper('core')->jsonEncode(
+                    array(
+                        'form_key'   => $this->getFormKey(),
+                        'grid_id'    => $this->getGridModel()->getId(),
+                        'profile_id' => $this->getGridModel()->getProfileId(),
+                    )
+                )
             );
         }
         return $this->_getData('additional_params_json_config');

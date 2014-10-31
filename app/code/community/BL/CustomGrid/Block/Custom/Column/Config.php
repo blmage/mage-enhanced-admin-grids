@@ -13,30 +13,10 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Custom_Column_Config extends BL_CustomGrid_Block_Widget_Form_Container
+class BL_CustomGrid_Block_Custom_Column_Config extends BL_CustomGrid_Block_Config_Container_Abstract
 {
-    public function __construct()
-    {
-        parent::__construct();
-        
-        $this->_blockGroup = 'customgrid';
-        $this->_controller = 'custom_column';
-        $this->_mode = 'config';
-        $this->_headerText = $this->getCustomColumn()->getName();
-        
-        $this->_removeButtons(array('back', 'delete', 'reset'));
-        
-        $this->_updateButton(
-            'save',
-            null,
-            array(
-                'id'         => 'blcg_custom_column_config_insert_button',
-                'label'      => $this->__('Apply Configuration'),
-                'onclick'    => $this->getJsObjectName() . '.insertParams();',
-                'sort_order' => 0,
-            )
-        );
-    }
+    protected $_blockGroup = 'customgrid';
+    protected $_mode = 'config';
     
     protected function _beforeToHtml()
     {
@@ -52,19 +32,34 @@ class BL_CustomGrid_Block_Custom_Column_Config extends BL_CustomGrid_Block_Widge
         return parent::_beforeToHtml();
     }
     
-    public function getUseDefaultForm()
-    {
-        return false;
-    }
-    
     public function getCustomColumn()
     {
         return Mage::registry('blcg_custom_column');
     }
     
+    protected function _getController()
+    {
+        return 'custom_column';
+    }
+    
+    protected function _getHeaderText()
+    {
+        return $this->getCustomColumn()->getName();
+    }
+    
+    protected function _getSaveButtonId()
+    {
+        return 'blcg_custom_column_config_insert_button';
+    }
+    
     public function getJsObjectName()
     {
         return 'blcgCustomColumnConfigForm';
+    }
+    
+    public function getUseDefaultForm()
+    {
+        return false;
     }
     
     public function getConfigTargetId()

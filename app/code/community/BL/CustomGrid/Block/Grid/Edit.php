@@ -64,7 +64,8 @@ class BL_CustomGrid_Block_Grid_Edit extends Mage_Adminhtml_Block_Widget
                 )
         );
         
-        $this->setChild('save_and_edit_button',
+        $this->setChild(
+            'save_and_edit_button',
             $this->getLayout()
                 ->createBlock('adminhtml/widget_button')
                 ->setData(

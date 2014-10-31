@@ -382,8 +382,6 @@ class BL_CustomGrid_Model_Custom_Column_Applier extends BL_CustomGrid_Object
                 Mage::throwException($this->_getBaseHelper()->__('The grid collection is not valid'));
             }
             
-            $customColumn = $this->getCustomColumn();
-            
             $this->_applyCustomColumnToGridBlock(
                 $gridBlock,
                 $gridModel,

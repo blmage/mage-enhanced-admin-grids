@@ -73,11 +73,13 @@ class BL_CustomGrid_Model_Column_Renderer_Collection_Country_Eu extends
             }
         }
         foreach ($countries as $code => $name) {
-            $allCountries[$code] = new BL_CustomGrid_Object(array(
-                'code'  => $code,
-                'name'  => $name,
-                'is_eu' => isset($isEuCountry[$code]),
-            ));
+            $allCountries[$code] = new BL_CustomGrid_Object(
+                array(
+                    'code'  => $code,
+                    'name'  => $name,
+                    'is_eu' => isset($isEuCountry[$code]),
+                )
+            );
         }
         
         $values['eu_countries']  = array_unique($euCountries);

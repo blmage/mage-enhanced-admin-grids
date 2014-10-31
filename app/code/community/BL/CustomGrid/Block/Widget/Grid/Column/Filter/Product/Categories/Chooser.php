@@ -224,12 +224,14 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Product_Categories_Chooser e
             ? ''
             : $this->getLayout()
                   ->createBlock('adminhtml/widget_button')
-                  ->setData(array(
-                      'label'   => $this->__('Choose'),
-                      'onclick' => 'blcgApplyCategories();',
-                      'class'   => 'scalable save',
-                      'type'    => 'button',
-                  ))
+                  ->setData(
+                      array(
+                          'label'   => $this->__('Choose'),
+                          'onclick' => 'blcgApplyCategories();',
+                          'class'   => 'scalable save',
+                          'type'    => 'button',
+                      )
+                  )
                   ->toHtml();
     }
 }

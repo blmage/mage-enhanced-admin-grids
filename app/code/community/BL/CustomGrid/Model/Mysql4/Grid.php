@@ -139,10 +139,10 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
         $write->delete(
             $columnsTable,
             $write->quoteInto('grid_id = ?', $gridId)
-                . ' AND '
-                . (is_null($profileId) ? 'profile_id IS NULL' : $write->quoteInto('profile_id = ?', $profileId))
-                . ' AND '
-                . $write->quoteInto('column_id NOT IN (?)', $columnsIds)
+            . ' AND '
+            . (is_null($profileId) ? 'profile_id IS NULL' : $write->quoteInto('profile_id = ?', $profileId))
+            . ' AND '
+            . $write->quoteInto('column_id NOT IN (?)', $columnsIds)
         );
         
         return $this;
@@ -179,8 +179,8 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
         $write->delete(
             $rolesTable,
             $write->quoteInto('grid_id = ?', $gridId)
-                . ' AND '
-                . $write->quoteInto('role_id NOT IN (?)', $rolesIds)
+            . ' AND '
+            . $write->quoteInto('role_id NOT IN (?)', $rolesIds)
         );
         
         return $this;
@@ -364,10 +364,10 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
         $write->delete(
             $columnsTable,
             $write->quoteInto('grid_id = ?', $gridId)
-                . ' AND '
-                . ($toProfileId === BL_CustomGrid_Model_Grid::BASE_PROFILE_ID
-                    ? 'profile_id IS NULL'
-                    : $write->quoteInto('profile_id = ?', $toProfileId))
+            . ' AND '
+            . ($toProfileId === BL_CustomGrid_Model_Grid::BASE_PROFILE_ID
+                ? 'profile_id IS NULL'
+                : $write->quoteInto('profile_id = ?', $toProfileId))
         );
         
         $select = $write->select()
@@ -419,8 +419,8 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
         $write->delete(
             $table,
             $write->quoteInto('profile_id = ?', $profileId)
-                . ' AND '
-                . $write->quoteInto('role_id NOT IN (?)', $assignedRolesIds)
+            . ' AND '
+            . $write->quoteInto('role_id NOT IN (?)', $assignedRolesIds)
         );
         
         return $this;
@@ -476,12 +476,12 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
                             'default_base_profile' => 0,
                         ),
                         $write->quoteInto('grid_id = ?', $gridId)
-                            . ' AND '
-                            . $write->quoteInto($config['key'] . ' NOT IN (?)', $values[$valuesKey])
-                            . ' AND '
-                            . ($isBaseProfile
-                                ? 'default_profile_id IS NULL AND ' . $write->quoteInto('default_base_profile = ?', 1)
-                                : $write->quoteInto('default_profile_id = ?', $profileId))
+                        . ' AND '
+                        . $write->quoteInto($config['key'] . ' NOT IN (?)', $values[$valuesKey])
+                        . ' AND '
+                        . ($isBaseProfile
+                            ? 'default_profile_id IS NULL AND ' . $write->quoteInto('default_base_profile = ?', 1)
+                            : $write->quoteInto('default_profile_id = ?', $profileId))
                     );
                 }
             }
@@ -494,8 +494,8 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
                         $table,
                         array('is_global_default' => 0),
                         $write->quoteInto('grid_id = ?', $gridId)
-                            . ' AND '
-                            . $write->quoteInto('profile_id != ?', ($isBaseProfile ? -1 : $profileId))
+                        . ' AND '
+                        . $write->quoteInto('profile_id != ?', ($isBaseProfile ? -1 : $profileId))
                     );
                 }
                 if (!$isBaseProfile) {
@@ -503,8 +503,8 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
                         $table,
                         array('is_global_default' => ($values['global'] ? 1 : 0)),
                         $write->quoteInto('grid_id = ?', $gridId)
-                            . ' AND '
-                            . $write->quoteInto('profile_id = ?', $profileId)
+                        . ' AND '
+                        . $write->quoteInto('profile_id = ?', $profileId)
                     );
                 }
             }
@@ -559,7 +559,7 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
                 $toProfileId = $write->lastInsertId();
             }
             if (empty($toProfileId)) {
-                Mage::throwException($helper->__('The new profile could not be created'));
+                Mage::throwException(Mage::helper('customgrid')->__('The new profile could not be created'));
             }
             
             $this->_copyProfileColumns($gridId, $fromProfileId, $toProfileId);
@@ -626,8 +626,8 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
                             $profilesTable,
                             $values,
                             $write->quoteInto('grid_id = ?', $gridId)
-                                . ' AND '
-                                . $write->quoteInto('profile_id = ?', $toProfileId)
+                            . ' AND '
+                            . $write->quoteInto('profile_id = ?', $toProfileId)
                         );
                     }
                 }
@@ -673,8 +673,8 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
                 $this->_getProfilesTable(),
                 $values,
                 $write->quoteInto('grid_id = ?', $gridId)
-                    . ' AND '
-                    . $write->quoteInto('profile_id = ?', $profileId)
+                . ' AND '
+                . $write->quoteInto('profile_id = ?', $profileId)
             );
             
             if ($useTransaction) {
@@ -698,8 +698,8 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
         $write->delete(
             $this->_getProfilesTable(),
             $write->quoteInto('grid_id = ?', $gridId)
-                . ' AND '
-                . $write->quoteInto('profile_id = ?', $profileId)
+            . ' AND '
+            . $write->quoteInto('profile_id = ?', $profileId)
         ); 
         
         return $this;

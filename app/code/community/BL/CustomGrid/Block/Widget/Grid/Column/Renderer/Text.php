@@ -60,7 +60,7 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Text extends
                     $truncationEnding,
                     !$exactTruncation
                 );
-            } elseif ($truncationMode = self::TRUNCATION_MODE_TEXT) {
+            } elseif ($truncationMode == self::TRUNCATION_MODE_TEXT) {
                 $text = $stringHelper->truncateText(
                     $text,
                     $truncationLength,

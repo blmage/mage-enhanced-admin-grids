@@ -324,11 +324,10 @@ class BL_CustomGrid_Model_Grid_Column extends BL_CustomGrid_Object
         
         $appliedCodes = $columnsCodes;
         $currentCodes = array();
-        $removedColumnBlockIds = array();
         
         foreach ($originalBlockIds as $columnBlockId) {
             if (isset($columns[$columnBlockId])) {
-                $parts = explode('/', $column[$columnBlockId]->getIndex());
+                $parts = explode('/', $columns[$columnBlockId]->getIndex());
                 
                 if (($typeCode == $parts[0])
                     && in_array($parts[1], $appliedCodes)
@@ -347,7 +346,7 @@ class BL_CustomGrid_Model_Grid_Column extends BL_CustomGrid_Object
         
         foreach ($newCodes as $customColumnCode) {
             $columnBlockId = $gridModel->getNextCustomColumnBlockId();
-            $columnModel = $availableColumns[$customColumnCode];
+            $columnModel   = $availableCustomColumns[$customColumnCode];
             $groupId = $columnModel->getGroupId();
             
             if (isset($columnsGroups[$groupId]) && $addGroupsToHeaders) {
@@ -359,7 +358,7 @@ class BL_CustomGrid_Model_Grid_Column extends BL_CustomGrid_Object
             $columnValues = array(
                 'grid_id'              => $gridModel->getId(),
                 'block_id'             => $columnBlockId,
-                'index'                => $typeCode . '/' . $code,
+                'index'                => $typeCode . '/' . $customColumnCode,
                 'width'                => '',
                 'align'                => self::ALIGNMENT_LEFT,
                 'header'               => $header,

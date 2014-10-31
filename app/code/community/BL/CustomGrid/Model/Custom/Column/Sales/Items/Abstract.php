@@ -70,13 +70,15 @@ abstract class BL_CustomGrid_Model_Custom_Column_Sales_Items_Abstract extends BL
         $position    = 0;
         
         foreach ($baseValues as $key => $value) {
-            $itemValues[$key] = new BL_CustomGrid_Object(array(
-                'code'        => $key,
-                'name'        => $salesHelper->__($value),
-                'description' => '',
-                'default'     => true,
-                'position'    => ($position += 100),
-            ));
+            $itemValues[$key] = new BL_CustomGrid_Object(
+                array(
+                    'code'        => $key,
+                    'name'        => $salesHelper->__($value),
+                    'description' => '',
+                    'default'     => true,
+                    'position'    => ($position += 100),
+                )
+            );
             
             if (in_array($key, $amountsKeys)) {
                 $itemValues[$key]->setData('value_align', 'right');
@@ -88,7 +90,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Sales_Items_Abstract extends BL
         }
         
         if (!empty($eventName)) {
-            $response = new Varien_Object(array('item_values' => $itemValues));
+            $response = new BL_CustomGrid_Object(array('item_values' => $itemValues));
             Mage::dispatchEvent($eventName, array('response' => $response));
             $itemValues = $response->getItemValues();
         }
@@ -106,10 +108,12 @@ abstract class BL_CustomGrid_Model_Custom_Column_Sales_Items_Abstract extends BL
                 continue;
             }
             
-            $itemValue->addData(array(
-                'last' => false,
-                'renderers/999999' => 'customgrid/widget_grid_column_renderer_sales_items_sub_value_default',
-            ));
+            $itemValue->addData(
+                array(
+                    'last' => false,
+                    'renderers/999999' => 'customgrid/widget_grid_column_renderer_sales_items_sub_value_default',
+                )
+            );
             
             $itemValue->ksortData('renderers', SORT_NUMERIC);
         }
@@ -204,7 +208,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Sales_Items_Abstract extends BL
             );
             
             foreach ($itemValues as $key => $itemValue) {
-                 $this->addCustomizationParam(
+                $this->addCustomizationParam(
                     'display_' . $key,
                     array(
                         'label'        => $helper->__('Display "%s"', $itemValue->getName()),
@@ -244,7 +248,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Sales_Items_Abstract extends BL
             $items->filterByParent();
         }
         if (!empty($event)) {
-            $response = new Varien_Object(array('items_collection' => $items));
+            $response = new BL_CustomGrid_Object(array('items_collection' => $items));
             Mage::dispatchEvent($eventName, array('response' => $response));
             $items = $response->getItemsCollection();
         }
@@ -297,9 +301,9 @@ abstract class BL_CustomGrid_Model_Custom_Column_Sales_Items_Abstract extends BL
             $oiAlias = $this->_getUniqueTableAlias('oi');
             
             $select->joinInner(
-                    array($oiAlias => $collection->getTable('sales/order_item')),
-                    $qi($itemAlias . '.order_item_id') . ' = ' . $qi($oiAlias . '.item_id'),
-                    array()
+                array($oiAlias => $collection->getTable('sales/order_item')),
+                $qi($itemAlias . '.order_item_id') . ' = ' . $qi($oiAlias . '.item_id'),
+                array()
                 )
                 ->where($qi($oiAlias . '.parent_item_id') . ' IS NULL');
         } else {

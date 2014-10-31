@@ -126,7 +126,6 @@ class BL_CustomGrid_Controller_Grid_Action extends Mage_Adminhtml_Controller_Act
      */
     protected function _initGridProfile($temporary = true, $baseIfNone = false)
     {
-        $profileId = false;
         $profile = false;
         
         if ($gridModel = Mage::registry('blcg_grid')) {

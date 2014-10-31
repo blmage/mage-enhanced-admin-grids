@@ -182,7 +182,6 @@ class BL_CustomGrid_Model_Custom_Column_Product_Categories extends BL_CustomGrid
         $forFilter = false,
         $categoryIds = null
     ) {
-        $helper    = $this->_getCollectionHelper();
         $mainAlias = $this->_getCollectionMainTableAlias($collection);
         list($adapter, $qi) = $this->_getCollectionAdapter($collection, true);
         $productAlias = $this->_getUniqueTableAlias($forFilter ? '_filter' : '_select');
@@ -309,14 +308,17 @@ class BL_CustomGrid_Model_Custom_Column_Product_Categories extends BL_CustomGrid
         $helper = $this->_getBaseHelper();
         
         if (!$this->hasData('custom_filter_operators')) {
-            $this->setData('custom_filter_operators', array(
-                '>'  => $helper->__('Greater than'),
-                '>=' => $helper->__('Greater than or equal to'),
-                '='  => $helper->__('Equal'),
-                '!=' => $helper->__('Not equal'),
-                '<=' => $helper->__('Lesser than or equal to'),
-                '<'  => $helper->__('Lesser than'),
-            ));
+            $this->setData(
+                'custom_filter_operators',
+                array(
+                    '>'  => $helper->__('Greater than'),
+                    '>=' => $helper->__('Greater than or equal to'),
+                    '='  => $helper->__('Equal'),
+                    '!=' => $helper->__('Not equal'),
+                    '<=' => $helper->__('Lesser than or equal to'),
+                    '<'  => $helper->__('Lesser than'),
+                )
+            );
         }
         
         $operators = $this->_getData('custom_filter_operators');

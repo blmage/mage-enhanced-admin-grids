@@ -82,12 +82,14 @@ abstract class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Abstract extends Mage
     
     protected function _initializeForm()
     {
-        return new Varien_Data_Form(array(
-            'id'     => $this->getFormId(),
-            'method' => 'post',
-            'html_id_prefix' => $this->getFormId(),
-            'use_container'  => true,
-        ));
+        return new Varien_Data_Form(
+            array(
+                'id'     => $this->getFormId(),
+                'method' => 'post',
+                'html_id_prefix' => $this->getFormId(),
+                'use_container'  => true,
+            )
+        );
     }
     
     abstract public function getIsRequiredValueEdit();

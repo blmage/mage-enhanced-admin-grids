@@ -61,7 +61,6 @@ class BL_CustomGrid_Model_Grid_Exporter extends BL_CustomGrid_Model_Grid_Worker
         $typeModel = $gridModel->getTypeModel();
         $typeModel->beforeGridExport($format, null);
         $gridBlock = Mage::getSingleton('core/layout')->createBlock($gridModel->getBlockType());
-        $exportOutput = '';
         
         if (is_array($config)) {
             $gridBlock->blcg_setExportConfig($config);
@@ -77,7 +76,7 @@ class BL_CustomGrid_Model_Grid_Exporter extends BL_CustomGrid_Model_Grid_Worker
                 $exportOutput = $gridBlock->getExcelFile();
                 break;
             default:
-                $exportOutput = null;
+                $exportOutput = '';
                 break;
         }
         

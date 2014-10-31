@@ -21,17 +21,22 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Helper_Product_Wysiwyg extends
         $html = Varien_Data_Form_Element_Textarea::getAfterElementHtml();
         
         if ($this->getIsWysiwygEnabled()) {
+            $htmlId = $this->getHtmlId();
             $disabled   = ($this->getDisabled() || $this->getReadonly());
             $wysiwygUrl = $this->helper('adminhtml')->getUrl('customgrid/grid_editor_product/wysiwyg');
             
             $html .= Mage::getSingleton('core/layout')
-                ->createBlock('adminhtml/widget_button', '', array(
-                    'label'    => Mage::helper('catalog')->__('WYSIWYG Editor'),
-                    'type'     => 'button',
-                    'disabled' => $disabled,
-                    'class'    => ($disabled ? 'disabled' : ''),
-                    'onclick'  => 'catalogWysiwygEditor.open(\'' . $wysiwygUrl . '\', \'' . $this->getHtmlId() . '\')'
-                ))
+                ->createBlock(
+                    'adminhtml/widget_button',
+                    '',
+                    array(
+                        'label'    => Mage::helper('catalog')->__('WYSIWYG Editor'),
+                        'type'     => 'button',
+                        'disabled' => $disabled,
+                        'class'    => ($disabled ? 'disabled' : ''),
+                        'onclick'  => 'catalogWysiwygEditor.open(\'' . $wysiwygUrl . '\', \'' . $htmlId . '\')',
+                    )
+                )
                 ->toHtml();
         }
         

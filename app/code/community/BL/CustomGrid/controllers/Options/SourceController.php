@@ -72,11 +72,13 @@ class BL_CustomGrid_Options_SourceController extends Mage_Adminhtml_Controller_A
             $source->addData($data);
         }
         
-        $this->_initAction(array(
+        $this->_initAction(
+            array(
                 'default',
                 strtolower($this->getFullActionName()),
                 'customgrid_options_source_' . $source->getType()
-            ))
+            )
+            )
             ->_title($this->__('New Options Source'))
             ->renderLayout();
     }
@@ -94,11 +96,13 @@ class BL_CustomGrid_Options_SourceController extends Mage_Adminhtml_Controller_A
             $source->addData($data);
         }
         
-        $this->_initAction(array(
+        $this->_initAction(
+            array(
                 'default',
                 strtolower($this->getFullActionName()),
                 'customgrid_options_source_' . $source->getType()
-            ))
+            )
+            )
             ->_title($source->getName())
             ->_addBreadcrumb($source->getName(), $source->getName())
             ->renderLayout();

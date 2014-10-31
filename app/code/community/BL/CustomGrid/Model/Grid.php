@@ -678,11 +678,13 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
                 
                 foreach ($typeModels as $code => $typeModel) {
                     if ($typeModel->isAppliableToGridBlock($blockType, $rewritingClassName)) {
-                        $this->addData(array(
-                            'type_code'  => $code,
-                            'type_model' => $typeModel,
-                            'base_type_model' => $typeModel,
-                        ));
+                        $this->addData(
+                            array(
+                                'type_code'  => $code,
+                                'type_model' => $typeModel,
+                                'base_type_model' => $typeModel,
+                            )
+                        );
                         break;
                     }
                 }
@@ -806,17 +808,19 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
             $this->setData(
                 'base_profile',
                 Mage::getModel('customgrid/grid_profile')
-                    ->setData(array_merge(
-                        array(
-                            'profile_id'    => $this->getBaseProfileId(),
-                            'grid_id'       => $this->getId(),
-                            'name'          => $this->getBaseProfileName(),
-                            'is_restricted' => false,
-                            'is_default'    => false,
-                            'grid_model'    => $this,
-                        ),
-                        $this->_getStashedBaseProfileValues()
-                    ))
+                    ->setData(
+                        array_merge(
+                            array(
+                                'profile_id'    => $this->getBaseProfileId(),
+                                'grid_id'       => $this->getId(),
+                                'name'          => $this->getBaseProfileName(),
+                                'is_restricted' => false,
+                                'is_default'    => false,
+                                'grid_model'    => $this,
+                            ),
+                            $this->_getStashedBaseProfileValues()
+                        )
+                    )
             );
         }
         return $this->_getData('base_profile');
@@ -941,12 +945,29 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
         return in_array($profileId, $this->getAvailableProfilesIds(true), true);
     }
     
-    protected function _getProfileSessionValuesSessionKey($profileId = null)
+    /**
+     * Return a full profile-based session key from the given base session key
+     * 
+     * @param int|null $profileId Profile ID
+     * @return string
+     */
+    protected function _getProfileBasedSessionKey($baseSessionKey, $profileId = null)
     {
         if (is_null($profileId)) {
             $profileId = $this->getProfileId();
         }
-        return self::SESSION_BASE_KEY_PROFILE_SESSION_VALUES . $this->getId() . '_' . $profileId;
+        return $baseSessionKey . $this->getId() . '_' . $profileId;
+    }
+    
+    /**
+     * Return profile's session values session key
+     *
+     * @param int|null $profileId Profile ID
+     * @return string
+     */
+    protected function _getProfileSessionValuesSessionKey($profileId = null)
+    {
+        return $this->_getProfileBasedSessionKey(self::SESSION_BASE_KEY_PROFILE_SESSION_VALUES);
     }
     
     /**
@@ -971,10 +992,12 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
         $this->setData('profile_id', $profileId);
         
         if ($profileId !== $this->getBaseProfileId()) {
-            $this->addData(array_intersect_key(
-                $profiles[$profileId]->getData(),
-                array_flip(self::$_stashedProfileKeys)
-            ));
+            $this->addData(
+                array_intersect_key(
+                    $profiles[$profileId]->getData(),
+                    array_flip(self::$_stashedProfileKeys)
+                )
+            );
         }
         if (!$temporary) {
             $session = $this->_getAdminhtmlSession();
@@ -1820,27 +1843,29 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
             $usedCodes = $this->getUsedCustomColumnsCodes();
             $typeCode  = $typeModel->getCode();
             
-            if ($grouped) {
-                foreach ($customColumns as $code => $customColumn) {
-                    if (!isset($availableColumns[$customColumn->getGroupId()])) {
-                        $availableColumns[$customColumn->getGroupId()] = array();
+            if (is_array($customColumns)) {
+                if ($grouped) {
+                    foreach ($customColumns as $code => $customColumn) {
+                        if (!isset($availableColumns[$customColumn->getGroupId()])) {
+                            $availableColumns[$customColumn->getGroupId()] = array();
+                        }
+                        if (in_array($code, $usedCodes)) {
+                            $customColumn->setSelected(true);
+                        }
+                        if ($includeTypeCode) {
+                            $this->_addTypeToCustomColumnCode($code, $typeCode);
+                        }
+                        
+                        $availableColumns[$customColumn->getGroupId()][$code] = $customColumn;
                     }
-                    if (in_array($code, $usedCodes)) {
-                        $customColumn->setSelected(true);
-                    }
-                    if ($includeTypeCode) {
+                } elseif ($includeTypeCode) {
+                    foreach ($customColumns as $code => $customColumn) {
                         $this->_addTypeToCustomColumnCode($code, $typeCode);
+                        $availableColumns[$code] = $customColumn;
                     }
-                    
-                    $availableColumns[$customColumn->getGroupId()][$code] = $customColumn;
+                } else {
+                    $availableColumns = $customColumns;
                 }
-            } elseif ($includeTypeCode) {
-                foreach ($customColumns as $code => $customColumn) {
-                    $this->_addTypeToCustomColumnCode($code, $typeCode);
-                    $availableColumns[$code] = $customColumn;
-                }
-            } else {
-                $availableColumns = $customColumns;
             }
         }
         
@@ -2028,29 +2053,23 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     /**
      * Return applied filters session key
      *
-     * @param int|null $profileId ID of the profile under which the filters are applied
+     * @param int|null $profileId Current profile ID at the time the filters were applied
      * @return string
      */
     public function getAppliedFiltersSessionKey($profileId = null)
     {
-        if (is_null($profileId)) {
-            $profileId = $this->getProfileId();
-        }
-        return self::SESSION_BASE_KEY_APPLIED_FILTERS . $this->getId() . '_' . $profileId;
+        return $this->_getProfileBasedSessionKey(self::SESSION_BASE_KEY_APPLIED_FILTERS);
     }
     
     /**
      * Return removed filters session key
      *
-     * @param int|null $profileId ID of the profile under which the filters are removed
+     * @param int|null $profileId Current profile ID at the time the filters were removed
      * @return string
      */
     protected function getRemovedFiltersSessionKey($profileId = null)
     {
-        if (is_null($profileId)) {
-            $profileId = $this->getProfileId();
-        }
-        return self::SESSION_BASE_KEY_REMOVED_FILTERS . $this->getId() . '_' . $profileId;
+        return $this->_getProfileBasedSessionKey(self::SESSION_BASE_KEY_REMOVED_FILTERS);
     }
     
     /**
@@ -2228,11 +2247,13 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
                 $assignedProfilesIds = array();
             }
             
-            $roleConfig->addData(array(
-                'permissions' => $permissions,
-                'default_profile_id' => $defaultProfileId,
-                'assigned_profiles_ids' => array_map('intval', $assignedProfilesIds),
-            ));
+            $roleConfig->addData(
+                array(
+                    'permissions' => $permissions,
+                    'default_profile_id' => $defaultProfileId,
+                    'assigned_profiles_ids' => array_map('intval', $assignedProfilesIds),
+                )
+            );
         }
         
         return $this->setData('roles_config', $rolesConfig);
@@ -2300,11 +2321,13 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
         
         foreach ($permissions as $roleId => $rolePermissions) {
             if (!isset($rolesConfig[$roleId])) {
-                $rolesConfig[$roleId] = new BL_CustomGrid_Object(array(
-                    'permissions' => array(),
-                    'default_profile_id' => null,
-                    'assigned_profiles_ids' => array(),
-                ));
+                $rolesConfig[$roleId] = new BL_CustomGrid_Object(
+                    array(
+                        'permissions' => array(),
+                        'default_profile_id' => null,
+                        'assigned_profiles_ids' => array(),
+                    )
+                );
             }
             if (!is_array($rolePermissions)) {
                 $rolePermissions = array();
@@ -2541,22 +2564,25 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
             $this->throwPermissionException();
         }
         
-        $booleanKeys = array(
-            'display_system_part',
-            'ignore_custom_headers',
-            'ignore_custom_widths',
-            'ignore_custom_aligments',
-            'merge_base_pagination',
-            'pin_header',
-            'rss_links_window',
-            'hide_original_export_block',
-            'hide_filter_reset_button',
+        $booleanParams = array_intersect_key(
+            $params,
+            array_flip(
+                array(
+                    'display_system_part',
+                    'ignore_custom_headers',
+                    'ignore_custom_widths',
+                    'ignore_custom_aligments',
+                    'merge_base_pagination',
+                    'pin_header',
+                    'rss_links_window',
+                    'hide_original_export_block',
+                    'hide_filter_reset_button',
+                )
+            )
         );
         
-        foreach ($booleanKeys as $key) {
-            if (isset($params[$key])) {
-                $this->setData($key, ($params[$key] !== '' ? (bool) $params[$key] : null));
-            }
+        foreach ($booleanParams as $key => $value) {
+            $this->setData($key, ($value !== '' ? (bool) $value : null));
         }
         
         if (isset($params['pagination_values'])) {

@@ -76,7 +76,6 @@ class BL_CustomGrid_Helper_Reflection extends Mage_Core_Helper_Abstract
         }
         
         list($classCode, $valueName) = $valueParts;
-        $className = null;
         
         if ($classType == self::CLASS_TYPE_BLOCK) {
             $className = Mage::app()->getConfig()->getBlockClassName($classCode);

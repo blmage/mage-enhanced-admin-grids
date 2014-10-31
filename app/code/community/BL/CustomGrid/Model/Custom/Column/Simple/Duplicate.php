@@ -28,7 +28,7 @@ class BL_CustomGrid_Model_Custom_Column_Simple_Duplicate extends BL_CustomGrid_M
     ) {
         $helper = $this->_getCollectionHelper();
         $mainAlias = $helper->getCollectionMainTableAlias($collection);
-        list($adapter, $qi) = $this->_getCollectionAdapter($collection, true);
+        list(, $qi) = $this->_getCollectionAdapter($collection, true);
         $fieldName = $this->getDuplicatedFieldName();
         $collection->getSelect()->columns(array($columnIndex => $mainAlias . '.' . $fieldName));
         $helper->addFilterToCollectionMap($collection, $qi($mainAlias . '.' . $fieldName), $columnIndex);

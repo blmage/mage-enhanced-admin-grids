@@ -50,11 +50,13 @@ class BL_CustomGrid_Column_Renderer_CollectionController extends BL_CustomGrid_C
             
             $this->renderLayout();
         } else {
-            $this->loadLayout(array(
+            $this->loadLayout(
+                array(
                     'blcg_empty', 
                     strtolower($this->getFullActionName()),
                     'customgrid_column_renderer_collection_unknown',
-                ))
+                )
+                )
                 ->renderLayout();
         }
     }

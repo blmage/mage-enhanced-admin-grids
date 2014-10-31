@@ -814,9 +814,8 @@ class BL_CustomGrid_Model_Grid_Applier extends BL_CustomGrid_Model_Grid_Worker
     {
         $gridModel = $this->getGridModel();
         
-        $customLimit  = $gridModel->getDefaultPaginationValue();
-        $blockLimit   = $gridBlock->getDefaultLimit();
-        $defaultLimit = null;
+        $customLimit = $gridModel->getDefaultPaginationValue();
+        $blockLimit  = $gridBlock->getDefaultLimit();
         $values = $gridModel->getAppliablePaginationValues();
         
         if (!empty($customLimit) && in_array($customLimit, $values)) {

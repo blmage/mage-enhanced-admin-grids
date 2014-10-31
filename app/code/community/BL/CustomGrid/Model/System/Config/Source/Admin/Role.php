@@ -37,10 +37,13 @@ class BL_CustomGrid_Model_System_Config_Source_Admin_Role
         $options = self::$_options;
         
         if ($includeCreatorRole) {
-            array_unshift($options, array(
-                'value' => self::CREATOR_ROLE,
-                'label' => Mage::helper('customgrid')->__('Creator Role'),
-            ));
+            array_unshift(
+                $options,
+                array(
+                    'value' => self::CREATOR_ROLE,
+                    'label' => Mage::helper('customgrid')->__('Creator Role'),
+                )
+            );
         }
         
         return $options;

@@ -41,10 +41,13 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Static_Default extends
         }
         
         // Prepare fieldset and field
-        $fieldset = $form->addFieldset('base_fieldset', array(
-            'legend' => $fieldsetLegend,
-            'class'  => 'fieldset-wide blcg-editor-fieldset',
-        ));
+        $fieldset = $form->addFieldset(
+            'base_fieldset',
+            array(
+                'legend' => $fieldsetLegend,
+                'class'  => 'fieldset-wide blcg-editor-fieldset',
+            )
+        );
         
         $field = $fieldset->addField($fieldId, $fieldType, $fieldValues);
         $this->_prepareFormField($fieldId, $fieldType, $fieldName, $editConfig, $field);
@@ -64,12 +67,15 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Static_Default extends
                 $editedValue = $this->getEditedValue();
                 $editParams  = $this->getEditParams();
                 
-                $value = call_user_func_array(
-                    $editConfig->getData('entity_value_callback'),
-                    $editConfig->hasData('entity_value_callback_params')
-                        ? (is_array($params = $editConfig->getData('entity_value_callback_params')) ? $params : array())
-                        : array($this->getGridBlockType(), $editedValue, $editParams, $editedEntity)
-                );
+                if ($editConfig->hasData('entity_value_callback_params')) {
+                    if (!is_array($callbackParams = $editConfig->getData('entity_value_callback_params'))) {
+                        $callbackParams = array();
+                    }
+                } else {
+                    $callbackParams = array($this->getGridBlockType(), $editedValue, $editParams, $editedEntity);
+                }
+                
+                $value = call_user_func_array($editConfig->getData('entity_value_callback'), $callbackParams);
             } else {
                 $value = $editedEntity->getData($editConfig->getData('field_name'));
             }
@@ -98,12 +104,15 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Static_Default extends
                 $editParams   = $this->getEditParams();
                 $editedEntity = $this->getEditedEntity();
                 
-                $sourceOptions = call_user_func_array(
-                    $editConfig->getData($callbackKey),
-                    $editConfig->hasData($callbackParamsKey)
-                        ? (is_array($params = $editConfig->hasData($callbackParamsKey)) ? $params : array())
-                        : array($this->getGridBlockType(), $editedValue, $editParams, $editedEntity)
-                );
+                if ($editConfig->hasData($callbackParamsKey)) {
+                    if (!is_array($callbackParams = $editConfig->getData($callbackParamsKey))) {
+                        $callbackParams = array();
+                    }
+                } else {
+                    $callbackParams = array($this->getGridBlockType(), $editedValue, $editParams, $editedEntity);
+                }
+                
+                $sourceOptions = call_user_func_array($editConfig->getData($callbackKey), $callbackParams);
             }
             if (is_array($sourceOptions)) {
                 // Stop as soon as a valid options source is found
@@ -192,16 +201,17 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Static_Default extends
     ) {
         if ($fieldType == 'date') {
             // Stop click events on icons, else row click events will be handled too (eg redirecting to edit pages)
-            $field->setAfterElementHtml($field->getAfterElementHtml() . '
-<script type="text/javascript">
-//<![CDATA[
-$("' . $field->getHtmlId() . '_trig").observe("click", function(e) {
-    e.stop();
-    return false;
-});
-//]]>
-</script>
-');
+            $field->setAfterElementHtml(
+                $field->getAfterElementHtml() 
+                . '<script type="text/javascript">'
+                . '//<![CDATA['
+                . '$("' . $field->getHtmlId() . '_trig").observe("click", function(e) {'
+                . 'e.stop();'
+                . 'return false;'
+                . '});'
+                . '//]]>'
+                . '</script>'
+            );
         }
         return $this;
     }

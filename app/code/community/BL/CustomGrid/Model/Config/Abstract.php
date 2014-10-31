@@ -122,15 +122,17 @@ abstract class BL_CustomGrid_Model_Config_Abstract extends BL_CustomGrid_Object
                     'type' => $xmlElement->getAttribute('type'),
                     'name' => $helper->__((string) $xmlElement->name),
                     'help' => $helper->__((string) $xmlElement->help),
-                    'sort_order'  => (int) $xmlElement->{'sort_order'}, // CheckStyle validatorsdo not like snake case
+                    'sort_order'  => (int) $xmlElement->{'sort_order'}, // CheckStyle validators do not like snake case
                     'description' => $helper->__((string) $xmlElement->description),
                     'is_customizable' => $this->getAcceptParameters(),
                 );
                 
-                $element = new BL_CustomGrid_Object(array_merge(
-                    $values,
-                    $this->getElementsArrayAdditionalSubValues($xmlElement, $values, $helper)
-                ));
+                $element = new BL_CustomGrid_Object(
+                    array_merge(
+                        $values,
+                        $this->getElementsArrayAdditionalSubValues($xmlElement, $values, $helper)
+                    )
+                );
                 
                 $elements[$element['code']] = $element;
             }

@@ -212,8 +212,9 @@ class BL_CustomGrid_Helper_Grid extends Mage_Core_Helper_Abstract
                     $callback['callback'],
                     array_merge(
                         array_values($callback['params']),
-                        ($callback['add_native']? array($element, $gridModel, $checkFromOneDotSix) : array())
-                    ));
+                        ($callback['add_native'] ? array($element, $gridModel, $checkFromOneDotSix) : array())
+                    )
+                );
                 
                 if (!$isVerified) {
                     break;

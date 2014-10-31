@@ -33,7 +33,7 @@ class BL_CustomGrid_Custom_Column_ConfigController extends BL_CustomGrid_Control
     
     public function indexAction()
     {
-        if ($column = $this->_initCustomColumn()) {
+        if ($this->_initCustomColumn()) {
             $this->loadLayout('blcg_empty');
             
             if ($configBlock = $this->getLayout()->getBlock('blcg.custom_column.config')) {
@@ -49,11 +49,13 @@ class BL_CustomGrid_Custom_Column_ConfigController extends BL_CustomGrid_Control
             
             $this->renderLayout();
         } else {
-            $this->loadLayout(array(
+            $this->loadLayout(
+                array(
                     'blcg_empty', 
                     strtolower($this->getFullActionName()),
                     'customgrid_custom_column_config_unknown',
-                ))
+                )
+                )
                 ->renderLayout();
         }
     }

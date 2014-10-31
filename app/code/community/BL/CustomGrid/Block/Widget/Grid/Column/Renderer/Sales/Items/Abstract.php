@@ -59,8 +59,10 @@ abstract class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Sales_Items_Abstr
                 // Retrieve and use all actions applied to the base block
                 // (most commonly, "addColumnRender" and "addItemRender")
                 $fakeParent  = new Varien_Object(array('block_name' => $itemsBlock->getNameInLayout()));
-                $actionNodes = $update->xpath('//block[@name=\'' . $blockName . '\']//action'
-                    . '|//reference[@name=\'' . $blockName . '\']//action');
+                
+                $actionNodes = $update->xpath(
+                    '//block[@name=\'' . $blockName . '\']//action|//reference[@name=\'' . $blockName . '\']//action'
+                );
                 
                 $generateAction = $this->helper('customgrid/reflection')
                     ->getModelReflectionMethod('core/layout::_generateAction');

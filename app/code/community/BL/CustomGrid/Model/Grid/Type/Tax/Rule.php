@@ -138,11 +138,13 @@ class BL_CustomGrid_Model_Grid_Type_Tax_Rule extends BL_CustomGrid_Model_Grid_Ty
         $entity,
         &$value
     ) {
-        $entity->addData(array(
-            'tax_rate' => array_unique($entity->getRates()),
-            'tax_product_class'  => array_unique($entity->getProductTaxClasses()),
-            'tax_customer_class' => array_unique($entity->getCustomerTaxClasses()),
-        ));
+        $entity->addData(
+            array(
+                'tax_rate' => array_unique($entity->getRates()),
+                'tax_product_class'  => array_unique($entity->getProductTaxClasses()),
+                'tax_customer_class' => array_unique($entity->getCustomerTaxClasses()),
+            )
+        );
         return parent::_beforeApplyEditedFieldValue($blockType, $config, $params, $entity, $value);
     }
 }

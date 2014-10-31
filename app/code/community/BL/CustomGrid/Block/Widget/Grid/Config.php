@@ -148,8 +148,48 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
         );
     }
     
-    protected function _getProfilesActionsJsonConfig(BL_CustomGrid_Model_Grid $gridModel)
+    protected function _isProfilesDefaultActionAvailable()
     {
+        return $this->getGridModel()
+            ->checkUserPermissions(
+                array(
+                    BL_CustomGrid_Model_Grid::ACTION_CHOOSE_OWN_USER_DEFAULT_PROFILE,
+                    BL_CustomGrid_Model_Grid::ACTION_CHOOSE_OTHER_USERS_DEFAULT_PROFILE,
+                    BL_CustomGrid_Model_Grid::ACTION_CHOOSE_OWN_ROLE_DEFAULT_PROFILE,
+                    BL_CustomGrid_Model_Grid::ACTION_CHOOSE_OTHER_ROLES_DEFAULT_PROFILE,
+                    BL_CustomGrid_Model_Grid::ACTION_CHOOSE_GLOBAL_DEFAULT_PROFILE,
+                )
+            );
+    }
+    
+    protected function _isProfilesCopyToNewActionAvailable()
+    {
+        return $this->getGridModel()->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_COPY_PROFILES_TO_NEW);
+    }
+    
+    protected function _isProfilesCopyToExistingActionAvailable()
+    {
+        return $this->getGridModel()->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_COPY_PROFILES_TO_EXISTING);
+    }
+    
+    protected function _isProfilesEditActionAvailable()
+    {
+        return $this->getGridModel()->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_EDIT_PROFILES);
+    }
+    
+    protected function _isProfilesAssignActionAvailable()
+    {
+        return $this->getGridModel()->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_ASSIGN_PROFILES);
+    }
+    
+    protected function _isProfilesDeleteActionAvailable()
+    {
+        return $this->getGridModel()->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_DELETE_PROFILES);
+    }
+    
+    protected function _getProfilesActionsJsonConfig()
+    {
+        $gridModel = $this->getGridModel();
         $actions   = array();
         $actionsRoute  = 'customgrid/grid_profile/';
         $actionsParams = array(
@@ -168,13 +208,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
             'leftClickable'    => true,
         );
         
-        if ($gridModel->checkUserPermissions(array(
-                BL_CustomGrid_Model_Grid::ACTION_CHOOSE_OWN_USER_DEFAULT_PROFILE,
-                BL_CustomGrid_Model_Grid::ACTION_CHOOSE_OTHER_USERS_DEFAULT_PROFILE,
-                BL_CustomGrid_Model_Grid::ACTION_CHOOSE_OWN_ROLE_DEFAULT_PROFILE,
-                BL_CustomGrid_Model_Grid::ACTION_CHOOSE_OTHER_ROLES_DEFAULT_PROFILE,
-                BL_CustomGrid_Model_Grid::ACTION_CHOOSE_GLOBAL_DEFAULT_PROFILE,
-            ))) {
+        if ($this->_isProfilesDefaultActionAvailable()) {
             $actions['default'] = array(
                 'label'     => $this->__('Choose As Default'),
                 'mode'      => 'window',
@@ -187,7 +221,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
             );
         }
         
-        if ($gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_COPY_PROFILES_TO_NEW)) {
+        if ($this->_isProfilesCopyToNewActionAvailable()) {
             $actions['copy_new'] = array(
                 'label'     => $this->__('Copy To New Profile'),
                 'mode'      => 'window',
@@ -199,7 +233,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
             );
         }
         
-        if ($gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_COPY_PROFILES_TO_EXISTING)) {
+        if ($this->_isProfilesCopyToExistingActionAvailable()) {
             $actions['copy_existing'] = array(
                 'label'     => $this->__('Copy To Existing Profile'),
                 'mode'      => 'window',
@@ -211,7 +245,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
             );
         }
         
-        if ($gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_EDIT_PROFILES)) {
+        if ($this->_isProfilesEditActionAvailable()) {
             $actions['edit'] = array(
                 'label'        => $this->__('Edit'),
                 'mode'         => 'window',
@@ -224,7 +258,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
             );
         }
         
-        if ($gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_ASSIGN_PROFILES)) {
+        if ($this->_isProfilesAssignActionAvailable()) {
             $actions['assign'] = array(
                 'label'     => $this->__('Assign'),
                 'mode'      => 'window',
@@ -236,7 +270,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
             );
         }
         
-        if ($gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_DELETE_PROFILES)) {
+        if ($this->_isProfilesDeleteActionAvailable()) {
             $actions['delete'] = array(
                 'label'   => $this->__('Delete'),
                 'url'     => $this->getUrl($actionsRoute . 'delete', $actionsParams),
@@ -254,7 +288,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
     {
         if (!$this->hasData('profiles_actions_json_config')) {
             $actions = ($gridModel = $this->getGridModel())
-                ? $this->_getProfilesActionsJsonConfig($gridModel)
+                ? $this->_getProfilesActionsJsonConfig()
                 : array();
             $this->setData('profiles_actions_json_config', $this->helper('core')->jsonEncode($actions));
         }
@@ -278,9 +312,11 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
         return $this->_getData('profiles_bar_json_config');
     }
     
-    protected function _getGridFormWindowJsonConfig(BL_CustomGrid_Model_Grid $gridModel, $title = null, $height = null)
+    protected function _getGridFormWindowJsonConfig($title = null, $height = null)
     {
-        $config = array('title' => $gridModel->getProfile()->getName() . (is_null($title) ? '' : ' - ' . $title));
+        $config = array(
+            'title' => $this->getGridModel()->getProfile()->getName() . (is_null($title) ? '' : ' - ' . $title)
+        );
         
         if (!is_null($height)) {
             $config['height'] = (int) $height;
@@ -305,16 +341,16 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
         return (!empty($scripts) ? $this->helper('adminhtml/js')->getScript(implode("\n", $scripts)) : '');
     }
     
-    public function getColumnsListButtonHtml(BL_CustomGrid_Model_Grid $gridModel)
+    public function getColumnsListButtonHtml()
     {
         if (!$this->hasData('columns_list_button_html')) {
             $buttonHtml = '';
             
-            if ($gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_CUSTOMIZE_COLUMNS)) {
+            if ($this->getGridModel()->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_CUSTOMIZE_COLUMNS)) {
                 $buttonHtml = $this->getButtonHtml(
                     $this->__('Columns List'),
                     '$(\'' . $this->getColumnsListBlock()->getHtmlId() . '\').toggle(); '
-                        . '$(this).toggleClassName(\'blcg-on\');',
+                    . '$(this).toggleClassName(\'blcg-on\');',
                     'blcg-grid-profiles-bar-button blcg-grid-profiles-bar-button-columns-list'
                 );
             }
@@ -324,9 +360,10 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
         return $this->_getData('columns_list_button_html');
     }
     
-    public function getCustomColumnsFormButtonHtml(BL_CustomGrid_Model_Grid $gridModel)
+    public function getCustomColumnsFormButtonHtml()
     {
         if (!$this->hasData('custom_columns_form_button_html')) {
+            $gridModel  = $this->getGridModel();
             $buttonHtml = '';
             
             if ($gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_CUSTOMIZE_COLUMNS)
@@ -334,10 +371,10 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
                 $functionName = $this->_prepareButtonScript(
                     'CC',
                     'blcg.Tools.openDialogFromPost('
-                        . '\''. $this->getCustomColumnsFormUrl() . '\','
-                        . '{},'
-                        . $this->_getGridFormWindowJsonConfig($gridModel, $this->__('Custom Columns'))
-                        . ');'
+                    . '\''. $this->getCustomColumnsFormUrl() . '\','
+                    . '{},'
+                    . $this->_getGridFormWindowJsonConfig($this->__('Custom Columns'))
+                    . ');'
                 );
                 
                 $buttonHtml = $this->getButtonHtml(
@@ -352,28 +389,30 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
         return $this->_getData('custom_columns_form_button_html');
     }
     
-    public function getDefaultParamsFormButtonHtml(BL_CustomGrid_Model_Grid $gridModel)
+    public function getDefaultParamsFormButtonHtml()
     {
         if (!$this->hasData('default_params_form_button_html')) {
             $buttonHtml = '';
            
             if (($gridBlock = $this->getRewritedGridBlock())
-                && $gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_EDIT_DEFAULT_PARAMS)) {
-                $defaultParams = serialize(array(
-                    BL_CustomGrid_Model_Grid::GRID_PARAM_PAGE   => $gridBlock->blcg_getPage(),
-                    BL_CustomGrid_Model_Grid::GRID_PARAM_LIMIT  => $gridBlock->blcg_getLimit(),
-                    BL_CustomGrid_Model_Grid::GRID_PARAM_SORT   => $gridBlock->blcg_getSort(),
-                    BL_CustomGrid_Model_Grid::GRID_PARAM_DIR    => $gridBlock->blcg_getDir(),
-                    BL_CustomGrid_Model_Grid::GRID_PARAM_FILTER => $gridBlock->blcg_getFilterParam(),
-                ));
+                && $this->getGridModel()->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_EDIT_DEFAULT_PARAMS)) {
+                $defaultParams = serialize(
+                    array(
+                        BL_CustomGrid_Model_Grid::GRID_PARAM_PAGE   => $gridBlock->blcg_getPage(),
+                        BL_CustomGrid_Model_Grid::GRID_PARAM_LIMIT  => $gridBlock->blcg_getLimit(),
+                        BL_CustomGrid_Model_Grid::GRID_PARAM_SORT   => $gridBlock->blcg_getSort(),
+                        BL_CustomGrid_Model_Grid::GRID_PARAM_DIR    => $gridBlock->blcg_getDir(),
+                        BL_CustomGrid_Model_Grid::GRID_PARAM_FILTER => $gridBlock->blcg_getFilterParam(),
+                    )
+                );
                 
                 $functionName = $this->_prepareButtonScript(
                     'DP',
                     'blcg.Tools.openDialogFromPost('
-                        . '\''. $this->getDefaultParamsFormUrl() . '\','
-                        . $this->helper('core')->jsonEncode(array('default_params' => $defaultParams)) . ','
-                        . $this->_getGridFormWindowJsonConfig($gridModel, $this->__('Default Parameters'))
-                        . ');'
+                    . '\''. $this->getDefaultParamsFormUrl() . '\','
+                    . $this->helper('core')->jsonEncode(array('default_params' => $defaultParams)) . ','
+                    . $this->_getGridFormWindowJsonConfig($this->__('Default Parameters'))
+                    . ');'
                 );
                 
                 $buttonHtml = $this->getButtonHtml(
@@ -388,9 +427,10 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
         return $this->_getData('default_params_form_button_html');
     }
     
-    public function getExportFormButtonHtml(BL_CustomGrid_Model_Grid $gridModel)
+    public function getExportFormButtonHtml()
     {
         if (!$this->hasData('export_form_button_html')) {
+            $gridModel  = $this->getGridModel();
             $buttonHtml = '';
             
             if ($gridModel->getExporter()->canExport()
@@ -404,10 +444,10 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
                 $functionName = $this->_prepareButtonScript(
                     'Export',
                     'blcg.Tools.openDialogFromPost('
-                        . '\''. $this->getExportFormUrl() . '\','
-                        . $this->helper('core')->jsonEncode($params) . ','
-                        . $this->_getGridFormWindowJsonConfig($gridModel, $this->__('Export'), 240)
-                        . ');'
+                    . '\''. $this->getExportFormUrl() . '\','
+                    . $this->helper('core')->jsonEncode($params) . ','
+                    . $this->_getGridFormWindowJsonConfig($this->__('Export'), 240)
+                    . ');'
                 );
                 
                 $buttonHtml = $this->getButtonHtml(
@@ -422,17 +462,20 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
         return $this->_getData('export_form_button_html');
     }
     
-    public function getGridInfosFormButtonHtml(BL_CustomGrid_Model_Grid $gridModel)
+    public function getGridInfosFormButtonHtml()
     {
         if (!$this->hasData('grid_infos_form_button_html')) {
+            $gridModel  = $this->getGridModel();
             $buttonHtml = '';
-            $hasPermissions = $gridModel->checkUserPermissions(array(
-                BL_CustomGrid_Model_Grid::ACTION_EDIT_FORCED_TYPE,
-                BL_CustomGrid_Model_Grid::ACTION_ENABLE_DISABLE,
-                BL_CustomGrid_Model_Grid::ACTION_VIEW_GRID_INFOS,
-            ));
+            $hasUserPermissions = $gridModel->checkUserPermissions(
+                array(
+                    BL_CustomGrid_Model_Grid::ACTION_EDIT_FORCED_TYPE,
+                    BL_CustomGrid_Model_Grid::ACTION_ENABLE_DISABLE,
+                    BL_CustomGrid_Model_Grid::ACTION_VIEW_GRID_INFOS,
+                )
+            );
             
-            if (!$this->getIsNewGridModel() && $this->getGridBlock() && $hasPermissions) {
+            if (!$this->getIsNewGridModel() && $this->getGridBlock() && $hasUserPermissions) {
                 $windowHeight = 120;
                 
                 if ($gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_EDIT_FORCED_TYPE)) {
@@ -448,10 +491,10 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
                 $functionName = $this->_prepareButtonScript(
                     'GI',
                     'blcg.Tools.openDialogFromPost('
-                        . '\''. $this->getGridInfosUrl() . '\','
-                        . '{},'
-                        . $this->_getGridFormWindowJsonConfig($gridModel, $this->__('Grid Infos'), $windowHeight)
-                        . ');'
+                    . '\''. $this->getGridInfosUrl() . '\','
+                    . '{},'
+                    . $this->_getGridFormWindowJsonConfig($this->__('Grid Infos'), $windowHeight)
+                    . ');'
                 );
                 
                 $buttonHtml = $this->getButtonHtml(
@@ -466,21 +509,25 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
         return $this->_getData('grid_infos_form_button_html');
     }
     
-    public function getGridEditLinkButtonHtml(BL_CustomGrid_Model_Grid $gridModel)
+    public function getGridEditLinkButtonHtml()
     {
         if (!$this->hasData('grid_edit_link_button_html')) {
             $buttonHtml = '';
+            $hasUserPermissions = $this->getGridModel()
+                ->checkUserPermissions(
+                    array(
+                        BL_CustomGrid_Model_Grid::ACTION_CUSTOMIZE_COLUMNS,
+                        BL_CustomGrid_Model_Grid::ACTION_ENABLE_DISABLE,
+                        BL_CustomGrid_Model_Grid::ACTION_EDIT_FORCED_TYPE,
+                        BL_CustomGrid_Model_Grid::ACTION_EDIT_CUSTOMIZATION_PARAMS,
+                        BL_CustomGrid_Model_Grid::ACTION_EDIT_DEFAULT_PARAMS_BEHAVIOURS,
+                        BL_CustomGrid_Model_Grid::ACTION_EDIT_ROLES_PERMISSIONS,
+                        BL_CustomGrid_Model_Grid::ACTION_ASSIGN_PROFILES,
+                        BL_CustomGrid_Model_Grid::ACTION_EDIT_PROFILES,
+                    )
+                );
             
-            if ($gridModel->checkUserPermissions(array(
-                    BL_CustomGrid_Model_Grid::ACTION_CUSTOMIZE_COLUMNS,
-                    BL_CustomGrid_Model_Grid::ACTION_ENABLE_DISABLE,
-                    BL_CustomGrid_Model_Grid::ACTION_EDIT_FORCED_TYPE,
-                    BL_CustomGrid_Model_Grid::ACTION_EDIT_CUSTOMIZATION_PARAMS,
-                    BL_CustomGrid_Model_Grid::ACTION_EDIT_DEFAULT_PARAMS_BEHAVIOURS,
-                    BL_CustomGrid_Model_Grid::ACTION_EDIT_ROLES_PERMISSIONS,
-                    BL_CustomGrid_Model_Grid::ACTION_ASSIGN_PROFILES,
-                    BL_CustomGrid_Model_Grid::ACTION_EDIT_PROFILES,
-                ))) {
+            if ($hasUserPermissions) {
                 $buttonHtml = $this->getButtonHtml(
                     $this->__('Edit Grid'),
                     'window.open(\'' . $this->getGridEditUrl() . '\', \'_blank\');',
@@ -493,20 +540,20 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
         return $this->_getData('grid_edit_link_button_html');
     }
     
-    public function getRssLinksListButtonHtml(BL_CustomGrid_Model_Grid $gridModel)
+    public function getRssLinksListButtonHtml()
     {
         if (!$this->hasData('rss_links_list_button_html')) {
             $buttonHtml = '';
             
-            if ($gridModel->getUseRssLinksWindow()
+            if ($this->getGridModel()->getUseRssLinksWindow()
                 && ($gridBlock = $this->getGridBlock())
                 && is_array($gridBlock->getRssLists())) {
                 $functionName = $this->_prepareButtonScript(
                     'RSS',
                     'blcg.Tools.openDialogFromElement('
-                        . '\''. $this->getRssLinksBlock()->getHtmlId() . '\','
-                        . $this->_getGridFormWindowJsonConfig($gridModel, $this->__('RSS Links'))
-                        . ');'
+                    . '\''. $this->getRssLinksBlock()->getHtmlId() . '\','
+                    . $this->_getGridFormWindowJsonConfig($this->__('RSS Links'))
+                    . ');'
                 );
                 
                 $buttonHtml = $this->getButtonHtml(
@@ -524,17 +571,15 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
     public function getButtonsHtml()
     {
         if (!$this->hasData('buttons_html')) {
-            $gridModel = $this->getGridModel();
-            
             $this->setData(
                 'buttons_html',
-                $this->getColumnsListButtonHtml($gridModel)
-                    . "\n" . $this->getCustomColumnsFormButtonHtml($gridModel)
-                    . "\n" . $this->getDefaultParamsFormButtonHtml($gridModel)
-                    . "\n" . $this->getExportFormButtonHtml($gridModel)
-                    . "\n" . $this->getGridInfosFormButtonHtml($gridModel)
-                    . "\n" . $this->getGridEditLinkButtonHtml($gridModel)
-                    . "\n" . $this->getRssLinksListButtonHtml($gridModel)
+                $this->getColumnsListButtonHtml()
+                . "\n" . $this->getCustomColumnsFormButtonHtml()
+                . "\n" . $this->getDefaultParamsFormButtonHtml()
+                . "\n" . $this->getExportFormButtonHtml()
+                . "\n" . $this->getGridInfosFormButtonHtml()
+                . "\n" . $this->getGridEditLinkButtonHtml()
+                . "\n" . $this->getRssLinksListButtonHtml()
             );
         }
         return $this->_getData('buttons_html');

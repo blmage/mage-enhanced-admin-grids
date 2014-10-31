@@ -187,7 +187,7 @@ class BL_CustomGrid_Model_Grid_Absorber extends BL_CustomGrid_Model_Grid_Worker
         
         foreach ($columnBlockIds as $columnBlockId) {
             if (isset($columns[$columnBlockId]) && !in_array($columnBlockId, $foundBlockIds)) {
-                $columns[$columnBockId]->setIsMissing(true);
+                $columns[$columnBlockId]->setIsMissing(true);
             }
         }
         

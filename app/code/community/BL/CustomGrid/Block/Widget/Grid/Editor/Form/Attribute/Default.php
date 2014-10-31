@@ -30,10 +30,13 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Attribute_Default extends
             $required = ' (<span class="blcg-editor-required-marker">' . $this->__('Required') . '</span>)';
         }
         
-        $fieldset = $form->addFieldset('base_fieldset', array(
-            'legend' => $this->__('%s : %s', $this->getEditedEntityName(), $attribute->getFrontendLabel() . $required),
-            'class'  => 'fieldset-wide blcg-editor-fieldset',
-        ));
+        $fieldset = $form->addFieldset(
+            'base_fieldset',
+            array(
+                'legend' => $this->__('%s : %s', $this->getEditedEntityName(), $attribute->getFrontendLabel() . $required),
+                'class'  => 'fieldset-wide blcg-editor-fieldset',
+            )
+        );
         
         $this->_setFieldset(array($attribute), $fieldset);
         $form->addValues($entity->getData());

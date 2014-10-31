@@ -268,8 +268,6 @@ class BL_CustomGrid_Helper_String extends Mage_Core_Helper_Abstract
                 $result[] = $this->htmlDoubleEscape($item);
             }
         } else {
-            $result = '';
-            
             if (strlen($data)) {
                 if (is_array($allowedTags) && !empty($allowedTags)) {
                     $allowed = implode('|', $allowedTags);

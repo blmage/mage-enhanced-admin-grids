@@ -82,15 +82,21 @@ class BL_CustomGrid_Helper_Editor extends Mage_Core_Helper_Abstract
      */
     public function filterDateValue($value)
     {
-        $filterInput = new Zend_Filter_LocalizedToNormalized(array(
-            'date_format' => Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT),
-        ));
-        $filterInternal = new Zend_Filter_NormalizedToLocalized(array(
-            'date_format' => Varien_Date::DATE_INTERNAL_FORMAT,
-        ));
+        $filterInput = new Zend_Filter_LocalizedToNormalized(
+            array(
+                'date_format' => Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT),
+            )
+        );
+        
+        $filterInternal = new Zend_Filter_NormalizedToLocalized(
+            array(
+                'date_format' => Varien_Date::DATE_INTERNAL_FORMAT,
+            )
+        );
         
         $value = $filterInput->filter($value);
         $value = $filterInternal->filter($value);
+        
         return $value;
     }
 }

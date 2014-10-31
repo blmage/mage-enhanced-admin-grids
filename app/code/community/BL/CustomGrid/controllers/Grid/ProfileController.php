@@ -44,7 +44,7 @@ class BL_CustomGrid_Grid_ProfileController extends BL_CustomGrid_Controller_Grid
         
         $this->loadLayout($handles);
         
-        if (is_string($error)) {
+        if ($error !== false) {
             if ($errorBlock = $this->getLayout()->getBlock('blcg.grid_profile.form_error')) {
                 $errorBlock->setErrorText($error);
             }
@@ -73,14 +73,14 @@ class BL_CustomGrid_Grid_ProfileController extends BL_CustomGrid_Controller_Grid
     public function defaultFormAction()
     {
         $this->_prepareFormLayout(
-                'default',
-                array(
-                    BL_CustomGrid_Model_Grid::ACTION_CHOOSE_OWN_USER_DEFAULT_PROFILE,
-                    BL_CustomGrid_Model_Grid::ACTION_CHOOSE_OTHER_USERS_DEFAULT_PROFILE,
-                    BL_CustomGrid_Model_Grid::ACTION_CHOOSE_OWN_ROLE_DEFAULT_PROFILE,
-                    BL_CustomGrid_Model_Grid::ACTION_CHOOSE_OTHER_ROLES_DEFAULT_PROFILE,
-                    BL_CustomGrid_Model_Grid::ACTION_CHOOSE_GLOBAL_DEFAULT_PROFILE,
-                )
+            'default',
+            array(
+                BL_CustomGrid_Model_Grid::ACTION_CHOOSE_OWN_USER_DEFAULT_PROFILE,
+                BL_CustomGrid_Model_Grid::ACTION_CHOOSE_OTHER_USERS_DEFAULT_PROFILE,
+                BL_CustomGrid_Model_Grid::ACTION_CHOOSE_OWN_ROLE_DEFAULT_PROFILE,
+                BL_CustomGrid_Model_Grid::ACTION_CHOOSE_OTHER_ROLES_DEFAULT_PROFILE,
+                BL_CustomGrid_Model_Grid::ACTION_CHOOSE_GLOBAL_DEFAULT_PROFILE,
+            )
             )
             ->renderLayout();
     }
@@ -90,7 +90,7 @@ class BL_CustomGrid_Grid_ProfileController extends BL_CustomGrid_Controller_Grid
         if ($this->getRequest()->isPost()) {
             try {
                 $data = $this->getRequest()->getPost();
-                $gridModel = $this->_initGridModel();
+                $this->_initGridModel();
                 $gridProfile = $this->_initGridProfile();
                 
                 $gridProfile->chooseAsDefault($data);
@@ -206,7 +206,7 @@ class BL_CustomGrid_Grid_ProfileController extends BL_CustomGrid_Controller_Grid
         if ($this->getRequest()->isPost()) {
             try {
                 $data = $this->getRequest()->getPost();
-                $gridModel   = $this->_initGridModel();
+                $this->_initGridModel();
                 $gridProfile = $this->_initGridProfile();
                 
                 $gridProfile->update($data);

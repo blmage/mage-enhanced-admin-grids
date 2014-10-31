@@ -117,7 +117,7 @@ class BL_CustomGrid_Model_Custom_Column_Product_Inventory extends BL_CustomGrid_
         Varien_Data_Collection_Db $collection
     ) {
         $helper = $this->_getCollectionHelper();
-        list($adapter, $qi) = $this->_getCollectionAdapter($collection, true);
+        list(, $qi) = $this->_getCollectionAdapter($collection, true);
         
         $fieldName = $this->getTableFieldName();
         $select->columns(array($columnIndex => $tableAlias . '.' . $fieldName), $tableAlias);

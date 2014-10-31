@@ -151,7 +151,6 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Default extends
     ) {
         $renderableValue = $this->_getRenderableChoiceValue($renderableValue, $renderOptions, $allowMultiple);
         $selectedValues  = array_intersect_key($choices, array_flip($renderableValue));
-        $renderedValue   = '';
         
         if (isset($renderOptions['without_path']) && $renderOptions['without_path']) {
             $renderedValue = $this->_renderChoiceValueWithoutPath($selectedValues, $renderOptions);
@@ -448,7 +447,6 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Default extends
         $fieldType     = $editConfig->getData('type');
         $renderOptions = $editConfig->getData('renderer');
         $formOptions   = $editConfig->getData('form');
-        $renderedValue = '';
         $renderableValue = $this->getRenderableValue();
         
         if (isset(self::$_renderMethods[$fieldType])) {

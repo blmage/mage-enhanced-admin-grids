@@ -683,20 +683,20 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
         BL_CustomGrid_Model_Grid $gridModel
     ) {
         return $this->addFilterToCollectionMap(
-                $collection,
-                $this->buildFiltersMapArray(
-                    array(
-                        'entity_id',
-                        'type_id',
-                        'attribute_set_id',
-                        'sku',
-                        'has_options',
-                        'required_options',
-                        'created_at',
-                        'updated_at',
-                    ),
-                    $this->getCollectionMainTableAlias($collection)
-                )
+            $collection,
+            $this->buildFiltersMapArray(
+                array(
+                    'entity_id',
+                    'type_id',
+                    'attribute_set_id',
+                    'sku',
+                    'has_options',
+                    'required_options',
+                    'created_at',
+                    'updated_at',
+                ),
+                $this->getCollectionMainTableAlias($collection)
+            )
             )
             ->addFilterToCollectionMap($collection, $this->getAttributeTableAlias('qty') . '.qty', 'qty');
     }

@@ -32,14 +32,16 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Product_Categories extends
             $htmlId = $this->helper('core')->uniqHash($this->_getHtmlId());
             $jsId = $this->helper('core')->uniqHash('blcgCategoriesFilter');
             $windowUrl = $this->getUrl('customgrid/grid_column_filter/categories', array('js_object_name' => $jsId));
-            $windowJsonConfig = $this->helper('core')->jsonEncode(array(
-                'width'  => '700px',
-                'height' => '480px',
-                'title'  => $this->__('Choose Categories To Filter'),
-                'draggable' => true,
-                'resizable' => true,
-                'recenterAuto' => false,
-            ));
+            $windowJsonConfig = $this->helper('core')->jsonEncode(
+                array(
+                    'width'  => '700px',
+                    'height' => '480px',
+                    'title'  => $this->__('Choose Categories To Filter'),
+                    'draggable' => true,
+                    'resizable' => true,
+                    'recenterAuto' => false,
+                )
+            );
             
             $ids = array_filter(array_unique(explode(',', $this->getValue())));
             sort($ids, SORT_NUMERIC);

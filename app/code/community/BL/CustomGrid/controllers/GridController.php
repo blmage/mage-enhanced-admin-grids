@@ -148,9 +148,9 @@ class BL_CustomGrid_GridController extends BL_CustomGrid_Controller_Grid_Action
     public function customColumnsFormAction()
     {
         $this->_prepareWindowFormLayout(
-                'custom_columns',
-                array(),
-                BL_CustomGrid_Model_Grid::ACTION_CUSTOMIZE_COLUMNS
+            'custom_columns',
+            array(),
+            BL_CustomGrid_Model_Grid::ACTION_CUSTOMIZE_COLUMNS
             )
             ->renderLayout();
     }
@@ -197,9 +197,9 @@ class BL_CustomGrid_GridController extends BL_CustomGrid_Controller_Grid_Action
         }
         
         $this->_prepareWindowFormLayout(
-                'default_params',
-                array('default_params' => $defaultParams),
-                BL_CustomGrid_Model_Grid::ACTION_EDIT_DEFAULT_PARAMS
+            'default_params',
+            array('default_params' => $defaultParams),
+            BL_CustomGrid_Model_Grid::ACTION_EDIT_DEFAULT_PARAMS
             )
             ->renderLayout();
     }
@@ -256,12 +256,12 @@ class BL_CustomGrid_GridController extends BL_CustomGrid_Controller_Grid_Action
     public function exportFormAction()
     {
         $this->_prepareWindowFormLayout(
-                'export',
-                array(
-                    'total_size'  => $this->getRequest()->getParam('total_size'),
-                    'first_index' => $this->getRequest()->getParam('first_index'),
-                ),
-                BL_CustomGrid_Model_Grid::ACTION_EXPORT_RESULTS
+            'export',
+            array(
+                'total_size'  => $this->getRequest()->getParam('total_size'),
+                'first_index' => $this->getRequest()->getParam('first_index'),
+            ),
+            BL_CustomGrid_Model_Grid::ACTION_EXPORT_RESULTS
             )
             ->renderLayout();
     }
@@ -307,12 +307,12 @@ class BL_CustomGrid_GridController extends BL_CustomGrid_Controller_Grid_Action
     public function gridInfosAction()
     {
         $this->_prepareWindowFormLayout(
-                'grid_infos',
-                array(),
-                array(
-                    BL_CustomGrid_Model_Grid::ACTION_VIEW_GRID_INFOS,
-                    BL_CustomGrid_Model_Grid::ACTION_EDIT_FORCED_TYPE,
-                )
+            'grid_infos',
+            array(),
+            array(
+                BL_CustomGrid_Model_Grid::ACTION_VIEW_GRID_INFOS,
+                BL_CustomGrid_Model_Grid::ACTION_EDIT_FORCED_TYPE,
+            )
             )
             ->renderLayout();
     }

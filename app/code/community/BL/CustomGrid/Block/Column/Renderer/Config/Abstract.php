@@ -13,33 +13,12 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-abstract class BL_CustomGrid_Block_Column_Renderer_Config_Abstract extends BL_CustomGrid_Block_Widget_Form_Container
+abstract class BL_CustomGrid_Block_Column_Renderer_Config_Abstract extends BL_CustomGrid_Block_Config_Container_Abstract
 {
-    abstract protected function _getController();
-    abstract public function getRenderer(); 
+    protected $_blockGroup = 'customgrid';
+    protected $_mode = 'config';
     
-    public function __construct()
-    {
-        parent::__construct();
-        
-        $this->_blockGroup = 'customgrid';
-        $this->_controller = $this->_getController();
-        $this->_mode = 'config';
-        $this->_headerText = $this->getRenderer()->getName();
-        
-        $this->_removeButtons(array('back', 'delete', 'reset'));
-        
-        $this->_updateButton(
-            'save',
-            null,
-            array(
-                'id'         => 'blcg_renderer_config_insert_button',
-                'label'      => $this->__('Apply Configuration'),
-                'onclick'    => $this->getJsObjectName() . '.insertParams();',
-                'sort_order' => 0,
-            )
-        );
-    }
+    abstract public function getRenderer(); 
     
     protected function _beforeToHtml()
     {
@@ -55,14 +34,24 @@ abstract class BL_CustomGrid_Block_Column_Renderer_Config_Abstract extends BL_Cu
         return parent::_beforeToHtml();
     }
     
-    public function getUseDefaultForm()
+    protected function _getHeaderText()
     {
-        return false;
+        return $this->getRenderer()->getName();
+    }
+    
+    protected function _getSaveButtonId()
+    {
+        return 'blcg_renderer_config_insert_button';
     }
     
     public function getJsObjectName()
     {
         return 'blcgRendererConfigForm';
+    }
+    
+    public function getUseDefaultForm()
+    {
+        return false;
     }
     
     public function getRendererTargetId()
