@@ -113,7 +113,7 @@ div.blcg-collapseable a.open { background:url(images/collapse_arrow_up.png) 100%
 .blcg-grid-profiles-bar-button-export > span::before { content:"\f1c3"; }
 .blcg-grid-profiles-bar-button-grid-infos > span::before { content:"\f129"; }
 .blcg-grid-profiles-bar-button-edit-link > span::before { content:"\f08e"; }
-.blcg-grid-profiles-bar-button-rss > span::before { content:"\f143"; }
+.blcg-grid-profiles-bar-button-rss > span::before { content:"\f09e"; }
 
 .blcg-grid-profiles-bar-button-copy_new,
 .blcg-grid-profiles-bar-button-copy_new:hover {
@@ -140,7 +140,7 @@ div.blcg-collapseable a.open { background:url(images/collapse_arrow_up.png) 100%
 .blcg-grid-profiles-bar-arrow-down { float:right; margin:5px 6px 0 0; background-image:url(images/arrow_down.gif); }
 .blcg-custom-grid-config-switch { float:right; margin-right:6px; text-align:right; }
 .blcg-grid-profiles-list { position:relative; float:left; display: table; border-spacing: 10px 0; }
-.blcg-grid-profiles-list li { display: table-cell; height:27px; line-height:30px; margin:8px 0 0 8px; padding:0 10px; background:#e2e2e2; border:1px solid #ccc; border-width:1px 1px 0; cursor:pointer; max-width:120px; text-overflow: ellipsis; overflow-x:hidden; white-space: nowrap; }
+.blcg-grid-profiles-list li { display: table-cell; height:27px; line-height:27px; margin:8px 0 0 8px; padding:0 10px; background:#e2e2e2; border:1px solid #ccc; border-width:1px 1px 0; cursor:pointer; max-width:120px; text-overflow: ellipsis; overflow-x:hidden; white-space: nowrap; }
 .blcg-grid-profiles-list li.blcg-base { font-style:italic; }
 .blcg-grid-profiles-list li.blcg-current { height:28px; margin-bottom:-1px; line-height:28px; background:#fff; max-width:inherit; }
 
