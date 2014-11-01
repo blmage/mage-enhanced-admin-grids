@@ -574,12 +574,12 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
             $this->setData(
                 'buttons_html',
                 $this->getColumnsListButtonHtml()
-                . "\n" . $this->getCustomColumnsFormButtonHtml()
-                . "\n" . $this->getDefaultParamsFormButtonHtml()
-                . "\n" . $this->getExportFormButtonHtml()
-                . "\n" . $this->getGridInfosFormButtonHtml()
-                . "\n" . $this->getGridEditLinkButtonHtml()
-                . "\n" . $this->getRssLinksListButtonHtml()
+                . $this->getCustomColumnsFormButtonHtml()
+                . $this->getDefaultParamsFormButtonHtml()
+                . $this->getExportFormButtonHtml()
+                . $this->getGridInfosFormButtonHtml()
+                . $this->getGridEditLinkButtonHtml()
+                . $this->getRssLinksListButtonHtml()
             );
         }
         return $this->_getData('buttons_html');

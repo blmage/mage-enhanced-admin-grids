@@ -13,8 +13,15 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 ?>
+<?php /** @var $this BL_CustomGrid_Block_Widget_Grid_Config */ ?>
 <?php $_gridModel = $this->getGridModel() ?>
     <div id="<?php echo $this->getHtmlId() ?>-profiles-bar" class="blcg-grid-profiles-bar">
+        <div class="blcg-grid-profiles-list-wrapper">
+            <ul class="blcg-grid-profiles-list"></ul>
+        </div>
+        <div class="blcg-grid-profiles-bar-cell">
+            <div class="blcg-grid-profiles-list-options blcg-grid-profiles-bar-buttons"></div>
+        </div>
         <div class="blcg-grid-profiles-bar-fixed-part">
             <div class="blcg-grid-profiles-bar-buttons">
                 <?php echo $this->getButtonsHtml() ?>
@@ -28,9 +35,6 @@
                 </div>
                 <div class="blcg-grid-profiles-bar-arrow blcg-grid-profiles-bar-arrow-up blcg-disabled"></div>
             </div>
-        </div>
-        <div class="blcg-grid-profiles-list-wrapper">
-            <ul class="blcg-grid-profiles-list"></ul>
         </div>
     </div>
 <script type="text/javascript">
