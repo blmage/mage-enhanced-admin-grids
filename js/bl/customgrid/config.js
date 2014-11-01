@@ -1651,46 +1651,39 @@ blcg.Grid.ProfilesBar.prototype = {
 
         if (this.currentProfile) {
             this.actions.each(function(pair) {
-                if ((pair.value.appliesToBase || !this.currentProfile.isBase)
-                    && (pair.value.appliesToCurrent || !this.currentProfile.isCurrent)) {
 
-                    var item = $(document.createElement('button'));
-                    var self = this;
-                    item.id = this.config.profileItemIdPrefix + this.currentProfile.id;
-                    item.update('<span><span>'+pair.value.label.escapeHTML()+'</span></span>');
-                    item.writeAttribute('title', pair.value.label.escapeHTML());
-                    item.addClassName(' blcg-grid-profiles-bar-button');
-                    item.addClassName(' blcg-grid-profiles-bar-button-'+pair.key);
-                    item.observe('click', function(){
-                        var action = pair[1];
-                        if (!action.confirm || confirm(action.confirm)) {
+                if (!pair.value.appliesToBase && this.currentProfile.isBase) {
+                    return;
+                }
+                if (!pair.value.appliesToCurrent && this.currentProfile.isCurrent) {
+                    return;
+                }
+                if (!pair.value.appliesToDefault && this.currentProfile.isDefault) {
+                    console.log(3);
+                    return;
+                }
 
-                            self.applyAction(self.currentProfile, pair.key);
-                        }
-                    });
+                var item = $(document.createElement('button'));
+                var self = this;
+                item.id = this.config.profileItemIdPrefix + this.currentProfile.id;
+                item.update('<span><span>'+pair.value.label.escapeHTML()+'</span></span>');
+                item.writeAttribute('title', pair.value.label.escapeHTML());
+                item.addClassName(' blcg-grid-profiles-bar-button');
+                item.addClassName(' blcg-grid-profiles-bar-button-'+pair.key);
+                item.observe('click', function(){
+                    var action = pair[1];
+                    if (!action.confirm || confirm(action.confirm)) {
 
+                        self.applyAction(self.currentProfile, pair.key);
+                    }
+                });
+
+                if(pair.key == 'copy_new') {
+                    this.profilesList.insert(item);
+                } else {
                     this.profileOptions.insert(item);
                 }
             }.bind(this));
-        }
-
-        this.profilesListScrollLevel = 0;
-        this.scrolledListTo = false;
-        this.lastProfilesListScrollLevel = Number.MIN_VALUE;
-        this.lastProfilesListMaxScrollLevel = Number.MAX_VALUE;
-        this.profilesListHeight  = this.profilesList.up().getHeight();
-        
-        if (this.profilesListHeight == 0) {
-            this.readinessTester = new PeriodicalExecuter(function() {
-                this.profilesListHeight  = this.profilesList.up().getHeight();
-                
-                if (this.profilesListHeight > 0) {
-                    this.readinessTester.stop();
-                    this.intializeRefresh();
-                }
-            }.bind(this), 0.1);
-        } else {
-            this.intializeRefresh();
         }
     },
     
