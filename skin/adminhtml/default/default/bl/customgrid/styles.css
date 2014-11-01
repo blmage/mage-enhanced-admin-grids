@@ -128,15 +128,12 @@ div.blcg-collapseable a.open { background:url(images/collapse_arrow_up.png) 100%
 .blcg-grid-profiles-bar-arrow-up { float:right; margin:5px 0 0; background-image:url(images/arrow_up.gif); }
 .blcg-grid-profiles-bar-arrow-down { float:right; margin:5px 6px 0 0; background-image:url(images/arrow_down.gif); }
 .blcg-custom-grid-config-switch { float:right; margin-right:6px; text-align:right; }
-.blcg-grid-profiles-list-state { float:right; width:40px; line-height:24px; text-align:center; }
 .blcg-grid-profiles-list-wrapper { height:36px; }
 .blcg-grid-profiles-list { position:relative; display:block; white-space:nowrap; }
 .blcg-grid-profiles-list:after { clear:both; display:block; content:"."; height:0; line-height:0; overflow:hidden; font-size:0; }
 .blcg-grid-profiles-list li { float:left; display:block; height:27px; line-height:30px; margin:8px 0 0 8px; padding:0 10px; background:#e2e2e2; border:1px solid #ccc; border-width:1px 1px 0; cursor:pointer; }
 .blcg-grid-profiles-list li.blcg-base { font-style:italic; }
 .blcg-grid-profiles-list li.blcg-current { height:28px; margin-bottom:-1px; line-height:28px; background:#fff; }
-.blcg-grid-profiles-bar-arrow,
-.blcg-grid-profiles-list li { user-select:none; -moz-user-select:none; -webkit-user-select:none; -ms-user-select:none; }
 
 /* PINNABLE GRID HEADER */
 
