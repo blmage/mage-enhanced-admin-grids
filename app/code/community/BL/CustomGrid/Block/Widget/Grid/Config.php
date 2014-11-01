@@ -409,9 +409,15 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
     {
         if (!$this->hasData('default_params_form_button_html')) {
             $buttonHtml = '';
-           
+
             if (($gridBlock = $this->getRewritedGridBlock())
                 && $this->getGridModel()->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_EDIT_DEFAULT_PARAMS)) {
+                /** @var Mage_Adminhtml_Block_Widget_Grid $gridBlock */
+                if (! $gridBlock->getPagerVisibility()) {
+                    $this->setData('default_params_form_button_html', '');
+                    return $buttonHtml;
+                }
+
                 $defaultParams = serialize(
                     array(
                         BL_CustomGrid_Model_Grid::GRID_PARAM_PAGE   => $gridBlock->blcg_getPage(),
