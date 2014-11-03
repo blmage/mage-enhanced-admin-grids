@@ -125,7 +125,8 @@ div.blcg-collapseable a.open { background:url(images/collapse_arrow_up.png) 100%
 .blcg-grid-profiles-bar-button-copy_new:hover {
     text-shadow: -1px 1px 8px #ffc;
 }
-.blcg-grid-profiles-bar-button-copy_new > span::before { content: "\f067"; }
+.blcg-grid-profiles-bar-button-copy_new > span::before { content: "\f067"; color:#aaa; }
+.blcg-grid-profiles-bar-button-copy_new > span:hover::before {color:#555;}
 
 .blcg-grid-profiles-bar-button-default > span::before { content: "\f08d";}
 .blcg-grid-profiles-bar-button-copy_existing > span::before { content: "\f0c5"; }
