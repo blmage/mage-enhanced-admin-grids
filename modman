@@ -2,6 +2,7 @@ app/code/community/BL/CustomGrid/                               app/code/communi
 app/design/adminhtml/default/default/layout/bl/customgrid.xml   app/design/adminhtml/default/default/layout/bl/customgrid.xml
 app/design/adminhtml/default/default/template/bl/customgrid/    app/design/adminhtml/default/default/template/bl/customgrid/
 app/etc/modules/BL_CustomGrid.xml                               app/etc/modules/BL_CustomGrid.xml
+app/locale/de_DE/BL_CustomGrid.csv                              app/locale/de_DE/BL_CustomGrid.csv
 app/locale/fr_FR/BL_CustomGrid.csv                              app/locale/fr_FR/BL_CustomGrid.csv
 js/bl/customgrid/                                               js/bl/customgrid/
 skin/adminhtml/default/default/bl/customgrid/                   skin/adminhtml/default/default/bl/customgrid/
