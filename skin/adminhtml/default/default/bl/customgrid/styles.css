@@ -141,10 +141,13 @@ div.blcg-collapseable a.open { background:url(images/collapse_arrow_up.png) 100%
 .blcg-grid-profiles-bar-arrow-down { float:right; margin:5px 6px 0 0; background-image:url(images/arrow_down.gif); }
 .blcg-custom-grid-config-switch { float:right; margin-right:6px; text-align:right; }
 .blcg-grid-profiles-list { position:relative; float:left; display: table; border-spacing: 10px 0; }
-.blcg-grid-profiles-list li { display: table-cell; height:27px; line-height:27px; margin:8px 0 0 8px; padding:0 10px; background:#e2e2e2; border:1px solid #ccc; border-width:1px 1px 0; cursor:pointer; max-width:120px; text-overflow: ellipsis; overflow-x:hidden; white-space: nowrap; }
+.blcg-grid-profiles-list li { display: table-cell; height:27px; line-height:27px; margin:8px 0 0 8px;
+    background:#e2e2e2; border:1px solid #ccc; border-width:1px 1px 0; cursor:pointer; max-width:120px;
+}
 .blcg-grid-profiles-list li.blcg-base { font-style:italic; }
-.blcg-grid-profiles-list li.blcg-current { height:28px; margin-bottom:-1px; line-height:28px; background:#fff; max-width:inherit; }
-
+.blcg-grid-profiles-list li > span {padding:0 10px; display:block; text-overflow: ellipsis; white-space: nowrap; overflow:hidden; }
+.blcg-grid-profiles-list li.blcg-current { max-width:inherit; }
+.blcg-grid-profiles-list li.blcg-current > span { height:30px; margin-bottom:-1px; line-height:30px; background:#fff; }
 /* PINNABLE GRID HEADER */
 
 .blcg-grid-pinned-actions-block { z-index:1; background:#fff; }

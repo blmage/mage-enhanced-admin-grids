@@ -1696,7 +1696,7 @@ blcg.Grid.ProfilesBar.prototype = {
     {
         var item = $(document.createElement('li'));
         item.id = this.config.profileItemIdPrefix + profile.id;
-        item.update(profile.name.escapeHTML());
+        item.update('<span>'+profile.name.escapeHTML()+'</span>');
         item.writeAttribute('title', this.config.profileItemTitle);
         item.observe('click', this.applyLeftClickAction.bind(this, profile.id));
         
