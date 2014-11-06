@@ -41,7 +41,7 @@ class BL_CustomGrid_Block_Widget_Grid_Button_Default_Filter_Reapply extends Mage
         if ($this->getGridBlock() && $this->getGridModel()) {
             $this->setData(
                 array(
-                    'label'   => $this->__('Reapply Default Filter'),
+                    'label'   => $this->__('Reset Filter'),
                     'onclick' => 'blcg.Grid.Tools.reapplyDefaultFilter('
                         . '\'' . $this->jsQuoteEscape($this->getGridBlockJsObjectName()) . '\','
                         . '\'' . $this->getReapplyDefaultFilterUrl() . '\','

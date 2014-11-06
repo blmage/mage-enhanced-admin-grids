@@ -70,6 +70,11 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
     {
         return ($this->getId() === $this->getGridModel()->getProfileId());
     }
+
+    public function isDefault() {
+        //@todo return proper flag if this profile is the default profile for this grid.
+        return false;
+    }
     
     /**
      * Return the roles IDs to which this profile is assigned

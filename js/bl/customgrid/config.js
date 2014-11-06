@@ -921,11 +921,11 @@ blcg.ContextMenu.prototype = {
     initialize: function(container)
     {
         blcg.ContextMenu.load();
-        
+
         this.activatedItem = false;
         this.items = [];
         this.container = $(container);
-        
+
         this.container.observe((Prototype.Browser.Opera ? 'click' : 'contextmenu'), function(event) {
             if (!blcg.ContextMenu.isEnabled || (Prototype.Browser.Opera && !event.ctrlKey)) {
                 return;
@@ -933,77 +933,77 @@ blcg.ContextMenu.prototype = {
             this.open(event);
         }.bindAsEventListener(this));
     },
-    
+
     open: function(event)
     {
         if (blcg.ContextMenu.currentMenu && !blcg.ContextMenu.currentMenu.close()) {
             return;
         }
-        
+
         this.buildMenu();
-        
+
         if (this.items.length === 0) {
             this.close(event);
             return false;
         }
-        
+
         this.clickedItem = Event.element(event);
         blcg.ContextMenu.currentMenu = this;
         blcg.ContextMenu.positionContainer(event);
         blcg.ContextMenu.container.show();
-        
+
         event.stop();
         return true;
     },
-    
+
     close: function(event)
     {
         if (event) {
             event.stop();
         }
-        
+
         blcg.ContextMenu.currentMenu = false;
         this.activatedItem = false;
-        
+
         blcg.ContextMenu.container.select('li').invoke('stopObserving');
         blcg.ContextMenu.container.hide();
         blcg.ContextMenu.container.update('');
-        
+
         return true;
     },
-    
+
     getItemValue: function(value)
     {
         return (Object.isFunction(value) ? value() : value);
     },
-    
+
     buildMenu: function()
     {
         var list = document.createElement('ul');
         blcg.ContextMenu.container.appendChild(list);
-        
+
         this.items.each(function(item) {
             if (!(!item.condition || (item.condition && (item.condition() !== false)))) {
                 return;
             }
-            
+
             var itemContainer = $(document.createElement('li'));
             itemContainer.update(this.getItemValue(item.label));
             list.appendChild(itemContainer);
             itemContainer[this.getItemValue(item.isEnabled) ? 'removeClassName' : 'addClassName']('disabled');
-            
+
             itemContainer.observe('mousedown', function(event, item) {
                 if (!this.getItemValue(item.isEnabled)) {
                     return event.stop();
                 }
                 this.activatedItem = this.getItemValue(item.label);
             }.bindAsEventListener(this, item));
-            
+
             itemContainer.observe('click', this.selectMenuItem.bindAsEventListener(this, item, itemContainer));
             itemContainer.observe('contextmenu', this.selectMenuItem.bindAsEventListener(this, item, itemContainer));
         }.bind(this));
     },
-    
+
     addItem: function(params)
     {
         if (!('isEnabled' in params)) {
@@ -1012,25 +1012,25 @@ blcg.ContextMenu.prototype = {
         this.items.push(params);
         return this;
     },
-    
+
     destroy: function()
     {
         this.container.stopObserving(Prototype.Browser.Opera ? 'click' : 'contextmenu');
         this.items = [];
     },
-    
+
     selectMenuItem: function(event, item, itemContainer)
     {
         if (!this.getItemValue(item.isEnabled)) {
             return event.stop();
         }
-        
+
         if (!this.activatedItem || (this.activatedItem == this.getItemValue(item.label))) {
             if (this.close()) {
                 item.callback(this.clickedItem);
             }
         }
-        
+
         event.stop();
         return false;
     }
@@ -1042,51 +1042,51 @@ Object.extend(blcg.ContextMenu, {
     menus: [],
     currentMenu: false,
     offset: 4,
-    
+
     load: function()
     {
         if (blcg.ContextMenu.isLoaded) {
             return;
         }
-        
+
         blcg.ContextMenu.isLoaded = true;
         blcg.ContextMenu.container = $(document.createElement('div'));
         blcg.ContextMenu.container.id = 'blcg-context-menu';
-        
+
         blcg.ContextMenu.container.setStyle({
             position: 'absolute',
             zIndex: 99999
         });
-        
+
         blcg.ContextMenu.container.hide();
         $(document.body).appendChild(blcg.ContextMenu.container);
         blcg.ContextMenu.enable();
     },
-    
+
     enable: function()
     {
         blcg.ContextMenu.isEnabled = true;
         $(document.body).observe('click', blcg.ContextMenu.onClick);
     },
-    
+
     disable: function()
     {
         $(document.body).stopObserving('click', blcg.ContextMenu.onClick);
     },
-    
+
     onContextMenu: function(event)
     {
         event.stop();
         return false;
     },
-    
+
     onClick: function()
     {
         if (blcg.ContextMenu.currentMenu) {
             blcg.ContextMenu.currentMenu.close();
         }
     },
-    
+
     positionContainer: function(event)
     {
         var dimensions = blcg.ContextMenu.container.getDimensions();
@@ -1096,14 +1096,14 @@ Object.extend(blcg.ContextMenu, {
         var right  = dimensions.width  + left;
         var viewportDimensions = document.viewport.getDimensions();
         var viewportScrollOffsets = document.viewport.getScrollOffsets();
-        
+
         if (bottom > viewportDimensions.height + viewportScrollOffsets.top) {
             top -= bottom - ((viewportDimensions.height  + viewportScrollOffsets.top) - blcg.ContextMenu.offset);
         }
         if(right > viewportDimensions.width + viewportScrollOffsets.left) {
             left -= right - ((viewportDimensions.width + viewportScrollOffsets.left) - blcg.ContextMenu.offset);
         }
-        
+
         blcg.ContextMenu.container.setStyle({
             top: top + 'px',
             left: left + 'px'
@@ -1604,11 +1604,10 @@ blcg.Grid.ProfilesBar.prototype = {
             removableUrlParams: [],
             profileIdPlaceholder: '{{profile_id}}',
             profileItemIdPrefix: 'blcg-grid-profile-item-',
+            profileOptions: 'blcg-grid-profiles-list-options',
             fixedPartClassName: 'blcg-grid-profiles-bar-fixed-part',
             profilesListClassName: 'blcg-grid-profiles-list',
             pagerClassName: 'blcg-grid-profiles-bar-pager',
-            upArrowClassName: 'blcg-grid-profiles-bar-arrow-up',
-            downArrowClassName: 'blcg-grid-profiles-bar-arrow-down',
             listCurrentLevelClassName: 'blcg-grid-profiles-list-current-level',
             listLevelsCountClassName: 'blcg-grid-profiles-list-levels-count',
             currentClassName: 'blcg-current',
@@ -1621,18 +1620,15 @@ blcg.Grid.ProfilesBar.prototype = {
         this.barId = barId;
         this.bar = $(this.barId);
         this.profilesList  = this.bar.select('.' + this.config.profilesListClassName).first();
+        this.profileOptions  = this.bar.select('.' + this.config.profileOptions).first();
         this.fixedPart = this.bar.select('.' + this.config.fixedPartClassName).first();
-        this.pager     = this.bar.select('.' + this.config.pagerClassName).first();
-        this.upArrow   = this.pager.select('.' + this.config.upArrowClassName).first();
-        this.downArrow = this.pager.select('.' + this.config.downArrowClassName).first();
-        this.currentLevelLabel = this.pager.select('.' + this.config.listCurrentLevelClassName).first();
-        this.levelsCountLabel  = this.pager.select('.' + this.config.listLevelsCountClassName).first();
         this.gridObjectName = gridObjectName;
         
         this.sortedIds = $A(sortedIds); // Hash.each() may not keep initial order
         this.profiles  = $H(profiles);
         this.actions   = $H(actions);
         this.baseProfileId    = null;
+        this.currentProfile   = null;
         this.currentProfileId = null;
         this.isActionRunning  = false;
         
@@ -1641,43 +1637,54 @@ blcg.Grid.ProfilesBar.prototype = {
             
             if (profile) {
                 this.addProfileItem(profile, null);
-                
+
                 if (profile.isBase) {
                     this.baseProfileId = profile.id;
                 }
                 if (profile.isCurrent) {
                     this.currentProfileId = profile.id;
+                    this.currentProfile = this.getProfile(this.currentProfileId);
                 }
             }
         }.bind(this));
-        
-        this.profilesListScrollLevel = 0;
-        this.scrolledListTo = false;
-        this.lastProfilesListScrollLevel = Number.MIN_VALUE;
-        this.lastProfilesListMaxScrollLevel = Number.MAX_VALUE;
-        this.profilesListHeight  = this.profilesList.up().getHeight();
-        
-        if (this.profilesListHeight == 0) {
-            this.readinessTester = new PeriodicalExecuter(function() {
-                this.profilesListHeight  = this.profilesList.up().getHeight();
-                
-                if (this.profilesListHeight > 0) {
-                    this.readinessTester.stop();
-                    this.intializeRefresh();
+
+
+        if (this.currentProfile) {
+            this.actions.each(function(pair) {
+
+                if (!pair.value.appliesToBase && this.currentProfile.isBase) {
+                    return;
                 }
-            }.bind(this), 0.1);
-        } else {
-            this.intializeRefresh();
+                if (!pair.value.appliesToCurrent && this.currentProfile.isCurrent) {
+                    return;
+                }
+                if (!pair.value.appliesToDefault && this.currentProfile.isDefault) {
+                    console.log(3);
+                    return;
+                }
+
+                var item = $(document.createElement('button'));
+                var self = this;
+                item.id = this.config.profileItemIdPrefix + this.currentProfile.id;
+                item.update('<span><span>'+pair.value.label.escapeHTML()+'</span></span>');
+                item.writeAttribute('title', pair.value.label.escapeHTML());
+                item.addClassName(' blcg-grid-profiles-bar-button');
+                item.addClassName(' blcg-grid-profiles-bar-button-'+pair.key);
+                item.observe('click', function(){
+                    var action = pair[1];
+                    if (!action.confirm || confirm(action.confirm)) {
+
+                        self.applyAction(self.currentProfile, pair.key);
+                    }
+                });
+
+                if(pair.key == 'copy_new') {
+                    this.profilesList.insert(item);
+                } else {
+                    this.profileOptions.insert(item);
+                }
+            }.bind(this));
         }
-    },
-    
-    intializeRefresh: function()
-    {
-        this.upArrow.observe('click', this.scrollUp.bind(this));
-        this.downArrow.observe('click', this.scrollDown.bind(this));
-        
-        this.refreshProfilesList();
-        this.refresher = new PeriodicalExecuter(this.periodicalRefresh.bind(this), 0.1);
     },
     
     getProfileItem: function(profileId)
@@ -1689,7 +1696,7 @@ blcg.Grid.ProfilesBar.prototype = {
     {
         var item = $(document.createElement('li'));
         item.id = this.config.profileItemIdPrefix + profile.id;
-        item.update(profile.name.escapeHTML());
+        item.update('<span>'+profile.name.escapeHTML()+'</span>');
         item.writeAttribute('title', this.config.profileItemTitle);
         item.observe('click', this.applyLeftClickAction.bind(this, profile.id));
         
@@ -1699,24 +1706,7 @@ blcg.Grid.ProfilesBar.prototype = {
         if (profile.isCurrent) {
             item.addClassName(this.config.currentClassName);
         }
-        
-        profile.contextMenu = new blcg.ContextMenu(item);
-        
-        profile.contextMenu.addItem({
-            label: profile.name.escapeHTML(),
-            isEnabled: false
-        });
-        
-        this.actions.each(function(pair) {
-            if ((pair.value.appliesToBase || !profile.isBase)
-                && (pair.value.appliesToCurrent || !profile.isCurrent)) {
-                profile.contextMenu.addItem({
-                    label: pair.value.label.escapeHTML(),
-                    callback: this.onActionMenuItemClick.bind(this, profile.id, pair.key)
-                });
-            }
-        }.bind(this));
-        
+
         if (insertBeforeId == null) {
             this.profilesList.insert({bottom: item});
         } else {
@@ -1881,88 +1871,6 @@ blcg.Grid.ProfilesBar.prototype = {
         });
         
         this.applyAction(profile, actionCode);
-    },
-    
-    onActionMenuItemClick: function(profileId, actionCode)
-    {
-        var profile = this.getProfile(profileId);
-        var action = this.actions.get(actionCode);
-        
-        if (profile && action) {
-            if (!action.confirm || confirm(action.confirm)) {
-                this.applyAction(profile, actionCode);
-            }
-        }
-    },
-    
-    scrollUp: function()
-    {
-        this.profilesListScrollLevel = Math.max(0, this.profilesListScrollLevel-1);
-        this.scrolledListTo = this.profilesListScrollLevel;
-        this.refreshProfilesList();
-    },
-    
-    scrollDown: function()
-    {
-        this.scrolledListTo = ++this.profilesListScrollLevel;
-        this.refreshProfilesList();
-    },
-    
-    refreshProfilesList: function()
-    {
-        this.profilesList.setStyle({width: (this.bar.getWidth() - this.fixedPart.getWidth()) + 'px'});
-        var listHeight = this.profilesList.getHeight();
-        
-        if (listHeight == 0) {
-            return;
-        }
-        
-        var itemHeight = this.profilesList.up().getHeight();
-        var maxScrollLevel = listHeight / this.profilesListHeight -1;
-        
-        if (this.scrolledListTo !== false) {
-            this.profilesListScrollLevel = Math.min(this.scrolledListTo, maxScrollLevel);
-        } else {
-            var currentOffset = this.getProfileItem(this.currentProfileId).positionedOffset();
-            this.profilesListScrollLevel = Math.floor(currentOffset.top / itemHeight);
-        }
-        
-        if ((this.profilesListScrollLevel != this.lastProfilesListScrollLevel)
-            || (maxScrollLevel != this.lastMaxScrollLevel)) {
-            this.profilesList.setStyle({marginTop: (-itemHeight * this.profilesListScrollLevel) + 'px'});
-            this.currentLevelLabel.update(this.profilesListScrollLevel +1);
-            this.levelsCountLabel.update(maxScrollLevel +1);
-            
-            if (this.profilesListScrollLevel > 0) {
-                this.upArrow.removeClassName(this.config.disabledClassName);
-            } else {
-                this.upArrow.addClassName(this.config.disabledClassName);
-            }
-            if (this.profilesListScrollLevel == maxScrollLevel) {
-                this.downArrow.addClassName(this.config.disabledClassName);
-            } else {
-                this.downArrow.removeClassName(this.config.disabledClassName);
-            }
-        }
-        
-        this.lastProfilesListScrollLevel = this.profilesListScrollLevel;
-        this.lastMaxScrollLevel = maxScrollLevel;
-        
-        if (maxScrollLevel == 0) {
-            this.pager.addClassName(this.config.hiddenClassName);
-        } else {
-            this.pager.removeClassName(this.config.hiddenClassName);
-            
-        }
-    },
-    
-    periodicalRefresh: function()
-    {
-        if (!$(this.bar.id)) {
-            this.refresher.stop();
-            return;
-        }
-        this.refreshProfilesList();
     }
 };
 
