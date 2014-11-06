@@ -95,6 +95,7 @@ div.blcg-collapseable a.open { background:url(images/collapse_arrow_up.png) 100%
 }
 .blcg-grid-profiles-bar-button.blcg-on,
 .blcg-grid-profiles-bar-button:active {
+    color: #555;
     background-image: -webkit-linear-gradient(top, #EBEBEB, #FFFFFF);
     background-image: -o-linear-gradient(top, #EBEBEB, #FFFFFF);
     background-image: linear-gradient(to bottom, #EBEBEB, #FFFFFF);
