@@ -49,7 +49,7 @@ class BL_CustomGrid_Model_Grid_Type_Config extends BL_CustomGrid_Model_Config_Ab
             uasort($types, 'strcmp');
         }
         if ($withEmpty) {
-            array_unshift($types, array('' => Mage::helper('customgrid')->__('None')));
+            $types = array('' => Mage::helper('customgrid')->__('None')) + $types;
         }
         
         return $types;

@@ -164,7 +164,7 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
      * @param array $roles Role IDs
      * @return array
      */
-    protected function _getProfileDefaultForRoles(array $roles)
+    protected function _getDefaultForRoles(array $roles)
     {
         $profileId = $this->getId();
         $gridModel = $this->getGridModel();

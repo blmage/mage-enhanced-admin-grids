@@ -129,7 +129,7 @@ class BL_CustomGrid_Helper_Grid extends Mage_Core_Helper_Abstract
     public function isVaryingGridBlockId($gridBlockId)
     {
         return (strlen($gridBlockId) >= 32)
-            && preg_match('#([0-9a-f]{32}#', substr($gridBlockId, -32));
+            && preg_match('#([0-9a-f]){32}#', substr($gridBlockId, -32));
     }
     
     /**
