@@ -23,7 +23,7 @@ class BL_CustomGrid_Block_Grid_Profile_Form_Default extends BL_CustomGrid_Block_
     protected function _addUsersFieldsToFieldset(Varien_Data_Form_Element_Fieldset $fieldset)
     {
         $gridModel   = $this->getGridModel();
-        $profileId   = $this->getGridProfile()->getProfileId();
+        $profileId   = $this->getGridProfile()->getId();
         $sessionUser = $gridModel->getSessionUser();
         $permissions = array(
             'own_user' => BL_CustomGrid_Model_Grid::ACTION_CHOOSE_OWN_USER_DEFAULT_PROFILE,
@@ -89,7 +89,7 @@ class BL_CustomGrid_Block_Grid_Profile_Form_Default extends BL_CustomGrid_Block_
     protected function _addRolesFieldsToFieldset(Varien_Data_Form_Element_Fieldset $fieldset)
     {
         $gridModel   = $this->getGridModel();
-        $profileId   = $this->getGridProfile()->getProfileId();
+        $profileId   = $this->getGridProfile()->getId();
         $sessionRole = $gridModel->getSessionRole();
         $permissions = array(
             'own_role'   => BL_CustomGrid_Model_Grid::ACTION_CHOOSE_OWN_ROLE_DEFAULT_PROFILE,
@@ -154,33 +154,21 @@ class BL_CustomGrid_Block_Grid_Profile_Form_Default extends BL_CustomGrid_Block_
     
     protected function _addGlobalFieldsToFieldset(Varien_Data_Form_Element_Fieldset $fieldset)
     {
-        $gridModel   = $this->getGridModel();
-        $profileId   = $this->getGridProfile()->getProfileId();
+        $gridModel = $this->getGridModel();
+        $profileId = $this->getGridProfile()->getId();
         
         if ($gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_CHOOSE_GLOBAL_DEFAULT_PROFILE)) {
-            if (($profileId === $gridModel->getBaseProfileId()) && is_null($gridModel->getGlobalDefaultProfileId())) {
-                $fieldset->addField(
-                    'global',
-                    'label',
-                    array(
-                        'label' => $this->__('Global'),
-                        'value' => $this->__('Yes'),
-                        'bold'  => true,
-                    )
-                );
-            } else {
-                $fieldset->addField(
-                    'global',
-                    'select',
-                    array(
-                        'name'     => 'global',
-                        'label'    => $this->__('Global'),
-                        'required' => true,
-                        'values'   => Mage::getSingleton('customgrid/system_config_source_yesno')->toOptionArray(),
-                        'value'    => ($profileId === $gridModel->getGlobalDefaultProfileId() ? 1 : 0),
-                    )
-                );
-            }
+            $fieldset->addField(
+                'global',
+                'select',
+                array(
+                    'name'     => 'global',
+                    'label'    => $this->__('Global'),
+                    'required' => true,
+                    'values'   => Mage::getSingleton('customgrid/system_config_source_yesno')->toOptionArray(),
+                    'value'    => ($profileId === $gridModel->getGlobalDefaultProfileId() ? 1 : 0),
+                )
+            );
         }
         
         return $this;
@@ -203,16 +191,15 @@ class BL_CustomGrid_Block_Grid_Profile_Form_Default extends BL_CustomGrid_Block_
             'priorities_note',
             'note',
             array(
-                // Use "after_element_html" rather than "note" for better semantic correctness
-                // (the "note" value is wrapped in a <span>)
                 'after_element_html' => '<div class="blcg-form-note-text">'
                         . $this->__($noteSummary)
                         . '<ul>'
-                            . '<li>' . $this->__('Session current profile')  . '</li>'
-                            . '<li>' . $this->__('User default profile')     . '</li>'
-                            . '<li>' . $this->__('Role default profile')     . '</li>'
-                            . '<li>' . $this->__('Global default profile')   . '</li>'
-                            . '<li>' . $this->__('Base profile ("Default")') . '</li>'
+                            . '<li>' . $this->__('Session current profile') . '</li>'
+                            . '<li>' . $this->__('User default profile') . '</li>'
+                            . '<li>' . $this->__('Role default profile') . '</li>'
+                            . '<li>' . $this->__('Global default profile') . '</li>'
+                            . '<li>' . $this->__('Base profile') . '</li>'
+                            . '<li>' . $this->__('First available profile (undetermined order)') . '</li>'
                         . '</ul>'
                     . '</div>',
             )

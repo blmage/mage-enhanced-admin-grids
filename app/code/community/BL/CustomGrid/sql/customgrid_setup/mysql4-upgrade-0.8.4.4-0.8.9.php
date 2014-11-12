@@ -167,7 +167,7 @@ $connection->addConstraint(
     'profile_id',
     $tables['grid_profile'],
     'profile_id',
-    'set null'
+    'SET NULL'
 );
 
 $connection->addColumn(

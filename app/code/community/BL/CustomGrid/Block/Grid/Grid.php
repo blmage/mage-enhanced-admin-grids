@@ -47,8 +47,7 @@ class BL_CustomGrid_Block_Grid_Grid extends Mage_Adminhtml_Block_Widget_Grid
                         'caption' => $this->__('Edit'),
                         'field'   => 'grid_id',
                         'url'     => array(
-                            'base'   => '*/*/edit',
-                            'params' => array('profile_id' => BL_CustomGrid_Model_Grid::BASE_PROFILE_ID),
+                            'base' => '*/*/edit',
                         ),
                         'permissions' => array(
                             BL_CustomGrid_Model_Grid::ACTION_CUSTOMIZE_COLUMNS,

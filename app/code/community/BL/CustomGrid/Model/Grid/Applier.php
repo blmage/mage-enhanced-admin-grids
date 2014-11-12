@@ -16,6 +16,11 @@
 class BL_CustomGrid_Model_Grid_Applier extends BL_CustomGrid_Model_Grid_Worker
 {
     /**
+     * Session keys
+     */
+    const SESSION_BASE_KEY_GRID_FILTERS_TOKEN = '_blcg_session_key_token_';
+    
+    /**
      * Parameter name to use to hold grid token value (used for filters verification)
      */
     const GRID_TOKEN_PARAM_NAME  = '_blcg_token_';
@@ -300,8 +305,6 @@ class BL_CustomGrid_Model_Grid_Applier extends BL_CustomGrid_Model_Grid_Worker
             );
             
             $data= (is_array($customValues) ? array_merge($data, $customValues) : null);
-        } else {
-            $data = null;
         }
         
         if (!empty($data)) {
@@ -556,6 +559,16 @@ class BL_CustomGrid_Model_Grid_Applier extends BL_CustomGrid_Model_Grid_Worker
     }
     
     /**
+     * Return the session key for the filters token of the current grid model
+     *
+     * @return string
+     */
+    protected function _getFiltersTokenSessionKey()
+    {
+        return self::SESSION_BASE_KEY_GRID_FILTERS_TOKEN . $this->getGridModel()->getId();
+    }
+    
+    /**
      * Verify validities of filters applied to given grid block,
      * and return safely appliable filters.
      * Mostly used for collection and custom columns, which may have their renderer changed at any time
@@ -567,20 +580,14 @@ class BL_CustomGrid_Model_Grid_Applier extends BL_CustomGrid_Model_Grid_Worker
      */
     public function verifyGridBlockFilters(Mage_Adminhtml_Block_Widget_Grid $gridBlock, array $filters)
     {
-        $gridModel = $this->getGridModel();
+        $gridModel   = $this->getGridModel();
+        $gridProfile = $gridModel->getProfile();
         
-        // Get previous filtering informations from session
-        $session = Mage::getSingleton('adminhtml/session');
-        $tokenSessionKey   = $gridModel->getFiltersTokenSessionKey();
-        $appliedSessionKey = $gridModel->getAppliedFiltersSessionKey();
-        $removedSessionKey = $gridModel->getRemovedFiltersSessionKey();
-        
-        if (!is_array($sessionAppliedFilters = $session->getData($appliedSessionKey))) {
-            $sessionAppliedFilters = array();
-        }
-        if (!is_array($sessionRemovedFilters = $session->getData($removedSessionKey))) {
-            $sessionRemovedFilters = array();
-        }
+        // Get session previous filtering informations
+        $session = $gridModel->getAdminhtmlSession();
+        $tokenSessionKey = $this->_getFiltersTokenSessionKey();
+        $sessionAppliedFilters = $gridProfile->getSessionAppliedFilters();
+        $sessionRemovedFilters = $gridProfile->getSessionRemovedFilters();
         
         /*
         Verify grid tokens, if request one does not correspond to session one,
@@ -628,7 +635,7 @@ class BL_CustomGrid_Model_Grid_Applier extends BL_CustomGrid_Model_Grid_Worker
             unset($sessionAppliedFilters[$columnBlockId]);
         }
         
-        $session->setData($appliedSessionKey, $sessionAppliedFilters);
+        $gridProfile->setSessionAppliedFilters($sessionAppliedFilters);
         
         if ($isGridAction) {
             /*
@@ -637,9 +644,9 @@ class BL_CustomGrid_Model_Grid_Applier extends BL_CustomGrid_Model_Grid_Worker
             obsolete filter(s) in it (eg from browser history), but there is no way at the moment to detect them
             (at least not any simple one with only few impacts)
             */
-            $session->setData($removedSessionKey, array_intersect_key($sessionRemovedFilters, $removedFilterBlockIds));
+            $gridProfile->setSessionRemovedFilters(array_intersect_key($sessionRemovedFilters, $removedFilterBlockIds));
         } else {
-            $session->setData($removedSessionKey, $sessionRemovedFilters);
+            $gridProfile->setSessionRemovedFilters($sessionRemovedFilters);
         }
         
         $filterParam = $this->encodeGridFiltersArray($filters);
@@ -662,12 +669,13 @@ class BL_CustomGrid_Model_Grid_Applier extends BL_CustomGrid_Model_Grid_Worker
      */
     public function getAppliableDefaultFilter()
     {
-        $gridModel = $this->getGridModel();
+        $gridModel   = $this->getGridModel();
+        $gridProfile = $gridModel->getProfile(); 
         
         if (!$gridModel->hasData('appliable_default_filter')) {
             $appliableDefaultFilter = null;
             
-            if (($filters = $gridModel->getData('default_filter')) && is_array($filters = @unserialize($filters))) {
+            if (($filters = $gridProfile->getData('default_filter')) && is_array($filters = @unserialize($filters))) {
                 $columns = $gridModel->getColumns(false, true);
                 $appliableDefaultFilter = array();
                 $attributesRenderers = $gridModel->getAvailableAttributesRendererTypes();
@@ -763,7 +771,7 @@ class BL_CustomGrid_Model_Grid_Applier extends BL_CustomGrid_Model_Grid_Worker
         }
         
         if (!$behaviour = $gridModel->getData('default_' . $type . '_behaviour')) {
-            $behaviour = Mage::helper('customgrid/config')->geDefaultParameterBehaviour($type);
+            $behaviour = $gridModel->getConfigHelper()->geDefaultParameterBehaviour($type);
         }
         if ($behaviour == BL_CustomGrid_Model_Grid::DEFAULT_PARAM_FORCE_CUSTOM) {
             if (!is_null($customValue)) {
@@ -838,18 +846,18 @@ class BL_CustomGrid_Model_Grid_Applier extends BL_CustomGrid_Model_Grid_Worker
      */
     public function applyDefaultsToGridBlock(Mage_Adminhtml_Block_Widget_Grid $gridBlock)
     {
-        $gridModel = $this->getGridModel();
+        $gridProfile = $this->getGridProfile();
         
-        if ($defaultValue = $gridModel->getData('default_page')) {
+        if ($defaultValue = $gridProfile->getData('default_page')) {
             $gridBlock->blcg_setDefaultPage($defaultValue);
         }
-        if ($defaultValue = $gridModel->getData('default_limit')) {
+        if ($defaultValue = $gridProfile->getData('default_limit')) {
             $gridBlock->blcg_setDefaultLimit($defaultValue);
         }
-        if ($defaultValue = $gridModel->getData('default_sort')) {
+        if ($defaultValue = $gridProfile->getData('default_sort')) {
             $gridBlock->blcg_setDefaultSort($defaultValue);
         }
-        if ($defaultValue = $gridModel->getData('default_dir')) {
+        if ($defaultValue = $gridProfile->getData('default_dir')) {
             $gridBlock->blcg_setDefaultDir($defaultValue);
         }
         if (is_array($defaultValue = $this->getAppliableDefaultFilter())) {
@@ -873,7 +881,7 @@ class BL_CustomGrid_Model_Grid_Applier extends BL_CustomGrid_Model_Grid_Worker
         }
         if (is_array($filters) && !empty($filters)) {
             $gridModel = $this->getGridModel();
-            $columns = $gridModel->getGgetColumns();
+            $columns = $gridModel->getColumns();
             $attributesRenderers = $gridModel->getAvailableAttributesRendererTypes();
             
             foreach ($filters as $columnBlockId => $filterData) {

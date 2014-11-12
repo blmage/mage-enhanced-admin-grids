@@ -44,6 +44,12 @@ class BL_CustomGrid_Block_Grid_Profile_Form_Assign extends BL_CustomGrid_Block_G
             )
         );
         
+        if ($gridProfile->isBase()) {
+            $noteSummary = 'If an user has no available profile, the base profile will automatically be available for '
+                . 'him, regardless of its assignations';
+            $restrictedField->setNote($this->__($noteSummary));
+        }
+        
         $assignedToField = $fieldset->addField(
             'assigned_to',
             'multiselect',

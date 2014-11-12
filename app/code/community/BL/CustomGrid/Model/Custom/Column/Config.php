@@ -188,31 +188,63 @@ class BL_CustomGrid_Model_Custom_Column_Config
         return $configWindow;
     }
     
+    protected function _prepareCustomColumnAvailabilityFields(
+        BL_CustomGrid_Model_Custom_Column_Abstract $customColumn,
+        array $xmlValues
+    ) {
+        /** @var $stringHelper BL_CustomGrid_Helper_String */
+        $stringHelper = Mage::helper('customgrid/string');
+        
+        foreach ($this->_getAvailabilityFieldsFromXmlValues($xmlValues) as $key => $value) {
+            call_user_func(
+                array($customColumn, 'set' . $stringHelper->camelize($key)),
+                $value,
+                true
+            );
+        }
+        
+        return $this;
+    }
+    
+    protected function _prepareCustomColumnBaseParams(
+        BL_CustomGrid_Model_Custom_Column_Abstract $customColumn,
+        array $xmlValues
+    ) {
+        if (isset($xmlValues['block_params']) && is_array($xmlValues['block_params'])) {
+            $customColumn->setBlockParams($this->_getParsedBaseParams($xmlValues['block_params']), true);
+        }
+        if (isset($xmlValues['config_params']) && is_array($xmlValues['config_params'])) {
+            $customColumn->setConfigParams($this->_getParsedBaseParams($xmlValues['config_params']), true);
+        }
+        return $this;
+    }
     
     protected function _prepareCustomColumnCustomizationParams(
         BL_CustomGrid_Model_Custom_Column_Abstract $customColumn,
         Varien_Simplexml_Element $xmlElement,
         Mage_Core_Helper_Abstract $helper
     ) {
-        $configWindow = array();
+        if ($customColumn->getAllowCustomization()) {
+            $configWindow = array();
             
-        if ($customizationXmlElement = $xmlElement->descend('customization_params')) {
-            if ($configXmlElement = $customizationXmlElement->descend('config')) {
-                foreach ($this->_loadXmlElementCustomizationParams($configXmlElement) as $key => $param) {
-                    $sortOrder = $param['sort_order'];
-                    unset($param['sort_order']);
-                    $customColumn->addCustomizationParam($key, $param, $sortOrder);
+            if ($customizationXmlElement = $xmlElement->descend('customization_params')) {
+                if ($configXmlElement = $customizationXmlElement->descend('config')) {
+                    foreach ($this->_loadXmlElementCustomizationParams($configXmlElement) as $key => $param) {
+                        $sortOrder = $param['sort_order'];
+                        unset($param['sort_order']);
+                        $customColumn->addCustomizationParam($key, $param, $sortOrder);
+                    }
+                }
+                if ($configWindowXmlElement = $customizationXmlElement->descend('config_window')) {
+                    $configWindow = $this->_loadXmlElementConfigWindow($configWindowXmlElement, $helper);
                 }
             }
-            if ($configWindowXmlElement = $customizationXmlElement->descend('config_window')) {
-                $configWindow = $this->_loadXmlElementConfigWindow($configWindowXmlElement, $helper);
+            if (!isset($configWindow['title'])) {
+                $configWindow['title'] = $helper->__('Customization : %s', $customColumn->getName());
             }
+            
+            $customColumn->setCustomizationWindowConfig($configWindow, true);
         }
-        if (!isset($configWindow['title'])) {
-            $configWindow['title'] = $helper->__('Customization : %s', $customColumn->getName());
-        }
-        
-        $customColumn->setCustomizationWindowConfig($configWindow, true);
         return $this;
     }
     
@@ -234,23 +266,9 @@ class BL_CustomGrid_Model_Custom_Column_Config
         $customColumn->addData($this->_getBooleanFieldsFromXmlValues($xmlValues));
         $customColumn->addData($this->_getTranslatableFieldsFromXmlValues($xmlValues, $helper));
         
-        foreach ($this->_getAvailabilityFieldsFromXmlValues($xmlValues) as $key => $value) {
-            call_user_func(
-                array($customColumn, 'set' . $stringHelper->camelize($key)),
-                $value,
-                true
-            );
-        }
-        
-        if (isset($xmlValues['block_params']) && is_array($xmlValues['block_params'])) {
-            $customColumn->setBlockParams($this->_getParsedBaseParams($xmlValues['block_params']), true);
-        }
-        if (isset($xmlValues['config_params']) && is_array($xmlValues['config_params'])) {
-            $customColumn->setConfigParams($this->_getParsedBaseParams($xmlValues['config_params']), true);
-        }
-        if ($customColumn->getAllowCustomization()) {
-            $this->_prepareCustomColumnCustomizationParams($customColumn, $xmlElement, $helper);
-        }
+        $this->_prepareCustomColumnAvailabilityFields($customColumn, $xmlValues);
+        $this->_prepareCustomColumnBaseParams($customColumn, $xmlValues);
+        $this->_prepareCustomColumnCustomizationParams($customColumn, $xmlElement, $helper);
         
         return $this;
     }

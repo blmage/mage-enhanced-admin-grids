@@ -25,8 +25,7 @@ class BL_CustomGrid_Block_Grid_Edit_Tabs extends Mage_Adminhtml_Block_Widget_Tab
     
     protected function _canDisplayProfileEditTab()
     {
-        return !$this->getGridProfile()->isBase()
-            && $this->getGridModel()->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_EDIT_PROFILES);
+        return $this->getGridModel()->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_EDIT_PROFILES);
     }
     
     protected function _canDisplayProfileAssignTab()

@@ -176,7 +176,7 @@ class BL_CustomGrid_Model_Custom_Column_Applier extends BL_CustomGrid_Object
                 . 'not be working (partially or fully)';
         }
         
-        return ($message ? $this->_geBaseHelper()->__($message, $blockType) : '');
+        return ($message ? $this->_getBaseHelper()->__($message, $blockType) : '');
     }
     
     /**
@@ -199,7 +199,7 @@ class BL_CustomGrid_Model_Custom_Column_Applier extends BL_CustomGrid_Object
                 . 'columns will not be applied';
         }
         
-        return ($message ? $this->_geBaseHelper()->__($message, $blockType) : '');
+        return ($message ? $this->_getBaseHelper()->__($message, $blockType) : '');
     }
     
     /**

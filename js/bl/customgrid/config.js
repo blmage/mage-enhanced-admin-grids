@@ -1400,7 +1400,7 @@ blcg.Grid.ProfilesBar.prototype = {
             removableUrlParams: [],
             profileIdPlaceholder: '{{profile_id}}',
             profileItemIdPrefix: 'blcg-grid-profile-item-',
-            profileOptions: 'blcg-grid-profiles-list-options',
+            profileOptionsClassName: 'blcg-grid-profiles-list-options',
             fixedPartClassName: 'blcg-grid-profiles-bar-fixed-part',
             profilesListClassName: 'blcg-grid-profiles-list',
             pagerClassName: 'blcg-grid-profiles-bar-pager',
@@ -1409,14 +1409,13 @@ blcg.Grid.ProfilesBar.prototype = {
             currentClassName: 'blcg-current',
             baseClassName: 'blcg-base',
             disabledClassName: 'blcg-disabled',
-            hiddenClassName: 'blcg-no-display',
-            profileItemTitle: blcg.Tools.translate('Right-click to view all the available actions')
+            hiddenClassName: 'blcg-no-display'
         }, config || {});
         
         this.barId = barId;
         this.bar = $(this.barId);
-        this.profilesList  = this.bar.select('.' + this.config.profilesListClassName).first();
-        this.profileOptions  = this.bar.select('.' + this.config.profileOptions).first();
+        this.profilesList = this.bar.select('.' + this.config.profilesListClassName).first();
+        this.profileOptions = this.bar.select('.' + this.config.profileOptionsClassName).first();
         this.fixedPart = this.bar.select('.' + this.config.fixedPartClassName).first();
         this.gridObjectName = gridObjectName;
         
@@ -1433,7 +1432,7 @@ blcg.Grid.ProfilesBar.prototype = {
             
             if (profile) {
                 this.addProfileItem(profile, null);
-
+                
                 if (profile.isBase) {
                     this.baseProfileId = profile.id;
                 }
@@ -1443,38 +1442,32 @@ blcg.Grid.ProfilesBar.prototype = {
                 }
             }
         }.bind(this));
-
-
+        
         if (this.currentProfile) {
             this.actions.each(function(pair) {
-
                 if (!pair.value.appliesToBase && this.currentProfile.isBase) {
                     return;
                 }
                 if (!pair.value.appliesToCurrent && this.currentProfile.isCurrent) {
                     return;
                 }
-                if (!pair.value.appliesToDefault && this.currentProfile.isDefault) {
-                    console.log(3);
-                    return;
-                }
-
+                
                 var item = $(document.createElement('button'));
-                var self = this;
                 item.id = this.config.profileItemIdPrefix + this.currentProfile.id;
-                item.update('<span><span>'+pair.value.label.escapeHTML()+'</span></span>');
-                item.writeAttribute('title', pair.value.label.escapeHTML());
-                item.addClassName(' blcg-grid-profiles-bar-button');
-                item.addClassName(' blcg-grid-profiles-bar-button-'+pair.key);
+                item.update('<span><span>' + pair.value.label.escapeHTML() + '</span></span>');
+                item.writeAttribute('title', pair.value.label);
+                item.addClassName('blcg-grid-profiles-bar-button');
+                item.addClassName('blcg-grid-profiles-bar-button-' + pair.key);
+                
                 item.observe('click', function(){
-                    var action = pair[1];
+                    var action = pair.value;
+                    
                     if (!action.confirm || confirm(action.confirm)) {
-
-                        self.applyAction(self.currentProfile, pair.key);
+                        this.applyAction(this.currentProfile, pair.key);
                     }
-                });
-
-                if(pair.key == 'copy_new') {
+                }.bind(this));
+                
+                if (pair.key == 'copy_new') {
                     this.profilesList.insert(item);
                 } else {
                     this.profileOptions.insert(item);
@@ -1492,8 +1485,8 @@ blcg.Grid.ProfilesBar.prototype = {
     {
         var item = $(document.createElement('li'));
         item.id = this.config.profileItemIdPrefix + profile.id;
-        item.update('<span>'+profile.name.escapeHTML()+'</span>');
-        item.writeAttribute('title', this.config.profileItemTitle);
+        item.update('<span>' + profile.name.escapeHTML() + '</span>');
+        item.writeAttribute('title', profile.name);
         item.observe('click', this.applyLeftClickAction.bind(this, profile.id));
         
         if (profile.isBase) {

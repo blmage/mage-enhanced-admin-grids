@@ -51,11 +51,11 @@ class BL_CustomGrid_Model_Grid_Exporter extends BL_CustomGrid_Model_Grid_Worker
         
         if (!$gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_EXPORT_RESULTS)) {
             $gridModel->throwPermissionException(
-                Mage::helper('customgrid')->__('You are not allowed to export this grid results')
+                $gridModel->getHelper()->__('You are not allowed to export this grid results')
             );
         }
         if (!$this->canExport($gridModel)) {
-            Mage::throwException(Mage::helper('customgrid')->__('This grid results can not be exported'));
+            Mage::throwException($gridModel->getHelper()->__('This grid results can not be exported'));
         }
         
         $typeModel = $gridModel->getTypeModel();

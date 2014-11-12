@@ -24,21 +24,20 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Store extends
     protected function _getRenderedValue()
     {
         $editConfig = $this->getEditConfig();
-        $renderOptions = $editConfig->getData('renderer');
         $renderableValue = $this->getRenderableValue();
         
-        if (empty($renderableValue)
-            && isset($renderOptions['without_empty_store'])
-            && $renderOptions['without_empty_store']) {
+        $renderOptions = $editConfig->getData('renderer');
+        $withoutAllStore = (isset($renderOptions['without_all_store']) && $renderOptions['without_all_store']);
+        $withoutEmptyStore = (isset($renderOptions['without_empty_store']) && $renderOptions['without_empty_store']);
+        
+        if (empty($renderableValue) && (is_array($renderableValue) || $withoutEmptyStore)) { 
             return '';
         }
-        if (!is_array($renderableValue)) {
-            $renderableValue = array($renderableValue);
-        }
-        if (empty($renderableValue)) {
-            return '';
-        } elseif (in_array(0, $renderableValue) && (count($renderableValue) == 1)) {
-            if (isset($renderOptions['without_all_store']) && $renderOptions['without_all_store']) {
+        
+        $renderableValue = (array) $renderableValue;
+        
+        if (in_array(0, $renderableValue) && (count($renderableValue) == 1)) {
+            if ($withoutAllStore) {
                 return '';
             } else {
                 return $this->helper('adminhtml')->__('All Store Views');
@@ -47,12 +46,9 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Store extends
         
         $storesStructure = $this->_getStoreModel()->getStoresStructure(false, $renderableValue);
         $renderedValue = '';
-        
-        if (isset($renderOptions['spaces_count'])) {
-            $spacesCount = ((int) $renderOptions['spaces_count'] > 0 ? $renderOptions['spaces_count'] : 3);
-        } else {
-            $spacesCount = 3;
-        }
+        $spacesCount = (isset($renderOptions['spaces_count']) && ($renderOptions['spaces_count'] > 0))
+            ? (int) $renderOptions['spaces_count']
+            : 3;
         
         foreach ($storesStructure as $website) {
             $renderedValue .= $website['label'] . '<br/>';

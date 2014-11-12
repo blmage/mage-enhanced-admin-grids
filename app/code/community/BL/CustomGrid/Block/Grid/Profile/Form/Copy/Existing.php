@@ -24,7 +24,7 @@ class BL_CustomGrid_Block_Grid_Profile_Form_Copy_Existing extends BL_CustomGrid_
     {
         $gridModel = $this->getGridModel();
         $profileId = $this->getGridProfile()->getId();
-        $profiles  = $gridModel->getProfiles(true, true, true);
+        $profiles  = $gridModel->getProfiles(true, true);
         
         $gridParams  = Mage::getSingleton('customgrid/system_config_source_grid_param')->toOptionArray(false);
         $yesNoValues = Mage::getSingleton('customgrid/system_config_source_yesno')->toOptionArray();

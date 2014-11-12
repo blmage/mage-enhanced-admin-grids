@@ -29,6 +29,7 @@
         </div>
     </div>
 <script type="text/javascript">
+//<![CDATA[
 <?php echo $this->getProfilesJsObjectName() ?> = new blcg.Grid.ProfilesBar(
     '<?php echo $this->getHtmlId() ?>-profiles-bar',
     <?php echo $this->getProfilesJsonConfig() ?>,
@@ -37,7 +38,8 @@
     '<?php echo $this->getGridBlockJsObjectName() ?>',
     <?php echo $this->getProfilesBarJsonConfig() ?>
 );
+//]]>
 </script>
 <?php echo $this->getButtonsScripts() ?>
 <?php echo $this->getColumnsListHtml() ?>
-<?php echo $this->getRssLinksHtml();
+<?php echo $this->getRssLinksHtml() ?>

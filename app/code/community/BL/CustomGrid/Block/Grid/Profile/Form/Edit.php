@@ -32,16 +32,18 @@ class BL_CustomGrid_Block_Grid_Profile_Form_Edit extends BL_CustomGrid_Block_Gri
             )
         );
         
-        $fieldset->addField(
-            'name',
-            'text',
-            array(
-                'name'     => 'name',
-                'label'    => $this->__('Name'),
-                'required' => true,
-                'value'    => $gridProfile->getName(),
-            )
-        );
+        if (!$gridProfile->isBase()) {
+            $fieldset->addField(
+                'name',
+                'text',
+                array(
+                    'name'     => 'name',
+                    'label'    => $this->__('Name'),
+                    'required' => true,
+                    'value'    => $gridProfile->getName(),
+                )
+            );
+        }
         
         $sessionParamsNote = 'Session parameters that will be restored upon returning to this profile, after it had '
             . 'been previously used during the same session.<br /><i>Only applies to the grids having their parameters '

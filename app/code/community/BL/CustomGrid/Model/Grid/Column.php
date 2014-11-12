@@ -315,7 +315,7 @@ class BL_CustomGrid_Model_Grid_Column extends BL_CustomGrid_Object
             return $gridModel;
         }
         
-        $helper = Mage::helper('customgrid');
+        $helper  = $gridModel->getHelper();
         $columns = $gridModel->getColumns();
         $originalBlockIds = $gridModel->getColumnIdsByOrigin(self::ORIGIN_CUSTOM);
         
@@ -342,7 +342,7 @@ class BL_CustomGrid_Model_Grid_Column extends BL_CustomGrid_Object
         
         $newCodes = array_intersect($availableCodes, array_diff($appliedCodes, $currentCodes));
         $customColumnsGroups = $gridModel->getCustomColumnsGroups();
-        $addGroupsToHeaders  = Mage::helper('customgrid/config')->getAddGroupToCustomColumnsDefaultHeader();
+        $addGroupsToHeaders  = $gridModel->getConfigHelper()->getAddGroupToCustomColumnsDefaultHeader();
         
         foreach ($newCodes as $customColumnCode) {
             $columnBlockId = $gridModel->getNextCustomColumnBlockId();

@@ -218,8 +218,8 @@ class BL_CustomGrid_GridController extends BL_CustomGrid_Controller_Grid_Action
             }
             
             $this->_saveConfigFormFieldsetsStates();
-            $gridModel = $this->_initGridModel();
-            $this->_initGridProfile();
+            $this->_initGridModel();
+            $gridProfile = $this->_initGridProfile();
             
             $appliableParams = $this->getRequest()->getParam('appliable_default_params', array());
             $appliableValues = $this->getRequest()->getParam('appliable_values', array());
@@ -237,8 +237,7 @@ class BL_CustomGrid_GridController extends BL_CustomGrid_Controller_Grid_Action
                 $appliableParams = array();
             }
             
-            $gridModel->updateDefaultParameters($appliableParams, $removableParams);
-            $gridModel->save();
+            $gridProfile->updateDefaultParameters($appliableParams, $removableParams);
             $isSuccess = true;
             
         } catch (Mage_Core_Exception $e) {
@@ -363,6 +362,11 @@ class BL_CustomGrid_GridController extends BL_CustomGrid_Controller_Grid_Action
     {
         try {
             $gridModel = $this->_initGridModel();
+            
+            if (!$this->getRequest()->has('profile_id')) {
+                $this->getRequest()->setParam('profile_id', $gridModel->getProfileId());
+            }
+            
             $this->_initGridProfile();
         } catch (Mage_Core_Exception $e) {
             $this->_getSession()->addError($e->getMessage());

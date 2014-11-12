@@ -34,7 +34,7 @@
  *
  * @category    Mage
  * @package     Mage_Core
- * @copyright   Copyright (c) 2012 Magento Inc. (http://www.magentocommerce.com)
+ * @copyright   Copyright (c) 2014 Magento Inc. (http://www.magentocommerce.com)
  * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -46,158 +46,184 @@ class BL_CustomGrid_Helper_String extends Mage_Core_Helper_Abstract
      * Truncate a string to a certain length if necessary
      *
      * @param string $string String to be truncated
-     * @param int $length Truncated string length (not including $etc)
+     * @param int $truncateLength Truncated string length (not including $etc)
      * @param string $etc Value to be appended at the end of the truncated string
      * @param string &$remainder Remainder of the original string that is not included in the truncated string
      * @param bool $breakWords Whether words can be broken (if not, truncation will stop on the first available space)
      * @return string
      */
-    public function truncateText($string, $length = 80, $etc = '...', &$remainder = '', $breakWords = true)
+    public function truncateText($string, $truncateLength = 80, $etc = '...', &$remainder = '', $breakWords = true)
     {
-        if ($length == 0) {
+        $remainder = '';
+        
+        if ($truncateLength == 0) {
             return '';
         }
         
         $helper = Mage::helper('core/string');
-        $remainder = '';
         $originalLength = $helper->strlen($string);
         
-        if ($originalLength > $length) {
+        if ($originalLength > $truncateLength) {
             $length -= $helper->strlen($etc);
             
-            if ($length <= 0) {
+            if ($truncateLength <= 0) {
                 return '';
             }
             
             $preparedString = $string;
-            $preparedLength = $length;
+            $preparedLength = $truncateLength;
             
             if (!$breakWords) {
-                $preparedString = $helper->substr($string, 0, $length+1);
-                
-                if (($spacePosition = strrpos($preparedString, ' ')) !== false) {
-                    $preparedString = $helper->substr($preparedString, 0, $spacePosition);
-                }
-                
-                $preparedLength = $helper->strlen($preparedString);
+                $preparedString = preg_replace('/\s+?(\S+)?$/u', '', $this->substr($string, 0, $length + 1));
+                $preparedlength = $this->strlen($preparedString);
             }
             
             $remainder = $helper->substr($string, $preparedLength, $originalLength);
-            return $helper->substr($preparedString, 0, $length) . $etc;
+            return $helper->substr($preparedString, 0, $truncateLength) . $etc;
         }
         
         return $string;
     }
     
     /**
-     * Truncates given string as HTML.
+     * Handle the given HTML opening tag from a truncated HTML string
+     * 
+     * @param string $htmlTag HTML opening tag
+     * @param array $openedTags Currently opened tags
+     * @return this
+     */
+    protected function _handleHtmlOpeningTag($htmlTag, array &$openedTags)
+    {
+        $emptyTagsRegex = '(img|br|input|hr|area|base|basefont|col|frame|isindex|link|meta|param)';
+        
+        if (preg_match('/^<(\s*.+?\/\s*|\s*' . $emptyTagsRegex . '(\s.+?)?)>$/is', $htmlTag)) {
+            // The tag is an "empty element" (with or without XHTML-conform closing slash) (eg. <br/>)
+        } elseif (preg_match('/^<\s*\/([^\s]+?)\s*>$/s', $htmlTag, $tagMatchings)) {
+            // // The tag is a closing tag (eg. </b>)
+            if (($position = array_search($tagMatchings[1], $openedTags)) !== false) {
+                unset($openedTags[$position]);
+            }
+        } elseif (preg_match('/^<\s*([^\s>!]+).*?>$/s', $htmlTag, $tagMatchings)) {
+            // The tag is an opening tag (eg. <b>)
+            array_unshift($openedTags, strtolower($tagMatchings[1]));
+        }
+        
+        return $this;
+    }
+    
+    /**
+     * Supplement the given truncated HTML string with the given HTML content, stripped of its tags
+     * 
+     * @param string $content Additional content
+     * @param string $truncated Current truncated string
+     * @param int $totalLength Length of the current truncated string
+     * @param int $truncateLength Maximum truncated string length
+     * @param bool $breakWords Whether words can be broken
+     * @return this
+     */
+    protected function _supplementTruncatedHtml($content, &$truncated, &$totalLength, $truncateLength, $breakWords)
+    {
+        $helper = Mage::helper('core/string');
+        $htmlEntitiesRegex = '/&[0-9a-z]{2,8};|&#[0-9]{1,7};|&#x[0-9a-f]{1,6};/i';
+        
+        // Calculate the length of the content, handle HTML entities as one character
+        $parsedContent = preg_replace($htmlEntitiesRegex, ' ', $content);
+        $parsedLength  = $helper->strlen($parsedContent);
+        
+        if ($totalLength+$parsedLength > $truncateLength) {
+            $remainingLength = $truncateLength-$totalLength;
+            $entitiesLength = 0;
+            
+            // Adapt the remaining length by taking HTML entities into account
+            if (preg_match_all($htmlEntitiesRegex, $content, $entities, PREG_OFFSET_CAPTURE)) {
+                foreach ($entities[0] as $entity) {
+                    if ($entity[1]+1-$entitiesLength <= $remainingLength) {
+                        $remainingLength--;
+                        $entitiesLength += $helper->strlen($entity[0]);
+                    } else {
+                        break;
+                    }
+                }
+            }
+            
+            $content = $helper->substr($content, 0, $remainingLength+$entitiesLength);
+            
+            if (!$breakWords) {
+                // To ensure that we do not get false positives, we can only check for spaces in the additional content
+                $spacePosition = max((int) strrpos($content, '&nbsp;'), (int) strrpos($content, ' '));
+                
+                if ($spacePosition > 0) {
+                    $content = $helper->substr($content, 0, $spacePosition);
+                } else {
+                    $content = '';
+                } 
+            }
+            
+            $truncated .= $content;
+            $totalLength = $truncateLength;
+        } else {
+            $truncated .= $content;
+            $totalLength += $parsedLength;
+        }
+    }
+    
+    /**
+     * Truncate given string as HTML
      * Original version found at :
      * http://dodona.wordpress.com/2009/04/05/how-do-i-truncate-an-html-string-without-breaking-the-html-code/
      *
      * @param string $string String to be truncated
-     * @param integer $length Truncated string length (not including $etc)
+     * @param integer $truncateLength Truncated string length (not including $etc)
      * @param string $etc Value to be appended at the end of the truncated string
      * @param bool $breakWords Whether words can be broken (if not, truncation will stop on the first available space)
      * @return string
      */
-    public function truncateHtml($string, $length = 80, $etc = '...', $breakWords = true)
+    public function truncateHtml($string, $truncateLength = 80, $etc = '...', $breakWords = true)
     {
-        if ($length == 0) {
+        if ($truncateLength == 0) {
             return '';
         }
         
         $helper = Mage::helper('core/string');
         
-        // If the plain text is shorter than the maximum length, return the whole text
-        if ($helper->strlen(preg_replace('/<.*?>/', '', $string)) <= $length) {
+        if ($helper->strlen(preg_replace('/<.*?>/', '', $string)) <= $truncateLength) {
             return $string;
         }
         
-        // Splits all html-tags to scanable lines
+        // Splits all HTML tags to scannable lines
         preg_match_all('/(<.+?>)?([^<>]*)/s', $string, $lines, PREG_SET_ORDER);
         $totalLength = $helper->strlen($etc);
         
-        if (!is_array($lines) || ($length-$totalLength <= 0)) {
+        if (!is_array($lines) || ($truncateLength-$totalLength <= 0)) {
             return '';
         }
         
-        $openTags = array();
-        $truncate = '';
-        $emptyTagsRegex = '(img|br|input|hr|area|base|basefont|col|frame|isindex|link|meta|param)';
-        $htmlEntitiesRegex = '/&[0-9a-z]{2,8};|&#[0-9]{1,7};|&#x[0-9a-f]{1,6};/i';
+        $truncated  = '';
+        $openedTags = array();
         
         foreach ($lines as $lineMatchings) {
-            // If there is any html-tag in this line, handle it and add it (uncounted) to the output
             if (!empty($lineMatchings[1])) {
-                if (preg_match('/^<(\s*.+?\/\s*|\s*' . $emptyTagsRegex . '(\s.+?)?)>$/is', $lineMatchings[1])) {
-                    // If it's an "empty element" with or without xhtml-conform closing slash (f.e. <br/>) : do nothing
-                } elseif (preg_match('/^<\s*\/([^\s]+?)\s*>$/s', $lineMatchings[1], $tagMatchings)) {
-                    // // If tag is a closing tag (f.e. </b>) : delete tag from $openTags list
-                    if (($position = array_search($tagMatchings[1], $openTags)) !== false) {
-                        unset($openTags[$position]);
-                    }
-                } elseif (preg_match('/^<\s*([^\s>!]+).*?>$/s', $lineMatchings[1], $tagMatchings)) {
-                    // If tag is an opening tag (f.e. <b>) : add tag to the beginning of $openTags list
-                    array_unshift($openTags, strtolower($tagMatchings[1]));
-                }
-                // Add html-tag to $truncate'd text
-                $truncate .= $lineMatchings[1];
+                // If there is any HTML tag in this line, handle it and add it (uncounted) to the output
+                $this->_handleHtmlOpeningTag($lineMatchings[1], $openedTags);
+                $truncated .= $lineMatchings[1];
             }
             
-            // Calculate the length of the plain text part of the line, handle entities as one character
-            $content = preg_replace('/&[0-9a-z]{2,8};|&#[0-9]{1,7};|&#x[0-9a-f]{1,6};/i', ' ', $lineMatchings[2]);
-            $contentLength = $helper->strlen($content);
+            $this->_supplementTruncatedHtml($lineMatchings[2], $truncated, $totalLength, $truncateLength, $breakWords);
             
-            if ($totalLength+$contentLength > $length) {
-                // The number of characters which are left
-                $left = $length - $totalLength;
-                $entitiesLength = 0;
-                
-                // Search for html entities
-                if (preg_match_all($htmlEntitiesRegex, $lineMatchings[2], $entities, PREG_OFFSET_CAPTURE)) {
-                    // Calculate the real length of all entities in the legal range
-                    foreach ($entities[0] as $entity) {
-                        if ($entity[1]+1-$entitiesLength <= $left) {
-                            $left--;
-                            $entitiesLength += $helper->strlen($entity[0]);
-                        } else {
-                            // No more characters left
-                            break;
-                        }
-                    }
-                }
-                $truncate .= $helper->substr($lineMatchings[2], 0, $left+$entitiesLength);
-                // Maximum length is reached, so get off the loop
+            if ($totalLength >= $truncateLength) {
                 break;
-            } else {
-                $truncate .= $lineMatchings[2];
-                $totalLength += $contentLength;
-            }
-            
-            // If the maximum length is reached, get off the loop
-            if ($totalLength >= $length) {
-                break;
-            }
-        }
-        
-        // If the words shouldn't be cut in the middle...
-        if (!$breakWords) {
-            // ...search the last occurence of a space...
-            if (($spacePosition = strrpos($truncate, ' ')) !== false) {
-                // ...and cut the text in this position
-                $truncate = $helper->substr($truncate, 0, $spacePosition);
             }
         }
         
         // Close all unclosed html-tags
-        foreach ($openTags as $tag) {
-            $truncate .= '</' . $tag . '>';
+        foreach ($openedTags as $tag) {
+            $truncated .= '</' . $tag . '>';
         }
         
         // Add the defined ending to the text
-        $truncate .= $etc;
+        $truncated .= $etc;
         
-        return $truncate;
+        return $truncated;
     }
     
     /**

@@ -86,7 +86,8 @@ class BL_CustomGrid_Block_Grid_Form_Default_Params extends BL_CustomGrid_Block_G
     
     protected function _addRemovableParamsFieldsToForm(Varien_Data_Form $form)
     {
-        $gridModel = $this->getGridModel();
+        $gridModel   = $this->getGridModel();
+        $gridProfile = $gridModel->getProfile();
         $dependenceBlock = $this->getDependenceBlock();
         $gridParams  = Mage::getSingleton('customgrid/system_config_source_grid_param')->toOptionArray(false);
         $yesNoValues = Mage::getSingleton('customgrid/system_config_source_yesno')->toOptionArray();
@@ -101,7 +102,7 @@ class BL_CustomGrid_Block_Grid_Form_Default_Params extends BL_CustomGrid_Block_G
         );
         
         foreach ($gridParams as $gridParam) {
-            if (!is_null($currentValue = $gridModel->getData('default_' . $gridParam['value']))) {
+            if (!is_null($currentValue = $gridProfile->getData('default_' . $gridParam['value']))) {
                 $hasNoDefaultParam = false;
                 $renderedValue = $this->_renderDefaultParamValue($gridParam['value'], $currentValue, false, $gridModel);
                 

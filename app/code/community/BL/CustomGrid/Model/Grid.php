@@ -19,15 +19,6 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
      * Session keys
      */
     const SESSION_BASE_KEY_CURRENT_PROFILE = '_blcg_current_profile_';
-    const SESSION_BASE_KEY_APPLIED_FILTERS = '_blcg_applied_filters_';
-    const SESSION_BASE_KEY_REMOVED_FILTERS = '_blcg_removed_filters_';
-    const SESSION_BASE_KEY_PROFILE_SESSION_VALUES = '_blcg_profile_session_values_';
-    const SESSION_BASE_KEY_TOKEN = '_blcg_session_key_token_';
-    
-    /**
-     * Base profile ID
-     */
-    const BASE_PROFILE_ID = 0;
     
     /**
      * Attribute columns base keys
@@ -171,20 +162,6 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     const DEFAULT_PARAM_MERGE_BASE_ORIGINAL = 'merge_on_original';
     const DEFAULT_PARAM_MERGE_BASE_CUSTOM   = 'merge_on_custom';
     
-    /**
-     * Keys of values that can be redefined at profile-level
-     * (and therefore should be stashed after load to remember the base state)
-     *
-     * @var array
-     */
-    static protected $_stashedProfileKeys = array(
-        'default_page',
-        'default_limit',
-        'default_sort',
-        'default_dir',
-        'default_filter'
-    );
-    
     protected function _construct()
     {
         parent::_construct();
@@ -238,7 +215,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
      */
     public function throwPermissionException($message = null)
     {
-        $message = (is_null($message) ? $this->_getHelper()->__('You are not allowed to use this action') : $message);
+        $message = (is_null($message) ? $this->getHelper()->__('You are not allowed to use this action') : $message);
         throw new BL_CustomGrid_Grid_Permission_Exception($message); 
     }
     
@@ -247,7 +224,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
      * 
      * @return BL_CustomGrid_Helper_Data
      */
-    protected function _getHelper()
+    public function getHelper()
     {
         return Mage::helper('customgrid');
     }
@@ -257,7 +234,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
      * 
      * @return BL_CustomGrid_Helper_Config
      */
-    protected function _getConfigHelper()
+    public function getConfigHelper()
     {
         return Mage::helper('customgrid/config');
     }
@@ -267,7 +244,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
      * 
      * @return Mage_Admin_Model_Session
      */
-    protected function _getAdminSession()
+    public function getAdminSession()
     {
         return Mage::getSingleton('admin/session');
     }
@@ -277,7 +254,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
      * 
      * @return Mage_Adminhtml_Model_Session
      */
-    protected function _getAdminhtmlSession()
+    public function getAdminhtmlSession()
     {
         return Mage::getSingleton('adminhtml/session');
     }
@@ -287,7 +264,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
      * 
      * @return BL_CustomGrid_Model_Session
      */
-    protected function _getBlcgSession()
+    public function getBlcgSession()
     {
         return Mage::getSingleton('customgrid/session');
     }
@@ -299,7 +276,8 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
      */
     public function getSessionUser()
     {
-        $user = $this->_getAdminSession()->getUser();
+        /** @var $user Mage_Admin_Model_User */
+        $user = $this->getAdminSession()->getUser();
         return ($user && $user->getId() ? $user : null);
     }
     
@@ -375,7 +353,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     public function resetProfilesValues()
     {
         $this->resetAvailableProfilesValues();
-        return $this->_resetKeys(array('base_profile', 'profiles', 'profile_id'));
+        return $this->_resetKeys(array('profiles', 'profile_id'));
     }
     
     /**
@@ -417,17 +395,6 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     }
     
     /**
-     * Stash base values after load
-     * 
-     * @return this
-     */
-    protected function _afterLoad()
-    {
-        $this->_stashBaseProfileValues();
-        return parent::_afterLoad();
-    }
-    
-    /**
      * Set default values to uninitialized data keys before save
      *
      * @return this
@@ -453,7 +420,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     }
     
     /**
-     * Ensures deletion is allowed before delete
+     * Enforce corresponding user permission before delete
      *
      * @return this
      */
@@ -462,41 +429,6 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
         return !$this->checkUserPermissions(self::ACTION_DELETE)
             ? $this->throwPermissionException()
             : parent::_beforeDelete();
-    }
-    
-    /**
-     * Returns the result of Mage_Core_Model_Abstract::_getData(),
-     * but previously ensures that the current profile is loaded
-     * if the requested value can be overriden at profile-level
-     *
-     * @param string $key Data key
-     * @return mixed
-     */
-    protected function _getData($key)
-    {
-        if (in_array($key, $this->getStashedProfileKeys())) {
-            // Ensures the current profile is loaded if it can possibly "override" the requested value
-            $this->getProfileId();
-        }
-        return parent::_getData($key);
-    }
-    
-    /**
-     * Returns the result of Mage_Core_Model_Abstract::getData(),
-     * but previously ensures that the current profile is loaded
-     * if the requested value can be overriden at profile-level
-     *
-     * @param  string $key Data key
-     * @param string|int $index Value index
-     * @return mixed
-     */
-    public function getData($key = '', $index = null)
-    {
-        if (in_array($key, $this->getStashedProfileKeys())) {
-            // Ensures the current profile is loaded if it can possibly "override" the requested value
-            $this->getProfileId();
-        }
-        return parent::getData($key, $index);
     }
     
     /**
@@ -526,56 +458,6 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
         return !$this->checkUserPermissions(self::ACTION_ENABLE_DISABLE)
             ? $this->throwPermissionException()
             : $this->setData('disabled', (bool) $disabled);
-    }
-    
-    /**
-     * Stash base values that can be redefined at profile-level
-     *
-     * @return this
-     */
-    protected function _stashBaseProfileValues()
-    {
-        foreach (self::$_stashedProfileKeys as $key) {
-            $this->setData('base_' . $key, (isset($this->_data[$key]) ? $this->_data[$key] : null));
-        }
-        return $this;
-    }
-    
-    /**
-     * Return stashed base values
-     *
-     * @return array
-     */
-    protected function _getStashedBaseProfileValues()
-    {
-        $values = array();
-        
-        foreach (self::$_stashedProfileKeys as $key) {
-            $values[$key] = $this->getData('base_' . $key);
-        }
-        
-        return $values;
-    }
-    
-    /**
-     * Restore stashed base values
-     *
-     * @return this
-     */
-    protected function _restoreBaseProfileValues()
-    {
-        $this->addData($this->_getStashedBaseProfileValues());
-        return $this;
-    }
-    
-    /**
-     * Return the profiles data keys that should be stashed
-     *
-     * @return array
-     */
-    public function getStashedProfileKeys()
-    {
-        return self::$_stashedProfileKeys;
     }
     
     /**
@@ -734,7 +616,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
             $this->throwPermissionException();
         }
         
-        $helper = $this->_getHelper();
+        $helper = $this->getHelper();
         
         if (!empty($forcedTypeCode)) {
             $typeModels = Mage::getSingleton('customgrid/grid_type_config')->getTypesInstances();
@@ -778,55 +660,6 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     }
     
     /**
-     * Return base profile ID (differentiating from null for comparison purposes)
-     *
-     * @return int
-     */
-    public function getBaseProfileId()
-    {
-        return self::BASE_PROFILE_ID;
-    }
-    
-    /**
-     * Return base profile name
-     *
-     * @return string
-     */
-    public function getBaseProfileName()
-    {
-        return $this->_getHelper()->__('Default');
-    }
-    
-    /**
-     * Return base profile model
-     *
-     * @return BL_CustomGrid_Model_Grid_Profile
-     */
-    protected function _getBaseProfile()
-    {
-        if (!$this->hasData('base_profile')) {
-            $this->setData(
-                'base_profile',
-                Mage::getModel('customgrid/grid_profile')
-                    ->setData(
-                        array_merge(
-                            array(
-                                'profile_id'    => $this->getBaseProfileId(),
-                                'grid_id'       => $this->getId(),
-                                'name'          => $this->getBaseProfileName(),
-                                'is_restricted' => false,
-                                'is_default'    => false,
-                                'grid_model'    => $this,
-                            ),
-                            $this->_getStashedBaseProfileValues()
-                        )
-                    )
-            );
-        }
-        return $this->_getData('base_profile');
-    }
-    
-    /**
      * Return all profiles
      *
      * @return array
@@ -855,28 +688,39 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     }
     
     /**
-     * Return profiles
+     * Return profiles list
      *
-     * @param bool $includeBase Whether the base profile should also be returned
      * @param bool $onlyAvailable Whether only the profiles available to the current user should be returned
      * @param bool $sorted Whether profiles should be sorted
      * @return array
      */
-    public function getProfiles($includeBase = false, $onlyAvailable = false, $sorted = false)
+    public function getProfiles($onlyAvailable = false, $sorted = false)
     {
         $profiles = $this->_getProfiles();
         
-        if ($onlyAvailable) {
+        if ($onlyAvailable && !empty($profiles)) {
+            $baseProfile = (($baseProfileId = $this->getBaseProfileId()) ? $profiles[$baseProfileId] : null);
             $profiles = array_intersect_key($profiles, array_flip($this->getAvailableProfilesIds()));
-        }
-        if ($includeBase) {
-            $profiles[$this->getBaseProfileId()] = $this->_getBaseProfile();
+            
+            if (empty($profiles) && $baseProfileId) {
+                $profiles[$baseProfileId] = $baseProfile;
+            }
         }
         if ($sorted) {
             uasort($profiles, array($this, '_sortProfiles'));
         }
         
         return $profiles;
+    }
+    
+    /**
+     * Return the ID of the base profile
+     *
+     * @return int|null
+     */
+    public function getBaseProfileId()
+    {
+        return (!is_null($profileId = $this->_getData('base_profile_id')) ? (int) $profileId : null);
     }
     
     /**
@@ -892,8 +736,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
         if (is_null($roleId)) {
             $roleId = (($role = $this->getSessionRole()) ? $role->getId() : null);
         }
-        if (!is_null($roleId)
-            && ($roleConfig = $this->getRoleConfig($roleId))) {
+        if (!is_null($roleId) && ($roleConfig = $this->getRoleConfig($roleId))) {
             $assignedProfilesIds = $roleConfig->getDataSetDefault('assigned_profiles_ids', array());
         }
         
@@ -903,20 +746,17 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     /**
      * Return available profiles IDs
      * 
-     * @param bool $includeBase Whether the base profile ID should also be returned
      * @return array
      */
-    public function getAvailableProfilesIds($includeBase = false)
+    public function getAvailableProfilesIds()
     {
         if (!$this->hasData('available_profiles_ids')) {
             $profiles = $this->_getProfiles();
             
             if (!$this->checkUserPermissions(self::ACTION_ACCESS_ALL_PROFILES)) {
-                $assignedProfilesIds = $this->getRoleAssignedProfilesIds();
-                
                 foreach ($profiles as $key => $profile) {
-                    if ($profile->isRestricted()
-                        && !in_array($profile->getId(), $assignedProfilesIds, true)) {
+                    /** @var $profile BL_CustomGrid_Model_Grid_Profile */
+                    if (!$profile->isAvailable()) {
                         unset($profiles[$key]);
                     }
                 }
@@ -924,14 +764,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
             
             $this->setData('available_profiles_ids', array_keys($profiles));
         }
-        
-        $profilesIds = $this->_getData('available_profiles_ids');
-        
-        if ($includeBase) {
-            $profilesIds[] = $this->getBaseProfileId();
-        }
-        
-        return $profilesIds;
+        return $this->_getData('available_profiles_ids');
     }
     
     /**
@@ -942,38 +775,89 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
      */
     public function isAvailableProfile($profileId)
     {
-        return in_array($profileId, $this->getAvailableProfilesIds(true), true);
+        return in_array($profileId, $this->getAvailableProfilesIds(), true);
     }
     
     /**
-     * Return a full profile-based session key from the given base session key
+     * Handle a permanent profile change, by restoring and/or remembering the necessary session values
      * 
-     * @param int|null $profileId Profile ID
-     * @return string
+     * @param BL_CustomGrid_Model_Grid_Profile $newProfile New permanent profile
+     * @param BL_CustomGrid_Model_Grid_Profile $previousProfile Previous permanent profile (if it still exists)
+     * @return this
      */
-    protected function _getProfileBasedSessionKey($baseSessionKey, $profileId = null)
-    {
-        if (is_null($profileId)) {
-            $profileId = $this->getProfileId();
+    protected function _handlePermanentProfileChange(
+        BL_CustomGrid_Model_Grid_Profile $newProfile,
+        BL_CustomGrid_Model_Grid_Profile $previousProfile = null
+    ) {
+        $session  = $this->getAdminhtmlSession();
+        $rememberedValues   = $newProfile->getRememberedSessionValues();
+        $rememberableValues = array();
+        $rememberableParams = ($previousProfile ? $previousProfile->getRememberedSessionParams() : array());
+        
+        foreach ($this->getBlockVarNames() as $gridParam => $varName) {
+            $isRememberedValue   = isset($rememberedValues[$gridParam]);
+            $isRememberableValue = false;
+            
+            if ($sessionKey = $this->getBlockParamSessionKey($varName)) {
+                if (($previousProfile && in_array($gridParam, $rememberableParams))
+                    && $session->hasData($sessionKey)) {
+                    $rememberableValues[$gridParam] = $session->getData($sessionKey);
+                    $isRememberableValue = true;
+                }
+                if ($isRememberedValue) {
+                    $session->setData($sessionKey, $rememberedValues[$gridParam]);
+                } else {
+                    $session->unsetData($sessionKey);
+                }
+            }
+            if ($previousProfile && ($varName == self::GRID_PARAM_FILTER) && !$isRememberableValue) {
+                // Ensure that the next filters verification won't mess with the default filters
+                // when switching back to the previous profile
+                $previousProfile->setSessionAppliedFilters(array());
+                $previousProfile->setSessionRemovedFilters(array());
+            }
         }
-        return $baseSessionKey . $this->getId() . '_' . $profileId;
+        
+        if ($previousProfile) {
+            $previousProfile->setRememberableSessionValues($rememberableValues);
+        }
+        
+        return $this;
     }
     
     /**
-     * Return profile's session values session key
-     *
-     * @param int|null $profileId Profile ID
-     * @return string
+     * Set the new current/permanent profile ID
+     * 
+     * @param int $profileId New current/permanent profile ID
+     * @return this
      */
-    protected function _getProfileSessionValuesSessionKey($profileId = null)
+    protected function _setPermanentProfileId($profileId)
     {
-        return $this->_getProfileBasedSessionKey(self::SESSION_BASE_KEY_PROFILE_SESSION_VALUES);
+        $profiles = $this->_getProfiles();
+        $session  = $this->getAdminhtmlSession();
+        $sessionKey = $this->_getSessionProfileIdKey();
+        
+        if ($session->hasData($sessionKey)) {
+            $previousProfileId = $this->getSessionProfileId();
+            $session->setData($sessionKey, $profileId);
+            
+            if ($profileId !== $previousProfileId) {
+                $this->_handlePermanentProfileChange(
+                    $profiles[$profileId],
+                    (isset($profiles[$previousProfileId]) ? $profiles[$previousProfileId] : null)
+                );
+            }
+        } else {
+            $session->setData($sessionKey, $profileId);
+        }
+        
+        return $this;
     }
     
     /**
-     * Set current profile ID (either for temporary or "permanent" use)
+     * Set the new current profile ID, either for temporary or "permanent" use
      *
-     * @param int $profileId (New) Current profile Id
+     * @param int $profileId New current profile Id
      * @param bool $temporary Whether the profile ID should only be set temporary (= not in session / no session check)
      * @param bool $forced Whether the given profile ID is "forced" (ie, was not determined automatically)
      * @return this
@@ -981,79 +865,17 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     public function setProfileId($profileId, $temporary = false, $forced = true)
     {
         $profileId = (int) $profileId;
-        $profiles  = $this->getProfiles(true, true);
+        $profiles  = $this->getProfiles(true);
         
         if (!isset($profiles[$profileId])) {
-            Mage::throwException($this->_getHelper()->__('This profile is not available'));
+            Mage::throwException($this->getHelper()->__('This profile is not available'));
         }
         
         $this->resetColumnsValues();
-        $this->_restoreBaseProfileValues();
         $this->setData('profile_id', $profileId);
         
-        if ($profileId !== $this->getBaseProfileId()) {
-            $this->addData(
-                array_intersect_key(
-                    $profiles[$profileId]->getData(),
-                    array_flip(self::$_stashedProfileKeys)
-                )
-            );
-        }
         if (!$temporary) {
-            $session = $this->_getAdminhtmlSession();
-            $sessionKey = $this->_getSessionProfileIdKey();
-            
-            if ($session->hasData($sessionKey)) {
-                $previousProfileId = $this->getSessionProfileId();
-                $session->setData($sessionKey, $profileId);
-                
-                if ($profileId !== $previousProfileId) {
-                    $rememberableValuesSessionKey = $this->_getProfileSessionValuesSessionKey($profileId);
-                    $rememberedValuesSessionKey = $this->_getProfileSessionValuesSessionKey($previousProfileId);
-                    
-                    if (isset($profiles[$previousProfileId])) {
-                        $rememberableValues = $profiles[$previousProfileId]->getRememberedSessionParams();
-                    } else {
-                        $rememberableValues = array();
-                    }
-                    if (!is_array($rememberedValues = $session->getData($rememberedValuesSessionKey))) {
-                        $rememberedValues = array();
-                    } else {
-                        $rememberedValues = array_intersect_key(
-                            $rememberedValues,
-                            array_flip($profiles[$profileId]->getRememberedSessionParams())
-                        );
-                    }
-                    
-                    foreach ($this->getBlockVarNames() as $gridParam => $varName) {
-                        $isRememberableValue = in_array($gridParam, $rememberableValues);
-                        $isRememberedValue = isset($rememberedValues[$gridParam]);
-                        
-                        if ($sessionKey = $this->getBlockParamSessionKey($varName)) {
-                            if ($isRememberableValue) {
-                                if ($session->hasData($sessionKey)) {
-                                    $rememberableValues[$gridParam] = $session->getData($sessionKey);
-                                }
-                            }
-                            if ($isRememberedValue) {
-                                $session->setData($sessionKey, $rememberedValues[$gridParam]);
-                            } else {
-                                $session->unsetData($sessionKey);
-                            }
-                        }
-                        if (($varName == self::GRID_PARAM_FILTER) && !$isRememberableValue) {
-                            // Ensure that the next filters verification won't mess with the default filters when
-                            // switching back to the previous profile
-                            $session->unsetData($this->getAppliedFiltersSessionKey($previousProfileId));
-                            $session->unsetData($this->getRemovedFiltersSessionKey($previousProfileId));
-                        }
-                    }
-                    
-                    $session->setData($rememberableValuesSessionKey, $rememberableValues);
-                }
-            } else {
-                $session->setData($sessionKey, $profileId);
-            }
+            $this->_setPermanentProfileId($profileId);
         }
         
         return $this;
@@ -1076,7 +898,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
      */
     public function getSessionProfileId()
     {
-        $profileId = $this->_getAdminhtmlSession()->getData($this->_getSessionProfileIdKey());
+        $profileId = $this->getAdminhtmlSession()->getData($this->_getSessionProfileIdKey());
         
         if (!is_null($profileId)) {
             $profileId = (int) $profileId;
@@ -1098,8 +920,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
         if (is_null($userId)) {
             $userId = (($user = $this->getSessionUser()) ? $user->getId() : null);
         }
-        if (!is_null($userId)
-            && ($userConfig = $this->getUserConfig($userId))) {
+        if (!is_null($userId) && ($userConfig = $this->getUserConfig($userId))) {
             $defaultProfileId = $userConfig->getData('default_profile_id');
         }
         
@@ -1119,8 +940,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
         if (is_null($roleId)) {
             $roleId = (($role = $this->getSessionRole()) ? $role->getId() : null);
         }
-        if (!is_null($roleId)
-            && ($roleConfig = $this->getRoleConfig($roleId))) {
+        if (!is_null($roleId) && ($roleConfig = $this->getRoleConfig($roleId))) {
             $defaultProfileId = $roleConfig->getData('default_profile_id');
         }
         
@@ -1134,61 +954,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
      */
     public function getGlobalDefaultProfileId()
     {
-        $defaultProfileId = null;
-        $profiles = $this->getProfiles();
-        
-        foreach ($profiles as $profile) {
-            if ($profile->isGlobalDefault()) {
-                $defaultProfileId = $profile->getId();
-                break;
-            }
-        }
-        
-        return $defaultProfileId;
-    }
-    
-    /**
-     * Return the current profile ID
-     *
-     * @return int
-     */
-    protected function _getProfileId()
-    {
-        if (!$this->hasData('profile_id')) {
-            if (!$this->getId()) {
-                // Force base profile without resetting anything if nothing has been saved yet
-                $this->setData('profiles', array());
-                $this->setData('profile_id', $this->getBaseProfileId());
-            } else {
-                $profiles  = $this->getProfiles(true, true);
-                $profileId = $this->getBaseProfileId();
-                $sessionProfileId = $this->getSessionProfileId();
-                
-                $defaultProfilesIds = array(
-                    $sessionProfileId,
-                    $this->getUserDefaultProfileId(),
-                    $this->getRoleDefaultProfileId(),
-                    $this->getGlobalDefaultProfileId(),
-                );
-                
-                foreach ($defaultProfilesIds as $defaultProfileId) {
-                    if (!is_null($defaultProfileId)
-                        && isset($profiles[$defaultProfileId])) {
-                        $profileId = (int) $defaultProfileId;
-                        break;
-                    }
-                }
-                
-                if (is_int($sessionProfileId)
-                    && ($sessionProfileId !== $profileId)) {
-                    $this->_getBlcgSession()
-                        ->addNotice($this->_getHelper()->__('The previous profile is not available anymore'));
-                }
-                
-                $this->setProfileId($profileId, false, false);
-            }
-        }
-        return $this->_getData('profile_id');
+        return (!is_null($profileId = $this->_getData('global_default_profile_id')) ? (int) $profileId : null);
     }
     
     /**
@@ -1198,24 +964,58 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
      */
     public function getProfileId()
     {
-        return $this->_getProfileId();
+        if (!$this->hasData('profile_id')) {
+            if (!$this->getId()) {
+                return null;
+            } else {
+                $profiles  = $this->getProfiles(true);
+                $profileId = key($profiles);
+                $sessionProfileId = $this->getSessionProfileId();
+                
+                $defaultProfilesIds = array(
+                    $sessionProfileId,
+                    $this->getUserDefaultProfileId(),
+                    $this->getRoleDefaultProfileId(),
+                    $this->getGlobalDefaultProfileId(),
+                    $this->getBaseProfileId(),
+                );
+                
+                foreach ($defaultProfilesIds as $defaultProfileId) {
+                    if (!is_null($defaultProfileId) && isset($profiles[$defaultProfileId])) {
+                        $profileId = (int) $defaultProfileId;
+                        break;
+                    }
+                }
+                
+                if (is_null($profileId)) {
+                    Mage::throwException($this->getHelper()->__('There is not any available profile'));
+                }
+                if (is_int($sessionProfileId) && ($sessionProfileId !== $profileId)) {
+                    $this->getBlcgSession()
+                        ->addNotice($this->getHelper()->__('The previous profile is not available anymore'));
+                }
+                
+                $this->setProfileId($profileId, false, false);
+            }
+        }
+        return $this->_getData('profile_id');
     }
     
     /**
      * Return a profile by its ID
      *
-     * @param int|null $profileId Profile ID (if null, the current profile will be returned)
+     * @param int|null $profileId Profile ID (if not set, current profile ID will be used)
      * @return BL_CustomGrid_Model_Grid_Profile
      */
     public function getProfile($profileId = null)
     {
-        $profiles = $this->getProfiles(true, true);
+        $profiles = $this->getProfiles(true);
         
         if (is_null($profileId)) {
             $profileId = $this->getProfileId();
         }
         if (!isset($profiles[$profileId])) {
-            Mage::throwException($this->_getHelper()->__('This profile is not available'));
+            Mage::throwException($this->getHelper()->__('This profile is not available'));
         }
         
         return $profiles[$profileId];
@@ -1230,7 +1030,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     public function getProfilesDefaultRestricted()
     {
         return is_null($value = $this->_getData('profiles_default_restricted'))
-            ? $this->_getConfigHelper()->getProfilesDefaultRestricted()
+            ? $this->getConfigHelper()->getProfilesDefaultRestricted()
             : (bool) $value;
     }
     
@@ -1243,8 +1043,8 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     public function getProfilesDefaultAssignedTo()
     {
         return is_null($value = $this->_getData('profiles_default_assigned_to'))
-            ? $this->_getConfigHelper()->getProfilesDefaultAssignedTo()
-            : $this->_getHelper()->parseCsvIntArray($value, true, false, 1);
+            ? $this->getConfigHelper()->getProfilesDefaultAssignedTo()
+            : $this->getHelper()->parseCsvIntArray($value, true, false, 1);
     }
     
     /**
@@ -1256,7 +1056,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     public function getProfilesRememberedSessionParams()
     {
         return is_null($value = $this->_getData('profiles_remembered_session_params'))
-            ? $this->_getConfigHelper()->getProfilesRememberedSessionParams()
+            ? $this->getConfigHelper()->getProfilesRememberedSessionParams()
             : explode(',', $value);
     }
     
@@ -1770,7 +1570,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     public function canHaveCustomColumns()
     {
         return ($typeModel = $this->getTypeModel())
-             && $typeModel->canHaveCustomColumns($this->getBlockType(), $this->getRewritingClassName());
+            && $typeModel->canHaveCustomColumns($this->getBlockType(), $this->getRewritingClassName());
     }
     
     /**
@@ -2041,88 +1841,6 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     }
     
     /**
-     * Return filters token session key
-     *
-     * @return string
-     */
-    public function getFiltersTokenSessionKey()
-    {
-        return self::SESSION_BASE_KEY_TOKEN . $this->getId();
-    }
-    
-    /**
-     * Return applied filters session key
-     *
-     * @param int|null $profileId Current profile ID at the time the filters were applied
-     * @return string
-     */
-    public function getAppliedFiltersSessionKey($profileId = null)
-    {
-        return $this->_getProfileBasedSessionKey(self::SESSION_BASE_KEY_APPLIED_FILTERS);
-    }
-    
-    /**
-     * Return removed filters session key
-     *
-     * @param int|null $profileId Current profile ID at the time the filters were removed
-     * @return string
-     */
-    protected function getRemovedFiltersSessionKey($profileId = null)
-    {
-        return $this->_getProfileBasedSessionKey(self::SESSION_BASE_KEY_REMOVED_FILTERS);
-    }
-    
-    /**
-     * Update default parameters
-     *
-     * @param array $appliable Appliable values
-     * @param array $removable Removable values
-     * @return this
-     */
-    public function updateDefaultParameters(array $appliable, array $removable)
-    {
-        if (!$this->checkUserPermissions(self::ACTION_EDIT_DEFAULT_PARAMS)) {
-            $this->throwPermissionException();
-        }
-        
-        if (isset($appliable[self::GRID_PARAM_PAGE])) {
-            $this->setData('default_page', (int) $appliable[self::GRID_PARAM_PAGE]);
-        }
-        if (isset($appliable[self::GRID_PARAM_LIMIT])) {
-            $this->setData('default_limit', (int) $appliable[self::GRID_PARAM_LIMIT]);
-        }
-        if (isset($appliable[self::GRID_PARAM_SORT])) {
-            if ($this->getColumnByBlockId($appliable[self::GRID_PARAM_SORT])) {
-                $this->setData('default_sort', $appliable[self::GRID_PARAM_SORT]);
-            } else {
-                $this->setData('default_sort', null);
-            }
-        }
-        if (isset($appliable[self::GRID_PARAM_DIR])) {
-            if (($appliable[self::GRID_PARAM_DIR] == 'asc') || ($appliable[self::GRID_PARAM_DIR] == 'desc')) {
-                $this->setData('default_dir', $appliable[self::GRID_PARAM_DIR]);
-            } else {
-                $this->setData('default_dir', null);
-            }
-        }
-        if (isset($appliable[self::GRID_PARAM_FILTER])) {
-            $this->setData(
-                'default_filter',
-                $this->getApplier()->prepareDefaultFilterValue($appliable[self::GRID_PARAM_FILTER])
-            );
-        }
-        
-        foreach ($this->getGridParamsKeys() as $key) {
-            if (isset($removable[$key]) && $removable[$key]) {
-                $this->setData('default_' . $key, null);
-            }
-        }
-        
-        $this->setDataChanges(true);
-        return $this;
-    }
-    
-    /**
      * Update default parameters behaviours
      *
      * @param array $behaviours New behaviours
@@ -2285,7 +2003,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     }
     
     /**
-     * Return given role's permissions
+     * Return the permissions for the given role
      *
      * @param int $roleId Role ID
      * @param mixed $default Default value to return if there is no permissions for the given role ID
@@ -2349,7 +2067,53 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     }
     
     /**
-     * Check if the current user has the required permissions for any of or all the given actions
+     * Prepare and return the given base values from an user permissions check, ensuring that they are fully suitable
+     * for further tests
+     * 
+     * @param string|array $actions Actions codes
+     * @param bool|array|null $aclPermissions Corresponding ACL permissions values
+     * return array Array containing the two prepared values
+     */
+    protected function _prepareUserPermissionsCheckValues($actions, $aclPermissions)
+    {
+        if (!is_array($actions)) {
+            if (!is_null($aclPermissions) && !is_array($aclPermissions)) {
+                $aclPermissions = array($actions => $aclPermissions);
+            }
+            $actions = array($actions);
+        }
+        if (!is_array($aclPermissions)) {
+            $aclPermissions = array();
+        }
+        return array($actions, $aclPermissions);
+    }
+    
+    /**
+     * Check if the current user has the required permission for the given action
+     * 
+     * @param string $action Action code
+     * @param array $permissions Role permissions values
+     * @param array $aclPermissions ACL permissions values
+     * @return bool
+     */
+    protected function _checkUserActionPermission($action, array $permissions, array $aclPermissions)
+    {
+        $result = true;
+        $actionPermission = (isset($permissions[$action]) ? $permissions[$action] : self::ACTION_PERMISSION_USE_CONFIG);
+        
+        if ($actionPermission === self::ACTION_PERMISSION_NO) {
+            $result = false;
+        } elseif ($actionPermission === self::ACTION_PERMISSION_USE_CONFIG) {
+            $result = isset($aclPermissions[$action])
+                ? (bool) $aclPermissions[$action]
+                : (bool) $this->getAdminSession()->isAllowed(self::$_gridActionsAclPaths[$action]);
+        }
+        
+        return $result;
+    }
+    
+    /**
+     * Check if the current user has the required permissions for any or all of the given actions
      *
      * @param string|array $actions Actions codes
      * @param bool|array|null $aclPermissions Corresponding ACL permissions values
@@ -2359,7 +2123,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     public function checkUserPermissions($actions, $aclPermissions = null, $any = true)
     {
         $any = (bool) $any;
-        $session = $this->_getAdminSession();
+        $session = $this->getAdminSession();
         
         if (($user = $session->getUser()) && ($role = $user->getRole())) {
             $roleId = $role->getId();
@@ -2367,28 +2131,12 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
             return false;
         }
         
-        if (!is_array($actions)) {
-            if (!is_null($aclPermissions) && !is_array($aclPermissions)) {
-                $aclPermissions = array($actions => $aclPermissions);
-            }
-            $actions = array($actions);
-        }
-        
-        $permissions = $this->getRolePermissions($roleId, false);
+        list($actions, $aclPermissions) = $this->_prepareUserPermissionsCheckValues($actions, $aclPermissions);
+        $permissions = $this->getRolePermissions($roleId);
         $result = true;
         
         foreach ($actions as $action) {
-            $actionPermission = (is_array($permissions) && isset($permissions[$action]))
-                ? $permissions[$action]
-                : self::ACTION_PERMISSION_USE_CONFIG;
-            
-            if ($actionPermission === self::ACTION_PERMISSION_NO) {
-                $result = false;
-            } elseif ($actionPermission === self::ACTION_PERMISSION_USE_CONFIG) {
-                $result = (!is_null($aclPermissions) && isset($aclPermissions[$action]))
-                    ? (bool) $aclPermissions[$action]
-                    : (bool) $session->isAllowed(self::$_gridActionsAclPaths[$action]);
-            }
+            $result = $this->_checkUserActionPermission($action, $permissions, $aclPermissions);
             
             if ($any === $result) {
                 break;
@@ -2406,7 +2154,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     public function getDisplaySystemPart()
     {
         return is_null($value = $this->_getData('display_system_part'))
-            ? $this->_getConfigHelper()->getDisplaySystemPart()
+            ? $this->getConfigHelper()->getDisplaySystemPart()
             : (bool) $value;
     }
     
@@ -2418,7 +2166,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     public function getIgnoreCustomHeaders()
     {
         return is_null($value = $this->_getData('ignore_custom_headers'))
-            ? $this->_getConfigHelper()->getIgnoreCustomHeaders()
+            ? $this->getConfigHelper()->getIgnoreCustomHeaders()
             : (bool) $value;
     }
     
@@ -2430,7 +2178,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     public function getIgnoreCustomWidths()
     {
         return is_null($value = $this->_getData('ignore_custom_widths'))
-            ? $this->_getConfigHelper()->getIgnoreCustomWidths()
+            ? $this->getConfigHelper()->getIgnoreCustomWidths()
             : (bool) $value;
     }
     
@@ -2442,7 +2190,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     public function getIgnoreCustomAlignments()
     {
         return is_null($value = $this->_getData('ignore_custom_alignments'))
-            ? $this->_getConfigHelper()->getIgnoreCustomAlignments()
+            ? $this->getConfigHelper()->getIgnoreCustomAlignments()
             : (bool) $value;
     }
     
@@ -2454,7 +2202,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     public function getMergeBasePagination()
     {
         return is_null($value = $this->_getData('merge_base_pagination'))
-            ? $this->_getConfigHelper()->getMergeBasePagination()
+            ? $this->getConfigHelper()->getMergeBasePagination()
             : (bool) $value;
     }
     
@@ -2466,8 +2214,8 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     public function getPaginationValues()
     {
         return is_null($value = $this->_getData('pagination_values'))
-            ? $this->_getConfigHelper()->getPaginationValues()
-            : $this->_getHelper()->parseCsvIntArray($value, true, true, 1);
+            ? $this->getConfigHelper()->getPaginationValues()
+            : $this->getHelper()->parseCsvIntArray($value, true, true, 1);
     }
     
     /**
@@ -2478,7 +2226,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     public function getDefaultPaginationValue()
     {
         return is_null($value = $this->_getData('default_pagination_value'))
-            ? $this->_getConfigHelper()->getDefaultPaginationValue()
+            ? $this->getConfigHelper()->getDefaultPaginationValue()
             : (int) $value;
     }
     
@@ -2512,7 +2260,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     public function getPinHeader()
     {
         return is_null($value = $this->_getData('pin_header'))
-            ? $this->_getConfigHelper()->getPinHeader()
+            ? $this->getConfigHelper()->getPinHeader()
             : (bool) $value;
     }
     
@@ -2524,7 +2272,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     public function getUseRssLinksWindow()
     {
         return is_null($value = $this->_getData('use_rss_links_window'))
-            ? $this->_getConfigHelper()->getUseRssLinksWindow()
+            ? $this->getConfigHelper()->getUseRssLinksWindow()
             : (bool) $value;
     }
     
@@ -2536,7 +2284,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     public function getHideOriginalExportBlock()
     {
         return is_null($value = $this->_getData('hide_original_export_block'))
-            ? $this->_getConfigHelper()->getHideOriginalExportBlock()
+            ? $this->getConfigHelper()->getHideOriginalExportBlock()
             : (bool) $value;
     }
     
@@ -2548,7 +2296,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     public function getHideFilterResetButton()
     {
         return is_null($value = $this->_getData('hide_filter_reset_button'))
-            ? $this->_getConfigHelper()->getHideFilterResetButton()
+            ? $this->getConfigHelper()->getHideFilterResetButton()
             : (bool) $value;
     }
     

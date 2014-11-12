@@ -46,7 +46,7 @@ class BL_CustomGrid_Block_Grid_Profile_Switcher extends Mage_Adminhtml_Block_Tem
     public function getProfiles()
     {
         if (!$this->hasData('profiles')) {
-            $this->setData('profiles', $this->getGridModel()->getProfiles(true, true, true));
+            $this->setData('profiles', $this->getGridModel()->getProfiles(true, true));
         }
         return $this->_getData('profiles');
     }

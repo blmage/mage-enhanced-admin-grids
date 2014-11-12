@@ -16,6 +16,13 @@
 class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
 {
     /**
+     * Session base keys
+     */
+    const SESSION_BASE_KEY_SESSION_VALUES = '_blcg_profile_session_values_';
+    const SESSION_BASE_KEY_APPLIED_FILTERS = '_blcg_applied_filters_';
+    const SESSION_BASE_KEY_REMOVED_FILTERS = '_blcg_removed_filters_';
+    
+    /**
      * Return base helper
      *
      * @return BL_CustomGrid_Helper_Data
@@ -26,7 +33,7 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
     }
     
     /**
-     * Return this profile's ID
+     * Return the ID of this profile
      *
      * @return int
      */
@@ -36,7 +43,7 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
     }
     
     /**
-     * Return this profile's grid model
+     * Return the grid model corresponding to this profile
      *
      * @param bool $graceful Whether to throw an exception if the grid model is invalid, otherwise return null
      * @return BL_CustomGrid_Model_Grid|null
@@ -52,13 +59,33 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
     }
     
     /**
+     * Return the name of this profile
+     * 
+     * @return string
+     */
+    public function getName()
+    {
+        return ($this->isBase() ? $this->_getHelper()->__('Base') : $this->_getData('name'));
+    }
+    
+    /**
      * Return whether this is the base profile from the corresponding grid model
      *
      * @return bool
      */
     public function isBase()
     {
-        return ($this->getId() === BL_CustomGrid_Model_Grid::BASE_PROFILE_ID);
+        return ($this->getId() === $this->getGridModel()->getBaseProfileId());
+    }
+    
+    /**
+     * Return whether this is the global default profile from the corresponding grid model
+     * 
+     * @return bool
+     */
+    public function isGlobalDefault()
+    {
+        return ($this->getId() === $this->getGridModel()->getGlobalDefaultProfileId());
     }
     
     /**
@@ -70,10 +97,158 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
     {
         return ($this->getId() === $this->getGridModel()->getProfileId());
     }
-
-    public function isDefault() {
-        //@todo return proper flag if this profile is the default profile for this grid.
-        return false;
+    
+    /**
+     * Check the "Access all profiles" from the grid model
+     * 
+     * @return bool
+     */
+    protected function _checkAccessAllPermission()
+    {
+        return $this->getGridModel()->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_ACCESS_ALL_PROFILES);
+    }
+    
+    /**
+     * Return whether this profile is available for the current user
+     * Note that this does not take edge cases into account
+     * (eg, when the base profile is automatically chosen for the current user because he has not any availabel profile)
+     * 
+     * @param bool $checkAccessAllPermission Whether the "Access all profiles" from the grid model should also be used
+     * @return bool
+     */
+    public function isAvailable($checkAccessAllPermission = false)
+    {
+        return !$this->isRestricted()
+            || ($checkAccessAllPermission && $this->_checkAccessAllPermission())
+            || in_array($this->getId(), $this->getGridModel()->getRoleAssignedProfilesIds(), true);
+    }
+    
+    /**
+     * Return the session parameters that should be restored upon returning to this profile,
+     * if it has been previously used during the same session
+     * 
+     * @return array
+     */
+    public function getRememberedSessionParams()
+    {
+        return is_null($value = $this->_getData('remembered_session_params'))
+            ? $this->getGridModel()->getProfilesRememberedSessionParams()
+            : explode(',', $value);
+    }
+    
+    /**
+     * Return a full session data key, unique to this profile
+     * 
+     * @param string $baseKey Base session key
+     * @return string
+     */
+    protected function _getSessionDataKey($baseKey)
+    {
+        return $baseKey . $this->getGridModel()->getId() . '_' . $this->getId();
+    }
+    
+    /**
+     * Return array data from the adminhtml session, corresponding to the given base key
+     * 
+     * @param string $sessionBaseKey Base key
+     * @return array
+     */
+    protected function _getSessionArrayData($sessionBaseKey)
+    {
+        $data = $this->getGridModel()
+            ->getAdminhtmlSession()
+            ->getData($this->_getSessionDataKey($sessionBaseKey));
+        return (is_array($data) ? $data : array());
+    }
+    
+    /**
+     * Set array data in the adminhtml session, for the given base key
+     * 
+     * @param string $sessionBaseKey Base key
+     * @return this
+     */
+    protected function _setSessionArrayData($sessionBaseKey, array $data)
+    {
+        $this->getGridModel()
+            ->getAdminhtmlSession()
+            ->setData($this->_getSessionDataKey($sessionBaseKey), $data);
+        return $this;
+    }
+    
+    /**
+     * Among the given session values, return the actual values that are/should be remembered
+     * 
+     * @param array $sessionValues Session values
+     * @return array
+     */
+    protected function _getRememberedSessionValues(array $sessionValues)
+    {
+        return array_intersect_key(
+            $sessionValues,
+            array_flip($this->getRememberedSessionParams())
+        );
+    }
+    
+    /**
+     * Get the previously remembered session values
+     * 
+     * @return array
+     */
+    public function getRememberedSessionValues()
+    {
+        return $this->_getRememberedSessionValues($this->_getSessionArrayData(self::SESSION_BASE_KEY_SESSION_VALUES));
+    }
+    
+    /**
+     * Set the new remembered session values
+     * 
+     * @return this
+     */
+    public function setRememberedSessionValues(array $sessionValues)
+    {
+        return $this->_setSessionArrayData(self::SESSION_BASE_KEY_SESSION_VALUES, $sessionValues);
+    }
+    
+    /**
+     * Return the previously applied filters for this profile from session
+     * 
+     * @return array
+     */
+    public function getSessionAppliedFilters()
+    {
+        return $this->_getSessionArrayData(self::SESSION_BASE_KEY_APPLIED_FILTERS);
+    }
+    
+    /**
+     * Set the new applied filters for this profile in session
+     * 
+     * @param array $filters New applied filters
+     * @return this
+     */
+    public function setSessionAppliedFilters(array $filters)
+    {
+        return $this->_setSessionArrayData(self::SESSION_BASE_KEY_APPLIED_FILTERS, $filters);
+    }
+    
+    /**
+     * Return the previously removed filters for this profile from session
+     * 
+     * @return array
+     */
+    public function getSessionRemovedFilters()
+    {
+        return $this->_getSessionArrayData(self::SESSION_BASE_KEY_REMOVED_FILTERS);
+    }
+    
+    /**
+     * Set the new removed filters for this profile in session
+     * 
+     * @param array $filters New removed filters
+     * @return this
+     */
+    public function setSessionRemovedFilters(array $filters)
+    {
+        return $this->_setSessionArrayData(self::SESSION_BASE_KEY_REMOVED_FILTERS, $filters);
     }
     
     /**
@@ -97,19 +272,6 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
             $this->setData('assigned_to_role_ids', $rolesIds);
         }
         return $this->_getData('assigned_to_role_ids');
-    }
-    
-    /**
-     * Return the session parameters that should be restored upon returning to a profile previously used during
-     * the same session
-     * 
-     * @return array
-     */
-    public function getRememberedSessionParams()
-    {
-        return is_null($value = $this->_getData('remembered_session_params'))
-            ? $this->getGridModel()->getProfilesRememberedSessionParams()
-            : explode(',', $value);
     }
     
     /**
@@ -214,10 +376,9 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
     {
         $profileId  = $this->getId();
         $gridModel  = $this->getGridModel();
-        $profiles   = $gridModel->getProfiles(true, true);
         $defaultFor = array();
         
-        if (!isset($profiles[$profileId])) {
+        if (!$this->isAvailable(true)) {
             Mage::throwException($this->_getHelper()->__('This profile is not available'));
         }
         if (isset($values['users']) && is_array($values['users'])) {
@@ -272,6 +433,31 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
     }
     
     /**
+     * Check the validity of the given new values for the given profile ID, adapt them if necessary
+     * 
+     * @param int|null $profileId Updated profile ID
+     * @param array $values New profile values
+     * @return this
+     */
+    protected function _checkProfileNewValues($profileId, array &$values)
+    {
+        $gridModel = $this->getGridModel();
+        
+        if (is_null($profileId) || ($profileId !== $gridModel->getBaseProfileId())) {
+            if (!isset($values['name']) || !strlen(trim($values['name']))) {
+                Mage::throwException($this->_getHelper()->__('The profile name must be filled'));
+            }
+            
+            $values['name'] = trim($values['name']);
+            $this->_checkProfileDuplication($profileId, $values, $this->getGridModel()->getProfiles());
+        } elseif (isset($values['name'])) {
+            unset($values['name']);
+        }
+        
+        return $this;
+    }
+    
+    /**
      * Copy this profile to a new one, and return the new profile ID
      *
      * @param array $newValues New profile values
@@ -281,18 +467,14 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
     {
         $profileId = $this->getId();
         $gridModel = $this->getGridModel();
-        $profiles  = $gridModel->getProfiles(true, true);
         
         if (!$gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_COPY_PROFILES_TO_NEW)) {
             $gridModel->throwPermissionException();
-        } elseif (!isset($profiles[$profileId])) {
+        } elseif (!$this->isAvailable(true)) {
             Mage::throwException($this->_getHelper()->__('The copied profile is not available'));
-        } elseif (!isset($values['name'])) {
-            Mage::throwException($this->_getHelper()->__('The profile name must be filled'));
         }
         
-        $values['name'] = trim($values['name']);
-        $this->_checkProfileDuplication(null, $values, $profiles);
+        $this->_checkProfileNewValues(null, $values);
         $assignedRolesIds = null;
         
         if ($gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_ASSIGN_PROFILES)) {
@@ -331,7 +513,7 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
     }
     
     /**
-     * Copy some of this profile's values to another existing one
+     * Copy some of the values from this profile to another existing profile
      *
      * @param int $toProfileId ID of the profile on which to copy the given values
      * @param array $values Copied values (possible values : "columns", and each grid parameter key - eg "page")
@@ -341,7 +523,7 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
     {
         $profileId = $this->getId();
         $gridModel = $this->getGridModel();
-        $profiles  = $gridModel->getProfiles(true, true);
+        $profiles  = $gridModel->getProfiles(true);
         
         if (!$gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_COPY_PROFILES_TO_EXISTING)) {
             $gridModel->throwPermissionException();
@@ -360,7 +542,7 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
     }
     
     /**
-     * Update this profile's base values
+     * Update base values
      *
      * @param array $values New values
      * @return this
@@ -369,23 +551,16 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
     {
         $profileId = $this->getId();
         $gridModel = $this->getGridModel();
-        $profiles  = $gridModel->getProfiles(true, true);
         
         if (!$gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_EDIT_PROFILES)) {
             $gridModel->throwPermissionException();
-        } elseif (!isset($profiles[$profileId])) {
+        } elseif (!$this->isAvailable(true)) {
             Mage::throwException($this->_getHelper()->__('This profile is not available'));
-        } elseif ($profileId === $gridModel->getBaseProfileId()) {
-            Mage::throwException($this->_getHelper()->__('The base profile can not be edited'));
-        } elseif (!isset($values['name'])) {
-            Mage::throwException($this->_getHelper()->__('The profile name must be filled'));
         }
         
         $editableKeys = array('name', 'remembered_session_params');
         $values = array_intersect_key($values, array_flip($editableKeys));
-        $values['name'] = trim($values['name']);
-        
-        $this->_checkProfileDuplication($profileId, $values, $profiles);
+        $this->_checkProfileNewValues($profileId, $values);
         
         if (!isset($values['remembered_session_params']) || is_array($values['remembered_session_params'])) {
             $sessionParams = array_intersect($values['remembered_session_params'], $gridModel->getGridParamsKeys(true));
@@ -406,6 +581,116 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
     }
     
     /**
+     * Prepare the given default page value
+     * 
+     * @param string $value Default page value
+     * @return int
+     */
+    protected function _prepareDefaultPageValue($value)
+    {
+        return (int) $value;
+    }
+    
+    /**
+     * Prepare the given default limit value
+     * 
+     * @param string $value Default limit value
+     * @return int
+     */
+    protected function _prepareDefaultLimitValue($value)
+    {
+        return (int) $value;
+    }
+    
+    /**
+     * Prepare the given default sort value
+     * 
+     * @param string $value Default sort value
+     * @return string|null
+     */
+    protected function _prepareDefaultSortValue($value)
+    {
+        return $this->getGridModel()->getColumnByBlockId($value)
+            ? $value
+            : null;
+    }
+    
+    /**
+     * Prepare the given default direction value
+     * 
+     * @param string $value Default direction value
+     * @return string|null
+     */
+    protected function _prepareDefaultDirValue($value)
+    {
+        $value = strtolower($value);
+        return (in_array($value, array('asc', 'desc')) ? $value : null);
+    }
+    
+    /**
+     * Prepare the given default filter value
+     * 
+     * @param string $value Default filter value
+     * @return string|null
+     */
+    protected function _prepareDefaultFilterValue($value)
+    {
+        return $this->getGridModel()
+            ->getApplier()
+            ->prepareDefaultFilterValue($value);
+    }
+    
+    /**
+     * Extract the request value corresponding to the given default parameter keys,
+     * from the given appliable and removable parameter values
+     * 
+     * @param string $paramKey Key of the default parameter (eg "page" or "limit")
+     * @param string $valueKey Value key of the default parameter (eg "default_page" or "default_limit")
+     * @param array $appliable Appliable default values
+     * @param array $removable Removable default values
+     * @return mixed
+     */
+    protected function _extractDefaultParamValue($paramKey, $valueKey, array $appliable, array $removable)
+    {
+        if (isset($removable[$paramKey]) && $removable[$paramKey]) {
+            $value = null;
+        } elseif (isset($appliable[$paramKey])) {
+            $value = $this->{'_prepareDefault' . ucfirst($paramKey) . 'Value'}($appliable[$paramKey]);
+        } else {
+            $value = $this->_getData($valueKey);
+        }
+        return $value;
+    }
+    
+    /**
+     * Update default parameters
+     *
+     * @param array $appliable Appliable values
+     * @param array $removable Removable values
+     * @return this
+     */
+    public function updateDefaultParameters(array $appliable, array $removable)
+    {
+        $gridModel = $this->getGridModel();
+        
+        if (!$gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_EDIT_DEFAULT_PARAMS)) {
+            $gridModel->throwPermissionException();
+        }
+        
+        $defaultParams = array();
+        
+        foreach ($gridModel->getGridParamsKeys() as $paramKey) {
+            $valueKey = 'default_' . $paramKey;
+            $defaultParams[$valueKey] = $this->_extractDefaultParamValue($paramKey, $valueKey, $appliable, $removable);
+        }
+        
+        $gridModel->getResource()->updateProfile($gridModel->getId(), $this->getId(), $defaultParams, true);
+        $this->addData($defaultParams);
+        
+        return $this;
+    }
+    
+    /**
      * (Un-)Restrict and/or (un-)assign this profile
      *
      * @param array $values Array with "is_restricted" and "assigned_to" keys, holding corresponding value(s)
@@ -415,14 +700,12 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
     {
         $profileId = $this->getId();
         $gridModel = $this->getGridModel();
-        $profiles  = $gridModel->getProfiles(true, true);
+        $profiles  = $gridModel->getProfiles(true);
         
         if (!$gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_ASSIGN_PROFILES)) {
             $gridModel->throwPermissionException();
         } elseif (!isset($profiles[$profileId])) {
             Mage::throwException($this->_getHelper()->__('This profile is not available'));
-        } elseif ($profileId === $gridModel->getBaseProfileId()) {
-            Mage::throwException($this->_getHelper()->__('The base profile can not be assigned'));
         }
         
         $editableKeys = array('is_restricted', 'assigned_to');
@@ -454,13 +737,12 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
     {
         $profileId = $this->getId();
         $gridModel = $this->getGridModel();
-        $profiles  = $gridModel->getProfiles(true, true);
         
         if (!$gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_DELETE_PROFILES)) {
             $gridModel->throwPermissionException();
-        } elseif (!isset($profiles[$profileId])) {
+        } elseif (!$this->isAvailable(true)) {
             Mage::throwException($this->_getHelper()->__('This profile is not available'));
-        } elseif ($profileId === $gridModel->getBaseProfileId()) {
+        } elseif ($this->isBase()) {
             Mage::throwException($this->_getHelper()->__('The base profile can not be deleted'));
         }
         

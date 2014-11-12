@@ -20,7 +20,7 @@ $connection = $installer->getConnection();
 $tables = array(
     'grid'         => $installer->getTable('customgrid/grid'),
     'grid_profile' => $installer->getTable('customgrid/grid_profile'),
-    'grid_role'     => $installer->getTable('customgrid/grid_role'),
+    'grid_role'    => $installer->getTable('customgrid/grid_role'),
 );
 
 /**
@@ -74,7 +74,7 @@ $connection->addColumn(
 $connection->addColumn(
     $tables['grid_role'],
     'base_profile_assigned',
-    'tinyint(1) NOT NULL default 1'
+    'tinyint(1) NOT NULL default 0'
 );
 
 $installer->endSetup();

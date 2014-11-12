@@ -75,6 +75,22 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
     }
     
     /**
+     *  Return the column descriptions for the given collection table
+     * 
+     * @param Varien_Data_Collection_Db $collection Database collection
+     * @param string $tableName Table name
+     * @return array
+     */
+    public function describeCollectionTable(Varien_Data_Collection_Db $collection, $tableName)
+    {
+        if (!isset($this->_describeTableCache[$tableName])) {
+            $adapter = $this->getCollectionAdapter($collection);
+            $this->_describeTableCache[$tableName] = $adapter->describeTable($tableName);
+        }
+        return $this->_describeTableCache[$tableName];
+    }
+    
+    /**
      * Return the alias used by the main table of the given collection.
      * 
      * @param Varien_Data_Collection_Db $collection Grid collection
@@ -502,7 +518,114 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
     }
     
     /**
-     * Search in the given filters for occurences that correspond to unqualified fields in the collection,
+     * Return the unmapped fields from the given collection that are used in the given filters
+     * 
+     * @param Varien_Data_Collection_Db $collection Grid collection
+     * @param Mage_Adminhtml_Block_Widget_Grid Grid block
+     * @param array $filters Applied filters
+     * @return array
+     */
+    protected function _getUnmappedFiltersFields(
+        Varien_Data_Collection_Db $collection,
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock,
+        array $filters
+    ) {
+        $unmappedFields = array();
+        
+        if (is_array($filtersMap = $this->_getCollectionFiltersMap($collection))) {
+            // Search for "potentially dangerous" unmapped fields in applied filters
+            $filtersMap = (isset($filtersMap['fields']) ? $filtersMap['fields'] : array());
+            
+            foreach ($gridBlock->getColumns() as $columnBlockId => $columnBlock) {
+                if (isset($filters[$columnBlockId])
+                    && (!empty($filters[$columnBlockId]) || strlen($filters[$columnBlockId]) > 0)
+                    && $columnBlock->getFilter()) {
+                    $field = $columnBlock->getFilterIndex()
+                        ? $columnBlock->getFilterIndex()
+                        : $columnBlock->getIndex();
+                    
+                    if ((strpos($field, '.') === false) // Not completely safe as "." is allowed in quoted identifier
+                        && !isset($filtersMap[$field])
+                        && (strpos($field, BL_CustomGrid_Model_Grid::ATTRIBUTE_COLUMN_GRID_ALIAS) !== 0)
+                        && (strpos($field, BL_CustomGrid_Model_Grid::CUSTOM_COLUMN_GRID_ALIAS) !== 0)) {
+                        $unmappedFields[] = $field;
+                    }
+                }
+            }
+        }
+        
+        return $unmappedFields;
+    }
+    
+    /**
+     * Return each table used by the given collection, which contains one or more of the given unmapped fields,
+     * sorted by priority
+     * 
+     * @param Varien_Data_Collection_Db $collection Grid collection
+     * @param array $unmappedFields Unmapped fields
+     * @return array (keys : table aliases / values : contained unmapped fields)
+     */
+    protected function _getUnmappedFieldsMatchingTables(Varien_Data_Collection_Db $collection, array $unmappedFields)
+    {
+        $matchingTables = array();
+        
+        foreach ($collection->getSelectSql()->getPart(Zend_Db_Select::FROM) as $tableAlias => $table) {
+            $tableFields = array_keys($this->describeCollectionTable($collection, $table['tableName']));
+            $matchingFields = array_intersect($unmappedFields, $tableFields);
+            
+            if (!empty($matchingFields)) {
+                $matchingTables[$tableAlias] = array(
+                    'fields'   => $matchingFields,
+                    'priority' => ($table['joinType'] == Zend_Db_Select::FROM)
+                            ? 1 : ($table['joinType'] == Zend_Db_Select::LEFT_JOIN ? 100 : 10),
+                );
+            }
+        }
+        
+        uasort($matchingTables, array($this, '_sortMatchingTables'));
+        
+        foreach ($matchingTables as $tableAlias => $values) {
+            $matchingTables[$tableAlias] = $values['fields'];
+        }
+        
+        return $matchingTables;
+    }
+    
+    /**
+     * Map as much as possible of the given unmapped fields from the given collection,
+     * according to the given matching tables
+     * 
+     * @param Varien_Data_Collection_Db $collection Grid collection
+     * @param array $unmappedFields Unmapped fields
+     * @param array $matchingTables Tables that contain or or more of the unmapped fields, sorted by priority
+     * @return this
+     */
+    protected function _mapUnmappedFields(
+        Varien_Data_Collection_Db $collection,
+        array $unmappedFields,
+        array $matchingTables
+    ) {
+        foreach ($matchingTables as $tableAlias => $tableFields) {
+            $unmappedFields = array_diff($unmappedFields, $tableFields);
+            
+            foreach ($fields as $fieldName) {
+                $this->addFilterToCollectionMap(
+                    $collection,
+                    $adapter->quoteIdentifier($tableAlias . '.' . $fieldName),
+                    $fieldName
+                );
+            }
+            
+            if (empty($unmappedFields)) {
+                break;
+            }
+        }
+        
+        return $this;
+    }
+    
+    /**
+     * Search in the given filters for occurences that correspond to unqualified fields in the given collection,
      * and in the collection for the most relevant table containing a corresponding field,
      * to add the resulting association in the collection filters map.
      * This is used to prevent potential ambiguous filters on fields that would not have been handled by the prepare
@@ -520,72 +643,13 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
         BL_CustomGrid_Model_Grid $gridModel,
         array $filters
     ) {
-        if (!is_array($this->_getCollectionFiltersMap($collection))) {
-            return $this;
-        }
-        
-        // Search for "potentially dangerous" unmapped fields in applied filters
-        $filtersMap = (isset($filtersMap['fields']) ? $filtersMap['fields'] : array());
-        $unmappedFields = array();
-        
-        foreach ($gridBlock->getColumns() as $columnBlockId => $columnBlock) {
-            if (isset($filters[$columnBlockId])
-                && (!empty($filters[$columnBlockId]) || strlen($filters[$columnBlockId]) > 0)
-                && $columnBlock->getFilter()) {
-                $field = ($columnBlock->getFilterIndex() ? $columnBlock->getFilterIndex() : $columnBlock->getIndex());
-                
-                if ((strpos($field, '.') === false) // Not completely safe as "." is allowed in quoted identifier
-                    && !isset($filtersMap[$field])
-                    && (strpos($field, BL_CustomGrid_Model_Grid::ATTRIBUTE_COLUMN_GRID_ALIAS) !== 0)
-                    && (strpos($field, BL_CustomGrid_Model_Grid::CUSTOM_COLUMN_GRID_ALIAS) !== 0)) {
-                    $unmappedFields[] = $field;
-                }
-            }
-        }
+        $unmappedFields = $this->_getUnmappedFiltersFields($collection, $gridBlock, $filters);
         
         if (!empty($unmappedFields)) {
-            // Search for unmapped fields in each joined table
-            $adapter = $this->getCollectionAdapter($collection);
-            $matchingTables = array();
+            $matchingTables = $this->_getUnmappedFieldsMatchingTables($collection, $unmappedFields);
             
-            foreach ($collection->getSelectSql()->getPart(Zend_Db_Select::FROM) as $tableAlias => $table) {
-                $tableName = $table['tableName'];
-                
-                if (!isset($this->_describeTableCache[$tableName])) {
-                    $this->_describeTableCache[$tableName] = $adapter->describeTable($tableName);
-                }
-                
-                $matchingFields = array_intersect(
-                    $unmappedFields,
-                    array_keys($this->_describeTableCache[$tableName])
-                );
-                
-                if (!empty($matchingFields)) {
-                    $matchingTables[$tableAlias] = array(
-                        'fields'   => $matchingFields,
-                        'priority' => ($table['joinType'] == Zend_Db_Select::FROM)
-                                ? 1 : ($table['joinType'] == Zend_Db_Select::LEFT_JOIN ? 100 : 10),
-                    );
-                }
-            }
-            
-            uasort($matchingTables, array($this, '_sortMatchingTables'));
-            
-            foreach ($matchingTables as $tableAlias => $table) {
-                $fields = array_intersect($unmappedFields, $table['fields']);
-                $unmappedFields = array_diff($unmappedFields, $fields);
-                
-                foreach ($fields as $field) {
-                    $this->addFilterToCollectionMap(
-                        $collection,
-                        $adapter->quoteIdentifier($tableAlias . '.' . $field),
-                        $field
-                    );
-                }
-                
-                if (empty($unmappedFields)) {
-                    break;
-                }
+            if (!empty($matchingTables)) {
+                $this->_mapUnmappedFields($collection, $unmappedFields, $matchingTables);
             }
         }
         

@@ -114,7 +114,7 @@ class BL_CustomGrid_Model_Grid_Absorber extends BL_CustomGrid_Model_Grid_Worker
                     'index'                => $index,
                     'width'                => '',
                     'align'                => BL_CustomGrid_Model_Grid_Column::ALIGNMENT_LEFT,
-                    'header'               => Mage::helper('customgrid')->getColumnHeaderName($index),
+                    'header'               => $this->getGridModel()->getHelper()->getColumnHeaderName($index),
                     'order'                => $order,
                     'origin'               => BL_CustomGrid_Model_Grid_Column::ORIGIN_COLLECTION,
                     'is_visible'           => false,

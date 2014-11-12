@@ -20,127 +20,171 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
         $this->_init('customgrid/grid', 'grid_id');
     }
     
+    /**
+     * Return the grids table name
+     * 
+     * @return string
+     */
     protected function _getGridsTable()
     {
         return $this->getTable('customgrid/grid');
     }
     
+    /**
+     * Return the profiles table name
+     * 
+     * @return string
+     */
     protected function _getProfilesTable()
     {
         return $this->getTable('customgrid/grid_profile');
     }
     
+    /**
+     * Return the columns table name
+     * 
+     * @return string
+     */
     protected function _getColumnsTable()
     {
         return $this->getTable('customgrid/grid_column');
     }
     
+    /**
+     * Return the users table name
+     * 
+     * @return string
+     */
     protected function _getUsersTable()
     {
         return $this->getTable('customgrid/grid_user');
     }
     
+    /**
+     * Return the roles table name
+     * 
+     * @return string
+     */
     protected function _getRolesTable()
     {
         return $this->getTable('customgrid/grid_role');
     }
     
+    /**
+     * Return the roles -  profiles table name
+     * 
+     * @return string
+     */
     protected function _getRolesProfilesTable()
     {
         return $this->getTable('customgrid/role_profile');
     }
     
-    protected function _beforeSave(Mage_Core_Model_Abstract $object)
+    /**
+     * Save the current profile, the columns and the roles config from the given grid model being saved
+     * 
+     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @return this
+     */
+    protected function _afterSave(Mage_Core_Model_Abstract $gridModel)
     {
-        if (!$object->getId()) {
-            $object->setData('_blcg_is_new_grid_model', true);
+        $this->_saveProfile($gridModel);
+        $this->_saveColumns($gridModel);
+        $this->_saveRolesConfig($gridModel);
+        return $this;
+    }
+    
+    /**
+     * Save the current profile for the given grid (base profile for a new grid / current profile otherwise)
+     * 
+     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @return this
+     */
+    protected function _saveProfile(Mage_Core_Model_Abstract $gridModel)
+    {
+        if (!$gridModel->getBaseProfileId()) {
+            $write = $this->_getWriteAdapter();
+            
+            $write->insert(
+                $this->_getProfilesTable(),
+                array(
+                    'grid_id' => $gridModel->getId(),
+                    'name' => '',
+                    'is_restricted' => true,
+                )
+            );
+            
+            $baseProfileId = $write->lastInsertId();
+            
+            $write->update(
+                $this->_getGridsTable(),
+                array('base_profile_id' => $baseProfileId),
+                $write->quoteInto('grid_id = ?', $gridModel->getId())
+            );
+            
+            $gridModel->setData('base_profile_id', $baseProfileId);
+        } else {
+            $profileData = $gridModel->getProfile()->getData();
+            
+            if (isset($profileData['is_restricted'])) {
+                unset($profileData['is_restricted']);
+            }
+            
+            $this->updateProfile(
+                $gridModel->getId(),
+                $gridModel->getProfileId(),
+                $profileData,
+                false
+            );
         }
         return $this;
     }
     
-    protected function _prepareDataForSave(Mage_Core_Model_Abstract $object)
+    /**
+     * Save the columns from the given grid model
+     * 
+     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @return this
+     */
+    protected function _saveColumns(Mage_Core_Model_Abstract $gridModel)
     {
-        $data = parent::_prepareDataForSave($object);
-        
-        if (!$object->getData('_blcg_is_new_grid_model') && !$object->getProfile()->isBase()) {
-            // Non-default profile : do not save its specific values in the grids table but in the profiles one
-            $profileValues = array();
-            
-            foreach ($object->getStashedProfileKeys() as $key) {
-                if (isset($data[$key])) {
-                    $profileValues[$key] = $data[$key];
-                    unset($data[$key]);
-                } else {
-                    $profileValues[$key] = null;
-                }
-            }
-            
-            $object->setData('saveable_profile_values', $profileValues);
-        }
-        
-        return $data;
-    }
-    
-    protected function _afterSave(Mage_Core_Model_Abstract $object)
-    {
-        if (!$object->getData('_blcg_is_new_grid_model') && !$object->getProfile()->isBase()) {
-            $profileValues = $object->getData('saveable_profile_values');
-            $object->unsetData('saveable_profile_values');
-            
-            if (is_array($profileValues)) {
-                $this->updateProfile($object->getId(), $object->getProfileId(), $profileValues, false);
-            }
-        }
-        
-        $object->unsetData('_blcg_is_new_grid_model');
-        $this->_saveColumns($object);
-        $this->_saveRolesConfig($object);
-        return $this;
-    }
-    
-    protected function _saveColumns(Mage_Core_Model_Abstract $object)
-    {
-        if (!is_array($columns = $object->getData('columns'))) {
+        if (!is_array($columns = $gridModel->getData('columns'))) {
             return $this;
         }
         
-        $write  = $this->_getWriteAdapter();
+        $write = $this->_getWriteAdapter();
         $columnsTable = $this->_getColumnsTable();
         
-        $gridId = $object->getId();
-        $profileId = $object->getProfileId();
-        $profileId = ($profileId === BL_CustomGrid_Model_Grid::BASE_PROFILE_ID ? null : $profileId);
-        $columnsIds  = array();
+        $gridId = $gridModel->getId();
+        $profileId   = $gridModel->getProfileId();
+        $columnsIds  = array(-1);
         $columnsKeys = array_flip(array_keys($write->describeTable($columnsTable)));
         
         foreach ($columns as $column) {
-            $column = array_intersect_key($column->getData(), $columnsKeys);
+            /** @var $column BL_CustomGrid_Model_Grid_Column */
+            $columnValues = array_intersect_key($column->getData(), $columnsKeys);
             
-            if (isset($column['column_id']) && ($column['column_id'] > 0)) {
+            if (isset($columnValues['column_id']) && ($columnValues['column_id'] > 0)) {
                 $write->update(
                     $columnsTable,
-                    $column,
-                    $write->quoteInto('column_id = ?', $column['column_id'])
+                    $columnValues,
+                    $write->quoteInto('column_id = ?', $columnValues['column_id'])
                 );
                 
-                $columnsIds[] = $column['column_id'];
+                $columnsIds[] = $columnValues['column_id'];
             } else {
-                $column['grid_id'] = $gridId;
-                $column['profile_id'] = $profileId;
-                $write->insert($columnsTable, $column);
+                $columnValues['grid_id'] = $gridId;
+                $columnValues['profile_id'] = $profileId;
+                $write->insert($columnsTable, $columnValues);
                 $columnsIds[] = $write->lastInsertId();
             }
-        }
-        
-        if (empty($columnsIds)) {
-            $columnsIds = array(-1);
         }
         
         $write->delete(
             $columnsTable,
             $write->quoteInto('grid_id = ?', $gridId)
             . ' AND '
-            . (is_null($profileId) ? 'profile_id IS NULL' : $write->quoteInto('profile_id = ?', $profileId))
+            . $write->quoteInto('profile_id = ?', $profileId)
             . ' AND '
             . $write->quoteInto('column_id NOT IN (?)', $columnsIds)
         );
@@ -148,25 +192,32 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
         return $this;
     }
     
-    protected function _saveRolesConfig(Mage_Core_Model_Abstract $object)
+    /**
+     * Save the roles config from the given grid model
+     * 
+     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @return this
+     */
+    protected function _saveRolesConfig(Mage_Core_Model_Abstract $gridModel)
     {
-        if (!is_array($rolesConfig = $object->getData('roles_config'))) {
+        if (!is_array($rolesConfig = $gridModel->getData('roles_config'))) {
             return $this;
         }
         
         $write = $this->_getWriteAdapter();
         $rolesTable = $this->getTable('customgrid/grid_role');
         
-        $gridId = $object->getId();
+        $gridId = $gridModel->getId();
         $rolesValues = array();
         
         if (!empty($rolesConfig)) {
             foreach ($rolesConfig as $roleId => $roleConfig) {
+                /** @var $roleConfig BL_CustomGrid_Object */
                 $rolesValues[] = array(
                     'grid_id' => $gridId,
                     'role_id' => $roleId,
-                    'default_profile_id' => $roleConfig->getData('default_profile_id'),
                     'permissions' => serialize($roleConfig->getDataSetDefault('permissions', array())),
+                    'default_profile_id' => $roleConfig->getData('default_profile_id'),
                 );
             }
             
@@ -186,6 +237,13 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
         return $this;
     }
     
+    /**
+     * Return the given array of arrays, re-keyed with the sub-arrays values corresponding to the given key
+     * 
+     * @param array $values Array of arrays
+     * @param string $valueKey Key of the values to use as the new keys for the main array
+     * @return array
+     */
     protected function _arrangeResult(array $values, $valueKey)
     {
         $result = array();
@@ -200,6 +258,15 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
         return $result;
     }
     
+    /**
+     * Regroup the sub-arrays from the given array under the sub-arrays values corresponding to the given group key,
+     * possibly re-keying them with the sub-arrays values corresponding to the given value key
+     * 
+     * @param array $values Array of arrays
+     * @param string $groupKey Key of the values to use as the keys under which to regroup the corresponding sub-arrays
+     * @param string $valueKey Key of the values to use as the new keys for the new regroupment arrays, if needed
+     * @return array
+     */
     protected function _arrangeGroupedResult(array $values, $groupKey, $valueKey = null)
     {
         $result = array();
@@ -222,6 +289,12 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
         return $result;
     }
     
+    /**
+     * Return the grid profiles belonging to the given grid model ID(s)
+     * 
+     * @param int|array $gridId Grid model ID(s)
+     * @return array
+     */
     public function getGridProfiles($gridId)
     {
         $read   = $this->_getReadAdapter();
@@ -244,27 +317,34 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
         return $result;
     }
     
+    /**
+     * Return the grid columns belonging to the given grid model ID(s)
+     * 
+     * @param int|array $gridId Grid model ID(s)
+     * @return array
+     */
     public function getGridColumns($gridId, $profileId)
     {
         $read = $this->_getReadAdapter();
         
         $select = $read->select()
             ->from($this->_getColumnsTable())
-            ->where('grid_id = ?', $gridId);
-        
-        if ($profileId === BL_CustomGrid_Model_Grid::BASE_PROFILE_ID) {
-            $select->where('profile_id IS NULL');
-        } else {
-            $select->where('profile_id = ?', $profileId);
-        }
+            ->where('grid_id = ?', $gridId)
+            ->where('profile_id = ?', $profileId);
         
         return $read->fetchAll($select);
     }
     
+    /**
+     * Return the grid roles belonging to the given grid model ID(s)
+     * 
+     * @param int|array $gridId Grid model ID(s)
+     * @return array
+     */
     public function getGridRoles($gridId)
     {
-        $read = $this->_getReadAdapter();
-        $roles  = array();
+        $read  = $this->_getReadAdapter();
+        $roles = array();
         
         // Retrieve every existing admin role for each given grid
         $select = $read->select()
@@ -274,7 +354,7 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
             ->joinLeft(
                 array('cggr' => $this->_getRolesTable()),
                 '(cggr.role_id = ar.role_id) AND (cggr.grid_id = cgg.grid_id)',
-                array('permissions', 'default_profile_id', 'default_base_profile')
+                array('permissions', 'default_profile_id')
             )
             ->joinLeft(
                 array('cggp' => $this->_getProfilesTable()),
@@ -301,15 +381,11 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
             $key = $role['grid_id'] . '_' . $role['role_id'];
             
             if (!isset($roles[$key])) {
-                $defaultProfileId = $role['default_base_profile']
-                    ? BL_CustomGrid_Model_Grid::BASE_PROFILE_ID
-                    : $role['default_profile_id'];
-                
                 $roles[$key] = array(
                     'grid_id' => $role['grid_id'],
                     'role_id' => $role['role_id'],
                     'permissions' => $helper->unserializeArray($role['permissions']),
-                    'default_profile_id' => $defaultProfileId,
+                    'default_profile_id' => $role['default_profile_id'],
                     'assigned_profiles_ids' => array(),
                 );
             }
@@ -327,6 +403,12 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
         return $roles;
     }
     
+    /**
+     * Return the grid users belonging to the given grid model ID(s)
+     * 
+     * @param int|array $gridId Grid model ID(s)
+     * @return array
+     */
     public function getGridUsers($gridId)
     {
         $read   = $this->_getReadAdapter();
@@ -340,13 +422,6 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
         
         $result = $read->fetchAll($select);
         
-        foreach ($result as $key => $row) {
-            if ($row['default_base_profile']) {
-                $result[$key]['default_profile_id'] = BL_CustomGrid_Model_Grid::BASE_PROFILE_ID;
-            }
-            unset($result[$key]['default_base_profile']);
-        }
-        
         if (is_array($gridId)) {
             $result = $this->_arrangeGroupedResult($result, 'grid_id', 'user_id');
         } else {
@@ -356,6 +431,14 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
         return $result;
     }
     
+    /**
+     * Copy the grid columns from one profile to another
+     * 
+     * @param int $gridId Grid model ID
+     * @param int $fromProfileId ID of the profile from which to copy the columns
+     * @param int $toProfileId ID of the profile into which to copy the columns
+     * @return this
+     */
     protected function _copyProfileColumns($gridId, $fromProfileId, $toProfileId)
     {
         $write = $this->_getWriteAdapter();
@@ -365,27 +448,16 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
             $columnsTable,
             $write->quoteInto('grid_id = ?', $gridId)
             . ' AND '
-            . ($toProfileId === BL_CustomGrid_Model_Grid::BASE_PROFILE_ID
-                ? 'profile_id IS NULL'
-                : $write->quoteInto('profile_id = ?', $toProfileId))
+            . $write->quoteInto('profile_id = ?', $toProfileId)
         );
         
         $select = $write->select()
             ->from($columnsTable)
-            ->where('grid_id = ?', $gridId);
-        
-        if ($fromProfileId === BL_CustomGrid_Model_Grid::BASE_PROFILE_ID) {
-            $select->where('profile_id IS NULL');
-        } else {
-            $select->where('profile_id = ?', $fromProfileId);
-        }
+            ->where('grid_id = ?', $gridId)
+            ->where('profile_id = ?', $fromProfileId);
         
         $result  = $write->fetchAll($select);
         $columns = array();
-        
-        if ($toProfileId === BL_CustomGrid_Model_Grid::BASE_PROFILE_ID) {
-            $toProfileId = null;
-        }
         
         foreach ($result as $column) {
             unset($column['column_id']);
@@ -397,6 +469,13 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
         return $this;
     }
     
+    /**
+     * Assign the given profile ID to the given roles IDs
+     * 
+     * @param int $profileId ID of the profile to be assigned
+     * @param array $assignedRolesIds Roles IDs to assign
+     * @return this
+     */
     protected function _assignProfile($profileId, array $assignedRolesIds = array())
     {
         $write  = $this->_getWriteAdapter();
@@ -426,99 +505,14 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
         return $this;
     }
     
-    public function chooseProfileAsDefault($gridId, $profileId, array $values)
-    {
-        $write = $this->_getWriteAdapter();
-        $isBaseProfile = ($profileId === BL_CustomGrid_Model_Grid::BASE_PROFILE_ID);
-        $profileId = ($isBaseProfile ? null : $profileId);
-        
-        $write->beginTransaction();
-        
-        try {
-            $valuesKeys = array(
-                'users' => array(
-                    'table' => $this->_getUsersTable(),
-                    'key'   => 'user_id',
-                ),
-                'roles' => array(
-                    'table' => $this->_getRolesTable(),
-                    'key'   => 'role_id',
-                ),
-            );
-            
-            foreach ($valuesKeys as $valuesKey => $config) {
-                if (isset($values[$valuesKey]) && is_array($values[$valuesKey])) {
-                    if (!empty($values[$valuesKey])) {
-                        $insert = array();
-                        
-                        foreach ($values[$valuesKey] as $valueId) {
-                            $insert[] = array(
-                                'grid_id' => $gridId,
-                                $config['key'] => $valueId,
-                                'default_profile_id'   => $profileId,
-                                'default_base_profile' => $isBaseProfile,
-                            );
-                        }
-                        
-                        $write->insertOnDuplicate(
-                            $config['table'],
-                            $insert,
-                            array('default_profile_id', 'default_base_profile')
-                        );
-                    } else {
-                        $values[$valuesKey] = array(-1);
-                    }
-                    
-                    $write->update(
-                        $config['table'],
-                        array(
-                            'default_profile_id' => null,
-                            'default_base_profile' => 0,
-                        ),
-                        $write->quoteInto('grid_id = ?', $gridId)
-                        . ' AND '
-                        . $write->quoteInto($config['key'] . ' NOT IN (?)', $values[$valuesKey])
-                        . ' AND '
-                        . ($isBaseProfile
-                            ? 'default_profile_id IS NULL AND ' . $write->quoteInto('default_base_profile = ?', 1)
-                            : $write->quoteInto('default_profile_id = ?', $profileId))
-                    );
-                }
-            }
-            
-            if (isset($values['global'])) {
-                $table = $this->_getProfilesTable();
-                
-                if ($values['global']) {
-                    $write->update(
-                        $table,
-                        array('is_global_default' => 0),
-                        $write->quoteInto('grid_id = ?', $gridId)
-                        . ' AND '
-                        . $write->quoteInto('profile_id != ?', ($isBaseProfile ? -1 : $profileId))
-                    );
-                }
-                if (!$isBaseProfile) {
-                    $write->update(
-                        $table,
-                        array('is_global_default' => ($values['global'] ? 1 : 0)),
-                        $write->quoteInto('grid_id = ?', $gridId)
-                        . ' AND '
-                        . $write->quoteInto('profile_id = ?', $profileId)
-                    );
-                }
-            }
-            
-            $write->commit();
-            
-        } catch (Exception $e) {
-            $write->rollback();
-            throw $e;
-        }
-        
-        return $this;
-    }
-    
+    /**
+     * Copy the given profile to a new profile, with different name and assignations
+     * 
+     * @param int $gridId Grid model ID
+     * @param int $fromProfileId ID of the profile to copy
+     * @param array $values Alternative values ("name" and "is_restricted" / "assigned_to")
+     * @return int ID of the new profile
+     */
     public function copyProfileToNew($gridId, $fromProfileId, array $values)
     {
         $write = $this->_getWriteAdapter();
@@ -528,28 +522,23 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
         $write->beginTransaction();
         
         try {
-            $profileColumns = array(
-                'grid_id',
-                'default_page',
-                'default_limit',
-                'default_sort',
-                'default_dir',
-                'default_filter',
-                'name' => new Zend_Db_Expr($write->quote($values['name'])),
-                'is_restricted' => new Zend_Db_Expr($values['is_restricted'] ? 1 : 0),
-                'is_global_default' => new Zend_Db_Expr(0),
-            );
-            
-            if ($fromProfileId === BL_CustomGrid_Model_Grid::BASE_PROFILE_ID) {
-                $select = $write->select()
-                    ->from($gridsTable, $profileColumns)
-                    ->where('grid_id = ?', $gridId);
-            } else {
-                $select = $write->select()
-                    ->from($profilesTable, $profileColumns)
-                    ->where('grid_id = ?', $gridId)
-                    ->where('profile_id = ?', $fromProfileId);
-            }
+            $select = $write->select()
+                ->from(
+                    $profilesTable,
+                    array(
+                        'grid_id',
+                        'default_page',
+                        'default_limit',
+                        'default_sort',
+                        'default_dir',
+                        'default_filter',
+                        'remembered_session_params',
+                        'name' => new Zend_Db_Expr($write->quote($values['name'])),
+                        'is_restricted' => new Zend_Db_Expr($values['is_restricted'] ? 1 : 0),
+                    )
+                )
+                ->where('grid_id = ?', $gridId)
+                ->where('profile_id = ?', $fromProfileId);
             
             $values = $write->fetchRow($select);
             $toProfileId = null;
@@ -578,6 +567,15 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
         return $toProfileId;
     }
     
+    /**
+     * Copy the values from the given types from one profile to another profile
+     * 
+     * @param int $gridId Grid model ID
+     * @param int $fromProfileId ID of the profile from which to copy the values
+     * @param int $toProfileId ID of the profile into which to copy the values
+     * @param array $copiedValues Types of copied values
+     * @return this
+     */
     public function copyProfileToExisting($gridId, $fromProfileId, $toProfileId, array $copiedValues)
     {
         $write = $this->_getWriteAdapter();
@@ -602,34 +600,18 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
                 );
                 
                 if (!empty($params)) {
-                    $select = $write->select();
+                    $select = $write->select()
+                        ->from($profilesTable, $params)
+                        ->where('grid_id = ?', $gridId)
+                        ->where('profile_id = ?', $fromProfileId);
                     
-                    if ($fromProfileId === BL_CustomGrid_Model_Grid::BASE_PROFILE_ID) {
-                        $select->from($gridsTable, $params)
-                            ->where('grid_id = ?', $gridId);
-                    } else {
-                        $select->from($profilesTable, $params)
-                            ->where('grid_id = ?', $gridId)
-                            ->where('profile_id = ?', $fromProfileId);
-                    }
-                    
-                    $values = $write->fetchRow($select);
-                    
-                    if ($toProfileId === BL_CustomGrid_Model_Grid::BASE_PROFILE_ID) {
-                        $write->update(
-                            $gridsTable,
-                            $values,
-                            $write->quoteInto('grid_id = ?', $gridId)
-                        );
-                    } else {
-                        $write->update(
-                            $profilesTable,
-                            $values,
-                            $write->quoteInto('grid_id = ?', $gridId)
-                            . ' AND '
-                            . $write->quoteInto('profile_id = ?', $toProfileId)
-                        );
-                    }
+                    $write->update(
+                        $profilesTable,
+                        $write->fetchRow($select),
+                        $write->quoteInto('grid_id = ?', $gridId)
+                        . ' AND '
+                        . $write->quoteInto('profile_id = ?', $toProfileId)
+                    );
                 }
             }
             
@@ -647,6 +629,15 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
         return $this;
     }
     
+    /**
+     * Update the given profile values, and possibly assignations
+     * 
+     * @param int $gridId Grid model ID
+     * @param int $profileId Updated profile ID
+     * @param array $values New profile values (set "is_retricted" to also update assignations)
+     * @param bool $useTransaction Whether a transaction should be used
+     * @return this
+     */
     public function updateProfile($gridId, $profileId, array $values, $useTransaction = true)
     {
         $write = $this->_getWriteAdapter();
@@ -657,24 +648,19 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
         
         try {
             if (isset($values['is_restricted'])) {
-                if ($values['is_restricted']) {
-                    if (isset($values['assigned_to']) && is_array($values['assigned_to'])) {
-                        $this->_assignProfile($profileId, $values['assigned_to']);
-                    }
-                } else {
-                    $this->_assignProfile($profileId, array());
+                if ($values['is_restricted'] && isset($values['assigned_to']) && is_array($values['assigned_to'])) {
+                    $this->_assignProfile($profileId, $values['assigned_to']);
                 }
             }
-            if (array_key_exists('assigned_to', $values)) {
-                unset($values['assigned_to']);
-            }
+            
+            $profilesTable = $this->_getProfilesTable();
+            $profilesColumns = $write->describeTable($profilesTable);
+            $values = array_intersect_key($values, array_flip(array_keys($profilesColumns)));
             
             $write->update(
-                $this->_getProfilesTable(),
+                $profilesTable,
                 $values,
-                $write->quoteInto('grid_id = ?', $gridId)
-                . ' AND '
-                . $write->quoteInto('profile_id = ?', $profileId)
+                $write->quoteInto('profile_id = ?', $profileId)
             );
             
             if ($useTransaction) {
@@ -691,6 +677,118 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
         return $this;
     }
     
+    /**
+     * (Un-)Set the given profile as default for the given IDs, corresponding to either roles or users
+     * 
+     * @param string $valuesType Values type ("role" or "user")
+     * @param int $gridId Grid model ID
+     * @param int $profileId Default profile ID
+     * @param array $valuesIds Values IDs
+     * @return this
+     */
+    protected function _chooseProfileAsRoleUserDefault($valuesType, $gridId, $profileId, array $valuesIds)
+    {
+        $write = $this->_getWriteAdapter();
+        
+        $tables = array(
+            'role' => $this->_getRolesTable(),
+            'user' => $this->_getUsersTable(),
+        );
+        $idFieldNames = array(
+            'role' => 'role_id',
+            'user' => 'user_id',
+        );
+        
+        if (!empty($valuesIds)) {
+            $insert = array();
+            
+            foreach ($valuesIds as $valueId) {
+                $insert[] = array(
+                    'grid_id' => $gridId,
+                    'default_profile_id' => $profileId,
+                    $idFieldNames[$valuesType] => $valueId,
+                );
+            }
+            
+            $write->insertOnDuplicate(
+                $tables[$valuesType],
+                $insert,
+                array('default_profile_id')
+            );
+        } else {
+            $valuesIds = array(-1);
+        }
+        
+        $write->update(
+            $tables[$valuesType],
+            array('default_profile_id' => null),
+            $write->quoteInto('grid_id = ?', $gridId)
+            . ' AND '
+            . $write->quoteInto('default_profile_id = ?', $profileId)
+            . ' AND '
+            . $write->quoteInto($idFieldNames[$valuesType] . ' NOT IN (?)', $valuesIds)
+        );
+        
+        return $this;
+    }
+    
+    /**
+     * (Un-)Set the given profile as default for roles, users, and globally
+     * 
+     * @param int $gridId Grid model ID
+     * @param int $profileId Default profile ID
+     * @param array $values Values for which the given profile should be set as default ("global" / "roles" / "users")
+     * @return this
+     */
+    public function chooseProfileAsDefault($gridId, $profileId, array $values)
+    {
+        $write = $this->_getWriteAdapter();
+        $write->beginTransaction();
+        
+        try {
+            if (isset($values['users']) && is_array($values['users'])) {
+                $this->_chooseProfileAsRoleUserDefault('user', $gridId, $profileId, $values['users']);
+            }
+            if (isset($values['roles']) && is_array($values['roles'])) {
+                $this->_chooseProfileAsRoleUserDefault('role', $gridId, $profileId, $values['roles']);
+            }
+            if (isset($values['global'])) {
+                $table = $this->_getGridsTable();
+                
+                if ($values['global']) {
+                    $write->update(
+                        $table,
+                        array('global_default_profile_id' => $profileId),
+                        $write->quoteInto('grid_id = ?', $gridId)
+                    );
+                } else {
+                    $write->update(
+                        $table,
+                        array('global_default_profile_id' => null),
+                        $write->quoteInto('grid_id = ?', $gridId)
+                        . ' AND '
+                        . $write->quoteInto('global_default_profile_id = ?', $profileId)
+                    );
+                }
+            }
+            
+            $write->commit();
+            
+        } catch (Exception $e) {
+            $write->rollback();
+            throw $e;
+        }
+        
+        return $this;
+    }
+    
+    /**
+     * Delete the given profile
+     * 
+     * @param int $gridId Grid model ID
+     * @param int $profileId Deleted profile ID
+     * @return this
+     */
     public function deleteProfile($gridId, $profileId)
     {
         $write = $this->_getWriteAdapter();

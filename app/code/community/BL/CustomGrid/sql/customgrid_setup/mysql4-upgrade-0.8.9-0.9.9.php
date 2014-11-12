@@ -220,7 +220,7 @@ $connection->addConstraint(
     'profile_id',
     $tables['grid_profile'],
     'profile_id',
-    'cascade'
+    'CASCADE'
 );
 
 /**
@@ -248,7 +248,7 @@ $connection->changeColumn(
 $connection->addColumn(
     $tables['grid_profile'],
     'is_restricted',
-    'tinyint(1) unsigned NOT NULL default 1'
+    'tinyint(1) unsigned NOT NULL default 0'
 );
 
 $connection->addColumn(

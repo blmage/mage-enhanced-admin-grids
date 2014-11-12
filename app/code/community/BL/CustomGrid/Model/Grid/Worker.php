@@ -35,8 +35,18 @@ class BL_CustomGrid_Model_Grid_Worker extends BL_CustomGrid_Object
     {
         if ((!$gridModel = $this->_getData('grid_model'))
             || (!$gridModel instanceof BL_CustomGrid_Model_Grid)) {
-            Mage::throwException($this->_getBaseHelper()->__('Invalid grid model'));
+            Mage::throwException(Mage::helper('customgrid')->__('Invalid grid model'));
         }
         return $gridModel;
+    }
+    
+    /**
+     * Return the current grid profile
+     * 
+     * @return BL_CustomGrid_Model_Grid_Profile
+     */
+    public function getGridProfile()
+    {
+        return $this->getGridModel()->getProfile();;
     }
 }
