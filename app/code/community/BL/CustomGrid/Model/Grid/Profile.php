@@ -451,6 +451,18 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
     }
     
     /**
+     * Return whether the given values correspond to a restricted profile
+     * 
+     * @param array $values Profile values
+     * @return bool
+     */
+    protected function _isRestrictedProfileValues(array $values)
+    {
+        return (isset($values['is_restricted']) && $values['is_restricted'])
+            && (isset($values['assigned_to']) && is_array($values['assigned_to']) && !empty($values['assigned_to']));
+    }
+    
+    /**
      * Copy this profile to a new one, and return the new profile ID
      *
      * @param array $newValues New profile values
@@ -471,29 +483,25 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
         $assignedRolesIds = null;
         
         if ($gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_ASSIGN_PROFILES)) {
-            if ((isset($values['is_restricted']) && $values['is_restricted'])
-                && (isset($values['assigned_to']) && is_array($values['assigned_to']))) {
-                $assignedRolesIds = $values['assigned_to'];
+            if ($this->_isRestrictedProfileValues($value)) {
+                $assignedRolesIds = array_unique($values['assigned_to']);
             }
         } elseif ($gridModel->getProfilesDefaultRestricted()) {
             $assignedRolesIds = $gridModel->getProfilesDefaultAssignedTo();
-            $sessionRoleId  = $gridModel->getSessionRole()->getId();
-            $creatorRoleKey = array_search(
+            $creatorRoleIdKey = array_search(
                 BL_CustomGrid_Model_System_Config_Source_Admin_Role::CREATOR_ROLE,
                 $assignedRolesIds
             );
             
-            if ($creatorRoleKey !== false) {
-                unset($assignedRolesIds[$creatorRoleKey]);
-                
-                if (!in_array($sessionRoleId, $assignedRolesIds)) {
-                    $assignedRolesIds[] = $sessionRoleId;
-                }
+            if ($creatorRoleIdKey !== false) {
+                unset($assignedRolesIds[$creatorRoleIdKey]);
+                $assignedRolesIds[] = $gridModel->getSessionRole()->getId();
+                $assignedRolesIds = array_unique($assignedRolesIds);
             }
         }
         
-        $values['is_restricted'] = (is_array($assignedRolesIds) && !empty($assignedRolesIds));
-        $values['assigned_to'] = ($values['is_restricted'] ? $assignedRolesIds : null);
+        $values['is_restricted'] = !is_null($assignedRolesIds);
+        $values['assigned_to'] = $assignedRolesIds;
         
         $newProfileId = $gridModel->getResource()->copyProfileToNew($gridModel->getId(), $profileId, $values);
         $gridModel->resetProfilesValues();
@@ -704,10 +712,8 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
         $editableKeys = array('is_restricted', 'assigned_to');
         $values = array_intersect_key($values, array_flip($editableKeys));
         
-        if ((isset($values['is_restricted']) && $values['is_restricted'])
-            && (isset($values['assigned_to']) && is_array($values['assigned_to']))) {
-            $values['is_restricted'] = (is_array($values['assigned_to']) && !empty($values['assigned_to']));
-            $values['assigned_to'] = ($values['is_restricted'] ? $values['assigned_to'] : null);
+        if ($this->_isRestrictedProfileValues($values)) {
+            $values['is_restricted'] = true;
         } else {
             $values['is_restricted'] = false;
             $values['assigned_to'] = null;

@@ -154,7 +154,6 @@ class BL_CustomGrid_Block_Grid_Form_Default_Params extends BL_CustomGrid_Block_G
     
     protected function _addAppliableParamsFieldsToForm(Varien_Data_Form $form)
     {
-        $gridModel = $this->getGridModel();
         $dependenceBlock = $this->getDependenceBlock();
         $defaultParams   = (array) $this->getDataSetDefault('default_params', array());
         $gridParams  = Mage::getSingleton('customgrid/system_config_source_grid_param')->toOptionArray(false);

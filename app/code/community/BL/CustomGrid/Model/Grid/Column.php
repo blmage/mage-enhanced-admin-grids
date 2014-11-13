@@ -366,7 +366,7 @@ class BL_CustomGrid_Model_Grid_Column extends BL_CustomGrid_Object
         }
         
         $this->setGridModel($gridModel);
-        $gridModel->getColumnIdsByOrigin();
+        $gridModel->getColumnBlockIdsByOrigin();
         $allowEditable = $gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_CHOOSE_EDITABLE_COLUMNS);
         $availableAttributeCodes = $gridModel->getAvailableAttributesCodes();
         
@@ -399,7 +399,7 @@ class BL_CustomGrid_Model_Grid_Column extends BL_CustomGrid_Object
         
         $helper  = $gridModel->getHelper();
         $columns = $gridModel->getColumns();
-        $originalBlockIds = $gridModel->getColumnIdsByOrigin(self::ORIGIN_CUSTOM);
+        $originalBlockIds = $gridModel->getColumnBlockIdsByOrigin(self::ORIGIN_CUSTOM);
         
         $availableCustomColumns = $gridModel->getAvailableCustomColumns();
         $availableCodes = array_keys($availableCustomColumns);

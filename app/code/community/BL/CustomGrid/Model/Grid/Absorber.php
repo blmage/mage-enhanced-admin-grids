@@ -40,7 +40,7 @@ class BL_CustomGrid_Model_Grid_Absorber extends BL_CustomGrid_Model_Grid_Worker
     protected function _getGridColumnsMainValues()
     {
         $gridModel = $this->getGridModel();
-        $gridColumnBlockIds = $gridModel->getColumnIdsByOrigin(BL_CustomGrid_Model_Grid_Column::ORIGIN_GRID);
+        $gridColumnBlockIds = $gridModel->getColumnBlockIdsByOrigin(BL_CustomGrid_Model_Grid_Column::ORIGIN_GRID);
         $gridColumnIndices  = array();
         $columns = $gridModel->getColumns();
         
@@ -183,7 +183,7 @@ class BL_CustomGrid_Model_Grid_Absorber extends BL_CustomGrid_Model_Grid_Worker
     {
         $gridModel = $this->getGridModel();
         $columns   = $gridModel->getColumns();
-        $columnBlockIds = $gridModel->getColumnIdsByOrigin($origin);
+        $columnBlockIds = $gridModel->getColumnBlockIdsByOrigin($origin);
         
         foreach ($columnBlockIds as $columnBlockId) {
             if (isset($columns[$columnBlockId]) && !in_array($columnBlockId, $foundBlockIds)) {
@@ -289,7 +289,7 @@ class BL_CustomGrid_Model_Grid_Absorber extends BL_CustomGrid_Model_Grid_Worker
         $foundBlockIds = array();
         
         if ($gridModel->canHaveAttributeColumns()) {
-            $columnBlockIds = $gridModel->getColumnIdsByOrigin(BL_CustomGrid_Model_Grid_Column::ORIGIN_ATTRIBUTE);
+            $columnBlockIds = $gridModel->getColumnBlockIdsByOrigin(BL_CustomGrid_Model_Grid_Column::ORIGIN_ATTRIBUTE);
             $attributeCodes = $gridModel->getAvailableAttributesCodes();
             $columns = $gridModel->getColumns();
             
@@ -317,7 +317,7 @@ class BL_CustomGrid_Model_Grid_Absorber extends BL_CustomGrid_Model_Grid_Worker
         $foundBlockIds = array();
         
         if ($gridModel->canHaveCustomColumns()) {
-            $columnBlockIds = $gridModel->getColumnIdsByOrigin(BL_CustomGrid_Model_Grid_Column::ORIGIN_CUSTOM);
+            $columnBlockIds = $gridModel->getColumnBlockIdsByOrigin(BL_CustomGrid_Model_Grid_Column::ORIGIN_CUSTOM);
             $customColumnCodes = $gridModel->getAvailableCustomColumnsCodes(true);
             $columns = $gridModel->getColumns();
             

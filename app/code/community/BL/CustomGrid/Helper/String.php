@@ -74,7 +74,7 @@ class BL_CustomGrid_Helper_String extends Mage_Core_Helper_Abstract
             $preparedLength = $truncateLength;
             
             if (!$breakWords) {
-                $preparedString = preg_replace('/\s+?(\S+)?$/u', '', $this->substr($string, 0, $length + 1));
+                $preparedString = preg_replace('/\s+?(\S+)?$/u', '', $this->substr($string, 0, $truncateLength + 1));
                 $preparedLength = $this->strlen($preparedString);
             }
             

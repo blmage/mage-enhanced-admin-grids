@@ -795,13 +795,11 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
         $isFilterRememberable = false;
         
         foreach ($this->getBlockVarNames() as $gridParam => $varName) {
-            $isRememberedValue   = isset($rememberedValues[$gridParam]);
-            $isRememberableValue = false;
+            $isRememberedValue = isset($rememberedValues[$gridParam]);
             
             if ($sessionKey = $this->getBlockParamSessionKey($varName)) {
                 if (in_array($gridParam, $rememberableParams) && $session->hasData($sessionKey)) {
                     $rememberableValues[$gridParam] = $session->getData($sessionKey);
-                    $isRememberableValue  = true;
                     $isFilterRememberable = ($varName == self::GRID_PARAM_FILTER);
                 }
                 if ($isRememberedValue) {
@@ -1132,14 +1130,14 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     }
     
     /**
-     * Return columns IDs by column origin
+     * Return column block IDs by column origin
      *
-     * @return int[]
+     * @return string[]
      */
-    protected function _getColumnIdsByOrigin()
+    protected function _getColumnBlockIdsByOrigin()
     {
         return $this->getDataSetDefault(
-            'column_ids_by_origin',
+            'column_block_ids_by_origin',
             array(
                 BL_CustomGrid_Model_Grid_Column::ORIGIN_GRID       => array(),
                 BL_CustomGrid_Model_Grid_Column::ORIGIN_COLLECTION => array(),
@@ -1150,14 +1148,14 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     }
     
     /**
-     * Return columns IDs by column origin
+     * Return column block IDs by column origin
      *
      * @param string $origin If specified, only the column block IDs from this origin will be returned
-     * @return int[]
+     * @return string[]
      */
-    public function getColumnIdsByOrigin($origin = null)
+    public function getColumnBlockIdsByOrigin($origin = null)
     {
-        $originIds = $this->_getColumnIdsByOrigin();
+        $originIds = $this->_getColumnBlockIdsByOrigin();
         return (is_null($origin) ? $originIds : (isset($originIds[$origin]) ? $originIds[$origin] : array()));
     }
     
@@ -1223,7 +1221,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     public function addColumn(array $data)
     {
         $this->getColumns();
-        $this->getColumnIdsByOrigin();
+        $this->getColumnBlockIdsByOrigin();
         $data['grid_model'] = $this;
         $blockId = $data['block_id'];
         $this->_data['columns'][$blockId] = Mage::getModel('customgrid/grid_column', $data);
@@ -1247,7 +1245,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
             $column->addData($data);
             
             if (isset($data['origin']) && ($data['origin'] != $previousOrigin)) {
-                $this->getColumnIdsByOrigin();
+                $this->getColumnBlockIdsByOrigin();
                 $previousKey = array_search($columnBlockId, $this->_data['column_ids_by_origin'][$previousOrigin]);
                 
                 if ($previousKey !== false) {
@@ -1274,7 +1272,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     public function removeColumn($columnBlockId)
     {
         if ($column = $this->getColumnByBlockId($columnBlockId)) {
-            $this->getColumnIdsByOrigin();
+            $this->getColumnBlockIdsByOrigin();
             unset($this->_data['columns'][$columnBlockId]);
             
             $origin = $column->getOrigin();
@@ -1346,7 +1344,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
                 $columns = $typeModel->applyEditConfigsToColumns($this->getBlockType(), $columns);
             }
             if ($withCustomColumns) {
-                $columnBlockIds = $this->getColumnIdsByOrigin(BL_CustomGrid_Model_Grid_Column::ORIGIN_CUSTOM);
+                $columnBlockIds = $this->getColumnBlockIdsByOrigin(BL_CustomGrid_Model_Grid_Column::ORIGIN_CUSTOM);
                 $customColumns  = $this->getAvailableCustomColumns(false, true);
                 
                 foreach ($columnBlockIds as $blockId) {
@@ -1455,7 +1453,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     public function getColumnIndexFromCode($code, $origin, $position = null)
     {
         $columns = $this->getColumns();
-        $originIds = $this->getColumnIdsByOrigin();
+        $originIds = $this->getColumnBlockIdsByOrigin();
         
         if (($origin == BL_CustomGrid_Model_Grid_Column::ORIGIN_ATTRIBUTE)
             || ($origin == BL_CustomGrid_Model_Grid_Column::ORIGIN_CUSTOM)) {
@@ -1634,7 +1632,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
         
         $codes = array();
         $columns = $this->getColumns();
-        $columnBlockIds = $this->getColumnIdsByOrigin(BL_CustomGrid_Model_Grid_Column::ORIGIN_CUSTOM);
+        $columnBlockIds = $this->getColumnBlockIdsByOrigin(BL_CustomGrid_Model_Grid_Column::ORIGIN_CUSTOM);
         
         foreach ($columnBlockIds as $blockId) {
             $parts = explode('/', $columns[$blockId]->getIndex());
