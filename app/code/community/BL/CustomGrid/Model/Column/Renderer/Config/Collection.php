@@ -17,6 +17,6 @@ class BL_CustomGrid_Model_Column_Renderer_Config_Collection extends BL_CustomGri
 {
     public function getConfigType()
     {
-        return BL_CustomGrid_Model_Config::TYPE_COLUMN_RENDERERS_COLLECTION;
+        return BL_CustomGrid_Model_Config_Manager::TYPE_COLUMN_RENDERERS_COLLECTION;
     }
 }

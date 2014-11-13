@@ -18,7 +18,7 @@ class BL_CustomGrid_Model_Resource_Transaction extends Mage_Core_Model_Resource_
     /**
      * Parameterized callbacks array
      *
-     * @var array
+     * @var callback[]
      */
     protected $_parameterizedCommitCallbacks = array();
     

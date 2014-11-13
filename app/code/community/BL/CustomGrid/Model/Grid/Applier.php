@@ -222,8 +222,8 @@ class BL_CustomGrid_Model_Grid_Applier extends BL_CustomGrid_Model_Grid_Worker
      * 
      * @param BL_CustomGrid_Model_Grid_Column $column Grid column
      * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
-     * @param array $attributes Available attributes
-     * @param array $addedAttributes Attributes that were already added (values format: "[code]_[store_id]")
+     * @param Mage_Eav_Model_Entity_Attribute[] $attributes Available attributes
+     * @param string[] $addedAttributes Attributes that were already added (values format: "[code]_[store_id]")
      * @return bool
      */
     protected function _prepareExternalGridBlockColumn(
@@ -321,7 +321,7 @@ class BL_CustomGrid_Model_Grid_Applier extends BL_CustomGrid_Model_Grid_Worker
      * Arrange the given grid block's columns according to the given sorted column block IDs
      * 
      * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
-     * @param array $sortedBlockIds Sorted column block IDs
+     * @param string[] $sortedBlockIds Sorted column block IDs
      * @return this
      */
     protected function _arrangeGridBlockColumns(Mage_Adminhtml_Block_Widget_Grid $gridBlock, array $sortedBlockIds)
@@ -743,13 +743,80 @@ class BL_CustomGrid_Model_Grid_Applier extends BL_CustomGrid_Model_Grid_Worker
     }
     
     /**
+     * Return whether the given behaviour is dedicated to the default filter values
+     * 
+     * @param string $behaviour Default parameter behaviour
+     * @return bool
+     */
+    protected function _isFilterDefaultParamBehaviour($behaviour)
+    {
+        return ($behaviour == BL_CustomGrid_Model_Grid::DEFAULT_PARAM_MERGE_DEFAULT)
+            || ($behaviour == BL_CustomGrid_Model_Grid::DEFAULT_PARAM_MERGE_BASE_CUSTOM)
+            || ($behaviour == BL_CustomGrid_Model_Grid::DEFAULT_PARAM_MERGE_BASE_ORIGINAL);
+    }
+    
+    /**
+     * Return appliable default filter value depending on the given block and custom values, and the given behaviour
+     *
+     * @param mixed $blockValue Base value
+     * @param mixed $customValue User-defined value
+     * @param bool $fromCustomSetter Whether this function is called from a setter applying user-defined values
+     * @param string $behaviour Appliable behaviour
+     * @return mixed
+     */
+    protected function _getGridBlockDefaultFilterValue($blockValue, $customValue, $fromCustomSetter, $behaviour)
+    {
+        $blockFilters  = (is_array($blockValue)  ? $blockValue  : array());
+        $customFilters = (is_array($customValue) ? $customValue : array());
+        
+        if ($behaviour == BL_CustomGrid_Model_Grid::DEFAULT_PARAM_MERGE_BASE_CUSTOM) {
+            $value = array_merge($customFilters, $blockFilters);
+        } elseif ($behaviour == BL_CustomGrid_Model_Grid::DEFAULT_PARAM_MERGE_BASE_ORIGINAL) {
+            $value = array_merge($blockFilters, $customFilters);
+        } elseif ($fromCustomSetter) {
+            $value = array_merge($blockFilters, $customFilters);
+        } else {
+            $value = array_merge($customFilters, $blockFilters);
+        }
+        
+        return $value;
+    }
+    
+    /**
+     * Return appliable default parameter value depending on the given block and custom values, and the given behaviour
+     *
+     * @param string $type Parameter type (eg "limit" or "filter")
+     * @param mixed $blockValue Base value
+     * @param mixed $customValue User-defined value
+     * @param bool $fromCustomSetter Whether this function is called from a setter applying user-defined values
+     * @param string $behaviour Appliable behaviour
+     * @return mixed
+     */
+    protected function _getGridBlockDefaultParamValue($type, $blockValue, $customValue, $fromCustomSetter, $behaviour)
+    {
+        $value = $blockValue;
+        
+        if (($behaviour == BL_CustomGrid_Model_Grid::DEFAULT_PARAM_FORCE_CUSTOM) && !is_null($customValue)) {
+            $value = $customValue;
+        } elseif ($this->_isFilterDefaultParamBehaviour($behaviour)
+            && ($type == BL_CustomGrid_Model_Grid::GRID_PARAM_FILTER)) {
+            $value = $this->_getGridBlockDefaultFilterValue($blockValue, $customValue, $fromCustomSetter, $behaviour);
+        } elseif (($behaviour == BL_CustomGrid_Model_Grid::DEFAULT_PARAM_DEFAULT)
+            && (!is_null($customValue) && $fromCustomSetter)) {
+            $value = $customValue;
+        }
+        
+        return $value;
+    }
+    
+    /**
      * Return appliable default parameter value depending on the available values and the defined behaviour
      *
      * @param string $type Parameter type (eg "limit" or "filter")
      * @param mixed $blockValue Base value
      * @param mixed $customValue User-defined value
      * @param bool $fromCustomSetter Whether this function is called from a setter applying user-defined values
-     * @param mixed $originalValue Current value (to be replaced)
+     * @param mixed $originalValue Current value (that is being replaced)
      * @return mixed
      */
     public function getGridBlockDefaultParamValue(
@@ -759,7 +826,6 @@ class BL_CustomGrid_Model_Grid_Applier extends BL_CustomGrid_Model_Grid_Worker
         $fromCustomSetter = false,
         $originalValue = null
     ) {
-        $value = $blockValue;
         $gridModel = $this->getGridModel();
         
         if (!$fromCustomSetter) {
@@ -773,40 +839,12 @@ class BL_CustomGrid_Model_Grid_Applier extends BL_CustomGrid_Model_Grid_Worker
         if (!$behaviour = $gridModel->getData('default_' . $type . '_behaviour')) {
             $behaviour = $gridModel->getConfigHelper()->geDefaultParameterBehaviour($type);
         }
-        if ($behaviour == BL_CustomGrid_Model_Grid::DEFAULT_PARAM_FORCE_CUSTOM) {
-            if (!is_null($customValue)) {
-                $value = $customValue;
-            }
-        } elseif ($behaviour == BL_CustomGrid_Model_Grid::DEFAULT_PARAM_FORCE_ORIGINAL) {
-            if (is_null($blockValue) && $fromCustomSetter) {
-                $value = $blockValue;
-            }
-        } elseif (($type == BL_CustomGrid_Model_Grid::GRID_PARAM_FILTER)
-                  && (($behaviour == BL_CustomGrid_Model_Grid::DEFAULT_PARAM_MERGE_DEFAULT)
-                      || ($behaviour == BL_CustomGrid_Model_Grid::DEFAULT_PARAM_MERGE_BASE_CUSTOM)
-                      || ($behaviour == BL_CustomGrid_Model_Grid::DEFAULT_PARAM_MERGE_BASE_ORIGINAL))) {
-            $blockFilters  = (is_array($blockValue)  ? $blockValue  : array());
-            $customFilters = (is_array($customValue) ? $customValue : array());
-            
-            if ($behaviour == BL_CustomGrid_Model_Grid::DEFAULT_PARAM_MERGE_BASE_CUSTOM) {
-                $value = array_merge($customFilters, $blockFilters);
-            } elseif ($behaviour == BL_CustomGrid_Model_Grid::DEFAULT_PARAM_MERGE_BASE_ORIGINAL) {
-                $value = array_merge($blockFilters, $customFilters);
-            } elseif ($fromCustomSetter) {
-                $value = array_merge($blockFilters, $customFilters);
-            } else {
-                $value = array_merge($customFilters, $blockFilters);
-            }
-        } else {
-            if (!is_null($customValue) && $fromCustomSetter) {
-                $value = $customValue;
-            }
-        }
         
-        if ($type == BL_CustomGrid_Model_Grid::GRID_PARAM_LIMIT) {
-            if (!in_array($value, $gridModel->getAppliablePaginationValues())) {
-                $value = (is_null($originalValue) ? $blockValue : $originalValue);
-            }
+        $value = $this->_getGridBlockDefaultParamValue($type, $blockValue, $customValue, $fromCustomSetter, $behaviour);
+        
+        if (($type == BL_CustomGrid_Model_Grid::GRID_PARAM_LIMIT)
+            && !in_array($value, $gridModel->getAppliablePaginationValues())) {
+            $value = (is_null($originalValue) ? $blockValue : $originalValue);
         }
         
         return $value;

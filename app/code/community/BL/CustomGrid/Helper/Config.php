@@ -202,7 +202,7 @@ class BL_CustomGrid_Helper_Config extends Mage_Core_Helper_Abstract
     /**
      * Getter for the config value "General" > "Use drag'n'drop for sorting columns"
      *
-     * @return array
+     * @return bool
      */
     public function getSortWithDnd()
     {
@@ -252,7 +252,7 @@ class BL_CustomGrid_Helper_Config extends Mage_Core_Helper_Abstract
     /**
      * Getter for the config value "Customization Parameters - Default Values" > "Custom Pagination Values"
      *
-     * @return array
+     * @return int[]
      */
     public function getPaginationValues()
     {
@@ -347,7 +347,7 @@ class BL_CustomGrid_Helper_Config extends Mage_Core_Helper_Abstract
     /**
      * Getter for the config value "Profiles - Default Values" > "Remembered Session Parameters"
      *
-     * @return array
+     * @return string[]
      */
     public function getProfilesRememberedSessionParams()
     {
@@ -361,7 +361,7 @@ class BL_CustomGrid_Helper_Config extends Mage_Core_Helper_Abstract
     /**
      * Getter for the config value "Profiles - Default Values" > "Assigned To"
      *
-     * @return array
+     * @return int[]
      */
     public function getProfilesDefaultAssignedTo()
     {

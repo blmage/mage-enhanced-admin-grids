@@ -32,18 +32,14 @@ class BL_CustomGrid_Model_Grid_Rewriter_Config extends BL_CustomGrid_Object
             }
             
             $rewriter->setId($code)
-                ->setPriority(isset($config['priority']) ? (int) $config['priority'] : 0)
-                ->setDisplayErrors(isset($config['display_errors']) ? (bool) $config['display_errors'] : false)
-                ->setDisplayErrorsIfSuccess(false)
-                ->setLogErrors(isset($config['log_errors']) ? (bool) $config['log_errors'] : false)
-                ->setLogErrorsIfSuccess(false);
-            
-            if ($rewriter->getDisplayErrors() && isset($config['display_errors_if_success'])) {
-                $rewriter->setDisplayErrorsIfSuccess((bool) $config['display_errors_if_success']);
-            }
-            if ($rewriter->getLogErrors() && isset($config['log_errors_if_success'])) {
-                $rewriter->setLogErrorsIfSuccess((bool) $config['log_errors_if_success']);
-            }
+                ->addData($config)
+                ->setPriority((int) $rewriter->getDataSetDefault('priority', 0))
+                ->setLogErrors((bool) $rewriter->getData('log_errors'))
+                ->setDisplayErrors((bool) $rewriter->getData('display_errors'))
+                ->setLogErrorsIfSuccess($rewriter->getLogErrors() && $rewriter->getData('log_errors_if_success'))
+                ->setDisplayErrorsIfSuccess(
+                    $rewriter->getDisplayErrors() && $rewriter->getData('display_errors_if_success')
+                );
             
             $this->setData($dataKey, $rewriter);
         }

@@ -192,7 +192,6 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
             }
             
             foreach ($profiles as $key => $profile) {
-                /** @var $profile BL_CustomGrid_Model_Grid_Profile */
                 $profiles[$key] = array(
                     'id'        => $profile->getId(),
                     'name'      => $profile->getName(),

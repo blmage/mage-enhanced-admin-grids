@@ -15,18 +15,39 @@
 
 abstract class BL_CustomGrid_Model_Column_Renderer_Abstract extends BL_CustomGrid_Object
 {
+    /**
+     * Backwards compatibility map for parameters keys
+     * 
+     * @var array
+     */
     protected $_backwardsMap = array();
     
+    /**
+     * Return the base helper
+     * 
+     * @return BL_CustomGrid_Helper_Data
+     */
     protected function _getHelper()
     {
         return Mage::helper('customgrid');
     }
     
+    /**
+     * Return the config helper
+     * 
+     * @return BL_CustomGrid_Helper_Config
+     */
     protected function _getConfigHelper()
     {
         return Mage::helper('customgrid/config');
     }
     
+    /**
+     * Set the user-defined values for the renderer parameters
+     * 
+     * @param array $values User values
+     * @return this
+     */
     public function setValues(array $values)
     {
         $this->setData('values', $values);

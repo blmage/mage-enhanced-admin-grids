@@ -25,6 +25,11 @@ class BL_CustomGrid_Block_Grid_Form_Default_Params extends BL_CustomGrid_Block_G
         return false;
     }
     
+    protected function _getGridColumnHeader($columnBlockId)
+    {
+        return (($header = $this->getGridModel()->getColumnHeader($columnBlockId)) ? $header : $columnBlockId);
+    }
+    
     protected function _isPossiblyEmptyFilterValue($value)
     {
         $isEmpty = false;
@@ -41,23 +46,32 @@ class BL_CustomGrid_Block_Grid_Form_Default_Params extends BL_CustomGrid_Block_G
         return $isEmpty;
     }
     
-    protected function _renderDefaultFilterValue($value, $isAppliable, BL_CustomGrid_Model_Grid $gridModel)
+    protected function _renderDefaultFilterSubValue($columnBlockId, $filterValue, $isAppliable)
     {
-        if ($isAppliable) {
-            if (!is_array($value)) {
-                $value = $gridModel->getApplier()->decodeGridFiltersString($value);
-            }
+        if (!$isAppliable && is_array($filterValue) && isset($filterValue['value'])) {
+            $filterValue = $filterValue['value'];
         }
+        
+        $value  = $this->__('column "%s"', $this->_getGridColumnHeader($columnBlockId));
+        
+        if ($this->_isPossiblyEmptyFilterValue($filterValue)) {
+            $value .= ' ' . $this->__('(possibly empty)');
+        }
+        
+        return $value;
+    }
+    
+    protected function _renderDefaultFilterValue($value, $isAppliable)
+    {
+        if ($isAppliable && !is_array($value)) {
+            $value = $this->getGridModel()->getApplier()->decodeGridFiltersString($value);
+        }
+        
         if (is_array($value) || is_array($value = @unserialize($value))) {
             $values = array();
             
             foreach ($value as $columnBlockId => $filterValue) {
-                if (!$isAppliable && is_array($filterValue) && isset($filterValue['value'])) {
-                    $filterValue = $filterValue['value'];
-                }
-                $header = (($header = $gridModel->getColumnHeader($columnBlockId)) ? $header : $columnBlockId);
-                $values[] = $this->__('column "%s"', $header)
-                    . ($this->_isPossiblyEmptyFilterValue($filterValue) ? ' ' . $this->__('(possibly empty)') : '');
+                $values[] = $this->_renderDefaultFilterSubValue($columnBlockId, $filterValue, $isAppliable);
             }
             
             if (empty($values)) {
@@ -66,20 +80,21 @@ class BL_CustomGrid_Block_Grid_Form_Default_Params extends BL_CustomGrid_Block_G
                 $value = '<br />' . implode('<br />', $values);
             }
         }
+        
         return $value;
     }
     
-    protected function _renderDefaultParamValue($type, $value, $isAppliable, BL_CustomGrid_Model_Grid $gridModel)
+    protected function _renderDefaultParamValue($type, $value, $isAppliable)
     {
         if (($type == BL_CustomGrid_Model_Grid::GRID_PARAM_PAGE)
             || ($type == BL_CustomGrid_Model_Grid::GRID_PARAM_LIMIT)) {
             $value = (int) $value;
         } elseif ($type == BL_CustomGrid_Model_Grid::GRID_PARAM_SORT) {
-            $value = $this->__('column "%s"', (($header = $gridModel->getColumnHeader($value)) ? $header : $value));
+            $value = $this->__('column "%s"', $this->_getGridColumnHeader($value));
         } elseif ($type == BL_CustomGrid_Model_Grid::GRID_PARAM_DIR) {
             $value = $this->__(strtolower($type) == 'asc' ? 'ascending' : 'descending');
         } elseif ($type == BL_CustomGrid_Model_Grid::GRID_PARAM_FILTER) {
-            $value = $this->_renderDefaultFilterValue($value, $isAppliable, $gridModel);
+            $value = $this->_renderDefaultFilterValue($value, $isAppliable);
         }
         return $value;
     }
@@ -104,7 +119,7 @@ class BL_CustomGrid_Block_Grid_Form_Default_Params extends BL_CustomGrid_Block_G
         foreach ($gridParams as $gridParam) {
             if (!is_null($currentValue = $gridProfile->getData('default_' . $gridParam['value']))) {
                 $hasNoDefaultParam = false;
-                $renderedValue = $this->_renderDefaultParamValue($gridParam['value'], $currentValue, false, $gridModel);
+                $renderedValue = $this->_renderDefaultParamValue($gridParam['value'], $currentValue, false);
                 
                 $field = $fieldset->addField(
                     'remove_' . $gridParam['value'],
@@ -158,8 +173,7 @@ class BL_CustomGrid_Block_Grid_Form_Default_Params extends BL_CustomGrid_Block_G
                 $renderedValue = $this->_renderDefaultParamValue(
                     $gridParam['value'],
                     $defaultParams[$gridParam['value']],
-                    true,
-                    $gridModel
+                    true
                 );
                 
                 $field = $fieldset->addField(

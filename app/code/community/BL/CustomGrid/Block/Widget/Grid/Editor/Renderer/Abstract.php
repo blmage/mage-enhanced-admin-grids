@@ -26,5 +26,10 @@ abstract class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Abstract extends 
         return $this->_getRenderedValue();
     }
     
+    /**
+     * Return the rendered value
+     * 
+     * @return string
+     */
     abstract protected function _getRenderedValue();
 }

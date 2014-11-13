@@ -122,39 +122,16 @@ class BL_CustomGrid_Model_Custom_Column_Config
     
     protected function _loadXmlElementCustomizationParams(Varien_Simplexml_Element $xmlElement)
     {
+        /** @var $configHelper BL_CustomGrid_Helper_Xml_Config */
+        $configHelper = Mage::helper('customgrid/xml_config');
         $params = array();
-        $sortOrder = 0;
         
         foreach ($xmlElement->asCanonicalArray() as $key => $data) {
             if (is_array($data)) {
                 $data['sort_order'] = (isset($data['sort_order']) ? (int) $data['sort_order'] : 'top');
-                $values = array();
-                
-                if (isset($data['values']) && is_array($data['values'])) {
-                    foreach ($data['values'] as $value) {
-                        if (is_array($value) && isset($value['value']) && isset($value['label'])) {
-                            $values[] = $value;
-                        }
-                    }
-                }
-                
-                $data['values'] = $values;
-                
-                if (isset($data['helper_block'])) {
-                    $helperBlock = new BL_CustomGrid_Object();
-                    
-                    if (isset($data['helper_block']['data']) && is_array($data['helper_block']['data'])) {
-                        $helperBlock->addData($data['helper_block']['data']);
-                    }
-                    if (isset($data['helper_block']['type'])) {
-                        $helperBlock->setType($data['helper_block']['type']);
-                    }
-                    
-                    $data['helper_block'] = $helperBlock;
-                }
-                
+                $data['values'] = $configHelper->getElementParamOptionsValues($data);
+                $data['helper_block'] = $configHelper->getElementParamHelperBlock($data);
                 $params[$key] = $data;
-                ++$sortOrder;
             }
         }
         
@@ -260,7 +237,6 @@ class BL_CustomGrid_Model_Custom_Column_Config
         $module = (isset($xmlValues['@']['module']) ? (string) $xmlValues['@']['module'] : 'customgrid'); 
         $customColumn->setModule($module);
         $helper = Mage::helper('customgrid')->getSafeHelper($module);
-        $stringHelper = Mage::helper('customgrid/string');
         
         $customColumn->addData($this->_getRawFieldsFromXmlValues($xmlValues));
         $customColumn->addData($this->_getBooleanFieldsFromXmlValues($xmlValues));

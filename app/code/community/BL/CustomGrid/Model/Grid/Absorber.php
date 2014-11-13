@@ -176,7 +176,7 @@ class BL_CustomGrid_Model_Grid_Absorber extends BL_CustomGrid_Model_Grid_Worker
      * to the given array of column block IDs, and mark them as such
      * 
      * @param string $origin Columns origin
-     * @param array $foundBlockIds Found column block IDs
+     * @param string[] $foundBlockIds Found column block IDs
      * @return this
      */
     protected function _checkMissingOriginColumns($origin, array $foundBlockIds)

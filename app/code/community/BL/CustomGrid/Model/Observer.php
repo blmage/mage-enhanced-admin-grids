@@ -231,7 +231,7 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
     /**
      * Handle grid block rewrite errors, by displaying and/or logging them depending on the current config
      *
-     * @param array $rewriteErrors Rewrite errors
+     * @param string[] $rewriteErrors Rewrite errors
      * @param bool $isSuccess Whether the rewrite was successfull
      */
     protected function _handleGridBlockRewriteErrors(array $rewriteErrors, $isSuccess)

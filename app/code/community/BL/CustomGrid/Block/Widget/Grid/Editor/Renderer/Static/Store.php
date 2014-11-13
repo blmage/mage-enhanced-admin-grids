@@ -16,19 +16,48 @@
 class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Store extends
     BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Abstract
 {
+    /**
+     * Return the system store model
+     * 
+     * @return Mage_Adminhtml_Model_System_Store
+     */
     protected function _getStoreModel()
     {
         return Mage::getSingleton('adminhtml/system_store');
+    }
+    
+    /**
+     * Render the given stores structure
+     * 
+     * @param array $storesStructure Stores structure
+     * @param int $spacesCount Base number of spaces to prepend on sub-levels labels
+     * @return string
+     */
+    protected function _renderStoresStructure(array $storesStructure, $spacesCount)
+    {
+        $renderedStructure = '';
+        
+        foreach ($storesStructure as $website) {
+            $renderedStructure .= $website['label'] . '<br/>';
+            
+            foreach ($website['children'] as $group) {
+                $renderedStructure .= str_repeat('&nbsp;', $spacesCount) . $group['label'] . '<br/>';
+                
+                foreach ($group['children'] as $store) {
+                    $renderedStructure .= str_repeat('&nbsp;', 2*$spacesCount) . $store['label'] . '<br/>';
+                }
+            }
+        }
+        
+        return $renderedStructure;
     }
     
     protected function _getRenderedValue()
     {
         $editConfig = $this->getEditConfig();
         $renderableValue = $this->getRenderableValue();
-        
-        $renderOptions = $editConfig->getData('renderer');
-        $withoutAllStore = (isset($renderOptions['without_all_store']) && $renderOptions['without_all_store']);
-        $withoutEmptyStore = (isset($renderOptions['without_empty_store']) && $renderOptions['without_empty_store']);
+        $withoutAllStore = (bool) $editConfig->getData('renderer/without_all_store');
+        $withoutEmptyStore = (bool) $editConfig->getData('renderer/without_empty_store');
         
         if (empty($renderableValue) && (is_array($renderableValue) || $withoutEmptyStore)) { 
             return '';
@@ -45,23 +74,7 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Store extends
         }
         
         $storesStructure = $this->_getStoreModel()->getStoresStructure(false, $renderableValue);
-        $renderedValue = '';
-        $spacesCount = (isset($renderOptions['spaces_count']) && ($renderOptions['spaces_count'] > 0))
-            ? (int) $renderOptions['spaces_count']
-            : 3;
-        
-        foreach ($storesStructure as $website) {
-            $renderedValue .= $website['label'] . '<br/>';
-            
-            foreach ($website['children'] as $group) {
-                $renderedValue .= str_repeat('&nbsp;', $spacesCount) . $group['label'] . '<br/>';
-                
-                foreach ($group['children'] as $store) {
-                    $renderedValue .= str_repeat('&nbsp;', 2*$spacesCount) . $store['label'] . '<br/>';
-                }
-            }
-        }
-        
-        return $renderedValue;
+        $spacesCount = (int) $editConfig->getDataSetDefault('renderer/spaces_count', 3);
+        return $this->_renderStoresStructure($storesStructure, $spacesCount);
     }
 }

@@ -473,7 +473,7 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
      * Assign the given profile ID to the given roles IDs
      * 
      * @param int $profileId ID of the profile to be assigned
-     * @param array $assignedRolesIds Roles IDs to assign
+     * @param int[] $assignedRolesIds Roles IDs to assign
      * @return this
      */
     protected function _assignProfile($profileId, array $assignedRolesIds = array())
@@ -516,7 +516,6 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
     public function copyProfileToNew($gridId, $fromProfileId, array $values)
     {
         $write = $this->_getWriteAdapter();
-        $gridsTable = $this->_getGridsTable();
         $profilesTable = $this->_getProfilesTable();
         
         $write->beginTransaction();
@@ -579,7 +578,6 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
     public function copyProfileToExisting($gridId, $fromProfileId, $toProfileId, array $copiedValues)
     {
         $write = $this->_getWriteAdapter();
-        $gridsTable = $this->_getGridsTable();
         $profilesTable = $this->_getProfilesTable();
         
         $write->beginTransaction();
@@ -683,7 +681,7 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
      * @param string $valuesType Values type ("role" or "user")
      * @param int $gridId Grid model ID
      * @param int $profileId Default profile ID
-     * @param array $valuesIds Values IDs
+     * @param int[] $valuesIds Values IDs
      * @return this
      */
     protected function _chooseProfileAsRoleUserDefault($valuesType, $gridId, $profileId, array $valuesIds)

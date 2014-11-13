@@ -58,7 +58,7 @@ class BL_CustomGrid_Helper_Grid extends Mage_Core_Helper_Abstract
      * Return the columns that are actually displayable for the given grid block
      * 
      * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
-     * @return array
+     * @return Mage_Adminhtml_Block_Widget_Grid_Column[]
      */
     public function getGridBlockDisplayableColumns(Mage_Adminhtml_Block_Widget_Grid $gridBlock)
     {

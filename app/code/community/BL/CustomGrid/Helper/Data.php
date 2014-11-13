@@ -101,7 +101,7 @@ class BL_CustomGrid_Helper_Data extends Mage_Core_Helper_Abstract
      * 
      * @param array $optionArray Options array
      * @param bool $withEmpty Whether empty values from the array should be kept in the hash
-     * @return array
+     * @return string[]
      */
     public function getOptionHashFromOptionArray(array $optionArray, $withEmpty = false)
     {
@@ -126,7 +126,7 @@ class BL_CustomGrid_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Return an options array corresponding to the given options hash
      * 
-     * @param array $optionHash Options hash
+     * @param string[] $optionHash Options hash
      * @param bool $withEmpty Whether empty values from the hash should be kept in the array
      * @return array
      */

@@ -25,7 +25,7 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
     /**
      * Registered $adapter->quoteIdentifier() callbacks (usable for convenience and readability)
      * 
-     * @var array
+     * @var callback[]
      */
     protected $_quoteIdentifierCallbacks = array();
     
@@ -39,7 +39,7 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
     /**
      * Base callbacks to call when building filters map for a given grid block
      * 
-     * @var array
+     * @var string[]
      */
     protected $_baseFiltersMapCallbacks  = array(
         'adminhtml/catalog_product_grid'  => '_prepareCatalogProductFiltersMap',
@@ -52,7 +52,7 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
     /**
      * Additional callbacks to call when building filters map for a given grid block
      * 
-     * @var array
+     * @var string[]
      */
     protected $_additionalFiltersMapCallbacks = array();
     
@@ -349,7 +349,7 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
      * 
      * @param array $fields Fields to map. The keys will be used as aliases when strings, otherwise field names
      * @param string $tableAlias Alias of the table to which belong the given fields
-     * @return array
+     * @return string[]
      */
     public function buildFiltersMapArray($fields, $tableAlias)
     {
@@ -481,7 +481,7 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
      * Return the filters map value from the given collection
      * 
      * @param Varien_Data_Collection_Db $collection Grid collection
-     * @return array|null
+     * @return string[]|null
      */
     protected function _getCollectionFiltersMap(Varien_Data_Collection_Db $collection)
     {
@@ -502,7 +502,7 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
      * Set the filters map value for the given collection
      * 
      * @param Varien_Data_Collection_Db $collection Grid collection
-     * @param array $filtersMap Filters map value
+     * @param string[] $filtersMap Filters map value
      * @return this
      */
     protected function _setCollectionFiltersMap(Varien_Data_Collection_Db $collection, array $filtersMap)
@@ -523,7 +523,7 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
      * @param Varien_Data_Collection_Db $collection Grid collection
      * @param Mage_Adminhtml_Block_Widget_Grid Grid block
      * @param array $filters Applied filters
-     * @return array
+     * @return string[]
      */
     protected function _getUnmappedFiltersFields(
         Varien_Data_Collection_Db $collection,
@@ -562,7 +562,7 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
      * sorted by priority
      * 
      * @param Varien_Data_Collection_Db $collection Grid collection
-     * @param array $unmappedFields Unmapped fields
+     * @param string[] $unmappedFields Unmapped fields
      * @return array (keys : table aliases / values : contained unmapped fields)
      */
     protected function _getUnmappedFieldsMatchingTables(Varien_Data_Collection_Db $collection, array $unmappedFields)
@@ -596,7 +596,7 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
      * according to the given matching tables
      * 
      * @param Varien_Data_Collection_Db $collection Grid collection
-     * @param array $unmappedFields Unmapped fields
+     * @param string[] $unmappedFields Unmapped fields
      * @param array $matchingTables Tables that contain or or more of the unmapped fields, sorted by priority
      * @return this
      */
@@ -605,8 +605,11 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
         array $unmappedFields,
         array $matchingTables
     ) {
+        $adapter = $this->getCollectionAdapter($collection);
+        
         foreach ($matchingTables as $tableAlias => $tableFields) {
-            $unmappedFields = array_diff($unmappedFields, $tableFields);
+            $fields = array_intersect($unmappedFields, $tableFields);
+            $unmappedFields = array_diff($unmappedFields, $fields);
             
             foreach ($fields as $fieldName) {
                 $this->addFilterToCollectionMap(

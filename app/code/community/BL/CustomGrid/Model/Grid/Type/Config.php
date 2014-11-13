@@ -17,7 +17,7 @@ class BL_CustomGrid_Model_Grid_Type_Config extends BL_CustomGrid_Model_Config_Ab
 {
     public function getConfigType()
     {
-        return BL_CustomGrid_Model_Config::TYPE_GRID_TYPES;
+        return BL_CustomGrid_Model_Config_Manager::TYPE_GRID_TYPES;
     }
     
     public function getTypesInstances()

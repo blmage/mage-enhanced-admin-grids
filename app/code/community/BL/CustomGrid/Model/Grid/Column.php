@@ -25,7 +25,7 @@ class BL_CustomGrid_Model_Grid_Column extends BL_CustomGrid_Object
     /**
      * Alignments options hash
      * 
-     * @var array
+     * @var string[]
      */
     static protected $_alignmentsHash = null;
     
@@ -40,12 +40,12 @@ class BL_CustomGrid_Model_Grid_Column extends BL_CustomGrid_Object
     /**
      * Origins options hash
      * 
-     * @var array
+     * @var string[]
      */
     static protected $_originsHash = null;
     
     /**
-     * Return this column's ID
+     * Return the (internal) ID of this column
      *
      * @return int
      */
@@ -55,7 +55,7 @@ class BL_CustomGrid_Model_Grid_Column extends BL_CustomGrid_Object
     }
     
     /**
-     * Return this column's grid model
+     * Return the grid model corresponding to this column
      *
      * @param bool $graceful Whether to throw an exception if the grid model is invalid, otherwise return null
      * @return BL_CustomGrid_Model_Grid|null
@@ -144,7 +144,29 @@ class BL_CustomGrid_Model_Grid_Column extends BL_CustomGrid_Object
     }
     
     /**
-     * Compare this column's order to the given column
+     * Return whether this column can be assigned a store ID
+     * 
+     * @return bool
+     */
+    public function getAllowStore()
+    {
+        return ($this->isCollection() || ($this->isCustom() && $this->getCustomColumn()->getAllowStore()));
+    }
+    
+    /**
+     * Return whether this column can be assigned a renderer
+     * 
+     * @return bool
+     */
+    public function getAllowRenderer()
+    {
+        return $this->isCollection()
+            || $this->isAttribute()
+            || ($this->isCustom() && $this->getCustomColumn()->getAllowRenderers());
+    }
+    
+    /**
+     * Compare the order from this column to the order from the given column
      *
      * @param BL_CustomGrid_Model_Grid_Column $column Column against which to compare the order
      * @return int
@@ -155,9 +177,10 @@ class BL_CustomGrid_Model_Grid_Column extends BL_CustomGrid_Object
     }
     
     /**
-     * Parse proper column values from the given array of user values
+     * Parse the given user values and return the corresponding proper column values,
+     * basing on the given behaviour flags
      *
-     * @param array $column Column values
+     * @param array $userValues User values
      * @param bool $allowStore Whether store ID value is allowed
      * @param bool $allowRenderer Whether renderer values are allowed
      * @param bool $requireRendererType Whether renderer type is required
@@ -165,40 +188,44 @@ class BL_CustomGrid_Model_Grid_Column extends BL_CustomGrid_Object
      * @param bool $allowCustomizationParams Whether customization parameters are allowed
      * @return array
      */
-    protected function _parseUserColumnValues(
-        array $column,
+    protected function _parseGridModelColumnUserValues(
+        array $userValues,
         $allowStore = false,
         $allowRenderer = false,
         $requireRendererType = true,
         $allowEditable = false,
         $allowCustomizationParams = false
     ) {
-        // Using an object allows to drastically reduce complexity
-        $column = new BL_CustomGrid_Object($column);
+        $userValues = new BL_CustomGrid_Object($userValues);
         
         $values = array();
-        $values['is_visible'] = (bool) $column->getData('is_visible');
-        $values['is_only_filterable'] = ($values['is_visible'] && $column->getData('filter_only'));
-        $values['align']  = Mage::getSingleton('customgrid/grid')->getValidAlignment($column->getData('align'));
-        $values['header'] = $column->getData('header');
-        $values['order']  = (int) $column->getData('order');
-        $values['width']  = $column->getData('width');
-        $values['is_edit_allowed'] = ($allowEditable && $column->getData('editable'));
+        $values['is_visible'] = (bool) $userValues->getData('is_visible');
+        $values['is_only_filterable'] = ($values['is_visible'] && $userValues->getData('filter_only'));
+        $values['align']  = Mage::getSingleton('customgrid/grid')->getValidAlignment($userValues->getData('align'));
+        $values['header'] = $userValues->getData('header');
+        $values['order']  = (int) $userValues->getData('order');
+        $values['width']  = $userValues->getData('width');
+        $values['is_edit_allowed'] = ($allowEditable && $userValues->getData('editable'));
         
-        if ($allowStore && (($storeId = $column->getData('store_id')) !== '')) {
+        if ($allowStore && (($storeId = $userValues->getData('store_id')) !== '')) {
             $values['store_id'] = $storeId;
         } else {
             $values['store_id'] = null;
         }
-        if ($allowRenderer && (!$requireRendererType || $column->getData('renderer_type'))) {
-             $values['renderer_type'] = ($requireRendererType ? $column->getData('renderer_type') : null);
-             $values['renderer_params'] = (($params = $column->getData('renderer_params')) ? $params : null);
+        
+        $rendererType = null;
+        
+        if ($allowRenderer
+            && (!$requireRendererType || ($rendererType = $userValues->getData('renderer_type')))) {
+             $values['renderer_type'] = $rendererType;
+             $values['renderer_params'] = $userValues->getNotEmptyData('renderer_params');
         } else {
             $values['renderer_type'] = null;
             $values['renderer_params'] = null;
         }
-        if ($allowCustomizationParams && ($params = $column->getData('customization_params'))) {
-            $values['customization_params'] = $params;
+        
+        if ($allowCustomizationParams) {
+            $values['customization_params'] = $userValues->getNotEmptyData('customization_params');
         } else {
             $values['customization_params'] = null;
         }
@@ -207,70 +234,101 @@ class BL_CustomGrid_Model_Grid_Column extends BL_CustomGrid_Object
     }
     
     /**
-     * Update the given grid model's columns from the given user values
-     *
-     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
-     * @param array $columns New column values
-     * @return BL_CustomGrid_Model_Grid
+     * Return the proper values with wich to update the given grid column, from the given user values
+     * 
+     * @param array $userValues User values
+     * @param BL_CustomGrid_Model_Grid_Column $column Updated grid column
+     * @param bool $allowEditable Whether the user has the permission to choose which columns should be editable
+     * @param string[] $availableAttributeCodes Available attributes codes
+     * @return array
      */
-    public function updateGridModelColumns(BL_CustomGrid_Model_Grid $gridModel, array $columns)
-    {
-        if (!$gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_CUSTOMIZE_COLUMNS)) {
-            $gridModel->throwPermissionException();
+    protected function _getGridModelColumnNewValues(
+        array $userValues,
+        BL_CustomGrid_Model_Grid_Column $column,
+        $allowEditable,
+        array $availableAttributeCodes
+    ) {
+        $columnValues = $this->_parseGridModelColumnUserValues(
+            $userValues,
+            $column->getAllowStore(),
+            $column->getAllowRenderer(),
+            ($column->isCollection() || $column->isCustom()),
+            ($allowEditable && $column->isEditable()),
+            $column->isCustom()
+        );
+        
+        if ($column->isAttribute()
+            && isset($userValues['index'])
+            && in_array($userValues['index'], $availableAttributeCodes, true)) {
+            $columnValues['index'] = $userValues['index'];
         }
         
-        $this->setGridModel($gridModel);
-        $gridModel->getColumnIdsByOrigin();
-        $allowEditable = $gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_CHOOSE_EDITABLE_COLUMNS);
-        $availableAttributeCodes = $gridModel->getAvailableAttributesCodes();
-        
-        // Update existing columns
+        return $columnValues;
+    }
+    
+    /**
+     * Update the existing columns for the given grid model, with the given user values
+     *
+     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @param array $columns New columns values
+     * @param bool $allowEditable Whether the user has the permission to choose which columns should be editable
+     * @param string[] $availableAttributeCodes Available attributes codes
+     * @return this
+     */
+    protected function _updateGridModelExistingColumns(
+        BL_CustomGrid_Model_Grid $gridModel,
+        array &$columns,
+        $allowEditable,
+        array $availableAttributeCodes
+    ) {
         foreach ($gridModel->getColumns(true, true) as $columnBlockId => $column) {
             $columnId = $column->getId();
             
             if (isset($columns[$columnId])) {
-                $userValues   = $columns[$columnId]; 
-                $isCollection = $column->isCollection();
-                $isAttribute  = $column->isAttribute();
-                $isCustom     = $column->isCustom();
-                $customColumn = ($isCustom ? $column->getCustomColumnModel() : null);
-                $columnValues =  $this->_parseUserColumnValues(
-                    $userValues,
-                    ($isCustom || ($customColumn && $customColumn->getAllowStore())),
-                    ($isCollection || $isAttribute || ($customColumn && $customColumn->getAllowRenderers())),
-                    ($isCollection || $isCustom),
-                    ($allowEditable && $column->isEditable()),
-                    $isCustom
+                $gridModel->updateColumn(
+                    $columnBlockId,
+                    $this->_getGridModelColumnNewValues(
+                        $columns[$columnId],
+                        $column,
+                        $allowEditable,
+                        $availableAttributeCodes
+                    )
                 );
                 
-                if ($isAttribute
-                    && isset($userValues['index'])
-                    && in_array($userValues['index'], $availableAttributeCodes, true)) {
-                    $columnValues['index'] = $userValues['index'];
-                }
-                
-                $gridModel->updateColumn($columnBlockId, $columnValues);
-                
-                // At the end, there should only remain in $columns the new attribute columns (without a valid ID yet)
+                // In the end, there should only remain in $columns the new attribute columns (without a valid ID yet)
                 unset($columns[$columnId]);
             } else {
                 $gridModel->removeColumn($columnBlockId);
             }
         }
-        
-        // Add new attribute columns
-        if ($gridModel->canHaveAttributeColumns()) {
-            foreach ($columns as $columnId => $column) {
-                if (($columnId < 0) // Concerned columns IDs should be < 0, so assume other IDs are obsolete ones
-                    && isset($column['index'])
-                    && in_array($column['index'], $availableAttributeCodes, true)) {
-                    $newColumnBlockId = $gridModel->getNextAttributeColumnBlockId();
-                    
-                    $columnValues = array_merge(
+        return $this;
+    }
+    
+    /**
+     * Update the attribute columns for the given grid model, with the given user values
+     *
+     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @param array $columns New columns values
+     * @param bool $allowEditable Whether the user has the permission to choose which columns should be editable
+     * @param string[] $availableAttributeCodes Available attributes codes
+     * @return this
+     */
+    protected function _updateGridModelAttributeColumns(
+        BL_CustomGrid_Model_Grid $gridModel,
+        array $columns,
+        $allowEditable,
+        array $availableAttributeCodes
+    ) {
+        foreach ($columns as $columnId => $columnValues) {
+            if (($columnId < 0) // Concerned columns IDs should be < 0, so assume other IDs are obsolete ones
+                && isset($columnValues['index'])
+                && in_array($columnValues['index'], $availableAttributeCodes, true)) {
+                $gridModel->addColumn(
+                    array_merge(
                         array(
                             'grid_id'              => $gridModel->getId(),
-                            'block_id'             => $newColumnBlockId,
-                            'index'                => $column['index'],
+                            'block_id'             => $gridModel->getNextAttributeColumnBlockId(),
+                            'index'                => $columnValues['index'],
                             'width'                => '',
                             'align'                => self::ALIGNMENT_LEFT,
                             'header'               => '',
@@ -286,22 +344,46 @@ class BL_CustomGrid_Model_Grid_Column extends BL_CustomGrid_Object
                             'is_edit_allowed'      => true,
                             'customization_params' => null,
                         ),
-                        $this->_parseUserColumnValues($column, true, true, false, $allowEditable)
-                    );
-                    
-                    $gridModel->addColumn($columnValues);
-                }
+                        $this->_parseUserColumnValues($columnValues, true, true, false, $allowEditable)
+                    )
+                );
             }
+        }
+        return $this;
+    }
+    
+    /**
+     * Update the columns for the given grid model, with the given user values
+     *
+     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @param array $columns New columns values
+     * @return BL_CustomGrid_Model_Grid
+     */
+    public function updateGridModelColumns(BL_CustomGrid_Model_Grid $gridModel, array $columns)
+    {
+        if (!$gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_CUSTOMIZE_COLUMNS)) {
+            $gridModel->throwPermissionException();
+        }
+        
+        $this->setGridModel($gridModel);
+        $gridModel->getColumnIdsByOrigin();
+        $allowEditable = $gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_CHOOSE_EDITABLE_COLUMNS);
+        $availableAttributeCodes = $gridModel->getAvailableAttributesCodes();
+        
+        $this->_updateGridModelExistingColumns($gridModel, $columns, $allowEditable, $availableAttributeCodes);
+        
+        if ($gridModel->canHaveAttributeColumns()) {
+            $this->_updateGridModelAttributeColumns($gridModel, $columns, $allowEditable, $availableAttributeCodes);
         }
         
         return $gridModel->setDataChanges(true);
     }
     
     /**
-     * Update the given grid model's available custom columns with the given custom columns codes
+     * Update the available custom columns for the given grid model, with the given custom columns codes
      *
      * @param BL_CustomGrid_Model_Grid $gridModel Grid model
-     * @param array $columnsCodes New custom columns codes
+     * @param string[] $columnsCodes New custom columns codes
      * @return BL_CustomGrid_Model_Grid
      */
     public function updateGridModelCustomColumns(BL_CustomGrid_Model_Grid $gridModel, array $columnsCodes)
@@ -384,7 +466,7 @@ class BL_CustomGrid_Model_Grid_Column extends BL_CustomGrid_Object
     /**
      * Return alignments options hash
      *
-     * @return array
+     * @return string[]
      */
     public function getAlignments()
     {
@@ -403,7 +485,7 @@ class BL_CustomGrid_Model_Grid_Column extends BL_CustomGrid_Object
     /**
      * Return origins options hash
      *
-     * @return array
+     * @return string[]
      */
     public function getOrigins()
     {

@@ -43,7 +43,7 @@ class BL_CustomGrid_Block_Widget_Form_Element_Dependence extends Mage_Adminhtml_
     /**
      * Field names to field IDs map
      * 
-     * @var array
+     * @var string[]
      */
     protected $_fieldsMap  = array();
     

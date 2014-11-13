@@ -64,7 +64,7 @@ class BL_CustomGrid_Helper_String extends Mage_Core_Helper_Abstract
         $originalLength = $helper->strlen($string);
         
         if ($originalLength > $truncateLength) {
-            $length -= $helper->strlen($etc);
+            $truncateLength -= $helper->strlen($etc);
             
             if ($truncateLength <= 0) {
                 return '';
@@ -75,7 +75,7 @@ class BL_CustomGrid_Helper_String extends Mage_Core_Helper_Abstract
             
             if (!$breakWords) {
                 $preparedString = preg_replace('/\s+?(\S+)?$/u', '', $this->substr($string, 0, $length + 1));
-                $preparedlength = $this->strlen($preparedString);
+                $preparedLength = $this->strlen($preparedString);
             }
             
             $remainder = $helper->substr($string, $preparedLength, $originalLength);
@@ -89,7 +89,7 @@ class BL_CustomGrid_Helper_String extends Mage_Core_Helper_Abstract
      * Handle the given HTML opening tag from a truncated HTML string
      * 
      * @param string $htmlTag HTML opening tag
-     * @param array $openedTags Currently opened tags
+     * @param string[] $openedTags Currently opened tags
      * @return this
      */
     protected function _handleHtmlOpeningTag($htmlTag, array &$openedTags)
@@ -281,9 +281,9 @@ class BL_CustomGrid_Helper_String extends Mage_Core_Helper_Abstract
     /**
      * Escape HTML entities, including already escaped entities (unlike Mage_Core_Helper_Abstract::escapeHtml())
      * 
-     * @param array|string $data String or array of strings, in which to escape HTML entities
+     * @param string[]|string $data String or array of strings, in which to escape HTML entities
      * @param array|null $allowedTags HTML tags that should be preserved
-     * @return array|string
+     * @return string[]|string
      */
     public function htmlDoubleEscape($data, $allowedTags = null)
     {

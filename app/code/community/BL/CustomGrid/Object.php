@@ -229,6 +229,11 @@ class BL_CustomGrid_Object extends Varien_Object
         return parent::getDataSetDefault($key, $default);
     }
     
+    public function getNotEmptyData($key, $index = null, $default = null)
+    {
+        return (($data = $this->getData($key, $index)) ? $data : $default);
+    }
+    
     public function hasData($key = '')
     {
         if (is_string($key) && (strpos($key, '/') !== false)) {

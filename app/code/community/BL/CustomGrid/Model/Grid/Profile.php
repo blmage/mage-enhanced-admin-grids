@@ -127,7 +127,7 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
      * Return the session parameters that should be restored upon returning to this profile,
      * if it has been previously used during the same session
      * 
-     * @return array
+     * @return string[]
      */
     public function getRememberedSessionParams()
     {
@@ -254,7 +254,7 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
     /**
      * Return the roles IDs to which this profile is assigned
      *
-     * @return array
+     * @return int[]
      */
     public function getAssignedToRoleIds()
     {
@@ -277,8 +277,8 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
     /**
      * Check, complete and return the given array of user IDs for which this profile will be set as default
      *
-     * @param array $users User IDs
-     * @return array
+     * @param int[] $users User IDs
+     * @return int[]
      */
     protected function _getDefaultForUsers(array $users)
     {
@@ -323,8 +323,8 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
     /**
      * Check, complete and return the given array of role IDs for which this profile will be set as default
      *
-     * @param array $roles Role IDs
-     * @return array
+     * @param int[] $roles Role IDs
+     * @return int[]
      */
     protected function _getDefaultForRoles(array $roles)
     {
@@ -396,16 +396,9 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
         }
         
         $gridModel->getResource()->chooseProfileAsDefault($gridModel->getId(), $profileId, $defaultFor);
-        
-        if (isset($defaultFor['users'])) {
-             $gridModel->resetUsersConfigValues();
-        }
-        if (isset($defaultFor['roles'])) {
-            $gridModel->resetRolesConfigValues();
-        }
-        if (isset($defaultFor['global'])) {
-            $gridModel->resetProfilesValues();
-        }
+        $gridModel->resetUsersConfigValues();
+        $gridModel->resetRolesConfigValues();
+        $gridModel->resetProfilesValues();
         
         return $this;
     }
@@ -416,7 +409,7 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
      * 
      * @param int|null $checkedProfileId Checked profile ID (may be null in case of a new profile)
      * @param array $checkedProfileValues Checked profile values
-     * @param array $profiles List of all profiles
+     * @param BL_CustomGrid_Model_Grid_Profile[] $profiles List of all other profiles to check against
      * @return this
      */
     protected function _checkProfileDuplication($checkedProfileId, array $checkedProfileValues, array $profiles)

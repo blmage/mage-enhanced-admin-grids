@@ -81,7 +81,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      * Return which block types this grid type can handle
      * Wrapper for _getSupportedBlockTypes(), with cache
      * 
-     * @return array
+     * @return string[]
      */
     public function getSupportedBlockTypes()
     {
@@ -225,7 +225,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      * Return available attributes for given block type
      * 
      * @param string $blockType Grid block type
-     * @return array
+     * @return Mage_Eav_Model_Entity_Attribute[]
      */
     protected function _getAvailableAttributes($blockType)
     {
@@ -238,7 +238,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      * 
      * @param string $blockType Grid block type
      * @param bool $withEditableFlag Whether editable flag should be set on attribute models
-     * @return array
+     * @return Mage_Eav_Model_Entity_Attribute[]
      */
     public function getAvailableAttributes($blockType, $withEditableFlag = false)
     {
@@ -285,7 +285,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      * Return available export types
      * 
      * @param string $blockType Grid block type
-     * @return array
+     * @return BL_CustomGrid_Object[]
      */
     protected function _getExportTypes($blockType)
     {
@@ -310,7 +310,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      * Wrapper for _getExportTypes(), with cache and some values preparation
      * 
      * @param string $blockType Grid block type
-     * @return array
+     * @return BL_CustomGrid_Object[]
      */
     public function getExportTypes($blockType)
     {
@@ -382,7 +382,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
     /**
      * Return additional custom columns (on top of those defined in the XML configuration)
      *
-     * @return array
+     * @return BL_CustomGrid_Model_Custom_Column_Abstract[]
      */
     protected function _getAdditionalCustomColumns()
     {
@@ -396,7 +396,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      * @param string|null $blockType Grid block type (if null, all custom columns will be returned)
      * @param string $rewritingClassName Grid rewriting class name
      * @param bool $nullIfNone Whether null should be returned instead of an empty array, if appropriate
-     * @return array|null
+     * @return BL_CustomGrid_Model_Custom_Column_Abstract[]|null
      */
     public function getCustomColumns($blockType = null, $rewritingClassName = '', $nullIfNone = false)
     {
@@ -464,7 +464,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
     /**
      * Return available custom columns groups
      *
-     * @return array
+     * @return string[]
      */
     public function getCustomColumnsGroups()
     {
@@ -688,7 +688,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      * (to be used when needed by corresponding attribute fields)
      * 
      * @param string $blockType Grid block type
-     * @return array
+     * @return Mage_Eav_Model_Entity_Attribute[]
      */
     protected function _getAdditionalEditableAttributes($blockType)
     {
@@ -699,7 +699,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      * Return all editable attributes
      * 
      * @param string $blockType Grid block type
-     * @return array
+     * @return Mage_Eav_Model_Entity_Attribute[]
      */
     protected function _getEditableAttributes($blockType)
     {
@@ -1276,8 +1276,8 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      * Apply editable values configs to given grid columns
      * 
      * @param string $blockType Grid block type
-     * @param array $columns Grid columns
-     * @return array
+     * @param BL_CustomGrid_Model_Grid_Column[] $columns Grid columns
+     * @return BL_CustomGrid_Model_Grid_Column[]
      */
     public function applyEditConfigsToColumns($blockType, array $columns)
     {
@@ -1355,7 +1355,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      * Return entity identifiers keys
      * 
      * @param string $blockType Grid block type
-     * @return array
+     * @return string[]
      */
     protected function _getEntityRowIdentifiersKeys($blockType)
     {
@@ -1477,7 +1477,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      * @param BL_CustomGrid_Object $config Edited value config
      * @param array $params Edit parameters
      * @param mixed $entity Edited entity
-     * @return array
+     * @return string[]
      */
     protected function _getEditedEntityRegistryKeys($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
@@ -1629,7 +1629,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      * @param BL_CustomGrid_Object $config Edited field config
      * @param array $params Edit parameters
      * @param mixed $entity Edited entity
-     * @return array
+     * @return string[]
      */
     protected function _getFieldEditLayoutHandles($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
@@ -1697,7 +1697,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      * @param BL_CustomGrid_Object $config Edited attribute config
      * @param array $params Edit parameters
      * @param mixed $entity Edited entity
-     * @return array
+     * @return string[]
      */
     protected function _getAttributeEditLayoutHandles($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
@@ -1738,7 +1738,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      * @param BL_CustomGrid_Object $config Edited value config
      * @param array $params Edit parameters
      * @param mixed $entity Edited entity
-     * @return array
+     * @return string[]
      */
     protected function _getValueEditLayoutHandles($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {

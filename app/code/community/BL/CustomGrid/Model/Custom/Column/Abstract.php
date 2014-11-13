@@ -18,14 +18,14 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract extends BL_CustomGrid_
     /**
      * Generated collection flags
      * 
-     * @var array
+     * @var string[]
      */
     static protected $_uniqueFlags = array();
     
     /**
      * Generated collection aliases
      * 
-     * @var array
+     * @var string[]
      */
     static protected $_uniqueAliases = array();
     
@@ -340,7 +340,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract extends BL_CustomGrid_
      * Return customization params
      * 
      * @param bool $sorted Whether params should be sorted
-     * @return array
+     * @return Bl_CustomGrid_Object[]
      */
     public function getCustomizationParams($sorted = true)
     {

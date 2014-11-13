@@ -29,7 +29,7 @@ class BL_CustomGrid_Model_Grid_Exporter extends BL_CustomGrid_Model_Grid_Worker
     /**
      * Return the available export types for the current grid model
      *
-     * @return array
+     * @return BL_CustomGrid_Object[]
      */
     public function getExportTypes()
     {
