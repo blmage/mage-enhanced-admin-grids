@@ -483,7 +483,7 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
         $assignedRolesIds = null;
         
         if ($gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_ASSIGN_PROFILES)) {
-            if ($this->_isRestrictedProfileValues($value)) {
+            if ($this->_isRestrictedProfileValues($values)) {
                 $assignedRolesIds = array_unique($values['assigned_to']);
             }
         } elseif ($gridModel->getProfilesDefaultRestricted()) {
