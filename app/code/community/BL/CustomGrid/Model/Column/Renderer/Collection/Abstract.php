@@ -16,6 +16,11 @@
 abstract class BL_CustomGrid_Model_Column_Renderer_Collection_Abstract extends
     BL_CustomGrid_Model_Column_Renderer_Abstract
 {
+    public function getColumnType()
+    {
+        return 'collection';
+    }
+    
     /**
      * Return suitable values to create a grid column block based on this renderer and a collection value
      * 

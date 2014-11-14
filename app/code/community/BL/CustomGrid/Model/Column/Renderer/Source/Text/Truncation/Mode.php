@@ -13,23 +13,11 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_Column_Renderer_Source_Text_Truncation_Mode
+class BL_CustomGrid_Model_Column_Renderer_Source_Text_Truncation_Mode extends BL_CustomGrid_Model_Source_Fixed
 {
-    public function toOptionArray()
-    {
-        return array(
-            array(
-                'value' => BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Text::TRUNCATION_MODE_NONE,
-                'label' => Mage::helper('customgrid')->__('No'),
-            ),
-            array(
-                'value' => BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Text::TRUNCATION_MODE_TEXT,
-                'label' => Mage::helper('customgrid')->__('As Text'),
-            ),
-            array(
-                'value' => BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Text::TRUNCATION_MODE_HTML,
-                'label' => Mage::helper('customgrid')->__('As HTML'),
-            ),
-        );
-    }
+    protected $_optionHash = array(
+        BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Text::TRUNCATION_MODE_NONE => 'No',
+        BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Text::TRUNCATION_MODE_TEXT => 'As Text',
+        BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Text::TRUNCATION_MODE_HTML => 'As HTML',
+    );
 }

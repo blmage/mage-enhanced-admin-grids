@@ -58,29 +58,12 @@ class BL_CustomGrid_Model_Column_Renderer_Attribute_Options extends
         Mage_Core_Model_Store $store,
         BL_CustomGrid_Model_Grid $gridModel
     ) {
-        $options = $this->_getOptions($attribute);
-        $isMultiple = ($attribute->getFrontendInput() == 'multiselect');
-        
-        if (!$this->hasData('values/filter_mode') && $this->getData('values/boolean_filter')) {
-            $this->setData(
-                'values/filter_mode',
-                BL_CustomGrid_Block_Widget_Grid_Column_Filter_Select::MODE_WITH_WITHOUT
+        return $this->_getRendererHelper()
+            ->getOptionsValues(
+                $this,
+                $this->_getOptions($attribute),
+                ($attribute->getFrontendInput() == 'multiselect'),
+                ','
             );
-        }
-        
-        return array(
-            'filter'   => 'customgrid/widget_grid_column_filter_select',
-            'renderer' => 'customgrid/widget_grid_column_renderer_options',
-            'options'  => (is_array($options) ? $options : array()),
-            'imploded_values'      => $isMultiple,
-            'imploded_separator'   => ($isMultiple ? ',' : null),
-            'filter_mode'          => $this->getData('values/filter_mode'),
-            'logical_operator'     => $this->getData('values/filter_logical_operator'),
-            'negative_filter'      => (bool) $this->getData('values/negative_filter'),
-            'display_full_path'    => (bool) $this->getData('values/display_full_path'),
-            'values_separator'     => $this->getDataSetDefault('values/values_separator', ', '),
-            'sub_values_separator' => $this->getDataSetDefault('values/sub_values_separator', ' - '),
-            'show_missing_option_values' => (bool) $this->getData('values/show_missing'),
-        );
     }
 }

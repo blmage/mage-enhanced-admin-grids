@@ -28,9 +28,6 @@ class BL_CustomGrid_Model_Column_Renderer_Attribute_Number extends
         Mage_Core_Model_Store $store,
         BL_CustomGrid_Model_Grid $gridModel
     ) {
-        return array(
-            'type' => 'number',
-            'show_number_sign' => (bool) $this->getData('values/show_number_sign'),
-        );
+        return $this->_getRendererHelper()->getNumberValues($this);
     }
 }

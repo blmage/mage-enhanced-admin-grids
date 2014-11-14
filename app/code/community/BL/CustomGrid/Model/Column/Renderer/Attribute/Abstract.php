@@ -16,6 +16,11 @@
 abstract class BL_CustomGrid_Model_Column_Renderer_Attribute_Abstract extends
     BL_CustomGrid_Model_Column_Renderer_Abstract
 {
+    public function getColumnType()
+    {
+        return 'attribute';
+    }
+    
     /**
      * Return whether this renderer can be used to render columns based on the given attribute
      * 

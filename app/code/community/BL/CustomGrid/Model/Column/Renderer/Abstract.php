@@ -23,6 +23,13 @@ abstract class BL_CustomGrid_Model_Column_Renderer_Abstract extends BL_CustomGri
     protected $_backwardsMap = array();
     
     /**
+     * Return rendered column type
+     * 
+     * @return string "attribute" or "collection"
+     */
+    abstract public function getColumnType();
+    
+    /**
      * Return the base helper
      * 
      * @return BL_CustomGrid_Helper_Data
@@ -40,6 +47,16 @@ abstract class BL_CustomGrid_Model_Column_Renderer_Abstract extends BL_CustomGri
     protected function _getConfigHelper()
     {
         return Mage::helper('customgrid/config');
+    }
+    
+    /**
+     * Return the column renderer helper
+     * 
+     * @return BL_CustomGrid_Helper_Column_Renderer
+     */
+    protected function _getRendererHelper()
+    {
+        return Mage::helper('customgrid/column_renderer');
     }
     
     /**

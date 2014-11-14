@@ -21,20 +21,6 @@ class BL_CustomGrid_Model_Column_Renderer_Collection_Datetime extends
         Mage_Core_Model_Store $store,
         BL_CustomGrid_Model_Grid $gridModel
     ) {
-        $values = array(
-            'filter'      => 'customgrid/widget_grid_column_filter_datetime',
-            'renderer'    => 'customgrid/widget_grid_column_renderer_datetime',
-            'filter_time' => (bool) $this->getData('values/filter_time'),
-        );
-        
-        if ($format = $this->getData('values/format')) {
-            try {
-                $values['format'] = Mage::app()->getLocale()->getDateTimeFormat($format);
-            } catch (Exception $e) {
-                $values['format'] = null;
-            }
-        }
-        
-        return $values;
+        return $this->_getRendererHelper()->getDateTimeValues($this);
     }
 }

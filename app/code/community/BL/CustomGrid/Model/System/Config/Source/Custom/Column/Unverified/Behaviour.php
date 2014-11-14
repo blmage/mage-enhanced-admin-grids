@@ -14,7 +14,7 @@
  */
 
 class BL_CustomGrid_Model_System_Config_Source_Custom_Column_Unverified_Behaviour extends
-    BL_CustomGrid_Model_System_Config_Source_Fixed
+    BL_CustomGrid_Model_Source_Fixed
 {
     protected $_optionHash = array(
         BL_CustomGrid_Model_Custom_Column_Applier::UNVERIFIED_BEHAVIOUR_NONE

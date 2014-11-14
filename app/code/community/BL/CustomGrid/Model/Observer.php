@@ -507,8 +507,8 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
     {
         if (($gridBlock = $observer->getEvent()->getBlock())
             && ($gridBlock instanceof Mage_Adminhtml_Block_Widget_Grid)
-            && ($gridBlock->getTemplate() == 'widget/grid.phtml')) {
-            $blockType = $gridBlock->getType();
+            && ($gridBlock->getTemplate() == 'widget/grid.phtml')
+            && ($blockType = $gridBlock->getType())) {
             $blockId = $gridBlock->getId();
             $isNewGridModel = false;
             

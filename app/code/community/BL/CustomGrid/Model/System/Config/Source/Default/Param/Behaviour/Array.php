@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_System_Config_Source_Default_Param_Behaviour_Array extends
-    BL_CustomGrid_Model_System_Config_Source_Fixed
+class BL_CustomGrid_Model_System_Config_Source_Default_Param_Behaviour_Array extends BL_CustomGrid_Model_Source_Fixed
 {
     protected $_optionHash = array(
         BL_CustomGrid_Model_Grid::DEFAULT_PARAM_DEFAULT             => 'Default (Last Set Value is Used)',

@@ -13,7 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_System_Config_Source_Enableddisabled extends BL_CustomGrid_Model_System_Config_Source_Fixed
+class BL_CustomGrid_Model_System_Config_Source_Enableddisabled extends BL_CustomGrid_Model_Source_Fixed
 {
     protected $_optionHash = array(
         1 => 'Enabled',

@@ -15,18 +15,18 @@
 
 class BL_CustomGrid_Model_Column_Renderer_Source_Options_Source
 {
-    static protected $_options = null;
+    static protected $_optionArray = null;
     
     public function toOptionArray()
     {
-        if (is_null(self::$_options)) {
-            self::$_options = Mage::getModel('customgrid/options_source')
+        if (is_null(self::$_optionArray)) {
+            self::$_optionArray = Mage::getModel('customgrid/options_source')
                 ->getCollection()
                 ->load()
                 ->toOptionArray();
             
-            array_unshift(self::$_options, array('value' => '', 'label' => ''));
+            array_unshift(self::$_optionArray, array('value' => '', 'label' => ''));
         }
-        return self::$_options;
+        return self::$_optionArray;
     }
 }

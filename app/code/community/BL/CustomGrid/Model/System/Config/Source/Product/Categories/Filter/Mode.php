@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_System_Config_Source_Product_Categories_Filter_Mode extends
-    BL_CustomGrid_Model_System_Config_Source_Fixed
+class BL_CustomGrid_Model_System_Config_Source_Product_Categories_Filter_Mode extends BL_CustomGrid_Model_Source_Fixed
 {
     protected $_optionHash = array(
         BL_CustomGrid_Model_Custom_Column_Product_Categories::FILTER_MODE_ONE_CHOOSEN

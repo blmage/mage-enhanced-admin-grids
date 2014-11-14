@@ -41,7 +41,7 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
      * 
      * @var string[]
      */
-    protected $_baseFiltersMapCallbacks  = array(
+    static protected $_baseFiltersMapCallbacks = array(
         'adminhtml/catalog_product_grid'  => '_prepareCatalogProductFiltersMap',
         'adminhtml/sales_order_grid'      => '_prepareSalesOrderFiltersMap',
         'adminhtml/sales_invoice_grid'    => '_prepareSalesInvoiceFiltersMap',
@@ -683,9 +683,9 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
         $previousFiltersMap = $this->_getCollectionFiltersMap($collection);
         $collection->setFlag(self::COLLECTION_PREVIOUS_MAP_FLAG, $previousFiltersMap);
         
-        if (isset($this->_baseFiltersMapCallbacks[$blockType])) {
+        if (isset(self::$_baseFiltersMapCallbacks[$blockType])) {
             call_user_func(
-                array($this, $this->_baseFiltersMapCallbacks[$blockType]),
+                array($this, self::$_baseFiltersMapCallbacks[$blockType]),
                 $collection,
                 $gridBlock,
                 $gridModel

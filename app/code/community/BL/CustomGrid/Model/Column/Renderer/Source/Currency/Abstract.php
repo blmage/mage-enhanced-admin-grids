@@ -15,26 +15,26 @@
 
 abstract class BL_CustomGrid_Model_Column_Renderer_Source_Currency_Abstract
 {
-    protected $_optionArray = null;
+    static protected $_optionArray = null;
     
     abstract protected function _getUseBaseCurrencyValue();
     abstract protected function _getUseColumnCurrencyValue();
     
     public function toOptionArray()
     {
-        if (is_null($this->_optionArray)) {
+        if (is_null(self::$_optionArray)) {
             $currencies = Mage::app()->getLocale()->getOptionCurrencies();
             $allowedCodes = Mage::getModel('directory/currency')->getConfigAllowCurrencies();
-            $this->_optionArray = array();
+            self::$_optionArray = array();
             
             foreach ($currencies as $currency) {
                 if (in_array($currency['value'], $allowedCodes)) {
-                    $this->_optionArray[] = $currency;
+                    self::$_optionArray[] = $currency;
                 }
             }
             
             array_unshift(
-                $this->_optionArray, 
+                self::$_optionArray, 
                 array(
                     'value' => $this->_getUseBaseCurrencyValue(), 
                     'label' => Mage::helper('customgrid')->__('Use Base Currency'),
@@ -45,7 +45,7 @@ abstract class BL_CustomGrid_Model_Column_Renderer_Source_Currency_Abstract
                 )
             );
         }
-        return $this->_optionArray;
+        return self::$_optionArray;
     }
     
     public function toOptionHash()

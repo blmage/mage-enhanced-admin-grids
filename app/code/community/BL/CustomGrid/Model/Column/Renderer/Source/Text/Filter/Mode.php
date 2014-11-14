@@ -13,27 +13,12 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_Column_Renderer_Source_Text_Filter_Mode
+class BL_CustomGrid_Model_Column_Renderer_Source_Text_Filter_Mode extends BL_CustomGrid_Model_Source_Fixed
 {
-    public function toOptionArray()
-    {
-        return array(
-            array(
-                'value' => BL_CustomGrid_Block_Widget_Grid_Column_Filter_Text::MODE_WITH_WITHOUT,
-                'label' => Mage::helper('customgrid')->__('With/Without Value'),
-            ),
-            array(
-                'value' => BL_CustomGrid_Block_Widget_Grid_Column_Filter_Text::MODE_EXACT_LIKE,
-                'label' => Mage::helper('customgrid')->__('[el] LIKE (exact)'),
-            ),
-            array(
-                'value' => BL_CustomGrid_Block_Widget_Grid_Column_Filter_Text::MODE_INSIDE_LIKE,
-                'label' => Mage::helper('customgrid')->__('[il] LIKE (between %)'),
-            ),
-            array(
-                'value' => BL_CustomGrid_Block_Widget_Grid_Column_Filter_Text::MODE_REGEX,
-                'label' => Mage::helper('customgrid')->__('[re] Regular Expression'),
-            ),
-        );
-    }
+    protected $_optionHash = array(
+        BL_CustomGrid_Block_Widget_Grid_Column_Filter_Text::MODE_WITH_WITHOUT => 'With/Without Value',
+        BL_CustomGrid_Block_Widget_Grid_Column_Filter_Text::MODE_EXACT_LIKE   => '[el] LIKE (exact)',
+        BL_CustomGrid_Block_Widget_Grid_Column_Filter_Text::MODE_INSIDE_LIKE  => '[il] LIKE (between %)',
+        BL_CustomGrid_Block_Widget_Grid_Column_Filter_Text::MODE_REGEX        => '[re] Regular Expression',
+    );
 }

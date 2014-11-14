@@ -36,26 +36,8 @@ class BL_CustomGrid_Model_Column_Renderer_Collection_Options extends
         if (empty($implodedSeparator) && ($implodedSeparator != '0')) {
             $implodedSeparator = ',';
         }
-        if (!$this->hasData('values/filter_mode') && $this->getData('values/boolean_filter')) {
-            $this->setData(
-                'values/filter_mode',
-                BL_CustomGrid_Block_Widget_Grid_Column_Filter_Select::MODE_WITH_WITHOUT
-            );
-        }
         
-        return array(
-            'filter'   => 'customgrid/widget_grid_column_filter_select',
-            'renderer' => 'customgrid/widget_grid_column_renderer_options',
-            'options'  => (is_array($options) ? $options : array()),
-            'imploded_values'      => (bool) $this->getData('values/imploded_values'),
-            'imploded_separator'   => $implodedSeparator,
-            'filter_mode'          => $this->getData('values/filter_mode'),
-            'logical_operator'     => $this->getData('values/filter_logical_operator'),
-            'negative_filter'      => (bool) $this->getData('values/negative_filter'),
-            'display_full_path'    => (bool) $this->getData('values/display_full_path'),
-            'values_separator'     => $this->getDataSetDefault('values/values_separator', ', '),
-            'sub_values_separator' => $this->getDataSetDefault('values/sub_values_separator', ' - '),
-            'show_missing_option_values' => (bool) $this->getData('values/show_missing'),
-        );
+        return $this->_getRendererHelper()
+            ->getOptionsValues($this, $options, (bool) $this->getData('values/imploded_values'), $implodedSeparator);
     }
 }
