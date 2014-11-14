@@ -13,23 +13,14 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_System_Config_Source_Sql_Logical_Operator
+class BL_CustomGrid_Model_System_Config_Source_Sql_Logical_Operator extends
+    BL_CustomGrid_Model_System_Config_Source_Fixed
 {
-    public function toOptionArray()
-    {
-        return array(
-            array(
-                'value' => BL_CustomGrid_Helper_Collection::SQL_AND,
-                'label' => 'AND',
-            ),
-            array(
-                'value' => BL_CustomGrid_Helper_Collection::SQL_OR,
-                'label' => 'OR',
-            ),
-            array(
-                'value' => BL_CustomGrid_Helper_Collection::SQL_XOR,
-                'label' => 'XOR',
-            ),
-        );
-    }
+    protected $_optionHash = array(
+        BL_CustomGrid_Helper_Collection::SQL_AND => 'AND',
+        BL_CustomGrid_Helper_Collection::SQL_OR  => 'OR',
+        BL_CustomGrid_Helper_Collection::SQL_XOR => 'XOR',
+    );
+    
+    protected $_translateOptions = false;
 }

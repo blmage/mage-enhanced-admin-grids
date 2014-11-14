@@ -13,19 +13,10 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_System_Config_Source_Yesno
+class BL_CustomGrid_Model_System_Config_Source_Yesno extends BL_CustomGrid_Model_System_Config_Source_Fixed
 {
-    public function toOptionArray()
-    {
-        return array(
-            array(
-                'value' => 1,
-                'label' => Mage::helper('customgrid')->__('Yes'),
-            ),
-            array(
-                'value' => 0,
-                'label' => Mage::helper('customgrid')->__('No'),
-            ),
-        );
-    }
+    protected $_optionHash = array(
+        1 => 'Yes',
+        0 => 'No',
+    );
 }

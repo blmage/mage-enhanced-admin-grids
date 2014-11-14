@@ -13,45 +13,30 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_System_Config_Source_Grid_Param
+class BL_CustomGrid_Model_System_Config_Source_Grid_Param extends BL_CustomGrid_Model_System_Config_Source_Fixed
 {
+    protected $_optionHash = array(
+        BL_CustomGrid_Model_Grid::GRID_PARAM_PAGE   => 'Page Number',
+        BL_CustomGrid_Model_Grid::GRID_PARAM_LIMIT  => 'Page Size',
+        BL_CustomGrid_Model_Grid::GRID_PARAM_SORT   => 'Sort',
+        BL_CustomGrid_Model_Grid::GRID_PARAM_DIR    => 'Sort Direction',
+        BL_CustomGrid_Model_Grid::GRID_PARAM_FILTER => 'Filter',
+    );
+    
     public function toOptionArray($withNone = true)
     {
-        $helper  = Mage::helper('customgrid');
-        
-        $options = array(
-            array(
-                'value' => BL_CustomGrid_Model_Grid::GRID_PARAM_PAGE,
-                'label' => $helper->__('Page Number'),
-            ),
-            array(
-                'value' => BL_CustomGrid_Model_Grid::GRID_PARAM_LIMIT,
-                'label' => $helper->__('Page Size'),
-            ),
-            array(
-                'value' => BL_CustomGrid_Model_Grid::GRID_PARAM_SORT,
-                'label' => $helper->__('Sort'),
-            ),
-            array(
-                'value' => BL_CustomGrid_Model_Grid::GRID_PARAM_DIR,
-                'label' => $helper->__('Sort Direction'),
-            ),
-            array(
-                'value' => BL_CustomGrid_Model_Grid::GRID_PARAM_FILTER,
-                'label' => $helper->__('Filter'),
-            ),
-        );
+        $optionArray = parent::toOptionArray();
         
         if ($withNone) {
             array_unshift(
-                $options,
+                $optionArray,
                 array(
                     'value' => BL_CustomGrid_Model_Grid::GRID_PARAM_NONE,
-                    'label' => $helper->__('None'),
+                    'label' => $this->_getTranslationHelper()->__('None'),
                 )
             );
         }
         
-        return $options;
+        return $optionArray;
     }
 }

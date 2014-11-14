@@ -13,19 +13,11 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_System_Config_Source_Exceptions_Handling_Mode
+class BL_CustomGrid_Model_System_Config_Source_Exceptions_Handling_Mode extends
+    BL_CustomGrid_Model_System_Config_Source_Fixed
 {
-    public function toOptionArray()
-    {
-        return array(
-            array(
-                'value' => BL_CustomGrid_Helper_Config::GRID_EXCEPTION_HANDLING_MODE_EXCLUDE,
-                'label' => Mage::helper('customgrid')->__('Exclude'),
-            ),
-            array(
-                'value' => BL_CustomGrid_Helper_Config::GRID_EXCEPTION_HANDLING_MODE_ALLOW,
-                'label' => Mage::helper('customgrid')->__('Allow'),
-            ),
-         );
-    }
+    protected $_optionHash = array(
+        BL_CustomGrid_Helper_Config::GRID_EXCEPTION_HANDLING_MODE_EXCLUDE => 'Exclude',
+        BL_CustomGrid_Helper_Config::GRID_EXCEPTION_HANDLING_MODE_ALLOW   => 'Allow',
+    );
 }

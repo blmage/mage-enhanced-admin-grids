@@ -95,6 +95,25 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
     }
     
     /**
+     * Reset the base profile ID before deletion, to prevent a circular dependency problem
+     *
+     * @param BL_CustomGrid_Model_Grid $gridModel
+     * @return this
+     */
+    protected function _beforeDelete(Mage_Core_Model_Abstract $gridModel)
+    {
+        $write = $this->_getWriteAdapter();
+        
+        $write->update(
+            $this->_getGridsTable(),
+            array('base_profile_id' => null),
+            $write->quoteInto('grid_id = ?', $gridModel->getId())
+        );
+        
+        return $this;
+    }
+    
+    /**
      * Save the current profile for the given grid (base profile for a new grid / current profile otherwise)
      * 
      * @param BL_CustomGrid_Model_Grid $gridModel Grid model

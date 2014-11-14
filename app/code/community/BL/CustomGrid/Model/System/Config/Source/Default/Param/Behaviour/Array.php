@@ -13,37 +13,15 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_System_Config_Source_Default_Param_Behaviour_Array
+class BL_CustomGrid_Model_System_Config_Source_Default_Param_Behaviour_Array extends
+    BL_CustomGrid_Model_System_Config_Source_Fixed
 {
-    public function toOptionArray()
-    {
-        $helper = Mage::helper('customgrid');
-        
-        return array(
-            array(
-                'value' => BL_CustomGrid_Model_Grid::DEFAULT_PARAM_DEFAULT,
-                'label' => $helper->__('Default (Last Set Value is Used)'),
-            ),
-            array(
-                'value' => BL_CustomGrid_Model_Grid::DEFAULT_PARAM_FORCE_ORIGINAL,
-                'label' => $helper->__('Force Original Value'),
-            ),
-            array(
-                'value' => BL_CustomGrid_Model_Grid::DEFAULT_PARAM_FORCE_CUSTOM,
-                'label' => $helper->__('Force Custom Value'),
-            ),
-            array(
-                'value' => BL_CustomGrid_Model_Grid::DEFAULT_PARAM_MERGE_DEFAULT,
-                'label' => $helper->__('Merge Values (Natural Order)'),
-            ),
-            array(
-                'value' => BL_CustomGrid_Model_Grid::DEFAULT_PARAM_MERGE_BASE_ORIGINAL,
-                'label' => $helper->__('Merge Values (Custom on Original)'),
-            ),
-            array(
-                'value' => BL_CustomGrid_Model_Grid::DEFAULT_PARAM_MERGE_BASE_CUSTOM,
-                'label' => $helper->__('Merge Values (Original on Custom)'),
-            ),
-        );
-    }
+    protected $_optionHash = array(
+        BL_CustomGrid_Model_Grid::DEFAULT_PARAM_DEFAULT             => 'Default (Last Set Value is Used)',
+        BL_CustomGrid_Model_Grid::DEFAULT_PARAM_FORCE_ORIGINAL      => 'Force Original Value',
+        BL_CustomGrid_Model_Grid::DEFAULT_PARAM_FORCE_CUSTOM        => 'Force Custom Value',
+        BL_CustomGrid_Model_Grid::DEFAULT_PARAM_MERGE_DEFAULT       => 'Merge Values (Natural Order)',
+        BL_CustomGrid_Model_Grid::DEFAULT_PARAM_MERGE_BASE_ORIGINAL => 'Merge Values (Custom on Original)',
+        BL_CustomGrid_Model_Grid::DEFAULT_PARAM_MERGE_BASE_CUSTOM   => 'Merge Values (Original on Custom)',
+    );
 }

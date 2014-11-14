@@ -13,29 +13,17 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_System_Config_Source_Product_Categories_Filter_Mode
+class BL_CustomGrid_Model_System_Config_Source_Product_Categories_Filter_Mode extends
+    BL_CustomGrid_Model_System_Config_Source_Fixed
 {
-    public function toOptionArray()
-    {
-        $helper = Mage::helper('customgrid');
-        
-        return array(
-            array(
-                'value' => BL_CustomGrid_Model_Custom_Column_Product_Categories::FILTER_MODE_ONE_CHOOSEN,
-                'label' => $helper->__('The filtered products must belong to at least one chosen category'),
-            ),
-            array(
-                'value' => BL_CustomGrid_Model_Custom_Column_Product_Categories::FILTER_MODE_ALL_CHOOSEN,
-                'label' => $helper->__('The filtered products must belong to all of the chosen categories'),
-            ),
-            array(
-                'value' => BL_CustomGrid_Model_Custom_Column_Product_Categories::FILTER_MODE_NONE_CHOOSEN,
-                'label' => $helper->__('The filtered products must not belong to any of the chosen categories'),
-            ),
-            array(
-                'value' => BL_CustomGrid_Model_Custom_Column_Product_Categories::FILTER_MODE_CUSTOM,
-                'label' => $helper->__('Custom'),
-            ),
-        );
-    }
+    protected $_optionHash = array(
+        BL_CustomGrid_Model_Custom_Column_Product_Categories::FILTER_MODE_ONE_CHOOSEN
+            => 'The filtered products must belong to at least one chosen category',
+        BL_CustomGrid_Model_Custom_Column_Product_Categories::FILTER_MODE_ALL_CHOOSEN
+            => 'The filtered products must belong to all of the chosen categories',
+        BL_CustomGrid_Model_Custom_Column_Product_Categories::FILTER_MODE_NONE_CHOOSEN
+            => 'The filtered products must not belong to any of the chosen categories',
+        BL_CustomGrid_Model_Custom_Column_Product_Categories::FILTER_MODE_CUSTOM
+            => 'Custom',
+    );
 }

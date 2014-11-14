@@ -19,7 +19,7 @@ class BL_CustomGrid_Block_Grid_Edit_Tab_Role extends BL_CustomGrid_Block_Widget_
     {
         $role    = $this->getRole();
         $roleId  = $role->getId();
-        $options = Mage::getSingleton('customgrid/system_config_source_boolean_config')->getOptions();
+        $options = Mage::getSingleton('customgrid/system_config_source_boolean_config')->toOptionArray();
         $gridModel  = $this->getGridModel();
         $roleConfig = $gridModel->getRoleConfig($roleId);
         

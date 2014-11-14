@@ -17,24 +17,24 @@ class BL_CustomGrid_Model_System_Config_Source_Admin_Role
 {
     const CREATOR_ROLE = 'blcg_creator_role';
     
-    static protected $_options = null;
+    static protected $_optionArray = null;
     
     public function toOptionArray($includeCreatorRole=true)
     {
-        if (is_null(self::$_options)) {
+        if (is_null(self::$_optionArray)) {
             $collection = Mage::getModel('admin/role')
                 ->getCollection()
                 ->setRolesFilter();
             
             foreach ($collection as $role) {
-                self::$_options[] = array(
+                self::$_optionArray[] = array(
                     'value' => $role->getRoleId(),
                     'label' => $role->getRoleName(),
                 );
             }
         }
         
-        $options = self::$_options;
+        $options = self::$_optionArray;
         
         if ($includeCreatorRole) {
             array_unshift(

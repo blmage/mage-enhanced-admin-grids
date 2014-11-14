@@ -166,6 +166,7 @@
             <profiles>
                 <default_restricted>0</default_restricted>
                 <default_assigned_to>blcg_creator_role</default_assigned_to>
+                <remembered_session_params>none</remembered_session_params>
             </profiles>
             <custom_columns>
                 <group_in_default_header>1</group_in_default_header>

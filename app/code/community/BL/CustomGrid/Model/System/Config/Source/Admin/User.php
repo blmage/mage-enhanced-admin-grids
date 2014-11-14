@@ -15,20 +15,20 @@
 
 class BL_CustomGrid_Model_System_Config_Source_Admin_User
 {
-    static protected $_options = null;
+    static protected $_optionArray = null;
     
     public function toOptionArray()
     {
-        if (is_null(self::$_options)) {
+        if (is_null(self::$_optionArray)) {
             $collection = Mage::getModel('admin/user')->getCollection();
             
             foreach ($collection as $user) {
-                self::$_options[] = array(
+                self::$_optionArray[] = array(
                     'value' => $user->getUserId(),
                     'label' => $user->getUsername(),
                 );
             }
         }
-        return self::$_options;
+        return self::$_optionArray;
     }
 }

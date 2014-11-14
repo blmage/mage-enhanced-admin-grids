@@ -1225,7 +1225,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
         $data['grid_model'] = $this;
         $blockId = $data['block_id'];
         $this->_data['columns'][$blockId] = Mage::getModel('customgrid/grid_column', $data);
-        $this->_data['column_ids_by_origin'][$data['origin']][] = $blockId;
+        $this->_data['column_block_ids_by_origin'][$data['origin']][] = $blockId;
         $this->_recomputeColumnsMaxOrder($data['order']);
         $this->setDataChanges(true);
         return $this;
@@ -1246,13 +1246,17 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
             
             if (isset($data['origin']) && ($data['origin'] != $previousOrigin)) {
                 $this->getColumnBlockIdsByOrigin();
-                $previousKey = array_search($columnBlockId, $this->_data['column_ids_by_origin'][$previousOrigin]);
+                
+                $previousKey = array_search(
+                    $columnBlockId,
+                    $this->_data['column_block_ids_by_origin'][$previousOrigin]
+                );
                 
                 if ($previousKey !== false) {
-                    unset($this->_data['column_ids_by_origin'][$previousOrigin][$previousKey]);
+                    unset($this->_data['column_block_ids_by_origin'][$previousOrigin][$previousKey]);
                 }
                 
-                $this->_data['column_ids_by_origin'][$data['origin']][] = $columnBlockId;
+                $this->_data['column_block_ids_by_origin'][$data['origin']][] = $columnBlockId;
             }
             if (isset($data['order'])) {
                 $this->_recomputeColumnsMaxOrder($data['order']);
@@ -1276,10 +1280,10 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
             unset($this->_data['columns'][$columnBlockId]);
             
             $origin = $column->getOrigin();
-            $originKey = array_search($columnBlockId, $this->_data['column_ids_by_origin'][$origin]);
+            $originKey = array_search($columnBlockId, $this->_data['column_block_ids_by_origin'][$origin]);
             
             if ($originKey !== false) {
-                unset($this->_data['column_ids_by_origin'][$origin][$originKey]);
+                unset($this->_data['column_block_ids_by_origin'][$origin][$originKey]);
             }
             
             $this->_recomputeColumnsMaxOrder();
