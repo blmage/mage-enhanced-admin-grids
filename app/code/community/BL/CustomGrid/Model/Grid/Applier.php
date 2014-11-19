@@ -237,7 +237,7 @@ class BL_CustomGrid_Model_Grid_Applier extends BL_CustomGrid_Model_Grid_Worker
         Mage_Adminhtml_Block_Widget_Grid $gridBlock,
         array $baseData
     ) {
-        if ($customColumn = $column->getCustomColumnModel()){
+        if ($customColumn = $column->getCustomColumnModel()) {
             $baseData['index'] = BL_CustomGrid_Model_Grid::CUSTOM_COLUMN_GRID_ALIAS
                 . str_replace(BL_CustomGrid_Model_Grid::CUSTOM_COLUMN_ID_PREFIX, '', $column->getBlockId());
             

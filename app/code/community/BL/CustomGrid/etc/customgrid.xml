@@ -547,7 +547,7 @@
                         <group>Rendering</group>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>customgrid/column_renderer_source_collection_currency</source_model>
+                        <source_model>customgrid/column_renderer_source_currency</source_model>
                         <sort_order>50</sort_order>
                     </display_currency>
                     <display_currency_column_type>
@@ -1435,7 +1435,7 @@
                         <group>Rendering</group>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>customgrid/column_renderer_source_attribute_currency</source_model>
+                        <source_model>customgrid/column_renderer_source_currency</source_model>
                         <sort_order>50</sort_order>
                     </display_currency>
                     <display_currency_column_type>
