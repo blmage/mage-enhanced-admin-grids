@@ -27,6 +27,12 @@ class BL_CustomGrid_Model_Column_Renderer_Attribute_Options extends
             || ($attribute->getFrontendInput() == 'multiselect');
     }
     
+    /**
+     * Return the options used by the given attribute, if any
+     * 
+     * @param Mage_Eav_Model_Entity_Attribute $attribute Attribute model
+     * @return array|null
+     */
     protected function _getAttributeOptions(Mage_Eav_Model_Entity_Attribute $attribute)
     {
         try {
@@ -37,6 +43,12 @@ class BL_CustomGrid_Model_Column_Renderer_Attribute_Options extends
         return (!empty($options) ? $options : null);
     }
     
+    /**
+     * Return the usable options for the given attribute
+     * 
+     * @param Mage_Eav_Model_Entity_Attribute $attribute Attribute model
+     * @return array
+     */
     protected function _getOptions(Mage_Eav_Model_Entity_Attribute $attribute)
     {
         $options = array();
@@ -50,7 +62,7 @@ class BL_CustomGrid_Model_Column_Renderer_Attribute_Options extends
             }
         }
         
-        return $options;
+        return (is_array($options) ? $options : array());
     }
     
     public function getColumnBlockValues(

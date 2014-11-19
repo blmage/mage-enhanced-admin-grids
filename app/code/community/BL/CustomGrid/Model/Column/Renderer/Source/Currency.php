@@ -13,12 +13,9 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-abstract class BL_CustomGrid_Model_Column_Renderer_Source_Currency_Abstract
+class BL_CustomGrid_Model_Column_Renderer_Source_Currency
 {
     static protected $_optionArray = null;
-    
-    abstract protected function _getUseBaseCurrencyValue();
-    abstract protected function _getUseColumnCurrencyValue();
     
     public function toOptionArray()
     {
@@ -36,11 +33,11 @@ abstract class BL_CustomGrid_Model_Column_Renderer_Source_Currency_Abstract
             array_unshift(
                 self::$_optionArray, 
                 array(
-                    'value' => $this->_getUseBaseCurrencyValue(), 
+                    'value' => BL_CustomGrid_Helper_Column_Renderer::CURRENCY_TYPE_BASE,
                     'label' => Mage::helper('customgrid')->__('Use Base Currency'),
                 ), 
                 array(
-                    'value' => $this->_getUseColumnCurrencyValue(), 
+                    'value' => BL_CustomGrid_Helper_Column_Renderer::CURRENCY_TYPE_COLUMN,
                     'label' => Mage::helper('customgrid')->__('Use Column Currency'),
                 )
             );

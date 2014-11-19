@@ -470,7 +470,7 @@
                         <label>Original Currency</label>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>customgrid/column_renderer_source_collection_currency</source_model>
+                        <source_model>customgrid/column_renderer_source_currency</source_model>
                         <sort_order>10</sort_order>
                     </original_currency>
                     <original_currency_column_type>
@@ -1358,7 +1358,7 @@
                         <label>Original Currency</label>
                         <visible>1</visible>
                         <type>select</type>
-                        <source_model>customgrid/column_renderer_source_attribute_currency</source_model>
+                        <source_model>customgrid/column_renderer_source_currency</source_model>
                         <sort_order>10</sort_order>
                     </original_currency>
                     <original_currency_column_type>

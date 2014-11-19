@@ -91,18 +91,15 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
     }
     
     /**
-     * Return the alias used by the main table of the given collection.
+     * Return the most common alias known to be used by the main table of the collections having the same type
+     * as the given one
      * 
      * @param Varien_Data_Collection_Db $collection Grid collection
-     * @param mixed $defaultAlias The alias that should first be searched (if none is given, known default will be used)
-     * @param string $mainTableName The table that should be assumed to be the main one (if default alias search failed)
-     * @return mixed
+     * @param string|null $defaultAlias If set, this alias will be returned instead
+     * @return string
      */
-    public function getCollectionMainTableAlias(
-        Varien_Data_Collection_Db $collection,
-        $defaultAlias = null,
-        $mainTableName = ''
-    ) {
+    protected function _getDefaultMainTableAlias(Varien_Data_Collection_Db $collection, $defaultAlias = null)
+    {
         if (empty($defaultAlias)) {
             if ($collection instanceof Mage_Eav_Model_Entity_Collection_Abstract) {
                 $defaultAlias = 'e';
@@ -110,16 +107,32 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
                 $defaultAlias = 'main_table';
             }
         }
-        
-        $fromPart    = $collection->getSelect()->getPart(Zend_Db_Select::FROM);
-        $mainAlias   = '';
-        $fromAliases = array();
+        return $defaultAlias;
+    }
+    
+    /**
+     * Return the alias used by the main table of the given collection.
+     * 
+     * @param Varien_Data_Collection_Db $collection Grid collection
+     * @param string|null $defaultAlias The alias that should first be searched (if not set, known default will be used)
+     * @param string $mainTableName The table that should be assumed as the main one (if default alias search failed)
+     * @return string
+     */
+    public function getCollectionMainTableAlias(
+        Varien_Data_Collection_Db $collection,
+        $defaultAlias = null,
+        $mainTableName = null
+    ) {
+        $defaultAlias = $this->_getDefaultMainTableAlias($collection, $defaultAlias);
+        $fromPart     = $collection->getSelect()->getPart(Zend_Db_Select::FROM);
+        $mainAlias    = '';
+        $fromAliases  = array();
         
         if (!isset($fromPart[$defaultAlias])
             || ($fromPart[$defaultAlias]['joinType'] != Zend_Db_Select::FROM)) {
             foreach ($fromPart as $alias => $config) {
                 if ($config['joinType'] == Zend_Db_Select::FROM) {
-                    if (($mainTableName != '') && ($config['tableName'] === $mainTableName)) {
+                    if ($config['tableName'] === $mainTableName) {
                         $mainAlias = $alias;
                         break;
                     } else {
@@ -131,7 +144,8 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
             $mainAlias = $defaultAlias;
         }
         
-        return ($mainAlias !== '' ? $mainAlias : (!empty($fromAliases) ? array_shift($fromAliases) : $defaultAlias));
+        $fromAliases[] = $defaultAlias;
+        return ($mainAlias !== '' ? $mainAlias : array_shift($fromAliases));
     }
     
     /**

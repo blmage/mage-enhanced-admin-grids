@@ -15,9 +15,6 @@
 
 class BL_CustomGrid_Model_Column_Renderer_Attribute_Price extends BL_CustomGrid_Model_Column_Renderer_Attribute_Abstract
 {
-    const CURRENCY_TYPE_BASE   = 'base_currency';
-    const CURRENCY_TYPE_COLUMN = 'column_currency';
-    
     public function isAppliableToAttribute(
         Mage_Eav_Model_Entity_Attribute $attribute,
         BL_CustomGrid_Model_Grid $gridModel

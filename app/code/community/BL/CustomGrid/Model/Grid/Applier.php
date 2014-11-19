@@ -63,130 +63,207 @@ class BL_CustomGrid_Model_Grid_Applier extends BL_CustomGrid_Model_Grid_Worker
     }
     
     /**
-     * Return grid column block values for given collection column
+     * Return the values needed to create a column block corresponding to the given collection column
      *
-     * @param BL_CustomGrid_Model_Grid_Column $column Collection column
-     * @param string $rendererType Renderer type code
-     * @param string $rendererParams Encoded renderer parameters
-     * @param Mage_Core_Model_Store $store Current store
+     * @param BL_CustomGrid_Model_Grid_Column $column Grid collection column
+     * @param array $baseData Base column data
+     * @param array $lockedValues Locked column values
+     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
      * @return array
      */
     protected function _getCollectionColumnBlockValues(
         BL_CustomGrid_Model_Grid_Column $column,
-        $rendererType,
-        $rendererParams,
-        Mage_Core_Model_Store $store
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock,
+        array $baseData,
+        array $lockedValues
     ) {
-        $config = Mage::getSingleton('customgrid/column_renderer_config_collection');
-        
-        if ($renderer = $config->getRendererInstanceByCode($rendererType)) {
-            if (is_array($decodedParams = $config->decodeParameters($rendererParams))) {
-                $renderer->setValues($decodedParams);
-            } else {
-                $renderer->setValues(array());
-            }
+        if (isset($lockedValues['renderer']) || $column->getRendererType()) {
+            /** @var $rendererConfig BL_CustomGrid_Model_Column_Renderer_Config_Collection */
+            $rendererConfig = Mage::getSingleton('customgrid/column_renderer_config_collection');
+            list($rendererType, $rendererParams) = $this->_getCollectionColumnRendererValues($column, $lockedValues);
+            $rendererValues = array();
             
-            return $renderer->getColumnBlockValues($column->getIndex(), $store, $this->getGridModel());
-        }
-        
-        return array();
-    }
-    
-    /**
-     * Return grid column block values for given attribute column
-     * 
-     * @param Mage_Eav_Model_Entity_Attribute $attribute Corresponding attribute model
-     * @param string $rendererParams Encoded renderer parameters
-     * @param Mage_Core_Model_Store $store Current store
-     * @return array
-     */
-    protected function _getAttributeColumnBlockValues(
-        Mage_Eav_Model_Entity_Attribute $attribute,
-        $rendererParams,
-        Mage_Core_Model_Store $store
-    ) {
-        $gridModel = $this->getGridModel();
-        $config = Mage::getSingleton('customgrid/column_renderer_config_attribute');
-        $renderers = $config->getRenderersInstances();
-        $values = array();
-        
-        foreach ($renderers as $renderer) {
-            if ($renderer->isAppliableToAttribute($attribute, $gridModel)) {
-                if (is_array($params = $config->decodeParameters($rendererParams))) {
-                    $renderer->setValues($params);
+            if ($renderer = $rendererConfig->getRendererInstanceByCode($rendererType)) {
+                if (is_array($decodedParams = $rendererConfig->decodeParameters($rendererParams))) {
+                    $renderer->setValues($decodedParams);
                 } else {
                     $renderer->setValues(array());
                 }
                 
-                $values = $renderer->getColumnBlockValues($attribute, $store, $gridModel);
-                $values = (is_array($values) ? $values : array());
+                $rendererValues = $renderer->getColumnBlockValues(
+                    $column->getIndex(),
+                    $gridBlock->blcg_getStore(),
+                    $this->getGridModel()
+                );
+            }
+            
+            $baseData = array_merge($baseData, $rendererValues);
+        }
+        return $baseData;
+    }
+    
+    /**
+     * Return the renderer usable to render the attribute columns based on the given attribute,
+     * prepared with the given parameters
+     * 
+     * @param Mage_Eav_Model_Entity_Attribute $attribute Column attribute
+     * @param string $rendererParams Encoded renderer parameters
+     * @return BL_CustomGrid_Column_Renderer_Attribute_Abstract|null
+     */
+    protected function _getAttributeColumnRenderer(Mage_Eav_Model_Entity_Attribute $attribute, $rendererParams)
+    {
+        $gridModel = $this->getGridModel();
+        /** @var $rendererConfig BL_CustomGrid_Model_Column_Renderer_Config_Attribute */
+        $rendererConfig = Mage::getSingleton('customgrid/column_renderer_config_attribute');
+        $renderers = $rendererConfig->getRenderersInstances();
+        $matchingRenderer = null;
+        
+        foreach ($renderers as $renderer) {
+            if ($renderer->isAppliableToAttribute($attribute, $gridModel)) {
+                $matchingRenderer = $renderer;
+                
+                if (is_array($rendererParams = $rendererConfig->decodeParameters($rendererParams))) {
+                    $matchingRenderer->setValues($rendererParams);
+                } else {
+                    $matchingRenderer->setValues(array());
+                }
+                
                 break;
             }
         }
         
-        return $values;
+        return $matchingRenderer;
     }
     
     /**
-     * Return grid column block values for given custom column
+     * Return the values needed to create a column block corresponding to the given attribute column
      *
-     * @param string $columnBlockId Column block ID
-     * @param string $columnIndex Column index
-     * @param BL_CustomGrid_Model_Custom_Column_Abstract $customColumn Custom column model
-     * @param string $rendererType Renderer type code
-     * @param string $rendererParams Encoded renderer parameters
-     * @param string $customizationParams Encoded customization parameters
-     * @param Mage_Core_Model_Store $store Current store
+     * @param BL_CustomGrid_Model_Grid_Column $column Grid attribute column
      * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
+     * @param array $baseData Base column data
+     * @param Mage_Eav_Model_Entity_Attribute[] $attributes Available attributes
+     * @param string[] $adddedAttributes Attributes that were already added (values format: "[code]_[store_id]")
      * @return array
      */
-    protected function _getCustomColumnBlockValues(
-        $columnBlockId,
-        $columnIndex,
+    protected function _getAttributeColumnBlockValues(
+        BL_CustomGrid_Model_Grid_Column $column,
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock,
+        array $baseData,
+        array $attributes,
+        array &$addedAttributes
+    ) {
+        if (isset($attributes[$column->getIndex()])) {
+            $gridModel = $this->getGridModel();
+            $store = $this->_getColumnStoreModel($column, $gridBlock);
+            $attribute = $attributes[$column->getIndex()];
+            $attributeKey = $column->getIndex() . '_' . $store->getId();
+            
+            if (!isset($addedAttributes[$attributeKey])) {
+                $baseData['index'] = BL_CustomGrid_Model_Grid::ATTRIBUTE_COLUMN_GRID_ALIAS
+                    . str_replace(BL_CustomGrid_Model_Grid::ATTRIBUTE_COLUMN_ID_PREFIX, '', $column->getBlockId());
+                
+                $gridBlock->blcg_addAdditionalAttribute(
+                    array(
+                        'alias'     => $baseData['index'],
+                        'attribute' => $attribute,
+                        'bind'      => 'entity_id',
+                        'filter'    => null,
+                        'join_type' => 'left',
+                        'store_id'  => $store->getId(),
+                    )
+                );
+                
+                $addedAttributes[$attributeKey] = $baseData['index'];
+            } else {
+                $baseData['index'] = $addedAttributes[$attributeKey];
+            }
+            
+            if (($renderer = $this->_getAttributeColumnRenderer($attribute, $column->getRendererParams()))
+                && is_array($rendererValues = $renderer->getColumnBlockValues($attribute, $store, $gridModel))) {
+                $baseData = array_merge($baseData, $rendererValues);
+            }
+        }
+        
+        return $baseData;
+    }
+    
+    /**
+     * Return the renderer usable to render the columns based on the given custom column,
+     * depending on the selected renderer type, prepared with the given parameters
+     * 
+     * @param BL_CustomGrid_Model_Custom_Column_Abstract $customColumn Custom column model
+     * @param string $rendererType Selected renderer type
+     * @param string $rendererParams Encoded renderer parameters
+     * @return BL_CustomGrid_Column_Renderer_Collection_Abstract|null
+     */
+    protected function _getCustomColumnRenderer(
         BL_CustomGrid_Model_Custom_Column_Abstract $customColumn,
         $rendererType,
-        $rendererParams,
-        $customizationParams,
-        Mage_Core_Model_Store $store,
-        Mage_Adminhtml_Block_Widget_Grid $gridBlock
+        $rendererParams
     ) {
+        $renderer = null;
+        
         if ($customColumn->getAllowRenderers()) {
-            if ($customColumn->getLockedRenderer()
-                && ($customColumn->getLockedRenderer() != $rendererType)) {
+            if ($customColumn->getLockedRenderer() && ($customColumn->getLockedRenderer() != $rendererType)) {
                 $rendererType = $customColumn->getLockedRenderer();
                 $rendererParams = null;
             }
             
-            $config = Mage::getSingleton('customgrid/column_renderer_config_collection');
+            /** @var $rendererConfig BL_CustomGrid_Model_Column_Renderer_Config_Collection */
+            $rendererConfig = Mage::getSingleton('customgrid/column_renderer_config_collection');
             
-            if ($renderer = $config->getRendererInstanceByCode($rendererType)) {
-                if (is_array($params = $config->decodeParameters($rendererParams))) {
-                    $renderer->setValues($params);
+            if ($rendererType && ($renderer = $rendererConfig->getRendererInstanceByCode($rendererType))) {
+                if (is_array($rendererParams = $rendererConfig->decodeParameters($rendererParams))) {
+                    $renderer->setValues($rendererParams);
                 } else {
                     $renderer->setValues(array());
                 }
             }
-        } else {
-            $renderer = null;
         }
         
-        if (!empty($customizationParams)) {
-            $customizationParams = Mage::getSingleton('customgrid/grid_type_config')
-                ->decodeParameters($customizationParams);
-        } else {
-            $customizationParams = array();
+        return $renderer;
+    }
+    
+    /**
+     * Return the values needed to create a column block corresponding to the given attribute column
+     *
+     * @param BL_CustomGrid_Model_Grid_Column $column Grid custom column
+     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
+     * @param array $baseData Base column data 
+     * @return array
+     */
+    protected function _getCustomColumnBlockValues(
+        BL_CustomGrid_Model_Grid_Column $column,
+        Mage_Adminhtml_Block_Widget_Grid $gridBlock,
+        array $baseData
+    ) {
+        if ($customColumn = $column->getCustomColumnModel()){
+            $baseData['index'] = BL_CustomGrid_Model_Grid::CUSTOM_COLUMN_GRID_ALIAS
+                . str_replace(BL_CustomGrid_Model_Grid::CUSTOM_COLUMN_ID_PREFIX, '', $column->getBlockId());
+            
+            if ($customizationParams = $column->getCustomizationParams()) {
+                $customizationParams = Mage::getSingleton('customgrid/grid_type_config')
+                    ->decodeParameters($customizationParams);
+            }
+            
+            $customColumnValues = $customColumn->getApplier()
+                ->applyCustomColumnToGridBlock(
+                    $gridBlock,
+                    $this->getGridModel(),
+                    $column->getBlockId(),
+                    $baseData['index'],
+                    (is_array($customizationParams) ? $customizationParams : array()),
+                    $this->_getColumnStoreModel($column, $gridBlock),
+                    $this->_getCustomColumnRenderer(
+                        $customColumn,
+                        $column->getRendererType(),
+                        $column->getRendererParams()
+                    )
+                );
+            
+            $baseData = (is_array($customColumnValues) ? array_merge($baseData, $customColumnValues) : null);
         }
-        
-        return $customColumn->getApplier()
-            ->applyCustomColumnToGridBlock(
-                $gridBlock,
-                $this->getGridModel(),
-                $columnBlockId,
-                $columnIndex,
-                (is_array($customizationParams) ? $customizationParams : array()),
-                $store,
-                $renderer
-            );
+        return $baseData;
     }
     
     /**
@@ -218,7 +295,8 @@ class BL_CustomGrid_Model_Grid_Applier extends BL_CustomGrid_Model_Grid_Worker
     }
     
     /**
-     * Prepare the given grid column, assuming it is not part of the original grid block columns list
+     * Prepare the given grid column and add it to the given grid block
+     * (assuming it is not part of the original columns list from the grid block)
      * 
      * @param BL_CustomGrid_Model_Grid_Column $column Grid column
      * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
@@ -244,67 +322,12 @@ class BL_CustomGrid_Model_Grid_Applier extends BL_CustomGrid_Model_Grid_Worker
         
         $data = array_merge($data, array_intersect_key($lockedValues, $data));
         
-        if ($column->isCollection() && (isset($lockedValues['renderer']) || $column->getRendererType())) {
-            list($rendererType, $rendererParams) = $this->_getCollectionColumnRendererValues($column, $lockedValues);
-            
-            $data = array_merge(
-                $data, 
-                $this->_getCollectionColumnBlockValues(
-                    $column,
-                    $rendererType,
-                    $rendererParams,
-                    $gridBlock->blcg_getStore()
-                )
-            );
-        } elseif ($column->isAttribute() && isset($attributes[$column->getIndex()])) {
-            $store = $this->_getColumnStoreModel($column, $gridBlock);
-            $attributeKey = $column->getIndex() . '_' . $store->getId();
-            
-            if (!isset($addedAttributes[$attributeKey])) {
-                $data['index'] = BL_CustomGrid_Model_Grid::ATTRIBUTE_COLUMN_GRID_ALIAS
-                    . str_replace(BL_CustomGrid_Model_Grid::ATTRIBUTE_COLUMN_ID_PREFIX, '', $column->getBlockId());
-                
-                $gridBlock->blcg_addAdditionalAttribute(
-                    array(
-                        'alias'     => $data['index'],
-                        'attribute' => $attributes[$column->getIndex()],
-                        'bind'      => 'entity_id',
-                        'filter'    => null,
-                        'join_type' => 'left',
-                        'store_id'  => $store->getId(),
-                    )
-                );
-                
-                $addedAttributes[$attributeKey] = $data['index'];
-            } else {
-                $data['index'] = $addedAttributes[$attributeKey];
-            }
-            
-            $data = array_merge(
-                $data,
-                $this->_getAttributeColumnBlockValues(
-                    $attributes[$column->getIndex()],
-                    $column->getRendererParams(),
-                    $store
-                )
-            );
-        } elseif ($column->isCustom() && ($customColumn = $column->getCustomColumnModel())) {
-            $store = $this->_getColumnStoreModel($column, $gridBlock);
-            $data['index'] = BL_CustomGrid_Model_Grid::CUSTOM_COLUMN_GRID_ALIAS
-                . str_replace(BL_CustomGrid_Model_Grid::CUSTOM_COLUMN_ID_PREFIX, '', $column->getBlockId());
-            
-            $customValues = $this->_getCustomColumnBlockValues(
-                $column->getBlockId(),
-                $data['index'],
-                $customColumn,
-                $column->getRendererType(),
-                $column->getRendererParams(),
-                $column->getCustomizationParams(),
-                $store,
-                $gridBlock
-            );
-            
-            $data= (is_array($customValues) ? array_merge($data, $customValues) : null);
+        if ($column->isCollection()) {
+            $data = $this->_getCollectionColumnBlockValues($column, $gridBlock, $data, $lockedValues);
+        } elseif ($column->isAttribute()) {
+            $data = $this->_getAttributeColumnBlockValues($column, $gridBlock, $data, $attributes, $addedAttributes);
+        } elseif ($column->isCustom()) {
+            $data = $this->_getCustomColumnBlockValues($column, $gridBlock, $data);
         }
         
         if (!empty($data)) {

@@ -16,9 +16,6 @@
 class BL_CustomGrid_Model_Column_Renderer_Collection_Price extends
     BL_CustomGrid_Model_Column_Renderer_Collection_Abstract
 {
-    const CURRENCY_TYPE_BASE   = 'base_currency';
-    const CURRENCY_TYPE_COLUMN = 'column_currency';
-    
     public function getColumnBlockValues(
         $columnIndex,
         Mage_Core_Model_Store $store,

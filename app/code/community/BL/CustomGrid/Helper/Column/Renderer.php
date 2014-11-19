@@ -15,6 +15,9 @@
 
 class BL_CustomGrid_Helper_Column_Renderer extends Mage_Core_Helper_Abstract
 {
+    const CURRENCY_TYPE_BASE   = 'base_currency';
+    const CURRENCY_TYPE_COLUMN = 'column_currency';
+    
     /**
      * Return date(-time) related values
      * 
@@ -62,6 +65,7 @@ class BL_CustomGrid_Helper_Column_Renderer extends Mage_Core_Helper_Abstract
      * Return options related values
      * 
      * @param BL_CustomGrid_Model_Column_Renderer_Abstract $renderer Column renderer
+     * @param array $options Options array
      * @param bool $implodedValues Whether values are imploded
      * @param string $implodedSeparator String used to separate imploded values
      * @return array
@@ -137,7 +141,7 @@ class BL_CustomGrid_Helper_Column_Renderer extends Mage_Core_Helper_Abstract
         } // Else fixed currency code
         
         if ($isFixedCurrency) {
-            $currencySourceName = 'customgrid/column_renderer_source_' . $renderer->getColumnType() . '_currency';
+            $currencySourceName = 'customgrid/column_renderer_source_currency';
             $allowedCurrencies  = Mage::getModel($currencySourceName)->toOptionHash();
             
             if (!isset($allowedCurrencies[$currency])) {

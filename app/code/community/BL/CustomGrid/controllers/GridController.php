@@ -134,7 +134,7 @@ class BL_CustomGrid_GridController extends BL_CustomGrid_Controller_Grid_Action
             $resultMessage = $e->getMessage();
         } catch (Exception $e) {
             Mage::logException($e);
-            $resultMessage = $this->_('An error occured while saving the columns');
+            $resultMessage = $this->__('An error occured while saving the columns');
         }
         
         if ($isSuccess) {
@@ -724,7 +724,7 @@ class BL_CustomGrid_GridController extends BL_CustomGrid_Controller_Grid_Action
             case 'massDisable':
             case 'massEnable':
                 return Mage::getSingleton('admin/session')
-                    ->isAllowed('customgrid/administration/view_grids_list');;
+                    ->isAllowed('customgrid/administration/view_grids_list');
         }
         return true;
     }

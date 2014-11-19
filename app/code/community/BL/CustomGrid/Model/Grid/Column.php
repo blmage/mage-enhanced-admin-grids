@@ -150,7 +150,7 @@ class BL_CustomGrid_Model_Grid_Column extends BL_CustomGrid_Object
      */
     public function getAllowStore()
     {
-        return ($this->isCollection() || ($this->isCustom() && $this->getCustomColumn()->getAllowStore()));
+        return ($this->isCollection() || ($this->isCustom() && $this->getCustomColumnModel(false)->getAllowStore()));
     }
     
     /**
@@ -162,7 +162,7 @@ class BL_CustomGrid_Model_Grid_Column extends BL_CustomGrid_Object
     {
         return $this->isCollection()
             || $this->isAttribute()
-            || ($this->isCustom() && $this->getCustomColumn()->getAllowRenderers());
+            || ($this->isCustom() && $this->getCustomColumnModel(false)->getAllowRenderers());
     }
     
     /**
@@ -344,7 +344,7 @@ class BL_CustomGrid_Model_Grid_Column extends BL_CustomGrid_Object
                             'is_edit_allowed'      => true,
                             'customization_params' => null,
                         ),
-                        $this->_parseUserColumnValues($columnValues, true, true, false, $allowEditable)
+                        $this->_parseGridModelColumnUserValues($columnValues, true, true, false, $allowEditable)
                     )
                 );
             }
