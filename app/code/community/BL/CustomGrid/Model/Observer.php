@@ -415,12 +415,12 @@ class BL_CustomGrid_Model_Observer
     public function beforeBlockToHtml($observer)
     {
         if (($grid = $observer->getEvent()->getBlock())
-            && ($grid instanceof Mage_Adminhtml_Block_Widget_Grid)) {
+            && ($grid instanceof Mage_Adminhtml_Block_Widget_Grid)
+            && ($blockType = $grid->getType())) {
             if ($grid->getTemplate() == 'widget/grid.phtml') {
                 // Get corresponding custom grid model, create a new one if needed (first time)
-                $blockType = $grid->getType();
-                $blockId   = $grid->getId();
-                $newModel  = false;
+                $blockId  = $grid->getId();
+                $newModel = false;
                 
                 if (is_null($model = $this->_getGridModel($blockType, $blockId, false, false))) {
                     // Initialize new model with request and grid values
