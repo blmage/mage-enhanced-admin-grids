@@ -123,8 +123,8 @@ $connection->addColumn(
 $connection->addColumn(
     $tables['grid'],
     'default_filter_behaviour',
-    "enum ('default', 'force_original', 'force_custom', 'merge_default', 'merge_on_original', 'merge_on_custom') '
-        . 'character set utf8 default NULL"
+    "enum ('default', 'force_original', 'force_custom', 'merge_default', 'merge_on_original', 'merge_on_custom') "
+        . "character set utf8 default NULL"
 );
 
 /**
