@@ -67,7 +67,7 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Product_Categories extends
         }
         
         if ($tree = $columnBlock->getCategoryTree()) {
-            $result = $this->_renderCategoryTree($tree, $categoryIds, $displayIds, $minimumLevel);
+            $result = $this->_getCategoryTreeResult($tree, $categoryIds, $displayIds, $minimumLevel);
         } elseif ($hash = $columnBlock->getCategoryHash()) {
             $result = $this->_getCategoryHashResult($hash, $categoryIds);
         } else {
