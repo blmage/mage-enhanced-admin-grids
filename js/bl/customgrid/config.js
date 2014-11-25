@@ -1452,23 +1452,26 @@ blcg.Grid.ProfilesBar.prototype = {
                     return;
                 }
                 
-                var item = $(document.createElement('button'));
-                item.id = this.config.profileItemIdPrefix + this.currentProfile.id;
+                var item  = $(document.createElement('button'));
+                item.id   = this.config.profileItemIdPrefix + this.currentProfile.id;
+                item.type = 'button';
                 item.update('<span><span>' + pair.value.label.escapeHTML() + '</span></span>');
                 item.writeAttribute('title', pair.value.label);
                 item.addClassName('blcg-grid-profiles-bar-button');
                 item.addClassName('blcg-grid-profiles-bar-button-' + pair.key);
                 
-                item.observe('click', function(){
+                item.observe('click', function() {
                     var action = pair.value;
                     
                     if (!action.confirm || confirm(action.confirm)) {
                         this.applyAction(this.currentProfile, pair.key);
                     }
+                    
+                    e.preventDefault();
                 }.bind(this));
                 
                 if (pair.key == 'copy_new') {
-                    this.profilesList.insert(item);
+                    this.profilesList.up().insert(item);
                 } else {
                     this.profileOptions.insert(item);
                 }
