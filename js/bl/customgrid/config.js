@@ -1460,7 +1460,7 @@ blcg.Grid.ProfilesBar.prototype = {
                 item.addClassName('blcg-grid-profiles-bar-button');
                 item.addClassName('blcg-grid-profiles-bar-button-' + pair.key);
                 
-                item.observe('click', function() {
+                item.observe('click', function(e) {
                     var action = pair.value;
                     
                     if (!action.confirm || confirm(action.confirm)) {
