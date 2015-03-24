@@ -348,6 +348,29 @@
             <name>Reviews</name>
             <sort_order>180000</sort_order>
         </product_review>
+
+        <product_rating model="customgrid/grid_type_product_rating" module="customgrid">
+            <name>Review Ratings</name>
+            <sort_order>181000</sort_order>
+            <custom_columns>
+                <action model="customgrid/custom_column_action" module="customgrid">
+                    <name>Action</name>
+                    <group>Misc</group>
+                    <allow_customization>0</allow_customization>
+                    <config_params>
+                        <is_use_config_field>1</is_use_config_field>
+                    </config_params>
+                    <block_params>
+                        <getter>getId</getter>
+                        <actions>
+                            <edit>
+                                <field>id</field>
+                            </edit>
+                        </actions>
+                    </block_params>
+                </action>
+            </custom_columns>
+        </product_rating>
         
         <sitemap model="customgrid/grid_type_sitemap" module="customgrid">
             <name>Google Sitemap</name>
