@@ -1070,6 +1070,14 @@
                         <visible>1</visible>
                         <type>text</type>
                         <sort_order>50</sort_order>
+                        <depends>
+                            <filter_mode>
+                                <values>
+                                    <value1>exact_like</value1>
+                                    <value2>inside_like</value2>
+                                </values>
+                            </filter_mode>
+                        </depends>
                     </single_wildcard>
                     <multiple_wildcard>
                         <label>Wildcard for multiple characters (LIKE filters)</label>
@@ -1078,6 +1086,14 @@
                         <visible>1</visible>
                         <type>text</type>
                         <sort_order>60</sort_order>
+                        <depends>
+                            <filter_mode>
+                                <values>
+                                    <value1>exact_like</value1>
+                                    <value2>inside_like</value2>
+                                </values>
+                            </filter_mode>
+                        </depends>
                     </multiple_wildcard>
                     <truncation_mode>
                         <label>Truncate text</label>

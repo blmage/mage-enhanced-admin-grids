@@ -1283,31 +1283,31 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
     {
         foreach ($columns as $columnBlockId => $column) {
             $editConfig = null;
+            $hasStoreId = false;
             
             if ($column->isAttribute()) {
-                // Attribute columns
-                if ($editConfig = $this->getEditableAttribute($blockType, $column->getIndex())) {
-                    if ($column->hasStoreId()
-                        && !$editConfig->hasData('column_params/column_store_id')) {
-                        // Apply column's store ID to allow editing values for the corresponding store view
-                        $editConfig->setData('column_params/column_store_id', $column->getStoreId());
-                    }
-                }
+                $editConfig = $this->getEditableAttribute($blockType, $column->getIndex());
+                $hasStoreId = $column->hasStoreId();
             } elseif (!$column->isCustom()) {
-                // Grid and collection columns
                 if (!$editConfig = $this->getEditableField($blockType, $columnBlockId)) {
                     $editConfig = $this->getEditableAttributeField($blockType, $columnBlockId);
                 }
             }
             
             if ($editConfig instanceof BL_CustomGrid_Model_Grid_Edit_Config) {
+                $editConfig = clone $editConfig;
+                
+                if ($hasStoreId && !$editConfig->hasData('column_params/column_store_id')) {
+                    // Apply column's store ID to allow editing values for the corresponding store view
+                    $editConfig->setData('column_params/column_store_id', $column->getStoreId());
+                }
+                
                 $editConfig->setData('column_params/column_id', $column->getId());
                 $column->setEditConfig($editConfig);
             } else {
                 $column->setEditConfig(false);
             }
         }
-        
         return $columns;
     }
     

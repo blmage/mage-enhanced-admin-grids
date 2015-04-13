@@ -23,7 +23,7 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Helper_Product_Wysiwyg extends
         if ($this->getIsWysiwygEnabled()) {
             $htmlId = $this->getHtmlId();
             $disabled   = ($this->getDisabled() || $this->getReadonly());
-            $wysiwygUrl = $this->helper('adminhtml')->getUrl('customgrid/grid_editor_product/wysiwyg');
+            $wysiwygUrl = Mage::helper('adminhtml')->getUrl('customgrid/grid_editor_product/wysiwyg');
             
             $html .= Mage::getSingleton('core/layout')
                 ->createBlock(

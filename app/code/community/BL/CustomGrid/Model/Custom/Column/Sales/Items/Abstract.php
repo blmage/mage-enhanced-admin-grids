@@ -382,6 +382,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Sales_Items_Abstract extends BL
             $values['filter'] = 'customgrid/widget_grid_column_filter_text';
             $values['filter_condition_callback'] = array($this, 'addFilterToGridCollection');
             $values['blcg_filter_params'] = $params;
+            $values['filter_mode'] = BL_CustomGrid_Block_Widget_Grid_Column_Filter_Text::MODE_INSIDE_LIKE;
             
             if ($this->_extractBoolParam($params, 'allow_sql_wildcards')) {
                 $values['single_wildcard']   = '_';
