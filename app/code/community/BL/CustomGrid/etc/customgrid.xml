@@ -405,6 +405,21 @@
             <name>Credit Memos</name>
             <sort_order>230000</sort_order>
         </sales_creditmemo>
+
+        <system_store model="customgrid/grid_type_system_store" module="customgrid">
+            <name>Manage Stores</name>
+            <sort_order>300000</sort_order>
+            <custom_columns>
+                <store_code model="customgrid/custom_column_simple_duplicate" module="customgrid">
+                    <name>Store Code</name>
+                    <description>The code for an individual store</description>
+                    <config_params>
+                        <duplicated_field_name>code</duplicated_field_name>
+                        <duplicated_field_table_alias>store_table</duplicated_field_table_alias>
+                    </config_params>
+                </store_code>
+            </custom_columns>
+        </system_store>
         
         <other model="customgrid/grid_type_other" module="customgrid">
             <name>Other</name>
