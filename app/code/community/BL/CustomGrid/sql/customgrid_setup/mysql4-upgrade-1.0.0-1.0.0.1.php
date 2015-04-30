@@ -36,7 +36,7 @@ $tables = array(
 $connection->addColumn(
     $tables['grid'],
     'base_profile_id',
-    'int(10) default NULL'
+    'int(10) unsigned default NULL'
 );
 
 $connection->addConstraint(
@@ -51,7 +51,7 @@ $connection->addConstraint(
 $connection->addColumn(
     $tables['grid'],
     'global_default_profile_id',
-    'int(10) default NULL'
+    'int(10) unsigned default NULL'
 );
 
 $connection->addConstraint(
