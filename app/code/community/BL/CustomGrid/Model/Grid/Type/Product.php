@@ -466,7 +466,8 @@ class BL_CustomGrid_Model_Grid_Type_Product extends BL_CustomGrid_Model_Grid_Typ
         Mage_Adminhtml_Block_Widget_Grid $gridBlock, 
         Varien_Data_Collection $collection
     ) {
-        if ($collection instanceof Mage_Catalog_Model_Resource_Eav_Mysql4_Product_Collection) {
+        if ($collection instanceof Mage_Catalog_Model_Resource_Eav_Mysql4_Product_Collection ||
+            $collection instanceof Mage_Catalog_Model_Resource_Product_Collection) {
             $collection->addWebsiteNamesToResult();
         }
         return $this;

@@ -17,7 +17,7 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Product_Categories extends
     Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Text
 {
     protected function _getCategoryTreeResult(
-        Mage_Catalog_Model_Resource_Eav_Mysql4_Category_Tree $tree,
+        $tree,
         array $categoryIds,
         $displayIds,
         $minimumLevel
