@@ -288,12 +288,12 @@ class BL_CustomGrid_GridController extends BL_CustomGrid_Controller_Grid_Action
             $this->_prepareDownloadResponse($fileName, $exportOutput);
         } catch (Mage_Core_Exception $e) {
             $this->_getSession()->addError($e->getMessage());
+            $this->_redirectReferer();
         } catch (Exception $e) {
             Mage::logException($e);
             $this->_getSession()->addError($this->__('An error occured while exporting grid results'));
-            
+            $this->_redirectReferer();
         }
-        $this->_redirectReferer();
     }
     
     public function exportCsvAction()
