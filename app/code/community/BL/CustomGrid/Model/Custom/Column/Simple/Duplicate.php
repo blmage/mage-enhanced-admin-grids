@@ -20,6 +20,14 @@ class BL_CustomGrid_Model_Custom_Column_Simple_Duplicate extends BL_CustomGrid_M
         return $this->getConfigParam('duplicated_field_name');
     }
     
+    public function getDuplicatedFieldTableAlias(Varien_Data_Collection_Db $collection)
+    {
+        return $this->getConfigParam(
+            'duplicated_field_table_alias',
+            $this->_getCollectionHelper()->getCollectionMainTableAlias($collection)
+        );
+    }
+    
     public function addFieldToGridCollection(
         $columnIndex,
         array $params,
@@ -30,7 +38,7 @@ class BL_CustomGrid_Model_Custom_Column_Simple_Duplicate extends BL_CustomGrid_M
             $collection->getSelect(),
             $columnIndex,
             $this->getDuplicatedFieldName(),
-            $this->_getCollectionHelper()->getCollectionMainTableAlias($collection),
+            $this->getDuplicatedFieldTableAlias($collection),
             $params,
             $gridBlock,
             $collection
