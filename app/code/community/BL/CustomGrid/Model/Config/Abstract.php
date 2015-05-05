@@ -98,10 +98,16 @@ abstract class BL_CustomGrid_Model_Config_Abstract extends BL_CustomGrid_Object
             $codes = array();
             
             foreach ($this->getRootXmlElement()->children() as $xmlElement) {
-                $codes[] = $xmlElement->getName();
+                $codes[(int) $xmlElement->descend("sort_order")][] = $xmlElement->getName();
+            }
+            ksort($codes, SORT_NUMERIC);
+
+            $sortedCodes = array();
+            foreach ($codes as $codeGroup) {
+                $sortedCodes = array_merge($sortedCodes, array_values($codeGroup));
             }
             
-            $this->setData('elements_codes', $codes);
+            $this->setData('elements_codes', $sortedCodes);
         }
         return $this->_getData('elements_codes');
     }
