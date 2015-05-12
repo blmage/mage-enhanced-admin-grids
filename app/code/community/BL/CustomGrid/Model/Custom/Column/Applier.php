@@ -343,13 +343,29 @@ class BL_CustomGrid_Model_Custom_Column_Applier extends BL_CustomGrid_Object
         BL_CustomGrid_Object $renderer = null
     ) {
         $customColumn = $this->getCustomColumn();
-        return array_merge(
-            $customColumn->getDefaultBlockValues($gridBlock, $gridModel, $columnBlockId, $columnIndex, $params, $store),
-            $customColumn->getBlockValues($gridBlock, $gridModel, $columnBlockId, $columnIndex, $params, $store),
-            (is_array($values = $customColumn->getBlockParams()) ? $values : array()),
-            (is_object($renderer) ? $renderer->getColumnBlockValues($columnIndex, $store, $gridModel) : array()),
-            $customColumn->getForcedBlockValues($gridBlock, $gridModel, $columnBlockId, $columnIndex, $params, $store)
+        $columnMethodParams   = array($gridBlock, $gridModel, $columnBlockId, $columnIndex, $params, $store);
+        $rendererMethodParams = array($columnIndex, $store, $gridModel);
+        $blockValues = array();
+        $callbacks   = array(
+            array(array($customColumn, 'getDefaultBlockValues'), $columnMethodParams),
+            array(array($customColumn, 'getBlockValues'), $columnMethodParams),
+            array(array($customColumn, 'getBlockParams'), array()),
+            (is_object($renderer) ? array(array($renderer, 'getColumnBlockValues'), $rendererMethodParams) : false),
+            array(array($customColumn, 'getForcedBlockValues'), $columnMethodParams),
         );
+        
+        foreach ($callbacks as $callback) {
+            if (is_array($callback)) {
+                $customColumn->setCurrentBlockValues($blockValues);
+                
+                if (is_array($callbackValues = call_user_func_array($callback[0], $callback[1]))) {
+                    $blockValues = array_merge($blockValues, $callbackValues);
+                }
+            }
+        }
+        
+        $customColumn->setCurrentBlockValues(array());
+        return $blockValues;
     }
     
     /**

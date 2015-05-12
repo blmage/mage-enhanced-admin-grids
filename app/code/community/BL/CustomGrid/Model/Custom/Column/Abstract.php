@@ -729,6 +729,17 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract extends BL_CustomGrid_
     );
     
     /**
+     * Return the current block values
+     * Those values are updated between each call to the different block values getters, and reset afterwards
+     * 
+     * @return array
+     */
+    public function getCurrentBlockValues()
+    {
+        return $this->getDataSetDefault('current_block_values', array());
+    }
+    
+    /**
      * Return default grid column block values
      * (check BL_CustomGrid_Model_Custom_Column_Abstract::getBlockValues() for the priorities
      *  of the different methods related to block values)
