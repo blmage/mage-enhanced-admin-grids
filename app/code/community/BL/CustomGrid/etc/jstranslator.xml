@@ -28,15 +28,15 @@
     </blcg-grid-reload-error>
     
     <blcg-grid-action-apply-error translate="message" module="customgrid">
-        <message>An error occured while applying the action</message>
+        <message>An error occurred while applying the action</message>
     </blcg-grid-action-apply-error>
     
     <blcg-grid-values-save-error translate="message" module="customgrid">
-        <message>An error occured while saving the values</message>
+        <message>An error occurred while saving the values</message>
     </blcg-grid-values-save-error>
     
     <blcg-grid-values-apply-error translate="message" module="customgrid">
-        <message>An error occured while applying the values</message>
+        <message>An error occurred while applying the values</message>
     </blcg-grid-values-apply-error>
     
     <blcg-grid-columns-list-error-one-visible translate="message" module="customgrid">
@@ -44,15 +44,15 @@
     </blcg-grid-columns-list-error-one-visible>
     
     <blcg-grid-default-filter-reapply-error translate="message" module="customgrid">
-        <message>An error occured while reapplying the default filter</message>
+        <message>An error occurred while reapplying the default filter</message>
     </blcg-grid-default-filter-reapply-error>
     
     <blcg-grid-editor-form-initialization-error translate="message" module="customgrid">
-        <message>An error occured while initializing the edit form</message>
+        <message>An error occurred while initializing the edit form</message>
     </blcg-grid-editor-form-initialization-error>
     
     <blcg-grid-editor-value-edition-error translate="message" module="customgrid">
-        <message>An error occured while editing the value</message>
+        <message>An error occurred while editing the value</message>
     </blcg-grid-editor-value-edition-error>
     
     <blcg-grid-editor-form-no-savable-value translate="message" module="customgrid">

@@ -100,7 +100,7 @@ class BL_CustomGrid_GridController extends BL_CustomGrid_Controller_Grid_Action
             $resultMessage = $e->getMessage();
         } catch (Exception $e) {
             Mage::logException($e);
-            $resultMessage = $this->__('An error occured while reapplying the default filter');
+            $resultMessage = $this->__('An error occurred while reapplying the default filter');
         }
         
         if ($isSuccess) {
@@ -134,7 +134,7 @@ class BL_CustomGrid_GridController extends BL_CustomGrid_Controller_Grid_Action
             $resultMessage = $e->getMessage();
         } catch (Exception $e) {
             Mage::logException($e);
-            $resultMessage = $this->__('An error occured while saving the columns');
+            $resultMessage = $this->__('An error occurred while saving the columns');
         }
         
         if ($isSuccess) {
@@ -179,7 +179,7 @@ class BL_CustomGrid_GridController extends BL_CustomGrid_Controller_Grid_Action
             $resultMessage = $e->getMessage();
         } catch (Exception $e) {
             Mage::logException($e);
-            $resultMessage = $this->__('An error occured while saving the custom columns');
+            $resultMessage = $this->__('An error occurred while saving the custom columns');
         }
         
         if ($isSuccess) {
@@ -244,7 +244,7 @@ class BL_CustomGrid_GridController extends BL_CustomGrid_Controller_Grid_Action
             $resultMessage = $e->getMessage();
         } catch (Exception $e) {
             Mage::logException($e);
-            $resultMessage = $this->__('An error occured while saving the default parameters');
+            $resultMessage = $this->__('An error occurred while saving the default parameters');
         }
         
         if ($isSuccess) {
@@ -291,7 +291,7 @@ class BL_CustomGrid_GridController extends BL_CustomGrid_Controller_Grid_Action
             $this->_redirectReferer();
         } catch (Exception $e) {
             Mage::logException($e);
-            $this->_getSession()->addError($this->__('An error occured while exporting grid results'));
+            $this->_getSession()->addError($this->__('An error occurred while exporting grid results'));
             $this->_redirectReferer();
         }
     }
@@ -347,7 +347,7 @@ class BL_CustomGrid_GridController extends BL_CustomGrid_Controller_Grid_Action
             $resultMessage = $e->getMessage();
         } catch (Exception $e) {
             Mage::logException($e);
-            $resultMessage = $this->__('An error occured while saving the grid infos');
+            $resultMessage = $this->__('An error occurred while saving the grid infos');
         }
         
         if ($isSuccess) {
@@ -495,7 +495,7 @@ class BL_CustomGrid_GridController extends BL_CustomGrid_Controller_Grid_Action
             $resultMessage = $e->getMessage();
         } catch (Exception $e) {
             Mage::logException($e);
-            $resultMessage = $this->__('An error occured while saving the grid');
+            $resultMessage = $this->__('An error occurred while saving the grid');
         }
         
         if ($isSuccess) {
@@ -530,7 +530,7 @@ class BL_CustomGrid_GridController extends BL_CustomGrid_Controller_Grid_Action
             $this->_getSession()->addError($e->getMessage());
         } catch (Exception $e) {
             Mage::logException($e);
-            $this->_getSession()->addError($this->__('An error occured while disabling the grid'));
+            $this->_getSession()->addError($this->__('An error occurred while disabling the grid'));
         }
         return $this->_redirectReferer();
     }
@@ -549,7 +549,7 @@ class BL_CustomGrid_GridController extends BL_CustomGrid_Controller_Grid_Action
             $this->_getSession()->addError($e->getMessage());
         } catch (Exception $e) {
             Mage::logException($e);
-            $this->_getSession()->addError($this->__('An error occured while enabling the grid'));
+            $this->_getSession()->addError($this->__('An error occurred while enabling the grid'));
         }
         return $this->_redirectReferer();
     }
@@ -565,7 +565,7 @@ class BL_CustomGrid_GridController extends BL_CustomGrid_Controller_Grid_Action
             $this->_getSession()->addError($e->getMessage());
         } catch (Exception $e) {
             Mage::logException($e);
-            $this->_getSession()->addError($this->__('An error occured while deleting the grid'));
+            $this->_getSession()->addError($this->__('An error occurred while deleting the grid'));
         }
         return $this->_redirectReferer();
     }
@@ -612,7 +612,7 @@ class BL_CustomGrid_GridController extends BL_CustomGrid_Controller_Grid_Action
             $this->_getSession()->addError($e->getMessage());
         } catch (Exception $e) {
             Mage::logException($e);
-            $this->_getSession()->addError($this->__('An error occured while disabling a grid'));
+            $this->_getSession()->addError($this->__('An error occurred while disabling a grid'));
         }
         
         if ($disabledCount > 0) {
@@ -659,7 +659,7 @@ class BL_CustomGrid_GridController extends BL_CustomGrid_Controller_Grid_Action
             $this->_getSession()->addError($e->getMessage());
         } catch (Exception $e) {
             Mage::logException($e);
-            $this->_getSession()->addError($this->__('An error occured while enabling a grid'));
+            $this->_getSession()->addError($this->__('An error occurred while enabling a grid'));
         }
         
         if ($enabledCount > 0) {
@@ -700,7 +700,7 @@ class BL_CustomGrid_GridController extends BL_CustomGrid_Controller_Grid_Action
             $this->_getSession()->addError($e->getMessage());
         } catch (Exception $e) {
             Mage::logException($e);
-            $this->_getSession()->addError($this->__('An error occured while deleting a grid'));
+            $this->_getSession()->addError($this->__('An error occurred while deleting a grid'));
         }
         
         if ($deletedCount > 0) {

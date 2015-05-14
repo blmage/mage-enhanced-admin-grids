@@ -56,7 +56,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Order_Items_Abstract extends
                 }
                 
                 Mage::getSingleton('customgrid/session')
-                    ->addError(Mage::helper('customgrid')->__('An error occured while initializing items'));
+                    ->addError(Mage::helper('customgrid')->__('An error occurred while initializing items'));
             }
         }
         return $this;

@@ -195,7 +195,7 @@ class BL_CustomGrid_Options_SourceController extends Mage_Adminhtml_Controller_A
             $this->_getSession()->addError($e->getMessage());
         } catch (Exception $e) {
             Mage::logException($e);
-            $this->_getSession()->addError($this->__('An error occured while deleting an options source'));
+            $this->_getSession()->addError($this->__('An error occurred while deleting an options source'));
         }
         
         if ($deletedCount > 0) {

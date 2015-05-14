@@ -79,7 +79,7 @@ abstract class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Sales_Items_Abstr
                 $this->setData('items_block', false);
                 $this->setItemsBlockInitSuccess(false);
                 Mage::getSingleton('customgrid/session')
-                    ->addError($this->helper('customgrid')->__('An error occured while initializing items block'));
+                    ->addError($this->helper('customgrid')->__('An error occurred while initializing items block'));
             }
         }
         return $this->_getData('items_block');
