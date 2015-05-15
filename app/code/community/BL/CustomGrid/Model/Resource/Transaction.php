@@ -18,16 +18,16 @@ class BL_CustomGrid_Model_Resource_Transaction extends Mage_Core_Model_Resource_
     /**
      * Parameterized callbacks array
      *
-     * @var callback[]
+     * @var callable[]
      */
     protected $_parameterizedCommitCallbacks = array();
     
     /**
      * Add callback function and parameters, which will be called before commit transactions
      *
-     * @param callback $callback Callback function
+     * @param callable $callback Callback function
      * @param array $params Callback parameters
-     * @return this
+     * @return BL_CustomGrid_Model_Resource_Transaction
      */
     public function addParameterizedCommitCallback($callback, array $params)
     {
@@ -38,7 +38,7 @@ class BL_CustomGrid_Model_Resource_Transaction extends Mage_Core_Model_Resource_
     /**
      * Run all configured object callbacks
      *
-     * @return this
+     * @return BL_CustomGrid_Model_Resource_Transaction
      */
     protected function _runCallbacks()
     {

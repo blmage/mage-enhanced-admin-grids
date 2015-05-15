@@ -2609,7 +2609,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      * 
      * @param string $format Export format
      * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block, null at first call (before block creation)
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Type_Abstract
      */
     public function beforeGridExport($format, Mage_Adminhtml_Block_Widget_Grid $gridBlock = null)
     {
@@ -2621,7 +2621,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      * 
      * @param string $format Export format
      * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Type_Abstract
      */
     public function afterGridExport($format, Mage_Adminhtml_Block_Widget_Grid $gridBlock)
     {
@@ -2633,7 +2633,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      * 
      * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
      * @param bool $firstTime Whether this is the first (= incomplete) grid collection preparation
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Type_Abstract
      */
     public function beforeGridPrepareCollection(Mage_Adminhtml_Block_Widget_Grid $gridBlock, $firstTime = true)
     {
@@ -2645,7 +2645,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      * 
      * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
      * @param bool $firstTime Whether this is the first (= incomplete) grid collection preparation
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Type_Abstract
      */
     public function afterGridPrepareCollection(Mage_Adminhtml_Block_Widget_Grid $gridBlock, $firstTime = true)
     {
@@ -2656,8 +2656,8 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      * Do some actions before given collection is set on given grid
      * 
      * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
-     * @param Varien_Data_Collection $collection Grid collection
-     * @return this
+     * @param Varien_Data_Collection $collection Grid $collection
+     * @return BL_CustomGrid_Model_Grid_Type_Abstract
      */
     public function beforeGridSetCollection(
         Mage_Adminhtml_Block_Widget_Grid $gridBlock,
@@ -2671,8 +2671,8 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      * Do some actions after given collection was set on given grid
      * 
      * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
-     * @param Varien_Data_Collection $collection Grid collection
-     * @return this
+     * @param Varien_Data_Collection $collection Grid $collection
+     * @return BL_CustomGrid_Model_Grid_Type_Abstract
      */
     public function afterGridSetCollection(
         Mage_Adminhtml_Block_Widget_Grid $gridBlock,
@@ -2685,8 +2685,8 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      * Do some actions before given grid loads given collection for export
      * 
      * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
-     * @param Varien_Data_Collection $collection Grid collection
-     * @return this
+     * @param Varien_Data_Collection $collection Grid $collection
+     * @return BL_CustomGrid_Model_Grid_Type_Abstract
      */
     public function beforeGridExportLoadCollection(
         Mage_Adminhtml_Block_Widget_Grid $gridBlock,
@@ -2698,9 +2698,9 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
     /**
      * Do some actions after given grid has loaded given collection for export
      * 
-     * @param Mage_Adminhtml_Block_Widget_Grid $grid Grid block instance
-     * @param Varien_Data_Collection $collection Grid collection
-     * @return this
+     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block instance
+     * @param Varien_Data_Collection $collection Grid $collection
+     * @return BL_CustomGrid_Model_Grid_Type_Abstract
      */
     public function afterGridExportLoadCollection(
         Mage_Adminhtml_Block_Widget_Grid $gridBlock,
