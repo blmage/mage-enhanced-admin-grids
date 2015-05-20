@@ -30,7 +30,7 @@ class BL_CustomGrid_Model_Grid_Rewriter_Eval extends BL_CustomGrid_Model_Grid_Re
             try {
                 eval($this->_getRewriteCode($blcgClass, $originalClass, $blockType));
             } catch (Exception $e) {
-                $error = 'An error occured while eval()ing the rewrite code : "%s"';
+                $error = 'An error occurred while eval()ing the rewrite code : "%s"';
                 Mage::throwException(Mage::helper('customgrid')->__($error, $e->getMessage()));
             }
         } else {

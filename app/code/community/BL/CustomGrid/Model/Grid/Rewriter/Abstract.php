@@ -61,7 +61,7 @@ abstract class BL_CustomGrid_Model_Grid_Rewriter_Abstract extends BL_CustomGrid_
             $rewriteSuccess = true;
             
         } catch (Exception $e) {
-            $message = 'An error occured while rewriting "%s" : "%s" (rewriter: "%s")';
+            $message = 'An error occurred while rewriting "%s" : "%s" (rewriter: "%s")';
             Mage::throwException($helper->__($message, $blockType, $e->getMessage(), $this->getId()));
         }
         

@@ -370,7 +370,7 @@ class BL_CustomGrid_Model_Custom_Column_Applier extends BL_CustomGrid_Object
     
     /**
      * Apply the current custom column to the given grid block, and return the corresponding grid column block values,
-     * or false if an error occured
+     * or false if an error occurred
      * 
      * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
      * @param BL_CustomGrid_Model_Grid $gridModel
