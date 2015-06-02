@@ -38,8 +38,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Store extends
-    Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Abstract
+class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Store extends Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Abstract
 {
     /**
      * Return the HTML content for the options corresponding to the given stores that belong to the given store group

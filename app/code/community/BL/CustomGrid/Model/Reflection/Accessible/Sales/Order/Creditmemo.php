@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_Reflection_Accessible_Sales_Order_Creditmemo extends
-    Mage_Sales_Model_Order_Creditmemo
+class BL_CustomGrid_Model_Reflection_Accessible_Sales_Order_Creditmemo extends Mage_Sales_Model_Order_Creditmemo
 {
     /**
      * Return the items value from the given creditmemo

@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Price extends
-    Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
+class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Price extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
     protected $_defaultWidth = 100;
     

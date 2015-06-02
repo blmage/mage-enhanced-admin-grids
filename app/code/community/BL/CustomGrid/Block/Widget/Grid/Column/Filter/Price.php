@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Bl_CustomGrid_Block_Widget_Grid_Column_Filter_Price extends
-    Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Abstract
+class Bl_CustomGrid_Block_Widget_Grid_Column_Filter_Price extends Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Abstract
 {
     /**
      * Currency model

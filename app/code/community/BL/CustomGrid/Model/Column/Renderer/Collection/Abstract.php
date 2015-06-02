@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-abstract class BL_CustomGrid_Model_Column_Renderer_Collection_Abstract extends
-    BL_CustomGrid_Model_Column_Renderer_Abstract
+abstract class BL_CustomGrid_Model_Column_Renderer_Collection_Abstract extends BL_CustomGrid_Model_Column_Renderer_Abstract
 {
     public function getColumnType()
     {

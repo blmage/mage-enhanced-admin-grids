@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Renderer_Product_Attribute_Urlkey extends
-    Mage_Adminhtml_Block_Catalog_Form_Renderer_Attribute_Urlkey
+class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Renderer_Product_Attribute_Urlkey extends Mage_Adminhtml_Block_Catalog_Form_Renderer_Attribute_Urlkey
 {
     protected function _construct()
     {

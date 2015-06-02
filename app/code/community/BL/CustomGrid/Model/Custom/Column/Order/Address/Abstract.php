@@ -13,8 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-abstract class BL_CustomGrid_Model_Custom_Column_Order_Address_Abstract extends
-    BL_CustomGrid_Model_Custom_Column_Simple_Table
+abstract class BL_CustomGrid_Model_Custom_Column_Order_Address_Abstract extends BL_CustomGrid_Model_Custom_Column_Simple_Table
 {
     protected function _prepareConfig()
     {
