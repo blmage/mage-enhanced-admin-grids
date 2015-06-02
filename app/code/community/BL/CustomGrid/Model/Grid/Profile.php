@@ -475,7 +475,7 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
     /**
      * Copy this profile to a new one, and return the new profile ID
      *
-     * @param array $newValues New profile values
+     * @param array $values New profile values
      * @return int New profile ID
      */
     public function copyToNew(array $values)

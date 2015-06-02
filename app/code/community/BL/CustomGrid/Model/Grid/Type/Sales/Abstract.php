@@ -68,7 +68,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Sales_Abstract extends BL_CustomGri
     /**
      * Return the name of the order ID field in the main table
      * 
-     * @return int
+     * @return string
      */
     protected function _getOrderIdFieldName()
     {

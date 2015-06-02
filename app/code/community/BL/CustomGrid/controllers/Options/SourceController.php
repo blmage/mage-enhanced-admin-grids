@@ -48,11 +48,12 @@ class BL_CustomGrid_Options_SourceController extends Mage_Adminhtml_Controller_A
     /**
      * Load layout and initialize active menu, title and breadcrumbs for an options source action
      * 
+     * @param string[]|null $layoutHandles Layout handles
      * @return BL_CustomGrid_Options_SourceController
      */
-    protected function _initAction($layoutIds = null)
+    protected function _initAction($layoutHandles = null)
     {
-        return $this->loadLayout($layoutIds)
+        return $this->loadLayout($layoutHandles)
             ->_setActiveMenu('system/customgrid/options_source')
             ->_title($this->__('Custom Grids'))
             ->_title($this->__('Manage Options Source'))

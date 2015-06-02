@@ -278,7 +278,6 @@ class BL_CustomGrid_Object extends Varien_Object
      * Unset the value corresponding to the given data key (support compound keys)
      * 
      * @param string $key Data key (can be compound)
-     * @param mixed $value Data value
      * @return BL_CustomGrid_Object
      */
     public function unsetData($key = null)

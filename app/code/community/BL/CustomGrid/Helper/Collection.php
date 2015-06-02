@@ -361,7 +361,7 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
      * Return a filters map built from the given fields and table alias, by qualifying all of the given fields
      * and associating them to the given aliases (or their own names by default)
      * 
-     * @param array $fields Fields to map. The keys will be used as aliases when strings, otherwise field names
+     * @param string[] $fields Fields to map. The keys will be used as aliases when strings, otherwise field names
      * @param string $tableAlias Alias of the table to which belong the given fields
      * @return string[]
      */

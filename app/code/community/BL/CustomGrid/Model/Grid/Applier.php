@@ -271,7 +271,7 @@ class BL_CustomGrid_Model_Grid_Applier extends BL_CustomGrid_Model_Grid_Worker
      * 
      * @param BL_CustomGrid_Model_Grid_Column $column Grid column
      * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
-     * @return bool
+     * @return BL_CustomGrid_Model_Grid_Applier
      */
     protected function _prepareOriginalGridBlockColumn(
         BL_CustomGrid_Model_Grid_Column $column,
@@ -302,7 +302,7 @@ class BL_CustomGrid_Model_Grid_Applier extends BL_CustomGrid_Model_Grid_Worker
      * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
      * @param Mage_Eav_Model_Entity_Attribute[] $attributes Available attributes
      * @param string[] $addedAttributes Attributes that were already added (values format: "[code]_[store_id]")
-     * @return bool
+     * @return BL_CustomGrid_Model_Grid_Applier
      */
     protected function _prepareExternalGridBlockColumn(
         BL_CustomGrid_Model_Grid_Column $column,
@@ -462,7 +462,7 @@ class BL_CustomGrid_Model_Grid_Applier extends BL_CustomGrid_Model_Grid_Worker
      * 
      * @param array $sessionFilter Session filter values
      * @param BL_CustomGrid_Model_Grid_Column $column Corresponding column
-     * @param array $attributesRenderers Available attributes renderers
+     * @param string[] $attributesRenderers Available attributes renderers
      * @return bool
      */
     protected function _checkGridBlockFilterColumnChanges(

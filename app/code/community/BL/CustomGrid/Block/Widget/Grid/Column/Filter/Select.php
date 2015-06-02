@@ -210,7 +210,7 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Select extends Mage_Adminhtm
      * 
      * @param string $value Selected value
      * @param string $separator Separator used for the imploded values
-     * @param mixed $isNegative Whether the filter is on negative mode
+     * @param bool $isNegative Whether the filter is on negative mode
      * @return array
      */
     protected function _getSingleImplodedSubConditions($value, $separator, $isNegative)

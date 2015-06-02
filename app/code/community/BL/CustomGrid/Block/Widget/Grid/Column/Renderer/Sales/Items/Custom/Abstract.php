@@ -55,7 +55,7 @@ abstract class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Sales_Items_Custo
      * Return the renderer block usable to render the item value found in the given renderable value
      * 
      * @param Varien_Object $value Renderable value
-     * @return BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Sales_Items_Sub_Interface
+     * @return BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Sales_Items_Sub_Interface|false
      */
     protected function _getItemValueRendererBlock(Varien_Object $value)
     {

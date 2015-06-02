@@ -338,7 +338,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     /**
      * Reset given data keys
      * 
-     * @param array $keys Data keys to reset
+     * @param string[] $keys Data keys to reset
      * @return BL_CustomGrid_Model_Grid
      */
     protected function _resetKeys(array $keys)

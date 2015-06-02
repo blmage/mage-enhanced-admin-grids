@@ -1064,7 +1064,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      * @param string $blockType Grid block type
      * @param string $fieldId Field ID
      * @param array $config Field config
-     * @param array $attributes Attributes editable configs
+     * @param BL_CustomGrid_Model_Grid_Edit_Config[] $attributes Attributes editable configs
      * @return BL_CustomGrid_Model_Grid_Edit_Config|null
      */
     protected function _buildEditableAttributeFieldConfig($blockType, $fieldId, array $config, array $attributes)

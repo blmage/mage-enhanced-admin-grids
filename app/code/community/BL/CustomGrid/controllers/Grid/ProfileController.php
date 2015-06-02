@@ -20,6 +20,15 @@ class BL_CustomGrid_Grid_ProfileController extends BL_CustomGrid_Controller_Grid
         return parent::_setActionSuccessJsonResponse(array('actions' => $actions));
     }
     
+    /**
+     * Initialize the current grid model and profile, check the given permissions,
+     * then prepare the layout for the given profile action
+     * 
+     * @param string $actionCode Profile action
+     * @param string|array $permissions Required user permission(s)
+     * @param bool $anyPermission Whether all the given permissions are required, or just one of them
+     * @return BL_CustomGrid_Grid_ProfileController
+     */
     protected function _prepareFormLayout($actionCode, $permissions = null, $anyPermission = true)
     {
         $handles = array('blcg_empty');

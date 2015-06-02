@@ -23,29 +23,38 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Text extends Mage_Adminhtm
     const TRUNCATION_MODE_TEXT = 'text';
     const TRUNCATION_MODE_HTML = 'html';
     
-    protected function _parseText($text)
+    /**
+     * Parse the given text value with the configured CMS template processor (if any)
+     * 
+     * @param string $textValue Parsable text value
+     * @return string
+     */
+    protected function _parseTextValue($textValue)
     {
         if ($cmsProcessorType = $this->getColumn()->getCmsTemplateProcessor()) {
+            /** @var $cmsHelper Mage_Cms_Helper_Data */
+            $cmsHelper = $this->helper('cms');
             $cmsProcessor = null;
             
             if ($cmsProcessorType == self::CMS_TEMPLATE_PROCESSOR_BLOCK) {
-                $cmsProcessor = $this->helper('cms')->getBlockTemplateProcessor();
+                $cmsProcessor = $cmsHelper->getBlockTemplateProcessor();
             } elseif ($cmsProcessorType == self::CMS_TEMPLATE_PROCESSOR_PAGE) {
-                $cmsProcessor = $this->helper('cms')->getPageTemplateProcessor();
+                $cmsProcessor = $cmsHelper->getPageTemplateProcessor();
             }
             if (!is_null($cmsProcessor) && method_exists($cmsProcessor, 'filter')) {
-                $text = $cmsProcessor->filter($text);
+                $textValue = $cmsProcessor->filter($textValue);
             }
         }
-        return $text;
+        return $textValue;
     }
     
     public function render(Varien_Object $row)
     {
-        $text = $this->_parseText(parent::_getValue($row));
+        $textValue = $this->_parseTextValue(parent::_getValue($row));
         
         if (($truncationMode = $this->getColumn()->getTruncationMode())
             && ($truncationMode != self::TRUNCATION_MODE_NONE)) {
+            /** @var $stringHelper BL_CustomGrid_Helper_String */
             $stringHelper = $this->helper('customgrid/string');
             $truncationLength = (int) $this->getColumn()->getTruncationAt();
             $truncationEnding = $this->getColumn()->getTruncationEnding();
@@ -53,15 +62,15 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Text extends Mage_Adminhtm
             $remainder = '';
             
             if ($truncationMode == self::TRUNCATION_MODE_HTML) {
-                $text = $stringHelper->truncateHtml(
-                    $text,
+                $textValue = $stringHelper->truncateHtml(
+                    $textValue,
                     $truncationLength,
                     $truncationEnding,
                     !$exactTruncation
                 );
             } elseif ($truncationMode == self::TRUNCATION_MODE_TEXT) {
-                $text = $stringHelper->truncateText(
-                    $text,
+                $textValue = $stringHelper->truncateText(
+                    $textValue,
                     $truncationLength,
                     $truncationEnding,
                     $remainder,
@@ -70,12 +79,12 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Text extends Mage_Adminhtm
             }
         }
         if ($this->getColumn()->getEscapeHtml()) {
-            $text = $this->htmlEscape($text);
+            $textValue = $this->htmlEscape($textValue);
         }
         if ($this->getColumn()->getNl2br()) {
-            $text = nl2br($text);
+            $textValue = nl2br($textValue);
         }
         
-        return $text;
+        return $textValue;
     }
 }

@@ -54,8 +54,8 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Text extends Mage_Adminhtml_
      * @param string $value Filter value
      * @param string $filterMode Default filter mode
      * @param bool $filterModeShortcut Whether shortcuts for filter modes are enabled
-     * @param mixed $isNegative Default negative filter flag
-     * @param mixed $negativeShortcut Whether shortcuts
+     * @param bool $isNegative Default negative filter flag
+     * @param bool $negativeShortcut Whether a shortcut for negative filter flag is enabled
      * @return array Filter mode + negative filter flag
      */
     public function parseFilterShorcutsForValue(

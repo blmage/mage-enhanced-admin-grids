@@ -587,7 +587,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract extends BL_CustomGrid_
      * Generate a string that is unique across all custom columns, basing on the values that already exist
      * 
      * @param string $suffix String suffix
-     * @param array $existing Already existing strings
+     * @param string[] $existing Already existing strings
      * @return string
      */
     protected function _generateUniqueString($suffix, array $existing)

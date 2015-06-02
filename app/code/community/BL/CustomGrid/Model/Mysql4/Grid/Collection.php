@@ -34,7 +34,7 @@ class BL_CustomGrid_Model_Mysql4_Grid_Collection extends Mage_Core_Model_Mysql4_
     /**
      * Return the loaded grid IDs
      * 
-     * @return array()
+     * @return int[]
      */
     protected function _getGridIds()
     {
