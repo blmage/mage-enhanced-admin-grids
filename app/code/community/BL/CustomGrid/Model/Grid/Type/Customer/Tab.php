@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -29,14 +29,27 @@ class BL_CustomGrid_Model_Grid_Type_Customer_Tab extends BL_CustomGrid_Model_Gri
         );
     }
     
+    /**
+     * Return the current website ID
+     * 
+     * @return int
+     */
     protected function _getWebsiteId()
     {
         return $this->_getRequest()->getParam('website_id', null);
     }
     
+    /**
+     * Return the ID of the current customer
+     * 
+     * @return int
+     */
     protected function _getCustomerId()
     {
-        return (($customer = Mage::registry('current_customer')) ? $customer->getId() : 0);
+        return ($customer = Mage::registry('current_customer'))
+            /** @var $customer Mage_Customer_Model_Customer */
+            ? $customer->getId()
+            : 0;
     }
     
     protected function _getExportTypes($blockType)
@@ -51,33 +64,74 @@ class BL_CustomGrid_Model_Grid_Type_Customer_Tab extends BL_CustomGrid_Model_Gri
         return $exportTypes;
     }
     
+    /**
+     * Apply the website ID corresponding to the current export request to the given grid block
+     * 
+     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Exported grid block
+     * @return BL_CustomGrid_Model_Grid_Type_Customer_Tab
+     */
+    protected function _applyExportCurrentWebsite(Mage_Adminhtml_Block_Widget_Grid $gridBlock)
+    {
+        if (!$gridBlock->getWebsiteId() && ($websiteId = $this->_getWebsiteId())) {
+            $gridBlock->setWebsiteId($websiteId);
+        }
+        return $this;
+    }
+    
+    /**
+     * Ensure that a customer is registered for the current export request,
+     * and apply it to the grid blocks that need it
+     * 
+     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Exported grid block
+     * @return BL_CustomGrid_Model_Grid_Type_Customer_Tab
+     */
+    protected function _applyExportCurrentCustomer(Mage_Adminhtml_Block_Widget_Grid $gridBlock = null)
+    {
+        if (!$customer = Mage::registry('current_customer')) {
+            /** @var $customer Mage_Customer_Model_Customer */
+            $customer = Mage::getModel('customer/customer');
+            
+            if ($customerId = $this->_getRequest()->getParam('customer_id')) {
+                $customer->load($customerId);
+            }
+            
+            Mage::register('current_customer', $customer);
+        }
+        if (!is_null($gridBlock)) {
+            if (($gridBlock->getType() == 'adminhtml/customer_edit_tab_tag')
+                || ($gridBlock->getType() == 'adminhtml/customer_edit_tab_reviews')) {
+                $gridBlock->setCustomerId($customer->getId());
+            }
+        }
+        return $this;
+    }
+    
+    /**
+     * Ensure that a newsletter subscriber is registered for the current export request, if one is needed
+     * 
+     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Exported grid block
+     * @return BL_CustomGrid_Model_Grid_Type_Customer_Tab
+     */
+    protected function _applyExportCurrentSubscriber(Mage_Adminhtml_Block_Widget_Grid $gridBlock)
+    {
+        if (($gridBlock->getType() == 'adminhtml/customer_edit_tab_newsletter_grid')
+            && !Mage::registry('subscriber')) {
+            /** @var $subscriber Mage_Newsletter_Model_Subscriber */
+            $subscriber = Mage::getModel('newsletter/subscriber');
+            $subscriber->loadByCustomer(Mage::registry('current_customer'));
+            Mage::register('subscriber', $subscriber);
+        }
+        return $this;
+    }
+    
     public function beforeGridExport($format, Mage_Adminhtml_Block_Widget_Grid $gridBlock = null)
     {
         if (is_null($gridBlock)) {
-            if (!Mage::registry('current_customer')) {
-                $customer = Mage::getModel('customer/customer');
-                
-                if ($customerId = $this->_getRequest()->getParam('customer_id')) {
-                    $customer->load($customerId);
-                }
-                
-                Mage::register('current_customer', $customer);
-            }
+            $this->_applyExportCurrentCustomer();
         } else {
-            if (!$gridBlock->getWebsiteId() && ($websiteId = $this->_getWebsiteId())) {
-                $gridBlock->setWebsiteId($websiteId);
-            }
-            if ($gridBlock->getType() == 'adminhtml/customer_edit_tab_newsletter_grid') {
-                if (!Mage::registry('subscriber')) {
-                    Mage::register(
-                        'subscriber',
-                        Mage::getModel('newsletter/subscriber')->loadByCustomer(Mage::registry('current_customer'))
-                    );
-                }
-            } elseif (($gridBlock->getType() == 'adminhtml/customer_edit_tab_tag')
-                || ($gridBlock->getType() == 'adminhtml/customer_edit_tab_reviews')) {
-                $gridBlock->setCustomerId($this->_getCustomerId());
-            }
+            $this->_applyExportCurrentCustomer($gridBlock);
+            $this->_applyExportCurrentWebsite($gridBlock);
+            $this->_applyExportCurrentSubscriber($gridBlock);
         }
         return $this;
     }

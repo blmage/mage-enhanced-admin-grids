@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -27,10 +27,12 @@ class BL_CustomGrid_Model_Grid_Type_Product_Review extends BL_CustomGrid_Model_G
     
     protected function _getBaseEditableFields($blockType)
     {
+        /** @var $helper Mage_Review_Helper_Data */
         $helper = Mage::helper('review');
+        /** @var $reviewModel Mage_Review_Model_Review */
+        $reviewModel = Mage::getModel('review/review');
         
-        $statuses = Mage::getModel('review/review')
-            ->getStatusCollection()
+        $statuses = $reviewModel->getStatusCollection()
             ->load()
             ->toOptionArray();
         
@@ -79,7 +81,10 @@ class BL_CustomGrid_Model_Grid_Type_Product_Review extends BL_CustomGrid_Model_G
     
     protected function _loadEditedEntity($blockType, BL_CustomGrid_Object $config, array $params, $entityId)
     {
-        return Mage::getModel('review/review')->load($entityId);
+        /** @var $review Mage_Review_Model_Review */
+        $review = Mage::getModel('review/review');
+        $review->load($entityId);
+        return $review;
     }
     
     protected function _isEditedEntityLoaded(
@@ -90,6 +95,7 @@ class BL_CustomGrid_Model_Grid_Type_Product_Review extends BL_CustomGrid_Model_G
         $entityId
     ) {
         if (parent::_isEditedEntityLoaded($blockType, $config, $params, $entity, $entityId)) {
+            /** @var $entity Mage_Review_Model_Review */
             $usePendingFilter = (isset($params['additional']) && isset($params['additional']['use_pending_filter']));
             return ($entity->getStatus() == $entity->getPendingStatus() ? $usePendingFilter : !$usePendingFilter);
         }
@@ -98,6 +104,7 @@ class BL_CustomGrid_Model_Grid_Type_Product_Review extends BL_CustomGrid_Model_G
     
     protected function _getLoadedEntityName($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
+        /** @var $entity Mage_Review_Model_Review */
         return $entity->getTitle();
     }
     
@@ -108,11 +115,14 @@ class BL_CustomGrid_Model_Grid_Type_Product_Review extends BL_CustomGrid_Model_G
         array $params = array()
     ) {
         if (parent::checkUserEditPermissions($blockType, $gridModel, $gridBlock, $params)) {
+            /** @var $session Mage_Admin_Model_Session */
+            $session = Mage::getSingleton('admin/session');
+            
             if ((Mage::registry('use_pending_filter') === true)
                 || (isset($params['additional']) && isset($params['additional']['use_pending_filter']))) {
-                return Mage::getSingleton('admin/session')->isAllowed('catalog/reviews_ratings/reviews/pending');
+                return $session->isAllowed('catalog/reviews_ratings/reviews/pending');
             } else {
-                return Mage::getSingleton('admin/session')->isAllowed('catalog/reviews_ratings/reviews/all');
+                return $session->isAllowed('catalog/reviews_ratings/reviews/all');
             }
         }
         return false;

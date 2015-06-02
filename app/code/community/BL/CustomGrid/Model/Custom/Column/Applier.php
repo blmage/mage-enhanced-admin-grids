@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -37,7 +37,7 @@ class BL_CustomGrid_Model_Custom_Column_Applier extends BL_CustomGrid_Object
      * Set the current custom column
      * 
      * @param BL_CustomGrid_Model_Custom_Column_Abstract $customColumn Custom column to set as current
-     * @return this
+     * @return BL_CustomGrid_Model_Custom_Column_Applier
      */
     public function setCustomColumn(BL_CustomGrid_Model_Custom_Column_Abstract $customColumn)
     {
@@ -69,6 +69,7 @@ class BL_CustomGrid_Model_Custom_Column_Applier extends BL_CustomGrid_Object
      */
     protected function _canDisplayVerificationMessage($messageType, $elementType, $blockType)
     {
+        /** @var $session Mage_Admin_Model_Session */
         $session = Mage::getSingleton('admin/session');
         
         if (!is_array($flags = $session->getData(self::VERIFICATION_MESSAGES_FLAGS_SESSION_KEY))) {
@@ -93,10 +94,11 @@ class BL_CustomGrid_Model_Custom_Column_Applier extends BL_CustomGrid_Object
      * 
      * @param string $elementType Verified element type ("block" or "collection")
      * @param string $blockType Block type
-     * @return this
+     * @return BL_CustomGrid_Model_Custom_Column_Applier
      */
     protected function _resetVerificationMessagesFlags($elementType, $blockType)
     {
+        /** @var $session Mage_Admin_Model_Session */
         $session = Mage::getSingleton('admin/session');
         
         if (is_array($flags = $session->getData(self::VERIFICATION_MESSAGES_FLAGS_SESSION_KEY))) {
@@ -117,8 +119,9 @@ class BL_CustomGrid_Model_Custom_Column_Applier extends BL_CustomGrid_Object
      */
     protected function _getUnverifiedElementBehaviour($elementType)
     {
-        $behaviour = null;
+        /** @var $helper BL_CustomGrid_Helper_Config */
         $helper = Mage::helper('customgrid/config');
+        $behaviour = null;
         
         if ($elementType == 'block') {
             $behaviour = $helper->getCustomColumnsUnverifiedBlockBehaviour();
@@ -144,8 +147,9 @@ class BL_CustomGrid_Model_Custom_Column_Applier extends BL_CustomGrid_Object
         Mage_Adminhtml_Block_Widget_Grid $gridBlock,
         BL_CustomGrid_Model_Grid $gridModel
     ) {
-        $result = true;
+        /** @var $helper BL_CustomGrid_Helper_Grid */
         $helper = Mage::helper('customgrid/grid');
+        $result = true;
         
         if ($elementType == 'block') {
             $result = $helper->verifyGridBlock($gridBlock, $gridModel);
@@ -267,16 +271,20 @@ class BL_CustomGrid_Model_Custom_Column_Applier extends BL_CustomGrid_Object
      * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
      * @param BL_CustomGrid_Model_Grid $gridModel Grid model
      * @param string $message Error message
-     * @return this
+     * @return BL_CustomGrid_Model_Custom_Column_Applier
      */
     protected function _handleCustomColumnApplyError(
         Mage_Adminhtml_Block_Widget_Grid $gridBlock,
         BL_CustomGrid_Model_Grid $gridModel,
         $message = ''
     ) {
+        /** @var $session BL_CustomGrid_Model_Session */
+        $session = Mage::getSingleton('customgrid/session');
+        
         $name = $this->getCustomColumn()->getName();
         $message = $this->_getBaseHelper()->__('The "%s" custom column could not be applied : "%s"', $name, $message);
-        Mage::getSingleton('customgrid/session')->addError($message);
+        $session->addError($message);
+        
         return $this;
     }
     
@@ -289,7 +297,7 @@ class BL_CustomGrid_Model_Custom_Column_Applier extends BL_CustomGrid_Object
      * @param string $columnIndex Grid column index
      * @param array $params Customization params values
      * @param Mage_Core_Model_Store $store Column store
-     * @return this
+     * @return BL_CustomGrid_Model_Custom_Column_Applier
      */
     protected function _applyCustomColumnToGridBlock(
         Mage_Adminhtml_Block_Widget_Grid $gridBlock,

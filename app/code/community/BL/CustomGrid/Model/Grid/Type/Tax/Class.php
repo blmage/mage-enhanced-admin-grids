@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -48,8 +48,11 @@ class BL_CustomGrid_Model_Grid_Type_Tax_Class extends BL_CustomGrid_Model_Grid_T
     
     protected function _loadEditedEntity($blockType, BL_CustomGrid_Object $config, array $params, $entityId)
     {
-        if (isset($params['addtional']) && isset($params['additional']['class_type'])) {
-            return Mage::getModel('tax/class')->load($entityId);
+        if (isset($params['additional']) && isset($params['additional']['class_type'])) {
+            /** @var $taxClass Mage_Tax_Model_Class */
+            $taxClass = Mage::getModel('tax/class');
+            $taxClass->load($entityId);
+            return $taxClass;
         }
         return null;
     }
@@ -64,6 +67,7 @@ class BL_CustomGrid_Model_Grid_Type_Tax_Class extends BL_CustomGrid_Model_Grid_T
         if (parent::_isEditedEntityLoaded($blockType, $config, $params, $entity, $entityId)
             && isset($params['additional'])
             && isset($params['additional']['class_type'])) {
+            /** @var $entity Mage_Tax_Model_Class */
             return ($entity->getClassType() == $params['additional']['class_type']);
         }
         return false;
@@ -71,6 +75,7 @@ class BL_CustomGrid_Model_Grid_Type_Tax_Class extends BL_CustomGrid_Model_Grid_T
     
     protected function _getLoadedEntityName($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
+        /** @var $entity Mage_Tax_Model_Class */
         return $entity->getClassName();
     }
     
@@ -81,6 +86,8 @@ class BL_CustomGrid_Model_Grid_Type_Tax_Class extends BL_CustomGrid_Model_Grid_T
         array $params = array()
     ) {
         if (parent::checkUserEditPermissions($blockType, $gridModel, $gridBlock, $params)) {
+            /** @var $session Mage_Admin_Model_Session */
+            $session = Mage::getSingleton('admin/session');
             $classType = null;
             
             if (!is_null($gridBlock)) {
@@ -89,9 +96,9 @@ class BL_CustomGrid_Model_Grid_Type_Tax_Class extends BL_CustomGrid_Model_Grid_T
                 $classType = $params['additional']['class_type'];
             }
             if ($classType == Mage_Tax_Model_Class::TAX_CLASS_TYPE_CUSTOMER) {
-                return Mage::getSingleton('admin/session')->isAllowed('sales/tax/classes_customer');
+                return $session->isAllowed('sales/tax/classes_customer');
             } elseif ($classType == Mage_Tax_Model_Class::TAX_CLASS_TYPE_PRODUCT) {
-                return Mage::getSingleton('admin/session')->isAllowed('sales/tax/classes_product');
+                return $session->isAllowed('sales/tax/classes_product');
             }
         }
         return false;

@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -83,7 +83,7 @@ class BL_CustomGrid_Model_Grid_Applier extends BL_CustomGrid_Model_Grid_Worker
             list($rendererType, $rendererParams) = $this->_getCollectionColumnRendererValues($column, $lockedValues);
             $rendererValues = array();
             
-            if ($renderer = $rendererConfig->getRendererInstanceByCode($rendererType)) {
+            if ($renderer = $rendererConfig->getRendererModelByCode($rendererType)) {
                 if (is_array($decodedParams = $rendererConfig->decodeParameters($rendererParams))) {
                     $renderer->setValues($decodedParams);
                 } else {
@@ -115,7 +115,7 @@ class BL_CustomGrid_Model_Grid_Applier extends BL_CustomGrid_Model_Grid_Worker
         $gridModel = $this->getGridModel();
         /** @var $rendererConfig BL_CustomGrid_Model_Column_Renderer_Config_Attribute */
         $rendererConfig = Mage::getSingleton('customgrid/column_renderer_config_attribute');
-        $renderers = $rendererConfig->getRenderersInstances();
+        $renderers = $rendererConfig->getRenderersModels();
         $matchingRenderer = null;
         
         foreach ($renderers as $renderer) {
@@ -212,7 +212,7 @@ class BL_CustomGrid_Model_Grid_Applier extends BL_CustomGrid_Model_Grid_Worker
             /** @var $rendererConfig BL_CustomGrid_Model_Column_Renderer_Config_Collection */
             $rendererConfig = Mage::getSingleton('customgrid/column_renderer_config_collection');
             
-            if ($rendererType && ($renderer = $rendererConfig->getRendererInstanceByCode($rendererType))) {
+            if ($rendererType && ($renderer = $rendererConfig->getRendererModelByCode($rendererType))) {
                 if (is_array($rendererParams = $rendererConfig->decodeParameters($rendererParams))) {
                     $renderer->setValues($rendererParams);
                 } else {
@@ -238,18 +238,18 @@ class BL_CustomGrid_Model_Grid_Applier extends BL_CustomGrid_Model_Grid_Worker
         array $baseData
     ) {
         if ($customColumn = $column->getCustomColumnModel()) {
+            $gridModel = $this->getGridModel();
             $baseData['index'] = BL_CustomGrid_Model_Grid::CUSTOM_COLUMN_GRID_ALIAS
                 . str_replace(BL_CustomGrid_Model_Grid::CUSTOM_COLUMN_ID_PREFIX, '', $column->getBlockId());
             
             if ($customizationParams = $column->getCustomizationParams()) {
-                $customizationParams = Mage::getSingleton('customgrid/grid_type_config')
-                    ->decodeParameters($customizationParams);
+                $customizationParams = $gridModel->getGridTypeConfig()->decodeParameters($customizationParams);
             }
             
             $customColumnValues = $customColumn->getApplier()
                 ->applyCustomColumnToGridBlock(
                     $gridBlock,
-                    $this->getGridModel(),
+                    $gridModel,
                     $column->getBlockId(),
                     $baseData['index'],
                     (is_array($customizationParams) ? $customizationParams : array()),
@@ -345,7 +345,7 @@ class BL_CustomGrid_Model_Grid_Applier extends BL_CustomGrid_Model_Grid_Worker
      * 
      * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
      * @param string[] $sortedBlockIds Sorted column block IDs
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Applier
      */
     protected function _arrangeGridBlockColumns(Mage_Adminhtml_Block_Widget_Grid $gridBlock, array $sortedBlockIds)
     {
@@ -368,7 +368,7 @@ class BL_CustomGrid_Model_Grid_Applier extends BL_CustomGrid_Model_Grid_Worker
      *
      * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
      * @param bool $applyFromCollection Whether collection columns should be added to the grid block
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Applier
      */
     public function applyGridModelColumnsToGridBlock(Mage_Adminhtml_Block_Widget_Grid $gridBlock, $applyFromCollection)
     {
@@ -488,7 +488,8 @@ class BL_CustomGrid_Model_Grid_Applier extends BL_CustomGrid_Model_Grid_Worker
                 $hasColumnChanged = true;
             }
         } elseif ($column->isCustom()) {
-            $typeConfig = Mage::getSingleton('customgrid/grid_type_config');
+            $gridModel  = $this->getGridModel();
+            $typeConfig = $gridModel->getGridTypeConfig();
             $previousIndex = $sessionFilter['index'];
             
             $rendererTypes = array(
@@ -505,7 +506,7 @@ class BL_CustomGrid_Model_Grid_Applier extends BL_CustomGrid_Model_Grid_Worker
                 $hasColumnChanged = true;
             } else {
                 $hasColumnChanged = $customColumn->shouldInvalidateFilters(
-                    $this->getGridModel(),
+                    $gridModel,
                     $column,
                     $customizationParams,
                     $rendererTypes
@@ -728,7 +729,7 @@ class BL_CustomGrid_Model_Grid_Applier extends BL_CustomGrid_Model_Grid_Worker
                             }
                         } elseif ($column->isCustom()) {
                             $previousIndex = $filter['column']['index'];
-                            $typeConfig = Mage::getSingleton('customgrid/grid_type_config');
+                            $typeConfig = $gridModel->getGridTypeConfig();
                             
                             $rendererTypes = array(
                                 'previous' => $previousRendererType,
@@ -877,7 +878,7 @@ class BL_CustomGrid_Model_Grid_Applier extends BL_CustomGrid_Model_Grid_Worker
      * Apply base default limit to the given grid block (possibly based on custom pagination values)
      *
      * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Applier
      */
     public function applyBaseDefaultLimitToGridBlock(Mage_Adminhtml_Block_Widget_Grid $gridBlock)
     {
@@ -903,7 +904,7 @@ class BL_CustomGrid_Model_Grid_Applier extends BL_CustomGrid_Model_Grid_Worker
      * Apply default parameters to the given grid block
      *
      * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Applier
      */
     public function applyDefaultsToGridBlock(Mage_Adminhtml_Block_Widget_Grid $gridBlock)
     {

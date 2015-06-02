@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -224,7 +224,7 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
      * @param string $setSeparator Set values separator
      * @param string $operator Logical operator with which to bind the sub conditions
      * @param bool $negative Whether the global resulting condition should be negated
-     * @return this
+     * @return BL_CustomGrid_Helper_Collection
      */
     public function addFindInSetFiltersToCollection(
         Varien_Data_Collection_Db $collection,
@@ -296,7 +296,7 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
      * @param string $fieldName Field name
      * @param string $regex Regex
      * @param bool $negative Whether the field value should not match the given regex
-     * @return this
+     * @return BL_CustomGrid_Helper_Collection
      */
     public function addRegexFilterToCollection(
         Varien_Data_Collection_Db $collection,
@@ -386,7 +386,7 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
      * @param Varien_Data_Collection_Db $collection Grid collection
      * @param array|string $field Field name or filters map
      * @param string|null $alias Filter alias (not used if a filters map is given)
-     * @return this
+     * @return BL_CustomGrid_Helper_Collection
      */
     public function addFilterToCollectionMap(Varien_Data_Collection_Db $collection, $field, $alias = null)
     {
@@ -409,7 +409,7 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
      * @param callable $callback Filters map callback
      * @param array $params Callback parameters
      * @param bool $addNative Whether the native callback parameters should be appended to the callback call
-     * @eturn this
+     * @return BL_CustomGrid_Helper_Collection
      */
     public function addCollectionFiltersMapCallback($blockType, $callback, array $params = array(), $addNative = true)
     {
@@ -517,7 +517,7 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
      * 
      * @param Varien_Data_Collection_Db $collection Grid collection
      * @param string[] $filtersMap Filters map value
-     * @return this
+     * @return BL_CustomGrid_Helper_Collection
      */
     protected function _setCollectionFiltersMap(Varien_Data_Collection_Db $collection, array $filtersMap)
     {
@@ -529,6 +529,21 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
             }
         }
         return $this;
+    }
+    
+    /**
+     * Return whether the given filter field should be considered as being unmapped
+     * 
+     * @param string $field Filter field name
+     * @param array $filtersMap Collection filters map
+     * @return bool
+     */
+    protected function _isUnmappedFilterFied($field, array $filtersMap)
+    {
+        return (strpos($field, '.') === false) // Not completely safe as "." is allowed in quoted identifier
+            && !isset($filtersMap[$field])
+            && (strpos($field, BL_CustomGrid_Model_Grid::ATTRIBUTE_COLUMN_GRID_ALIAS) !== 0)
+            && (strpos($field, BL_CustomGrid_Model_Grid::CUSTOM_COLUMN_GRID_ALIAS) !== 0);
     }
     
     /**
@@ -558,10 +573,7 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
                         ? $columnBlock->getFilterIndex()
                         : $columnBlock->getIndex();
                     
-                    if ((strpos($field, '.') === false) // Not completely safe as "." is allowed in quoted identifier
-                        && !isset($filtersMap[$field])
-                        && (strpos($field, BL_CustomGrid_Model_Grid::ATTRIBUTE_COLUMN_GRID_ALIAS) !== 0)
-                        && (strpos($field, BL_CustomGrid_Model_Grid::CUSTOM_COLUMN_GRID_ALIAS) !== 0)) {
+                    if ($this->_isUnmappedFilterFied($field, $filtersMap)) {
                         $unmappedFields[] = $field;
                     }
                 }
@@ -612,7 +624,7 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
      * @param Varien_Data_Collection_Db $collection Grid collection
      * @param string[] $unmappedFields Unmapped fields
      * @param array $matchingTables Tables that contain or or more of the unmapped fields, sorted by priority
-     * @return this
+     * @return BL_CustomGrid_Helper_Collection
      */
     protected function _mapUnmappedFields(
         Varien_Data_Collection_Db $collection,
@@ -652,7 +664,7 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
      * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
      * @param BL_CustomGrid_Model_Grid $gridModel Grid model
      * @param array $filters Applied filters
-     * @return this
+     * @return BL_CustomGrid_Helper_Collection
      */
     protected function _handleUnmappedFilters(
         Varien_Data_Collection_Db $collection,
@@ -681,7 +693,7 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
      * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
      * @param BL_CustomGrid_Model_Grid $gridModel Grid model
      * @param array $filters Applied filters
-     * @return this
+     * @return BL_CustomGrid_Helper_Collection
      */
     public function prepareGridCollectionFiltersMap(
         Varien_Data_Collection_Db $collection,
@@ -732,7 +744,7 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
      * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
      * @param BL_CustomGrid_Model_Grid $gridModel Grid model
      * @param bool $resetAppliedFlag Whether the filters map should not be considered to have been prepared anymore
-     * @return this
+     * @return BL_CustomGrid_Helper_Collection
      */
     public function restoreGridCollectionFiltersMap(
         Varien_Data_Collection_Db $collection,
@@ -756,7 +768,7 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
      * @param Varien_Data_Collection_Db $collection Grid collection
      * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
      * @param BL_CustomGrid_Model_Grid $gridModel Grid model
-     * @return this
+     * @return BL_CustomGrid_Helper_Collection
      */
     protected function _prepareCatalogProductFiltersMap(
         Varien_Data_Collection_Db $collection,
@@ -789,7 +801,7 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
      * @param Varien_Data_Collection_Db $collection Grid collection
      * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
      * @param BL_CustomGrid_Model_Grid $gridModel Grid model
-     * @return this
+     * @return BL_CustomGrid_Helper_Collection
      */
     protected function _prepareSalesOrderFiltersMap(
         Varien_Data_Collection_Db $collection,
@@ -828,7 +840,7 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
      * @param Varien_Data_Collection_Db $collection Grid collection
      * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
      * @param BL_CustomGrid_Model_Grid $gridModel Grid model
-     * @return this
+     * @return BL_CustomGrid_Helper_Collection
      */
     protected function _prepareSalesInvoiceFiltersMap(
         Varien_Data_Collection_Db $collection,
@@ -866,7 +878,7 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
      * @param Varien_Data_Collection_Db $collection Grid collection
      * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
      * @param BL_CustomGrid_Model_Grid $gridModel Grid model
-     * @return this
+     * @return BL_CustomGrid_Helper_Collection
      */
     protected function _prepareSalesShipmentFiltersMap(
         Varien_Data_Collection_Db $collection,
@@ -899,7 +911,7 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
      * @param Varien_Data_Collection_Db $collection Grid collection
      * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
      * @param BL_CustomGrid_Model_Grid $gridModel Grid model
-     * @return this
+     * @return BL_CustomGrid_Helper_Collection
      */
     protected function _prepareSalesCreditmemoFiltersMap(
         Varien_Data_Collection_Db $collection,

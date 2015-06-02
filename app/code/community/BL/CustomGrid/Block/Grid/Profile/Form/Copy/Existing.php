@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -26,8 +26,8 @@ class BL_CustomGrid_Block_Grid_Profile_Form_Copy_Existing extends BL_CustomGrid_
         $profileId = $this->getGridProfile()->getId();
         $profiles  = $gridModel->getProfiles(true, true);
         
-        $gridParams  = Mage::getSingleton('customgrid/system_config_source_grid_param')->toOptionArray(false);
-        $yesNoValues = Mage::getSingleton('customgrid/system_config_source_yesno')->toOptionArray();
+        $gridParams  = $this->_getGridParamsOptionArray(false);
+        $yesNoValues = $this->_getYesNoOptionArray();
         $profilesValues = array();
         
         foreach ($profiles as $otherProfileId => $otherProfile) {

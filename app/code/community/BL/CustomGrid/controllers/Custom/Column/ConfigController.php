@@ -9,25 +9,27 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class BL_CustomGrid_Custom_Column_ConfigController extends BL_CustomGrid_Controller_Grid_Action
 {
+    /**
+     * Initialize and register the custom column from the current request
+     * 
+     * @return BL_CustomGrid_Model_Custom_Column_Abstract
+     */
     protected function _initCustomColumn()
     {
-        $typeConfig = Mage::getSingleton('customgrid/grid_type_config');
-        
         if (($code = $this->getRequest()->getParam('code'))
             && (count($codeParts = explode('/', $code)) == 2)
-            && ($gridType = $typeConfig->getTypeInstanceByCode($codeParts[0]))
+            && ($gridType = $this->_getGridTypeConfig()->getTypeModelByCode($codeParts[0]))
             && ($customColumn = $gridType->getCustomColumn($codeParts[1]))) {
             Mage::register('blcg_custom_column', $customColumn);
         } else {
             $customColumn = null;
         }
-        
         return $customColumn;
     }
     
@@ -37,13 +39,12 @@ class BL_CustomGrid_Custom_Column_ConfigController extends BL_CustomGrid_Control
             $this->loadLayout('blcg_empty');
             
             if ($configBlock = $this->getLayout()->getBlock('blcg.custom_column.config')) {
+                /** @var $configBlock BL_CustomGrid_Block_Custom_Column_Config */
                 if ($configTargetId = $this->getRequest()->getParam('config_target_id')) {
                     $configBlock->setConfigTargetId($configTargetId);
                 }
                 if ($params = $this->getRequest()->getParam('params')) {
-                    $configBlock->setConfigValues(
-                        Mage::getSingleton('customgrid/grid_type_config')->decodeParameters($params)
-                    );
+                    $configBlock->setConfigValues($this->_getGridTypeConfig()->decodeParameters($params));
                 }
             }
             
@@ -64,7 +65,7 @@ class BL_CustomGrid_Custom_Column_ConfigController extends BL_CustomGrid_Control
     {
         $this->_saveConfigFormFieldsetsStates();
         $params = $this->getRequest()->getPost('parameters', array());
-        $params = Mage::getSingleton('customgrid/grid_type_config')->encodeParameters($params);
+        $params = $this->_getGridTypeConfig()->encodeParameters($params);
         $this->_setActionSuccessJsonResponse(array('parameters' => $params));
     }
 }

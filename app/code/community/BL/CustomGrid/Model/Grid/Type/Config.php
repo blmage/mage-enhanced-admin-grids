@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -20,44 +20,65 @@ class BL_CustomGrid_Model_Grid_Type_Config extends BL_CustomGrid_Model_Config_Ab
         return BL_CustomGrid_Model_Config_Manager::TYPE_GRID_TYPES;
     }
     
-    public function getTypesInstances()
+    protected function _checkElementModelCompliance($model)
     {
-        $types = array();
-        
-        foreach ($this->getElementsCodes() as $code) {
-            if ($instance = $this->getElementInstanceByCode($code)) {
-                $types[$code] = $instance;
-            }
-        }
-        
-        return $types;
+        return ($model instanceof BL_CustomGrid_Model_Grid_Type_Abstract);
     }
     
-    public function getTypeInstanceByCode($typeCode)
+    /**
+     * Return the type model corresponding to the given code
+     * 
+     * @param string $code Grid type code
+     * @return BL_CustomGrid_Model_Grid_Type_Abstract|null
+     */
+    public function getTypeModelByCode($code)
     {
-        return parent::getElementInstanceByCode($typeCode);
+        return parent::getElementModelByCode($code);
     }
     
+    /**
+     * Return all the available type models
+     * 
+     * @param bool $sorted Whether the types models should be sorted
+     * @return BL_CustomGrid_Model_Grid_Type_Abstract[]
+     */
+    public function getTypesModels($sorted = false)
+    {
+        return parent::getElementsModels($sorted);
+    }
+    
+    /**
+     * Return the available types as an option hash
+     * 
+     * @param bool $sorted Whether the types should be sorted
+     * @param bool $withEmpty Whether an empty option should be included
+     * @return array
+     */
     public function getTypesAsOptionHash($sorted = false, $withEmpty = false)
     {
-        $types = array();
+        $optionHash = array();
         
-        foreach ($this->getElementsArray() as $type) {
-            $types[$type->getCode()] = $type->getName();
-        }
-        if ($sorted) {
-            uasort($types, 'strcmp');
+        foreach ($this->getTypesModels($sorted) as $model) {
+            $optionHash[$model->getCode()] = $model->getName();
         }
         if ($withEmpty) {
-            $types = array('' => Mage::helper('customgrid')->__('None')) + $types;
+            /** @var $helper BL_CustomGrid_Helper_Data */
+            $helper = Mage::helper('customgrid');
+            $optionHash = array('' => $helper->__('None')) + $optionHash;
         }
         
-        return $types;
+        return $optionHash;
     }
     
+    /**
+     * Load and return the custom columns models from the given XML element
+     * 
+     * @param Varien_Simplexml_Element $xmlElement XML element
+     * @return array
+     */
     protected function _loadXmlElementCustomColumns(Varien_Simplexml_Element $xmlElement)
     {
-        $customColumnModels = array();
+        $models = array();
         
         if ($columnsXmlElement = $xmlElement->descend('custom_columns')) {
             foreach ($columnsXmlElement->children() as $customColumnId => $columnXmlElement) {
@@ -67,7 +88,7 @@ class BL_CustomGrid_Model_Grid_Type_Config extends BL_CustomGrid_Model_Config_Ab
                     continue;
                 }
                 
-                $customColumnModels[$customColumnId] = Mage::getModel(
+                $model = Mage::getModel(
                     $columnXmlValues['@']['model'],
                     array(
                         'id' => $customColumnId,
@@ -75,12 +96,22 @@ class BL_CustomGrid_Model_Grid_Type_Config extends BL_CustomGrid_Model_Config_Ab
                         'xml_values'  => $columnXmlValues,
                     )
                 );
+                
+                if ($model instanceof BL_CustomGrid_Model_Custom_Column_Abstract) {
+                    $models[$customColumnId] = $model;
+                }
             }
         }
         
-        return $customColumnModels;
+        return $models;
     }
     
+    /**
+     * Return the custom columns models corresponding to the given grid type code
+     * 
+     * @param string $typeCode Grid type code
+     * @return array
+     */
     public function getCustomColumnsByTypeCode($typeCode)
     {
         return ($xmlElement = $this->getXmlElementByCode($typeCode))

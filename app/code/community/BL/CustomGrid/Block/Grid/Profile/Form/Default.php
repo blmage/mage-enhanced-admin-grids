@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -20,6 +20,12 @@ class BL_CustomGrid_Block_Grid_Profile_Form_Default extends BL_CustomGrid_Block_
         return 'default';
     }
     
+    /**
+     * Add users-related fields to the given fieldset
+     * 
+     * @param Varien_Data_Form_Element_Fieldset $fieldset Fieldset
+     * @return BL_CustomGrid_Block_Grid_Profile_Form_Default
+     */
     protected function _addUsersFieldsToFieldset(Varien_Data_Form_Element_Fieldset $fieldset)
     {
         $gridModel   = $this->getGridModel();
@@ -31,7 +37,7 @@ class BL_CustomGrid_Block_Grid_Profile_Form_Default extends BL_CustomGrid_Block_
         );
         
         if ($gridModel->checkUserPermissions($permissions['other_users'])) {
-            $usersValues = Mage::getSingleton('customgrid/system_config_source_admin_user')->toOptionArray();
+            $usersValues   = $this->_getAdminUsersOptionArray();
             $defaultValues = array();
              
             foreach ($usersValues as $key => $userValue) {
@@ -86,6 +92,12 @@ class BL_CustomGrid_Block_Grid_Profile_Form_Default extends BL_CustomGrid_Block_
         return $this;
     }
     
+    /**
+     * Add roles-related fields to the given fieldset
+     * 
+     * @param Varien_Data_Form_Element_Fieldset $fieldset Fieldset
+     * @return BL_CustomGrid_Block_Grid_Profile_Form_Default
+     */
     protected function _addRolesFieldsToFieldset(Varien_Data_Form_Element_Fieldset $fieldset)
     {
         $gridModel   = $this->getGridModel();
@@ -97,7 +109,7 @@ class BL_CustomGrid_Block_Grid_Profile_Form_Default extends BL_CustomGrid_Block_
         );
         
         if ($gridModel->checkUserPermissions($permissions['other_roles'])) {
-            $rolesValues   = Mage::getSingleton('customgrid/system_config_source_admin_role')->toOptionArray(false);
+            $rolesValues   = $this->_getAdminRolesOptionArray(false);
             $defaultValues = array();
              
             foreach ($rolesValues as $key => $roleValue) {
@@ -152,6 +164,12 @@ class BL_CustomGrid_Block_Grid_Profile_Form_Default extends BL_CustomGrid_Block_
         return $this;
     }
     
+    /**
+     * Add global fields to the given fieldset
+     * 
+     * @param Varien_Data_Form_Element_Fieldset $fieldset Fieldset
+     * @return BL_CustomGrid_Block_Grid_Profile_Form_Default
+     */
     protected function _addGlobalFieldsToFieldset(Varien_Data_Form_Element_Fieldset $fieldset)
     {
         $gridModel = $this->getGridModel();
@@ -165,7 +183,7 @@ class BL_CustomGrid_Block_Grid_Profile_Form_Default extends BL_CustomGrid_Block_
                     'name'     => 'global',
                     'label'    => $this->__('Global'),
                     'required' => true,
-                    'values'   => Mage::getSingleton('customgrid/system_config_source_yesno')->toOptionArray(),
+                    'values'   => $this->_getYesNoOptionArray(),
                     'value'    => ($profileId === $gridModel->getGlobalDefaultProfileId() ? 1 : 0),
                 )
             );

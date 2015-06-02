@@ -9,20 +9,21 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 ?>
+<?php /** @var $this BL_CustomGrid_Block_Widget_Grid_Config_Columns_Helper_Attribute */ ?>
 <div class="nobr">
-    <select name="<?php echo $this->getSelectName() ?>" id="<?php echo $this->getSelectId() ?>" class="<?php echo $this->getSelectClassNames() ?>">
+    <select name="<?php echo $this->getAttributeSelectName() ?>" id="<?php echo $this->getAttributeSelectHtmlId() ?>" class="<?php echo $this->getAttributeSelectClassNames() ?>">
     <?php foreach ($this->getAttributesCodes() as $_attributeCode): ?>
         <option value="<?php echo $this->htmlEscape($_attributeCode) ?>"<?php if ($this->getAttributeCode() == $_attributeCode): ?> selected="selected"<?php endif ?>><?php echo $this->htmlEscape($_attributeCode) ?></option>
     <?php endforeach ?>
     </select>
     <?php if ($this->getRendererTargetName()): ?>
-        <input type="hidden" name="<?php echo $this->getRendererTargetName() ?>" id="<?php echo $this->getRendererTargetId() ?>" value="<?php echo $this->getRendererParams() ?>" />
+        <input type="hidden" name="<?php echo $this->getRendererTargetName() ?>" id="<?php echo $this->getRendererTargetHtmlId() ?>" value="<?php echo $this->getRendererParams() ?>" />
         <?php if (!$this->getUseExternalConfigButton()): ?>
-            <span class="blcg-attribute-config-button" id="<?php echo $this->getConfigButtonId() ?>" style="display:none;"><?php echo $this->__('Configuration') ?></span>
+            <span class="blcg-attribute-config-button" id="<?php echo $this->getRendererConfigButtonHtmlId() ?>" style="display:none;"><?php echo $this->__('Configuration') ?></span>
         <?php endif ?>
         <?php if ($_jsObjectName = $this->getSelectsManagerJsObjectName()): ?>
 <script type="text/javascript">
@@ -30,9 +31,9 @@
 //<![CDATA[
 <?php endif ?>
 <?php echo $_jsObjectName ?>.registerSelect(
-    '<?php echo $this->getSelectId() ?>',
-    '<?php echo $this->getConfigButtonId() ?>',
-    '<?php echo $this->getRendererTargetId() ?>',
+    '<?php echo $this->getAttributeSelectHtmlId() ?>',
+    '<?php echo $this->getRendererConfigButtonHtmlId() ?>',
+    '<?php echo $this->getRendererTargetHtmlId() ?>',
     false,
     <?php echo $this->getEditableJsonConfig() ?>
 );

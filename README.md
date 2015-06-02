@@ -14,7 +14,7 @@ _Backwards compatibility is assured for all the previously existing data. **If y
 
 ### Main changes / New features :
 - massive code refactoring (goals: better maintainability, more consistency, better practices and a smaller footprint)
-- big design and usability rework (thanks to [paales](https://github.com/paales) for the current design)
+- big design and usability rework
 - every in-grid customization is now saved via Ajax, for a seamless integration in Ajax-based grids
 - profiles system (different columns lists and default parameters for each grid, assignable to different roles)
 - forcable grid types (use advanced features for the grids that you know to be compatible with a given grid type, but by default are not associated to it)
@@ -23,6 +23,8 @@ _Backwards compatibility is assured for all the previously existing data. **If y
 - failed block verifications for custom columns are not blocking anymore (by default)
 - refined permissions
 - various bug fixes
+
+Special thanks to : [paales](https://github.com/paales) for the current design and [mwgamble](https://github.com/mwgamble) for his many contributions
 
 ### Final steps before beta release
 - last waves of code refactoring/cleanup and complexity reduction

@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -22,6 +22,7 @@ class BL_CustomGrid_Model_Grid_Type_Cms_Block extends BL_CustomGrid_Model_Grid_T
     
     protected function _getBaseEditableFields($blockType)
     {
+        /** @var $helper Mage_Cms_Helper_Data */
         $helper = Mage::helper('cms');
         
         $fields = array(
@@ -53,12 +54,10 @@ class BL_CustomGrid_Model_Grid_Type_Cms_Block extends BL_CustomGrid_Model_Grid_T
         );
         
         if (!Mage::app()->isSingleStoreMode()) {
-            $stores = Mage::getSingleton('adminhtml/system_store')->getStoreValuesForForm(false, true);
-            
             $fields['store_id'] = array(
                 'type'              => 'multiselect',
                 'required'          => true,
-                'form_values'       => $stores,
+                'form_values'       => $this->_getEditorHelper()->getStoreValuesForForm(false, true),
                 'render_block_type' => 'customgrid/widget_grid_editor_renderer_static_store',
             );
         }
@@ -73,11 +72,15 @@ class BL_CustomGrid_Model_Grid_Type_Cms_Block extends BL_CustomGrid_Model_Grid_T
     
     protected function _loadEditedEntity($blockType, BL_CustomGrid_Object $config, array $params, $entityId)
     {
-        return Mage::getModel('cms/block')->load($entityId);
+        /** @var $block Mage_Cms_Model_Block */
+        $block = Mage::getModel('cms/block');
+        $block->load($entityId);
+        return $block;
     }
     
     protected function _getLoadedEntityName($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
+        /** @var $entity Mage_Cms_Model_Block */
         return $entity->getTitle();
     }
     
@@ -88,6 +91,7 @@ class BL_CustomGrid_Model_Grid_Type_Cms_Block extends BL_CustomGrid_Model_Grid_T
     
     protected function _applyEditedFieldValue($blockType, BL_CustomGrid_Object $config, array $params, $entity, $value)
     {
+        /** @var $entity Mage_Cms_Model_Block */
         if ($config->getValueId() == 'store_id') {
             $entity->setStores($value);
             return $this;
@@ -98,6 +102,7 @@ class BL_CustomGrid_Model_Grid_Type_Cms_Block extends BL_CustomGrid_Model_Grid_T
     
     protected function _getSavedFieldValueForRender($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
+        /** @var $entity Mage_Cms_Model_Block */
         return ($config->getValueId() == 'store_id')
             ? $entity->getStores()
             : parent::_getSavedFieldValueForRender($blockType, $config, $params, $entity);

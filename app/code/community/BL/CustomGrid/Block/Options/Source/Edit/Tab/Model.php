@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -64,6 +64,7 @@ class BL_CustomGrid_Block_Options_Source_Edit_Tab_Model extends BL_CustomGrid_Bl
     protected function _prepareForm()
     {
         $optionsSource = $this->getOptionsSource();
+        
         $form = new Varien_Data_Form();
         $fieldset = $form->addFieldset('general', array('legend' => $this->__('Model')));
         
@@ -99,7 +100,7 @@ class BL_CustomGrid_Block_Options_Source_Edit_Tab_Model extends BL_CustomGrid_Bl
                 'title'    => $this->__('Type'),
                 'class'    => 'required-entry',
                 'required' => true,
-                'values'   => Mage::getSingleton('customgrid/options_source')->getModelTypesAsOptionHash(),
+                'values'   => $optionsSource->getModelTypesAsOptionHash(),
             )
         );
         
@@ -124,7 +125,7 @@ class BL_CustomGrid_Block_Options_Source_Edit_Tab_Model extends BL_CustomGrid_Bl
                 'title'    => $this->__('Return Type'),
                 'class'    => 'required-entry',
                 'required' => true,
-                'values'   => Mage::getSingleton('customgrid/options_source')->getModelReturnTypesAsOptionHash(),
+                'values'   => $optionsSource->getModelReturnTypesAsOptionHash(),
             )
         );
         

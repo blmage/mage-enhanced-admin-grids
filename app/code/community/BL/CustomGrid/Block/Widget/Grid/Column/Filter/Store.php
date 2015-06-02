@@ -34,13 +34,23 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Store extends
     Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Abstract
 {
+    /**
+     * Return the HTML content for the options corresponding to the given stores that belong to the given store group
+     * 
+     * @param Mage_Core_Model_Website $website Current website
+     * @param Mage_Core_Model_Store_Group $storeGroup Current store group
+     * @param Mage_Core_Model_Store[] $stores All stores
+     * @param bool $shownWebsite Whether the website has been displayed
+     * @param bool $shownStoreGroup Whether the store group has been displayed
+     * @return string
+     */
     protected function _getStoresOptionsHtml(
         Mage_Core_Model_Website $website,
         Mage_Core_Model_Store_Group $storeGroup,
@@ -78,6 +88,16 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Store extends
         return $html;
     }
     
+    /**
+     * Return the HTML content for the options corresponding to the given store groups and their stores
+     * that belong to the given website
+     * 
+     * @param Mage_Core_Model_Website $website Current website
+     * @param Mage_Core_Model_Store_Group[] $storeGroup All store groups
+     * @param Mage_Core_Model_Store[] $stores All stores
+     * @param bool $shownWebsite Whether the website has been displayed
+     * @return string
+     */
     protected function _getStoreGroupsOptionsHtml(
         Mage_Core_Model_Website $website,
         array $storeGroups,
@@ -99,6 +119,15 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Store extends
         return $html;
     }
     
+    /**
+     * Return the HTML content for the options corresponding to the available websites
+     * 
+     * @param Mage_Core_Model_Website $website Current website
+     * @param Mage_Core_Model_Store_Group[] $storeGroup All store groups
+     * @param Mage_Core_Model_Store[] $stores All stores
+     * @param bool $shownWebsite Whether the website has been displayed
+     * @return string
+     */
     protected function _getWebsitesOptionsHtml()
     {
         $storeModel  = Mage::getSingleton('adminhtml/system_store');
@@ -122,7 +151,7 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Store extends
         $html = '<select name="' . $this->_getHtmlName() . '" ' . $this->getColumn()->getValidateClass() . '>'
             . '<option value=""'  . (!$value ? ' selected="selected"' : '') . '></option>'
             . '<option value="0"' . (strval($value) === '0' ? ' selected="selected"' : '') . '>'
-            . $this->helper('adminhtml')->__('All Store Views')
+            . $this->__('All Store Views')
             . '</option>'
             . $this->_getWebsitesOptionsHtml($value)
             . '<option value="_deleted_"' . ($value == '_deleted_' ? ' selected="selected"' : '') . '>'

@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -21,7 +21,7 @@ class BL_CustomGrid_Block_Widget_Form extends Mage_Adminhtml_Block_Widget_Form
      * 
      * @param Varien_Data_Form_Element_Fieldset $fieldset Fieldset
      * @param string $suffix Field name suffix
-     * @return this
+     * @return BL_CustomGrid_Block_Widget_Form
      */
     protected function _addSuffixToFieldsetFieldNames(Varien_Data_Form_Element_Fieldset $fieldset, $suffix)
     {
@@ -49,6 +49,7 @@ class BL_CustomGrid_Block_Widget_Form extends Mage_Adminhtml_Block_Widget_Form
     public function getDependenceBlock()
     {
         if (!$dependenceBlock = $this->getChild($this->getDependenceBlockName())) {
+            /** @var $dependenceBlock BL_CustomGrid_Block_Widget_Form_Element_Dependence */
             $dependenceBlock = $this->getLayout()->createBlock('customgrid/widget_form_element_dependence');
             $this->setChild($this->getDependenceBlockName(), $dependenceBlock);
         }
@@ -91,7 +92,7 @@ class BL_CustomGrid_Block_Widget_Form extends Mage_Adminhtml_Block_Widget_Form
      * 
      * @param Varien_Data_Form_Element_Abstract $element Form element
      * @param bool $checked Whether the checkbox should initially be checked
-     * @return this
+     * @return BL_CustomGrid_Block_Widget_Form
      */
     public function applyUseConfigCheckboxToElement(
         Varien_Data_Form_Element_Abstract $element,
@@ -148,5 +149,45 @@ class BL_CustomGrid_Block_Widget_Form extends Mage_Adminhtml_Block_Widget_Form
     public function getOptionsSource()
     {
         return Mage::registry('blcg_options_source');
+    }
+    
+    /**
+     * Return the module name usable for translations
+     * 
+     * @return string
+     */
+    protected function _getTranslationModule()
+    {
+        return 'customgrid';
+    }
+    
+    /**
+     * Return the module name to use for translations
+     * Wrapper for _getTranslationModule(), with cache
+     * 
+     * @return string
+     */
+    public function getTranslationModule()
+    {
+        if (!$this->hasData('translation_module')) {
+            if (!$translationModule = $this->_getTranslationModule()) {
+                $translationModule = 'customgrid';
+            }
+            $this->setData('translation_module', $translationModule);
+        }
+        return $this->_getData('translation_module');
+    }
+    
+    /**
+     * Return the helper usabled for translations, based on the current translation module
+     * 
+     * @return Mage_Core_Helper_Abstract
+     */
+    public function getTranslationHelper()
+    {
+        if (!$this->hasData('translation_helper')) {
+            $this->setData('translation_helper', $this->helper($this->getTranslationModule()));
+        }
+        return $this->_getData('translation_helper');
     }
 }

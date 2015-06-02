@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -30,11 +30,23 @@ class BL_CustomGrid_Block_Widget_Grid_Config_Rss_Links extends Mage_Adminhtml_Bl
     
     public function getId()
     {
-        return $this->getDataSetDefault('id', $this->helper('core')->uniqHash('blcgRSS'));
+        if (!$this->hasData('id')) {
+            /** @var $helper Mage_Core_Helper_Data */
+            $helper = $this->helper('core');
+            $this->setData('id', $helper->uniqHash('blcgRSS'));
+        }
+        return $this->_getData('id');
     }
     
+    /**
+     * Return the RSS links from the current grid block
+     * 
+     * @return array
+     */
     public function getRssLinks()
     {
-        return $this->getGridBlock()->getRssLists();
+        /** @var $gridBlock Mage_Adminhtml_Block_Widget_Grid */
+        $gridBlock = $this->getGridBlock();
+        return $gridBlock->getRssLists();
     }
 }

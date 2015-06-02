@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -25,6 +25,11 @@ class BL_CustomGrid_Block_Column_Renderer_Attribute_Config extends BL_CustomGrid
         return 'blcg_column_renderer_attribute_config_form';
     }
     
+    /**
+     * Return the current attribute column renderer
+     * 
+     * @return BL_CustomGrid_Model_Column_Renderer_Attribute_Abstract
+     */
     public function getRenderer()
     {
         return Mage::registry('blcg_attribute_column_renderer');

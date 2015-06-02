@@ -34,7 +34,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -66,11 +66,15 @@ class BL_CustomGrid_Block_Widget_Form_Element_Dependence extends Mage_Adminhtml_
         if (empty($this->_dependences)) {
             return '';
         }
+        
+        /** @var $helper Mage_Core_Helper_Data */
+        $helper = $this->helper('core');
+        
         return '<script type="text/javascript">'
             . "\n" . '//<![CDATA[' . "\n"
             . 'new blcg.Form.Element.DependenceController('
             . $this->_getDependencesJsonConfig()
-            . (!empty($this->_configOptions) ? ', ' . $this->helper('core')->jsonEncode($this->_configOptions) : '')
+            . (!empty($this->_configOptions) ? ', ' . $helper->jsonEncode($this->_configOptions) : '')
             . ');'
             . "\n" . '//<![CDATA[' . "\n"
             . '</script>';
@@ -82,7 +86,7 @@ class BL_CustomGrid_Block_Widget_Form_Element_Dependence extends Mage_Adminhtml_
      * 
      * @param string $fieldId Field ID
      * @param string $fieldName Field name
-     * @return this
+     * @return BL_CustomGrid_Block_Widget_Form_Element_Dependence
      */
     public function addFieldMap($fieldId, $fieldName = null)
     {
@@ -102,7 +106,7 @@ class BL_CustomGrid_Block_Widget_Form_Element_Dependence extends Mage_Adminhtml_
      * @param string $fieldName Dependent field name
      * @param string $fieldNameFrom Base field name
      * @param mixed $fromValues Base value(s)
-     * @return this
+     * @return BL_CustomGrid_Block_Widget_Form_Element_Dependence
      */
     public function addFieldDependence($fieldName, $fieldNameFrom, $fromValues)
     {
@@ -123,7 +127,7 @@ class BL_CustomGrid_Block_Widget_Form_Element_Dependence extends Mage_Adminhtml_
      * Add the given configuration options
      * 
      * @param array $options Configuration options
-     * @return this
+     * @return BL_CustomGrid_Block_Widget_Form_Element_Dependence
      */
     public function addConfigOptions(array $options)
     {
@@ -148,6 +152,8 @@ class BL_CustomGrid_Block_Widget_Form_Element_Dependence extends Mage_Adminhtml_
             }
         }
         
-        return $this->helper('core')->jsonEncode($result);
+        /** @var $helper Mage_Core_Helper_Data */
+        $helper = $this->helper('core');
+        return $helper->jsonEncode($result);
     }
 }

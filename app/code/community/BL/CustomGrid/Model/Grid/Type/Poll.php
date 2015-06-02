@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -20,6 +20,15 @@ class BL_CustomGrid_Model_Grid_Type_Poll extends BL_CustomGrid_Model_Grid_Type_A
         return array('adminhtml/poll_grid');
     }
     
+    /**
+     * Return the IDs of the stores to which the given poll is associated
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Object $config Edited field config
+     * @param array $params Edit parameters
+     * @param Mage_Poll_Model_Poll $entity Edited poll
+     * @return array
+     */
     public function getPollStoreIds($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
         return ($entity && $entity->getId() ? $entity->getStoreIds() : array());
@@ -27,6 +36,7 @@ class BL_CustomGrid_Model_Grid_Type_Poll extends BL_CustomGrid_Model_Grid_Type_A
     
     protected function _getBaseEditableFields($blockType)
     {
+        /** @var $helper Mage_Poll_Helper_Data */
         $helper = Mage::helper('poll');
         
         $fields = array(
@@ -55,7 +65,7 @@ class BL_CustomGrid_Model_Grid_Type_Poll extends BL_CustomGrid_Model_Grid_Type_A
                 'type'        => 'multiselect',
                 'field_name'  => 'store_ids',
                 'required'    => true,
-                'form_values' => Mage::getSingleton('adminhtml/system_store')->getStoreValuesForForm(),
+                'form_values' => $this->_getEditorHelper()->getStoreValuesForForm(false, false),
                 'render_block_type'     => 'customgrid/widget_grid_editor_renderer_static_store',
                 'entity_value_callback' => array($this, 'getPollStoreIds'),
             );
@@ -71,11 +81,15 @@ class BL_CustomGrid_Model_Grid_Type_Poll extends BL_CustomGrid_Model_Grid_Type_A
     
     protected function _loadEditedEntity($blockType, BL_CustomGrid_Object $config, array $params, $entityId)
     {
-        return Mage::getModel('poll/poll')->load($entityId);
+        /** @var $poll Mage_Poll_Model_Poll */
+        $poll = Mage::getModel('poll/poll');
+        $poll->load($entityId);
+        return $poll;
     }
     
     protected function _getLoadedEntityName($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
+        /** @var $entity Mage_Poll_Model_Poll */
         return $entity->getPollTitle();
     }
     

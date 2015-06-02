@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -20,7 +20,13 @@ class BL_CustomGrid_Model_Config_Manager
     const TYPE_GRID_TYPES = 'grid_types';
     const TYPE_COLUMN_RENDERERS_COLLECTION = 'column_renderers_collection';
     const TYPE_COLUMN_RENDERERS_ATTRIBUTE  = 'column_renderers_attribute';
+    const TYPE_EXCLUDED_GRIDS = 'excluded_grids';
     
+    /**
+     * XML configurations cache
+     * 
+     * @var array|null
+     */
     protected $_xmlConfigs = null;
     
     /**

@@ -9,17 +9,22 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Default extends
     BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Abstract
 {
+    /**
+     * Self render callbacks based on field type
+     * 
+     * @var string[]
+     */
     static protected $_renderMethods = array(
         'checkboxes'  => '_renderCheckboxesValue',
         'date'        => '_renderDateValue',
-        'radios'      => '_renderRadiosValue',
+        'radios'      => '_renderRadioButtonsValue',
         'select'      => '_renderSelectValue',
         'multiselect' => '_renderMultiSelectValue',
         'checkbox'    => '_renderDefaultValue',
@@ -29,18 +34,36 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Default extends
         'text'        => '_renderTextValue',
      );
     
+    /**
+     * Render the given text value
+     * 
+     * @param string $renderableValue Renderable text value
+     * @return string
+     */
     protected function _renderTextValue($renderableValue)
     {
         return ($renderableValue !== '' ? $this->htmlEscape($renderableValue) : '');
     }
     
+    /**
+     * Render the given long text value
+     * 
+     * @param string $renderableValue Renderable long text value
+     * @return string
+     */
     protected function _renderLongTextValue($renderableValue)
     {
-        return ($this->helper('core/string')->strlen($renderableValue) < 255)
-            ? $renderableValue
-            : $this->getDefaultValue();
+        /** @var $helper BL_CustomGrid_Helper_String */
+        $helper = $this->helper('core/string');
+        return (($helper->strlen($renderableValue) < 255) ? $renderableValue : $this->getDefaultValue());
     }
     
+    /**
+     * Render the given choices-based value
+     * 
+     * @param string $renderableValue Renderable choices-based value
+     * @return string
+     */
     protected function _getChoiceValues(array $formOptions, $key)
     {
         // Must work like the edit block does (see BL_CustomGrid_Block_Widget_Grid_Editor_Form_Static_Default)
@@ -71,6 +94,14 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Default extends
         return $choiceValues;
     }
     
+    /**
+     * Return a convenient renderable value for the given choices-based value
+     * 
+     * @param string $renderableValue Renderable choices-based value
+     * @param array $renderOptions Render options
+     * @param bool $allowMultiple Whether the corresponding field allows multiple values
+     * @return array
+     */
     protected function _getRenderableChoiceValue($renderableValue, array $renderOptions, $allowMultiple)
     {
         if (!is_array($renderableValue)) {
@@ -84,6 +115,13 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Default extends
         return $renderableValue;
     }
     
+     /**
+      * Render the given selected values from a choices-based field, without rendering their paths
+      * 
+      * @param array $selectedValues Selected values
+      * @param array $renderOptions Render options
+      * @return string
+      */
     protected function _renderChoiceValueWithoutPath(array $selectedValues, array $renderOptions)
     {
         $labels = array();
@@ -96,6 +134,13 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Default extends
         return implode($separator, $labels);
     }
     
+    /**
+     * Sort callback for choices-based values
+     * 
+     * @param array $valueA One value
+     * @param array $valueB Another value
+     * @return int
+     */
     protected function _sortChoiceValues(array $valueA, array $valueB)
     {
         if (!isset($valueA['path_id'])) {
@@ -109,6 +154,14 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Default extends
             : strcmp($valueA['label'], $valueB['label']);
     }
     
+    /**
+      * Render the given selected values from a choices-based field, including their paths
+      * 
+      * @param array $choices Available choices
+      * @param array $selectedValues Selected values
+      * @param array $renderOptions Render options
+      * @return string
+      */
     protected function _renderChoiceValueWithPath(array $choices, array $selectedValues, array $renderOptions)
     {
         uasort($choices, array($this, '_sortChoiceValues'));
@@ -128,8 +181,13 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Default extends
                 continue;
             }
             
-            $path  = explode('_', $value['path_id']);
-            $depth = count($path);
+            if ($value['path_id'] !== '') {
+                $path  = explode('_', $value['path_id']);
+                $depth = count($path);
+            } else {
+                $path  = array();
+                $depth = 0;
+            }
             
             for ($i=0; $i<$currentDepth; $i++) {
                 if ($path[$i] != $currentPath[$i]) {
@@ -148,6 +206,15 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Default extends
         return implode('<br />', $renderedValue);
     }
     
+    /**
+     * Render the given choices-based value
+     * 
+     * @param string $renderableValue Renderable value
+     * @param array $renderOptions Render options
+     * @param array $choices Available choices
+     * @param bool $allowMultiple Whether the corresponding field allows multiple values
+     * @return string
+     */
     protected function _renderChoiceValue(
         $renderableValue,
         array $renderOptions,
@@ -173,6 +240,14 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Default extends
         return $renderedValue;
     }
     
+    /**
+     * Render the given checkboxes-based value
+     * 
+     * @param string $renderableValue Renderable value
+     * @param array $renderOptions Render options
+     * @param array $formOptions Form options
+     * @return string
+     */
     protected function _renderCheckboxesValue($renderableValue, array $renderOptions, array $formOptions)
     {
         if (!is_null($values = $this->_getChoiceValues($formOptions, 'values'))) {
@@ -203,6 +278,14 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Default extends
         return $this->_renderChoiceValue($renderableValue, $renderOptions, $choices);
     }
     
+    /**
+     * Render the given multiple select-based value
+     * 
+     * @param string $renderableValue Renderable value
+     * @param array $renderOptions Render options
+     * @param array $formOptions Form options
+     * @return string
+     */
     protected function _renderMultiSelectValue($renderableValue, $renderOptions, $formOptions)
     {
         $choices = array();
@@ -249,7 +332,15 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Default extends
         return $this->_renderChoiceValue($renderableValue, $renderOptions, $choices, true);
     }
     
-    protected function _renderRadiosValue($renderableValue, array $renderOptions, array $formOptions)
+    /**
+     * Render the given radio buttons-based value
+     * 
+     * @param string $renderableValue Renderable value
+     * @param array $renderOptions Render options
+     * @param array $formOptions Form options
+     * @return string
+     */
+    protected function _renderRadioButtonsValue($renderableValue, array $renderOptions, array $formOptions)
     {
         $choices = array();
         
@@ -278,6 +369,14 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Default extends
         return $this->_renderChoiceValue($renderableValue, $renderOptions, $choices, true);
     }
     
+    /**
+     * Recursively collect values, pre-compute their paths, and return a flat array from the given select-based options
+     * 
+     * @param array $options Available options
+     * @param string $pathId Current path ID
+     * @param array $pathLabels Current path labels
+     * @return array
+     */
     protected function _collectSelectValues(array $options, $pathId, array $pathLabels)
     {
         $values = array();
@@ -318,6 +417,14 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Default extends
         return $values;
     }
     
+    /**
+     * Render the given select-based value
+     * 
+     * @param string $renderableValue Renderable value
+     * @param array $renderOptions Render options
+     * @param array $formOptions Form options
+     * @return string
+     */
     protected function _renderSelectValue($renderableValue, array $renderOptions, array $formOptions)
     {
         $choices = array();
@@ -374,6 +481,12 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Default extends
         return $this->_renderChoiceValue($renderableValue, $renderOptions, $choices);
     }
     
+    /**
+     * Return the input locale from the given render options
+     * 
+     * @param array $renderOptions Render Options
+     * @return string|Zend_Locale|null
+     */
     protected function _getDateInputLocale(array $renderOptions)
     {
         return isset($renderOptions['input_locale'])
@@ -381,6 +494,12 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Default extends
             : null;
     }
     
+    /**
+     * Return the input date format from the given render options
+     * 
+     * @param array $renderOptions Render Options
+     * @return string
+     */
     protected function _getDateInputFormat(array $renderOptions)
     {
         return isset($renderOptions['input_format'])
@@ -388,6 +507,13 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Default extends
             : Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
     }
     
+    /**
+     * Return a Zend_Date object from the given renderable date value
+     * 
+     * @param Zend_Date $renderableValue Renderable value
+     * @param mixed $renderOptions Render options
+     * @return Zend_Date|null
+     */
     protected function _getRenderableZendDate($renderableValue, array $renderOptions)
     {
         if (ctype_digit($renderableValue)) {
@@ -412,6 +538,12 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Default extends
         return $renderableValue;
     }
     
+    /**
+     * Return the output locale from the given render options
+     * 
+     * @param array $renderOptions Render Options
+     * @return string|Zend_Locale|null
+     */
     protected function _getDateOutputLocale(array $renderOptions)
     {
         return isset($renderOptions['output_locale'])
@@ -419,6 +551,12 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Default extends
             : null;
     }
     
+    /**
+     * Return the output date format from the given render options
+     * 
+     * @param array $renderOptions Render Options
+     * @return string
+     */
     protected function _getDateOutputFormat(array $renderOptions)
     {
         return isset($renderOptions['output_format'])
@@ -426,6 +564,13 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Default extends
             : Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
     }
     
+    /**
+     * Render the given date value
+     * 
+     * @param mixed $renderableValue Renderable value
+     * @param array $renderOptions Render options
+     * @return string
+     */
     protected function _renderDateValue($renderableValue, array $renderOptions)
     {
         if (empty($renderableValue)) {
@@ -442,6 +587,11 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Default extends
         );
     }
     
+    /**
+     * Return the default rendered value
+     * 
+     * @return string
+     */
     protected function _renderDefaultValue()
     {
         return $this->getDefaultValue();
@@ -449,10 +599,10 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Default extends
     
     protected function _getRenderedValue()
     {
-        $editConfig    = $this->getEditConfig();
-        $fieldType     = $editConfig->getData('type');
-        $renderOptions = $editConfig->getData('renderer');
-        $formOptions   = $editConfig->getData('form');
+        $editConfig      = $this->getEditConfig();
+        $fieldType       = $editConfig->getData('type');
+        $renderOptions   = $editConfig->getData('renderer');
+        $formOptions     = $editConfig->getData('form');
         $renderableValue = $this->getRenderableValue();
         
         if (isset(self::$_renderMethods[$fieldType])) {

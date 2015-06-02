@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -23,74 +23,109 @@ abstract class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Abstract extends Mage
     
     protected function _prepareLayout()
     {
-        $return   = parent::_prepareLayout();
+        $returnValue = parent::_prepareLayout();
         $inGrid   = $this->getEditedInGrid();
         $required = $this->getIsRequiredValueEdit();
         
-        Varien_Data_Form::setElementRenderer(
-            $this->getLayout()
-                ->createBlock('customgrid/widget_grid_editor_form_renderer_element')
-                ->setEditedInGrid($inGrid)
-                ->setIsRequiredValueEdit($required)
-        );
+        /** @var $elementRenderer BL_CustomGrid_Widget_Grid_Editor_Form_Renderer_Element */
+        $elementRenderer  = $this->getLayout()
+            ->createBlock('customgrid/widget_grid_editor_form_renderer_element');
         
-        Varien_Data_Form::setFieldsetRenderer(
-            $this->getLayout()
-                ->createBlock('customgrid/widget_grid_editor_form_renderer_fieldset')
-                ->setEditedInGrid($inGrid)
-                ->setIsRequiredValueEdit($required)
-        );
+        /** @var $elementRenderer BL_CustomGrid_Widget_Grid_Editor_Form_Renderer_Fieldset */
+        $fieldsetRenderer = $this->getLayout()
+            ->createBlock('customgrid/widget_grid_editor_form_renderer_fieldset');
         
-        Varien_Data_Form::setFieldsetElementRenderer(
-            $this->getLayout()
-                ->createBlock('customgrid/widget_grid_editor_form_renderer_fieldset_element')
-                ->setEditedInGrid($inGrid)
-                ->setIsRequiredValueEdit($required)
-        );
+        /** @var $elementRenderer BL_CustomGrid_Widget_Grid_Editor_Form_Renderer_Fieldset_Element */
+        $fieldsetElementRenderer = $this->getLayout()
+            ->createBlock('customgrid/widget_grid_editor_form_renderer_fieldset_element');
         
-        return $return;
-    }
-    
-    protected function _beforeToHtml()
-    {
-        if (is_object($this->getEditedEntity()) && is_object($this->getEditedValue())) {
-            $this->setCanDisplay(true);
-            return parent::_beforeToHtml();
-        }
-        $this->setCanDisplay(false);
-        return $this;
+        $elementRenderer->setEditedInGrid($inGrid)->setIsRequiredValueEdit($required);
+        $fieldsetRenderer->setEditedInGrid($inGrid)->setIsRequiredValueEdit($required);
+        $fieldsetElementRenderer->setEditedInGrid($inGrid)->setIsRequiredValueEdit($required);
+        
+        Varien_Data_Form::setElementRenderer($elementRenderer);
+        Varien_Data_Form::setFieldsetRenderer($fieldsetRenderer);
+        Varien_Data_Form::setFieldsetElementRenderer($fieldsetElementRenderer);
+        
+        return $returnValue;
     }
     
     protected function _toHtml()
     {
-        if ($this->getCanDisplay()) {
-            $html = parent::_toHtml();
-            
-            if ($this->getEditedInGrid()) {
-                $html .= '<input name="form_key" type="hidden" value="' . $this->getFormKey() . '" />';
-            }
-            
-            return $html;
+        $html = parent::_toHtml();
+        
+        if ($this->getEditedInGrid()) {
+            $html .= '<input name="form_key" type="hidden" value="' . $this->getFormKey() . '" />';
         }
-        return '';
+        
+        return $html;
     }
     
     public function getFormId()
     {
-        return $this->getDataSetDefault('form_id', $this->helper('core')->uniqHash('blcg_grid_editor_form'));
+        if (!$this->hasData('form_id')) {
+            /** @var $helper Mage_Core_Helper_Data */
+            $helper=  $this->helper('core');
+            $this->setData('form_id', $helper->uniqHash('blcg_grid_editor_form'));
+        }
+        return $this->_getData('form_id');
     }
     
     protected function _initializeForm()
     {
         return new Varien_Data_Form(
             array(
-                'id'     => $this->getFormId(),
-                'method' => 'post',
+                'id'             => $this->getFormId(),
+                'method'         => 'post',
                 'html_id_prefix' => $this->getFormId(),
                 'use_container'  => true,
             )
         );
     }
     
+    /**
+     * Return whether the edited value is required
+     * 
+     * @return bool
+     */
     abstract public function getIsRequiredValueEdit();
+    
+    /**
+     * Return the current edit config
+     * 
+     * @return BL_CustomGrid_Model_Grid_Edit_Config
+     */
+    public function getEditConfig()
+    {
+        if (!($config = $this->_getData('edit_config')) instanceof BL_CustomGrid_Model_Grid_Edit_Config) {
+            Mage::throwException($this->__('Invalid edit config'));
+        }
+        return $config;
+    }
+    
+    /**
+     * Return the current edited attribute
+     * 
+     * @return Mage_Eav_Model_Entity_Attribute
+     */
+    public function getEditedAttribute()
+    {
+        if (!($attribute = $this->_getData('edited_attribute')) instanceof Mage_Eav_Model_Entity_Attribute) {
+            Mage::throwException($this->__('Invalid edited attribute'));
+        }
+        return $attribute;
+    }
+    
+    /**
+     * Return the current edited entity
+     * 
+     * @return Varien_Object
+     */
+    public function getEditedEntity()
+    {
+        if (!($entity = $this->_getData('edited_entity')) instanceof Varien_Object) {
+            Mage::throwException($this->__('Invalid edited entity'));
+        }
+        return $entity;
+    }
 }

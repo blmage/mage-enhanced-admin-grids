@@ -10,7 +10,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 -->
@@ -27,7 +27,6 @@
         </reference>
         
         <reference name="before_body_end">
-            <block type="customgrid/column_renderer_collection_descriptions" name="blcg.column_renderer.collection.descriptions" />
             <block type="customgrid/messages" name="blcg.messages" />
         </reference>
     </default>
@@ -56,6 +55,12 @@
             <block type="customgrid/grid" name="blcg.grid.index" />
         </reference>
     </customgrid_grid_index>
+    
+    <customgrid_grid_grid>
+        <block type="core/text_list" name="root" output="toHtml">
+            <block type="customgrid/grid" name="blcg.grid.index" />
+        </block>
+    </customgrid_grid_grid>
     
     <customgrid_grid_edit>
         <reference name="left">

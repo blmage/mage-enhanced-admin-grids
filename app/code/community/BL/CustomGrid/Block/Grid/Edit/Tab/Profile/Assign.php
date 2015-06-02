@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -36,17 +36,18 @@ class BL_CustomGrid_Block_Grid_Edit_Tab_Profile_Assign extends BL_CustomGrid_Blo
         return false;
     }
     
-    protected function _prepareForm()
+    protected function _getFormHtmlIdPrefix()
     {
-        $gridModel = $this->getGridModel();
-        $gridProfile = $this->getGridProfile();
-        
-        $form = new Varien_Data_Form();
-        $form->setHtmlIdPrefix('blcg_grid_' . $gridModel->getId() . '_profile_edit_' . $gridProfile->getId());
-        $form->setFieldNameSuffix('profile_assign');
-        $form->setValues($gridProfile->getData());
-        $this->setForm($form);
-        
-        return parent::_prepareForm();
+        return 'blcg_grid_' . $this->getGridModel()->getId() . '_profile_assign_' . $this->getGridProfile()->getId();
+    }
+    
+    protected function _getFormFieldNameSuffix()
+    {
+        return 'profile_assign';
+    }
+    
+    protected function _getFormValues()
+    {
+        return $this->getGridProfile()->getData();
     }
 }

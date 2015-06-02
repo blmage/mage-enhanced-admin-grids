@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -20,7 +20,9 @@ class BL_CustomGrid_Config_FormController extends BL_CustomGrid_Controller_Grid_
         if ($this->_isAjaxRequest()
             && (($container = $this->getRequest()->getParam('container')) != '')
             && (($value = $this->getRequest()->getParam('value')) != '')) {
-            Mage::helper('customgrid/config_form')->saveFieldsetsStates(array($container => $value));
+            /** @var $helper BL_CustomGrid_Helper_Config_Form */
+            $helper = Mage::helper('customgrid/config_form');
+            $helper->saveFieldsetsStates(array($container => $value));
             $this->_setActionSuccessJsonResponse();
         }
     }

@@ -9,8 +9,17 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+/**
+ * @method this setId(string $id) Set custom column ID
+ * @method this setModule(string $module) Set origin module
+ * @method this setGroup(string $group) Set custom column group
+ * @method this setAllowCustomization(bool $flag) Set whether this columns is customizable
+ * @method this setAllowRenderers(bool $flag) Set whether this column allows to choose a renderer
+ * @method this setAllowStore(bool $flag) Set whether this column allows to choose a base store view
  */
 
 abstract class BL_CustomGrid_Model_Custom_Column_Abstract extends BL_CustomGrid_Object
@@ -52,10 +61,13 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract extends BL_CustomGrid_
      */
     public function getApplier()
     {
-        return $this->getDataSetDefault(
-            'applier',
-            Mage::getModel('customgrid/custom_column_applier')->setCustomColumn($this)
-        );
+        if (!$this->hasData('applier')) {
+            /** @var $applier BL_CustomGrid_Model_Custom_Column_Applier */
+            $applier = Mage::getModel('customgrid/custom_column_applier');
+            $applier->setCustomColumn($this);
+            $this->setData('applier', $applier);
+        }
+        return $this->_getData('applier');
     }
     
     /**
@@ -127,7 +139,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract extends BL_CustomGrid_
     /**
      * Prepare config data
      * 
-     * @return this
+     * @return BL_CustomGrid_Model_Custom_Column_Abstract
      */
     protected function _prepareConfig()
     {
@@ -137,7 +149,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract extends BL_CustomGrid_
     /**
      * Initialize and prepare config data
      * 
-     * @return this
+     * @return BL_CustomGrid_Model_Custom_Column_Abstract
      */
     protected function _initializeConfig()
     {
@@ -162,14 +174,19 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract extends BL_CustomGrid_
             'customization_window_config',
         );
         
-        $this->addData(array_fill_keys($booleanKeys, false));
-        $this->addData(array_fill_keys($arrayKeys, array()));
+        foreach ($booleanKeys as $key) {
+            $this->setData($key, false);
+        }
+        foreach ($arrayKeys as $key) {
+            $this->setData($key, array());
+        }
         
         // Initialize from XML values if possible
         if (is_array($xmlValues = $this->getData('xml_values'))
             && (($xmlElement = $this->getData('xml_element')) instanceof Varien_Simplexml_Element)) {
-            Mage::getSingleton('customgrid/custom_column_config')
-                ->initializeCustomColumnFromXmlConfig($this, $xmlElement, $xmlValues);
+            /** @var $configModel BL_CustomGrid_Model_Custom_Column_Config */
+            $configModel = Mage::getSingleton('customgrid/custom_column_config');
+            $configModel->initializeCustomColumnFromXmlConfig($this, $xmlElement, $xmlValues);
         }
         
         $this->unsetData('xml_element');
@@ -207,7 +224,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract extends BL_CustomGrid_
      * 
      * @param mixed $versions Allowed Magento versions patterns
      * @param bool $merge Whether given patterns should be merged with the existing ones
-     * @return this
+     * @return BL_CustomGrid_Model_Custom_Column_Abstract
      */
     public function setAllowedVersions($versions, $merge = false)
     {
@@ -219,7 +236,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract extends BL_CustomGrid_
      * 
      * @param mixed $versions Excluded Magento versions patterns
      * @param bool $merge Whether given patterns should be merged with the existing ones
-     * @return this
+     * @return BL_CustomGrid_Model_Custom_Column_Abstract
      */
     public function setExcludedVersions($versions, $merge = false)
     {
@@ -231,7 +248,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract extends BL_CustomGrid_
      * 
      * @param mixed $blocks Allowed block types patterns
      * @param bool $merge Whether given patterns should be merged with the existing ones
-     * @return this
+     * @return BL_CustomGrid_Model_Custom_Column_Abstract
      */
     public function setAllowedBlocks($blocks, $merge = false)
     {
@@ -243,7 +260,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract extends BL_CustomGrid_
      * 
      * @param mixed $blocks Excluded block types patterns
      * @param bool $merge Whether given patterns should be merged with the existing ones
-     * @return this
+     * @return BL_CustomGrid_Model_Custom_Column_Abstract
      */
     public function setExcludedBlocks($blocks, $merge = false)
     {
@@ -255,7 +272,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract extends BL_CustomGrid_
      * 
      * @param mixed $rewrites Allowed rewriting class names patterns
      * @param bool $merge Whether given patterns should be merged with the existing ones
-     * @return this
+     * @return BL_CustomGrid_Model_Custom_Column_Abstract
      */
     public function setAllowedRewrites($rewrites, $merge = false)
     {
@@ -267,7 +284,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract extends BL_CustomGrid_
      * 
      * @param mixed $rewrites Excluded rewriting class names patterns
      * @param bool $merge Whether given patterns should be merged with the existing ones
-     * @return this
+     * @return BL_CustomGrid_Model_Custom_Column_Abstract
      */
     public function setExcludedRewrites($rewrites, $merge = false)
     {
@@ -279,7 +296,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract extends BL_CustomGrid_
      * 
      * @param array $params Config params
      * @param bool $merge Whether given params should be merged with the existing ones
-     * @return this
+     * @return BL_CustomGrid_Model_Custom_Column_Abstract
      */
     public function setConfigParams(array $params, $merge = false)
     {
@@ -303,7 +320,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract extends BL_CustomGrid_
      * 
      * @param array $params Block params
      * @param bool $merge Whether given params should be merged with the existing ones
-     * @return this
+     * @return BL_CustomGrid_Model_Custom_Column_Abstract
      */
     public function setBlockParams(array $params, $merge = false)
     {
@@ -340,7 +357,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract extends BL_CustomGrid_
      * Return customization params
      * 
      * @param bool $sorted Whether params should be sorted
-     * @return Bl_CustomGrid_Object[]
+     * @return BL_CustomGrid_Object[]
      */
     public function getCustomizationParams($sorted = true)
     {
@@ -394,7 +411,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract extends BL_CustomGrid_
      * @param array $data Config values
      * @param mixed $sortOrder Sort order (can be "first", "last" or an integer)
      * @param bool $override Whether the existing param for the same key should be overriden (if appropriate)
-     * @return this
+     * @return BL_CustomGrid_Model_Custom_Column_Abstract
      */
     public function addCustomizationParam($key, array $data, $sortOrder = 'last', $override = true)
     {
@@ -421,7 +438,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract extends BL_CustomGrid_
      * 
      * @param array $data Config values
      * @param bool $merge Whether given values should be merged with the existing ones
-     * @return this
+     * @return BL_CustomGrid_Model_Custom_Column_Abstract
      */
     public function setCustomizationWindowConfig(array $data, $merge = false)
     {
@@ -432,7 +449,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract extends BL_CustomGrid_
      * Set custom column name
      * 
      * @param string $name Column name
-     * @return this
+     * @return BL_CustomGrid_Model_Custom_Column_Abstract
      */
     public function setName($name)
     {
@@ -621,7 +638,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract extends BL_CustomGrid_
      * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
      * @param Varien_Data_Collection_Db $collection Grid collection
      * @param array $filters Current filters
-     * @return this
+     * @return BL_CustomGrid_Model_Custom_Column_Abstract
      */
     public function prepareGridCollectionFiltersMap(
         BL_CustomGrid_Model_Grid $gridModel,
@@ -641,7 +658,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract extends BL_CustomGrid_
      * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
      * @param Varien_Data_Collection_Db $collection Grid collection
      * @param array $filters Current filters
-     * @return this
+     * @return BL_CustomGrid_Model_Custom_Column_Abstract
      */
     public function restoreGridCollectionFiltersMap(
         BL_CustomGrid_Model_Grid $gridModel,
@@ -664,7 +681,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract extends BL_CustomGrid_
      * @param string $columnIndex Grid column index
      * @param array $params Customization params values
      * @param Mage_Core_Model_Store $store Column store
-     * @return this
+     * @return BL_CustomGrid_Model_Custom_Column_Abstract
      */
     public function prepareGridCollection(
         Varien_Data_Collection_Db $collection,
@@ -716,7 +733,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract extends BL_CustomGrid_
      * @param string $columnIndex Grid column index
      * @param array $params Customization params values
      * @param Mage_Core_Model_Store $store Column store
-     * @return this
+     * @return BL_CustomGrid_Model_Custom_Column_Abstract
      */
     abstract public function applyToGridCollection(
         Varien_Data_Collection_Db $collection,

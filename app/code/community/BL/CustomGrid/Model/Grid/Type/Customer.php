@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -30,13 +30,13 @@ class BL_CustomGrid_Model_Grid_Type_Customer extends BL_CustomGrid_Model_Grid_Ty
     
     protected function _getAvailableAttributes($blockType)
     {
-        $attributes = Mage::getResourceModel('customer/customer')
-            ->loadAllAttributes()
-            ->getAttributesByCode();
-        
+        /** @var $customerResource Mage_Customer_Model_Entity_Customer */
+        $customerResource = Mage::getResourceModel('customer/customer');
+        $attributes = $customerResource->loadAllAttributes()->getAttributesByCode();
         $availableAttributes = array();
         
         foreach ($attributes as $attribute) {
+            /** @var $attribute Mage_Eav_Model_Entity_Attribute */
             if ($attribute->getBackendType() != 'static') {
                 $availableAttributes[$attribute->getAttributeCode()] = $attribute;
             }
@@ -60,17 +60,18 @@ class BL_CustomGrid_Model_Grid_Type_Customer extends BL_CustomGrid_Model_Grid_Ty
     
     protected function _getAdditionalCustomColumns()
     {
-        $columns = array();
-        $helper  = Mage::helper('customer');
+        /** @var $helper Mage_Customer_Helper_Data */
+        $helper = Mage::helper('customer');
+        $customColumns = array();
         
         // Add address attributes for both address types
-        $addressAttributes = Mage::getResourceModel('customer/address')
-            ->loadAllAttributes()
-            ->getAttributesByCode();
-        
+        /** @var $addressResource Mage_Customer_Model_Entity_Address */
+        $addressResource   = Mage::getResourceModel('customer/address');
+        $addressAttributes = $addressResource->loadAllAttributes()->getAttributesByCode();
         $availableAttributes = array();
         
         foreach ($addressAttributes as $attribute) {
+            /** @var $attribute Mage_Eav_Model_Entity_Attribute */
             if ($attribute->getBackendType() != 'static') {
                 $availableAttributes[$attribute->getAttributeCode()] = $attribute;
             }
@@ -82,25 +83,26 @@ class BL_CustomGrid_Model_Grid_Type_Customer extends BL_CustomGrid_Model_Grid_Ty
                 // Force translation, because customer address attributes may not be translated by default
                 $columnName = $helper->__($attribute->getFrontendLabel());
                 
-                // Clarify attributes labels for which we can't know which is which by default
+                // Clarify attributes labels for which we cannot know which is which by default
                 if ($attributeCode == 'region') {
                     $columnName .= ' (' . $helper->__('Name') . ')';
                 } elseif ($attributeCode == 'region_id') {
                     $columnName .= ' (' . $helper->__('ID') . ')';
                 }
                 
-                $column = Mage::getModel('customgrid/custom_column_customer_address_' . $addressType)
-                    ->setId($columnId)
+                /** @var $customColumn BL_CustomGrid_Model_Custom_Column_Customer_Address_Abstract */
+                $customColumn = Mage::getModel('customgrid/custom_column_customer_address_' . $addressType);
+                $customColumn->setId($columnId)
                     ->setModule('customgrid')
                     ->setName($columnName)
                     ->setGroup($typeLabel)
                     ->setAllowRenderers(true)
                     ->setConfigParams(array('attribute_code' => $attributeCode));
                 
-                $columns[$columnId] = $column;
+                $customColumns[$columnId] = $customColumn;
             }
         }
         
-        return $columns;
+        return $customColumns;
     }
 }

@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -19,7 +19,7 @@ class BL_CustomGrid_Model_Grid_Worker extends BL_CustomGrid_Object
      * Set the current grid model
      * 
      * @param BL_CustomGrid_Model_Grid $gridModel Grid model to set as current
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Worker
      */
     public function setGridModel(BL_CustomGrid_Model_Grid $gridModel)
     {
@@ -35,7 +35,9 @@ class BL_CustomGrid_Model_Grid_Worker extends BL_CustomGrid_Object
     {
         if ((!$gridModel = $this->_getData('grid_model'))
             || (!$gridModel instanceof BL_CustomGrid_Model_Grid)) {
-            Mage::throwException(Mage::helper('customgrid')->__('Invalid grid model'));
+            /** @var $helper BL_CustomGrid_Helper_Data */
+            $helper = Mage::helper('customgrid');
+            Mage::throwException($helper->__('Invalid grid model'));
         }
         return $gridModel;
     }

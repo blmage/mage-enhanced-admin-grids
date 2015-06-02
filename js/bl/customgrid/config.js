@@ -33,7 +33,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -92,7 +92,8 @@ blcg.Tools = {
             hideEffect: Element.hide,
             showEffect: Element.show,
             id: windowId,
-            onClose: this.closeDialog.bind(this)
+            onClose: this.closeDialog.bind(this),
+            options: {}
         }, windowConfig || {}); 
         
         if (windowConfig.resizable) {

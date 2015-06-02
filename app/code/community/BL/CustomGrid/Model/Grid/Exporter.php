@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -60,7 +60,9 @@ class BL_CustomGrid_Model_Grid_Exporter extends BL_CustomGrid_Model_Grid_Worker
         
         $typeModel = $gridModel->getTypeModel();
         $typeModel->beforeGridExport($format, null);
-        $gridBlock = Mage::getSingleton('core/layout')->createBlock($gridModel->getBlockType());
+        /** @var $layout Mage_Core_Model_Layout */
+        $layout = Mage::getSingleton('core/layout');
+        $gridBlock = $layout->createBlock($gridModel->getBlockType());
         
         if (is_array($config)) {
             $gridBlock->blcg_setExportConfig($config);

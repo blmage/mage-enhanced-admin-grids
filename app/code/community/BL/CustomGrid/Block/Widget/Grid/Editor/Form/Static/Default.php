@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -60,6 +60,7 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Static_Default extends
     protected function _initFormValues()
     {
         if ($form = $this->getForm()) {
+            /** @var $editConfig BL_CustomGrid_Model_Grid_Edit_Config */
             $editConfig   = $this->getEditConfig();
             $editedEntity = $this->getEditedEntity();
             
@@ -85,6 +86,12 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Static_Default extends
         return parent::_initFormValues();
     }
     
+    /**
+     * Return additional field values for the choices-based field from the given edit config
+     * 
+     * @param BL_CustomGrid_Model_Grid_Edit_Config $editConfig Edit config
+     * @return array
+     */
     protected function _getAdditionalChoicesFieldValues(BL_CustomGrid_Model_Grid_Edit_Config $editConfig)
     {
         $values = array();
@@ -123,12 +130,18 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Static_Default extends
         if (is_array($sourceOptions)) {
             $values[$sourceType] = $sourceOptions;
         } else {
-            Mage::throwException($this->__('Can\'t find any option to use for edited value'));
+            Mage::throwException($this->__('Cannot find any option to use for edited value'));
         }
         
         return $values;
     }
     
+    /**
+     * Return additional field values for the date-based field from the given edit config
+     * 
+     * @param BL_CustomGrid_Model_Grid_Edit_Config $editConfig Edit config
+     * @return array
+     */
     protected function _getAdditionalDateFieldValues(BL_CustomGrid_Model_Grid_Edit_Config $editConfig)
     {
         $values = array('after_element_html' => '');
@@ -148,14 +161,23 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Static_Default extends
         return $values;
     }
     
+    /**
+     * Return additional field values for the editor-based field from the given edit config
+     * 
+     * @param BL_CustomGrid_Model_Grid_Edit_Config $editConfig Edit config
+     * @return array
+     */
     protected function _getAdditionalEditorFieldValues(BL_CustomGrid_Model_Grid_Edit_Config $editConfig)
     {
         $values = array();
         
         if ($editConfig->getData('form/wysiwyg')) {
+            /** @var $helper BL_CustomGrid_Helper_Editor */
+            $helper = $this->helper('customgrid/editor');
+            
             $values['config'] = $editConfig->hasData('form/wysiwyg_config')
                 ? $editConfig->getData('form/wysiwyg_config')
-                : $this->helper('customgrid/editor')->getWysiwygConfig();
+                : $helper->getWysiwygConfig();
         } elseif ($editConfig->hasData('form/config')) {
             $editConfig->unsetData('form/config');
         }
@@ -163,6 +185,15 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Static_Default extends
         return $values;
     }
     
+    /**
+     * Return additional field values for the given field and edit config
+     * 
+     * @param string $fieldId Field ID
+     * @param string $fieldType Field type
+     * @param string $fieldName Field name
+     * @param BL_CustomGrid_Model_Grid_Edit_Config $editConfig Edit config
+     * @return array
+     */
     protected function _getAdditionalFieldValues(
         $fieldId,
         $fieldType,
@@ -192,6 +223,16 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Static_Default extends
         return $values;
     }
     
+    /**
+     * Prepare the given form field
+     * 
+     * @param string $fieldId Field ID
+     * @param string $fieldType Field type
+     * @param string $fieldName Field name
+     * @param BL_CustomGrid_Model_Grid_Edit_Config $editConfig Edit config
+     * @param Varien_Data_Form_Element_Abstract $field Form field
+     * @return BL_CustomGrid_Block_Widget_Grid_Editor_Form_Static_Default
+     */
     protected function _prepareFormField(
         $fieldId,
         $fieldType,

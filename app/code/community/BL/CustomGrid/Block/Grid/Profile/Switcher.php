@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -33,16 +33,31 @@ class BL_CustomGrid_Block_Grid_Profile_Switcher extends Mage_Adminhtml_Block_Tem
         return '';
     }
     
+    /**
+     * Return the current grid model
+     * 
+     * @return BL_CustomGrid_Model_Grid
+     */
     public function getGridModel()
     {
         return Mage::registry('blcg_grid');
     }
     
-    public function getCurrentGridProfile()
+    /**
+     * Return the current grid profile
+     * 
+     * @return BL_CustomGrid_Model_Grid_Profile
+     */
+    public function getGridProfile()
     {
         return Mage::registry('blcg_grid_profile');
     }
     
+    /**
+     * Return available profiles
+     * 
+     * @return BL_CustomGrid_Model_Grid_Profile[]
+     */
     public function getProfiles()
     {
         if (!$this->hasData('profiles')) {
@@ -51,17 +66,27 @@ class BL_CustomGrid_Block_Grid_Profile_Switcher extends Mage_Adminhtml_Block_Tem
         return $this->_getData('profiles');
     }
     
+    /**
+     * Return the placeholder usable for profiles IDs
+     * 
+     * @return string
+     */
     public function getProfileIdPlaceholder()
     {
         return '{{profile_id}}';
     }
     
+    /**
+     * Return the profile switching URL
+     * 
+     * @return string
+     */
     public function getSwitchUrl()
     {
         return $this->getUrl(
             '*/*/*',
             array(
-                '_current' => true,
+                '_current'   => true,
                 'profile_id' => $this->getProfileIdPlaceholder()
             )
         );

@@ -9,12 +9,24 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class BL_CustomGrid_Helper_Config_Form extends Mage_Core_Helper_Abstract
 {
+    /**
+     * Return the current admin user
+     * 
+     * @return Mage_Admin_Model_User
+     */
+    protected function _getAdminUser()
+    {
+        /** @var $session Mage_Admin_Model_Session */
+        $session = Mage::getSingleton('admin/session');
+        return $session->getUser();
+    }
+    
     /**
      * Return the extra data from the current admin user
      *
@@ -22,8 +34,7 @@ class BL_CustomGrid_Helper_Config_Form extends Mage_Core_Helper_Abstract
      */
     protected function _getAdminUserExtra()
     {
-        $adminUser = Mage::getSingleton('admin/session')->getUser();
-        $extra = $adminUser->getExtra();
+        $extra = $this->_getAdminUser()->getExtra();
         return (is_array($extra) ? $extra : array());
     }
     
@@ -34,7 +45,9 @@ class BL_CustomGrid_Helper_Config_Form extends Mage_Core_Helper_Abstract
      */
     public function getFieldsetStateSaveUrl()
     {
-        return Mage::helper('adminhtml')->getUrl('customgrid/config_form/saveFieldsetState');
+        /** @var $helper Mage_Adminhtml_Helper_Data */
+        $helper = Mage::helper('adminhtml');
+        return $helper->getUrl('customgrid/config_form/saveFieldsetState');
     }
     
     /**
@@ -59,7 +72,7 @@ class BL_CustomGrid_Helper_Config_Form extends Mage_Core_Helper_Abstract
      * Save the given fieldsets state for the current admin user
      * 
      * @param array $state Fieldsets state
-     * @return this
+     * @return BL_CustomGrid_Helper_Config_Form
      */
     public function saveFieldsetsStates(array $state)
     {
@@ -72,7 +85,7 @@ class BL_CustomGrid_Helper_Config_Form extends Mage_Core_Helper_Abstract
             $extra['blcgConfigFieldsetsStates'][$fieldset] = $fieldsetState;
         }
         
-        Mage::getSingleton('admin/session')->getUser()->saveExtra($extra);
+        $this->_getAdminUser()->saveExtra($extra);
         return $this;
     }
 }

@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2013 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -21,11 +21,28 @@ class BL_CustomGrid_Block_Widget_Grid_Columns_Filters extends Mage_Adminhtml_Blo
         $this->setTemplate('bl/customgrid/widget/grid/columns/filters.phtml');
     }
     
+    protected function _toHtml()
+    {
+        if (!$this->getIsNewGridModel()
+            /** @var $gridBlock Mage_Adminhtml_Block_Widget_Grid */
+            && ($gridBlock = $this->getGridBlock())
+            && $gridBlock->getFilterVisibility()) {
+            return parent::_toHtml();
+        }
+        return '';
+    }
+    
+    /**
+     * Return the column blocks from the current grid block that are only filterable
+     * 
+     * @return Mage_Adminhtml_Block_Widget_Grid_Column[]
+     */
     public function getColumns()
     {
         $columns = array();
         
         if ($gridBlock = $this->getGridBlock()) {
+            /** @var $gridBlock Mage_Adminhtml_Block_Widget_Grid */
             foreach ($gridBlock->getColumns() as $column) {
                 if ($column->getBlcgFilterOnly()) {
                     $columns[] = $column;
@@ -34,15 +51,5 @@ class BL_CustomGrid_Block_Widget_Grid_Columns_Filters extends Mage_Adminhtml_Blo
         }
         
         return $columns;
-    }
-    
-    protected function _toHtml()
-    {
-        if (!$this->getIsNewGridModel()
-            && ($gridBlock = $this->getGridBlock())
-            && $gridBlock->getFilterVisibility()) {
-            return parent::_toHtml();
-        }
-        return '';
     }
 }

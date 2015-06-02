@@ -9,8 +9,12 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+/**
+ * @method BL_CustomGrid_Model_Grid getGridModel() Return the current grid model
  */
 
 class BL_CustomGrid_Block_Widget_Grid_Config_Columns_List extends Mage_Adminhtml_Block_Widget
@@ -28,6 +32,11 @@ class BL_CustomGrid_Block_Widget_Grid_Config_Columns_List extends Mage_Adminhtml
             : '';
     }
     
+    /**
+     * Return whether the columns list is stand-alone (ie, not displayed along with the corresponding grid block)
+     * 
+     * @return bool
+     */
     public function isStandAlone()
     {
         return false;
@@ -35,124 +44,263 @@ class BL_CustomGrid_Block_Widget_Grid_Config_Columns_List extends Mage_Adminhtml
     
     public function getId()
     {
-        return $this->getDataSetDefault('id', $this->helper('core')->uniqHash('blcgConfig'));
+        if (!$this->hasData('id')) {
+            /** @var $helper Mage_Core_Helper_Data */
+            $helper = $this->helper('core');
+            $this->setData('id', $helper->uniqHash('blcgConfig'));
+        }
+        return $this->_getData('id');
     }
     
+    /**
+     * Return the initial maximum order amongst all the columns
+     * 
+     * @return int
+     */
     public function getColumnsMaxOrder()
     {
-        return $this->getDataSetDefault('max_order', $this->getGridModel()->getColumnsMaxOrder());
+        if (!$this->hasData('max_order')) {
+            $this->setData('max_order', $this->getGridModel()->getColumnsMaxOrder());
+        }
+        return $this->_getData('max_order');
     }
     
+    /**
+     * Return the orders pitch to use between each column
+     * 
+     */
     public function getColumnsOrderPitch()
     {
-        return $this->getDataSetDefault('order_pitch', $this->getGridModel()->getColumnsOrderPitch());
+        if (!$this->hasData('order_pitch')) {
+            $this->setData('order_pitch', $this->getGridModel()->getColumnsOrderPitch());
+        }
+        return $this->_getData('order_pitch');
     }
     
+    /**
+     * Return whether drag'n'drop can be used to sort the columns
+     * 
+     * @return bool
+     */
     public function getUseDragNDrop()
     {
-        return $this->getDataSetDefault('use_drag_n_drop', $this->helper('customgrid/config')->getSortWithDnd());
+        if (!$this->hasData('use_drag_n_drop')) {
+            /** @var $helper BL_CustomGrid_Helper_Config */
+            $helper = $this->helper('customgrid/config');
+            $this->setData('use_drag_n_drop', $helper->getSortWithDnd());
+        }
+        return $this->_getData('use_drag_n_drop');
     }
     
+    /**
+     * Return whether attribute columns are supported by the current grid model
+     * 
+     * @return bool
+     */
     public function canHaveAttributeColumns()
     {
-        return $this->getDataSetDefault('can_have_attribute_columns', $this->getGridModel()->canHaveAttributeColumns());
+        if (!$this->hasData('can_have_attribute_columns')) {
+            $this->setData('can_have_attribute_columns', $this->getGridModel()->canHaveAttributeColumns());
+        }
+        return $this->_getData('can_have_attribute_columns');
     }
     
+    /**
+     * Return whether the "Editable" part can be displayed for each column
+     * 
+     * @return bool
+     */
     public function canDisplayEditablePart()
     {
-        return $this->getDataSetDefault('can_display_editable_part', $this->getGridModel()->hasEditableColumns());
+        if (!$this->hasData('can_display_editable_part')) {
+            $this->setData('can_display_editable_part', $this->getGridModel()->hasEditableColumns());
+        }
+        return $this->_getData('can_display_editable_part');
     }
     
+    /**
+     * Return whether the user can choose the editable columns
+     * 
+     * @return bool
+     */
     public function canChooseEditableColumns()
     {
-        return $this->getDataSetDefault(
-            'can_choose_editable_columns',
-            $this->getGridModel()->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_CHOOSE_EDITABLE_COLUMNS)
-        );
+        if (!$this->hasData('can_choose_editable_columns')) {
+            $this->setData(
+                'can_choose_editable_columns',
+                $this->getGridModel()->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_CHOOSE_EDITABLE_COLUMNS)
+            );
+        }
+        return $this->_getData('can_choose_editable_columns');
     }
     
+    /**
+     * Return whether the "System" part can be displayed for each column
+     * 
+     * @return bool
+     */
     public function canDisplaySystemPart()
     {
-        return $this->getDataSetDefault('can_display_system_part', $this->getGridModel()->getDisplaySystemPart());
+        if (!$this->hasData('can_display_system_part')) {
+            $this->setData('can_display_system_part', $this->getGridModel()->getDisplaySystemPart());
+        }
+        return $this->_getData('can_display_system_part');
     }
     
+    /**
+     * Return whether the "Store View" part can be displayed for each column
+     * 
+     * @return bool
+     */
     public function canDisplayStorePart()
     {
-        return $this->getDataSetDefault('can_display_store_part', !Mage::app()->isSingleStoreMode());
+        if (!$this->hasData('can_display_store_part')) {
+            $this->setData('can_display_store_part', !Mage::app()->isSingleStoreMode());
+        }
+        return $this->_getData('can_display_store_part');
     }
     
+    /**
+     * Return the column alignments as an option hash
+     * 
+     * @return array
+     */
     public function getColumnAlignments()
     {
-        return $this->getDataSetDefault(
-            'column_alignments',
-            Mage::getSingleton('customgrid/grid_column')->getAlignments()
-        );
+        if (!$this->hasData('column_alignments')) {
+            /** @var $columnModel BL_CustomGrid_Model_Grid_Column */
+            $columnModel = Mage::getSingleton('customgrid/grid_column');
+            $this->setData('column_alignments', $columnModel->getAlignments());
+        }
+        return $this->_getData('column_alignments');
     }
     
+    /**
+     * Return the column origins as an option hash
+     * 
+     * @return array
+     */
     public function getColumnOrigins()
     {
-        return $this->getDataSetDefault(
-            'column_origins',
-            Mage::getSingleton('customgrid/grid_column')->getOrigins()
-        );
+        if (!$this->hasData('column_origins')) {
+            /** @var $columnModel BL_CustomGrid_Model_Grid_Column */
+            $columnModel = Mage::getSingleton('customgrid/grid_column');
+            $this->setData('column_origins', $columnModel->getOrigins());
+        }
+        return $this->_getData('column_origins');
     }
     
+    /**
+     * Return the columns list
+     * 
+     * @return BL_CustomGrid_Model_Grid_Column[]
+     */
     public function getColumns()
     {
-        return $this->getDataSetDefault(
-            'columns',
-            $this->getGridModel()->getSortedColumns(
-                true,
-                true,
-                $this->canHaveAttributeColumns(),
-                true,
-                false,
-                $this->canChooseEditableColumns(),
-                true
-            )
-        );
+        if (!$this->hasData('columns')) {
+            $this->setData(
+                'columns',
+                $this->getGridModel()->getSortedColumns(
+                    true,
+                    true,
+                    $this->canHaveAttributeColumns(),
+                    true,
+                    false,
+                    $this->canChooseEditableColumns(),
+                    true
+                )
+            );
+        }
+        return $this->_getData('columns');
     }
     
+    /**
+     * Return the locked values for the given column block ID
+     * 
+     * @param string $columnBlockId Column block ID
+     * @return array
+     */
     public function getColumnLockedValues($columnBlockId)
     {
-        return $this->getDataSetDefault(
-            'column_locked_values' . $columnBlockId,
-            $this->getGridModel()->getColumnLockedValues($columnBlockId)
-        );
+        $dataKey = 'column_locked_values_' . $columnBlockId;
+        
+        if (!$this->hasData($dataKey)) {
+            $this->setData(
+                $dataKey,
+                $this->getGridModel()->getColumnLockedValues($columnBlockId)
+            );
+        }
+        
+        return $this->_getData($dataKey);
     }
     
-    public function getColumnLockedValue($columnBlockId, $value)
+    /**
+     * Return the value of the given key for the given column block ID
+     * 
+     * @param string $columnBlockId Column block ID
+     * @param string $valueKey Key of the locked value
+     * @return mixed
+     */
+    public function getColumnLockedValue($columnBlockId, $valueKey)
     {
         $lockedValues = $this->getColumnLockedValues($columnBlockId);
-        return (isset($lockedValues[$value]) ? $lockedValues[$value] : null);
+        return (isset($lockedValues[$valueKey]) ? $lockedValues[$valueKey] : null);
     }
     
+    /**
+     * Return the name of the main JS object from the grid block
+     * 
+     * @return string
+     */
     public function getGridJsObjectName()
     {
         return (($gridBlock = $this->getGridBlock()) ? $gridBlock->getJsObjectName() : null);
     }
     
+    /**
+     * Return the name of the columns config JS object
+     * 
+     * @return string
+     */
     public function getConfigJsObjectName()
     {
         return $this->getId() . 'Config';
     }
     
+    /**
+     * Return the URL usable to save the columns list
+     * 
+     * @return string
+     */
     public function getSaveUrl()
     {
         return $this->getUrl('customgrid/grid/saveColumns');
     }
     
+    /**
+     * Return the URL of the custom column configuration form
+     * 
+     * @return string
+     */
     public function getCustomColumnConfigUrl()
     {
         return $this->getUrl('customgrid/custom_column_config/index');
     }
     
+    /**
+     * Return the additional request parameters as JSON
+     * 
+     * @return string
+     */
     public function getAdditionalParamsJsonConfig()
     {
         if (!$this->hasData('additional_params_json_config')) {
+            /** @var $helper Mage_Core_Helper_Data */
+            $helper = $this->helper('core');
+            
             $this->setData(
                 'additional_params_json_config',
-                Mage::helper('core')->jsonEncode(
+                $helper->jsonEncode(
                     array(
                         'form_key'   => $this->getFormKey(),
                         'grid_id'    => $this->getGridModel()->getId(),
@@ -164,11 +312,21 @@ class BL_CustomGrid_Block_Widget_Grid_Config_Columns_List extends Mage_Adminhtml
         return $this->_getData('additional_params_json_config');
     }
     
+    /**
+     * Return the placeholder used to represent dynamic IDs in strings
+     * 
+     * @return string
+     */
     public function getIdPlaceholder()
     {
         return '{{id}}';
     }
     
+    /**
+     * Return the HTML content of the attribute column addition button
+     * 
+     * @return string
+     */
     public function getAttributeColumnButtonHtml()
     {
         return $this->getButtonHtml(
@@ -178,6 +336,11 @@ class BL_CustomGrid_Block_Widget_Grid_Config_Columns_List extends Mage_Adminhtml
         );
     }
     
+    /**
+     * Return the HTML content of the columns list save button
+     * 
+     * @return string
+     */
     public function getSaveButtonHtml()
     {
         return $this->getButtonHtml(
@@ -187,89 +350,177 @@ class BL_CustomGrid_Block_Widget_Grid_Config_Columns_List extends Mage_Adminhtml
         );
     }
     
-    protected function _getGlobalCssId($suffix)
+    /**
+     * Return a global HTML ID based on the given suffix
+     * 
+     * @param string $suffix ID suffix
+     * @return string
+     */
+    protected function _getGlobalHtmlId($suffix)
     {
         return $this->getHtmlId() . '-' . $suffix;
     }
     
-    protected function _getColumnBasedCssId($suffix, $columnId = null)
+    /**
+     * Return a HTML ID based on the given column ID and suffix
+     * 
+     * @param string $suffix ID suffix
+     * @param int|null $columnId Column ID (if none is given, ID placeholder will be used)
+     * @return string
+     */
+    protected function _getColumnBasedHtmlId($suffix, $columnId = null)
     {
         return $this->getHtmlId() . '-' . (is_null($columnId) ? $this->getIdPlaceholder() : $columnId). '-' . $suffix;
     }
     
-    public function getTableCssId()
+    /**
+     * Return the HTML ID of the columns table
+     * 
+     * @return string
+     */
+    public function getTableHtmlId()
     {
-        return $this->_getGlobalCssId('table');
+        return $this->_getGlobalHtmlId('table');
     }
     
-    public function getTableRowsCssId()
+    /**
+     * Return the HTML ID of the columns table body
+     * 
+     * @return string
+     */
+    public function getTableRowsHtmlId()
     {
-        return $this->_getGlobalCssId('table-rows');
+        return $this->_getGlobalHtmlId('table-rows');
     }
     
-    public function getTableRowCssId($columnId = null)
+    /**
+     * Return the HTML ID of the table row corresponding to the given column ID
+     * 
+     * @param int|null $columnId Column ID (if none is given, ID placeholder will be used)
+     * @return string
+     */
+    public function getTableRowHtmlId($columnId = null)
     {
-        return $this->_getColumnBasedCssId('table-column', $columnId);
+        return $this->_getColumnBasedHtmlId('table-column', $columnId);
     }
     
-    public function getVisibleCheckboxCssId($columnId = null)
+    /**
+     * Return the HTML ID of the visibility checkbox corresponding to the given column ID
+     * 
+     * @param int|null $columnId Column ID (if none is given, ID placeholder will be used)
+     * @return string
+     */
+    public function getVisibleCheckboxHtmlId($columnId = null)
     {
-        return $this->_getColumnBasedCssId('visible-checkbox', $columnId);
+        return $this->_getColumnBasedHtmlId('visible-checkbox', $columnId);
     }
     
-    public function getFilterOnlyCheckboxCssId($columnId = null)
+    /**
+     * Return the HTML ID of the filterable-only checkbox corresponding to the given column ID
+     * 
+     * @param int|null $columnId Column ID (if none is given, ID placeholder will be used)
+     * @return string
+     */
+    public function getFilterOnlyCheckboxHtmlId($columnId = null)
     {
-        return $this->_getColumnBasedCssId('filter-only-checkbox', $columnId);
+        return $this->_getColumnBasedHtmlId('filter-only-checkbox', $columnId);
     }
     
-    public function getEditableContainerCssId($columnId = null)
+    /**
+     * Return the HTML ID of the editability container corresponding to the given column ID
+     * 
+     * @param int|null $columnId Column ID (if none is given, ID placeholder will be used)
+     * @return string
+     */
+    public function getEditableContainerHtmlId($columnId = null)
     {
-        return $this->_getColumnBasedCssId('editable-container', $columnId);
+        return $this->_getColumnBasedHtmlId('editable-container', $columnId);
     }
     
-    public function getEditableCheckboxCssId($columnId = null)
+    /**
+     * Return the HTML ID of the editability checkbox corresponding to the given column ID
+     * 
+     * @param int|null $columnId Column ID (if none is given, ID placeholder will be used)
+     * @return string
+     */
+    public function getEditableCheckboxHtmlId($columnId = null)
     {
-        return $this->_getColumnBasedCssId('editable-checkbox', $columnId);
+        return $this->_getColumnBasedHtmlId('editable-checkbox', $columnId);
     }
     
-    public function getAttributeRendererConfigButtonCssId($columnId = null)
+    /**
+     * Return the HTML ID of the attribute renderer config button corresponding to the given column ID
+     * 
+     * @param int|null $columnId Column ID (if none is given, ID placeholder will be used)
+     * @return string
+     */
+    public function getAttributeRendererConfigButtonHtmlId($columnId = null)
     {
-        return $this->_getColumnBasedCssId('config-button', $columnId);
+        return $this->_getColumnBasedHtmlId('config-button', $columnId);
     }
     
-    public function getCustomColumnConfigButtonCssId($columnId = null)
+    /**
+     * Return the HTML ID of the custom column config button corresponding to the given column ID
+     * 
+     * @param int|null $columnId Column ID (if none is given, ID placeholder will be used)
+     * @return string
+     */
+    public function getCustomColumnConfigButtonHtmlId($columnId = null)
     {
-        return $this->_getColumnBasedCssId('custom-column-config-button', $columnId);
+        return $this->_getColumnBasedHtmlId('custom-column-config-button', $columnId);
     }
     
-    public function getCustomColumnConfigTargetCssId($columnId = null)
+    /**
+     * Return the HTML ID of the custom column config target corresponding to the given column ID
+     * 
+     * @param int|null $columnId Column ID (if none is given, ID placeholder will be used)
+     * @return string
+     */
+    public function getCustomColumnConfigTargetHtmlId($columnId = null)
     {
-        return $this->_getColumnBasedCssId('custom-column-config-target', $columnId);
+        return $this->_getColumnBasedHtmlId('custom-column-config-target', $columnId);
     }
     
-    public function getOrderInputCssId($columnId = null)
+    /**
+     * Return the HTML ID of the order input corresponding to the given column ID
+     * 
+     * @param int|null $columnId Column ID (if none is given, ID placeholder will be used)
+     * @return string
+     */
+    public function getOrderInputHtmlId($columnId = null)
     {
-        return $this->_getColumnBasedCssId('order-input', $columnId);
+        return $this->_getColumnBasedHtmlId('order-input', $columnId);
     }
     
-    protected function _getStoreSelect()
+    /**
+     * Return the store select block
+     * 
+     * @return BL_CustomGrid_Block_Store_Select
+     */
+    protected function _getStoreSelectBlock()
     {
         if (!$this->getChild('store_select')) {
-            $this->setChild(
-                'store_select',
-                $this->getLayout()->createBlock('customgrid/store_select')
-            );
+            /** @var $storeSelect BL_CustomGrid_Block_Store_Select */
+            $storeSelect = $this->getLayout()->createBlock('customgrid/store_select');
+            $this->setChild('store_select', $storeSelect);
         }
         return $this->getChild('store_select');
     }
     
+    /**
+     * Return the HTML content of the store select for the given column,
+     * or a JS string representing the same HTML content for a dynamic column (using the ID placeholder)
+     * 
+     * @param BL_CustomGrid_Model_Grid_Column $column Grid column
+     * @return string
+     */
     protected function getStoreSelectHtml(BL_CustomGrid_Model_Grid_Column $column = null)
     {
         $jsOutput  = is_null($column);
         $columnId  = ($jsOutput ? $this->getIdPlaceholder() : $column->getId());
         $storeId   = (!$jsOutput ? $column->getStoreId() : null);
         
-        return $this->_getStoreSelect()
+        return $this->_getStoreSelectBlock()
             ->setHasUseGridOption(true)
             ->setHasUseDefaultOption(true)
             ->setStoreId($storeId)
@@ -279,34 +530,53 @@ class BL_CustomGrid_Block_Widget_Grid_Config_Columns_List extends Mage_Adminhtml
             ->toHtml();
     }
     
+    /**
+     * Return the helper block for collection columns
+     * 
+     * @return BL_CustomGrid_Block_Widget_Grid_Config_Columns_Helper_Collection
+     */
+    protected function _getCollectionColumnHelperBlock()
+    {
+        if (!$this->getChild('collection_column_helper')) {
+            $this->setChild(
+                'collection_column_helper',
+                $this->getLayout()->createBlock('customgrid/widget_grid_config_columns_helper_collection')
+            );
+        }
+        return $this->getChild('collection_column_helper')->setData(array());
+    }
+    
+    /**
+     * Return the name of the collection renderers selects manager JS object
+     * 
+     * @return string
+     */
     public function getCRSMJsObjectName()
     {
         return $this->getId() . 'CRSM';
     }
     
+    /**
+     * Return the JS script corresponding to the initialization of the collection renderers elements
+     * 
+     * @return string
+     */
     public function getCollectionRenderersJsHtml()
     {
-        return $this->getLayout()
-            ->createBlock('customgrid/column_renderer_collection_js')
+        return $this->_getCollectionColumnHelperBlock()
+            ->setTemplate('bl/customgrid/widget/grid/config/columns/renderer/collection/js.phtml')
             ->setJsObjectName($this->getCRSMJsObjectName())
             ->toHtml();
     }
     
-    protected function _getCollectionRenderersSelect()
+    /**
+     * Return the collection renderer values from the given grid column, if it is consistent
+     * 
+     * @param BL_CustomGrid_Model_Grid_Column $column Grid column
+     * @return array|null Locked renderer flag + locked renderer label + renderer type, or null if not consistent
+     */
+    protected function _getColumnCollectionRendererValues(BL_CustomGrid_Model_Grid_Column $column)
     {
-        if (!$this->getChild('collection_renderer_select')) {
-            $this->setChild(
-                'collection_renderer_select',
-                $this->getLayout()->createBlock('customgrid/column_renderer_collection_select')
-            );
-        }
-        return $this->getChild('collection_renderer_select');
-    }
-    
-    public function getCollectionRenderersSelectHtml(BL_CustomGrid_Model_Grid_Column $column)
-    {
-        $htmlId = $this->getHtmlId();
-        $columnId = $column->getId();
         $columnBlockId = $column->getBlockId();
         
         if ($column->isCollection()) {
@@ -318,7 +588,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config_Columns_List extends Mage_Adminhtml
                 $rendererType = $column->getRendererType();
             }
              
-            $lockedLabel  = (isset($lockedValues['renderer_label']) ? $lockedValues['renderer_label'] : '');
+            $lockedLabel = (isset($lockedValues['renderer_label']) ? $lockedValues['renderer_label'] : '');
         } elseif ($column->isCustom() && ($customColumn = $column->getCustomColumnModel())) {
             if ($lockedRenderer = (bool) strlen($customColumn->getLockedRenderer())) {
                 $lockedLabel  = $customColumn->getRendererLabel();
@@ -328,50 +598,86 @@ class BL_CustomGrid_Block_Widget_Grid_Config_Columns_List extends Mage_Adminhtml
                 $rendererType = $column->getRendererType();
             }
         } else {
-            return '';
+            return null;
         }
         
+        return array($lockedRenderer, $lockedLabel, $rendererType);
+    }
+    
+    /**
+     * Return the HTML content of the collection renderers select for the given grid column
+     * 
+     * @param BL_CustomGrid_Model_Grid_Column $column Grid column
+     * @return string
+     */
+    public function getCollectionRenderersSelectHtml(BL_CustomGrid_Model_Grid_Column $column)
+    {
+        $htmlId = $this->getHtmlId();
+        $columnId = $column->getId();
+        list($lockedRenderer, $lockedLabel, $rendererType) = $this->_getColumnCollectionRendererValues($column);
         $isPreviousRenderer = (!$lockedRenderer || ($rendererType === $column->getRendererType()));
         
-        return $this->_getCollectionRenderersSelect()
-            ->setData(array())
-            ->setId($htmlId . '-' . $columnId . '-crs')
+        return $this->_getCollectionColumnHelperBlock()
+            ->setTemplate('bl/customgrid/widget/grid/config/columns/renderer/collection/select.phtml')
+            ->setBaseHtmlId($htmlId . '-' . $columnId . '-crs')
             ->setRendererCode($rendererType)
             ->setIsForcedRenderer($lockedRenderer)
             ->setForcedRendererLabel($lockedLabel)
             ->setRendererParams($isPreviousRenderer ? $column->getRendererParams() : '')
-            ->setSelectName('columns[' . $columnId . '][renderer_type]')
-            ->setSelectClassNames('select')
+            ->setRendererSelectName('columns[' . $columnId . '][renderer_type]')
+            ->setRendererSelectClassNames('select')
             ->setRendererTargetName('columns[' . $columnId . '][renderer_params]')
             ->setSelectsManagerJsObjectName($this->getCRSMJsObjectName())
             ->toHtml();
     }
     
-    public function getARSMJsObjectName()
+    /**
+     * Return the helper block for attribute columns
+     * 
+     * @return BL_CustomGrid_Block_Widget_Grid_Config_Columns_Helper_Attribute
+     */
+    protected function _getAttributeColumnHelperBlock()
     {
-        return $this->getId() . 'ARSM';
+        if (!$this->getChild('attribute_column_helper')) {
+            $this->setChild(
+                'attribute_column_helper',
+                $this->getLayout()->createBlock('customgrid/widget_grid_config_columns_helper_attribute')
+            );
+        }
+        return $this->getChild('attribute_column_helper')->setData(array());
     }
     
+    /**
+     * Return the name of the attributes selects manager JS object
+     * 
+     * @return string
+     */
+    public function getASMJsObjectName()
+    {
+        return $this->getId() . 'ASM';
+    }
+    
+    /**
+     * Return the JS script corresponding to the initialization of the attribute renderers elements
+     * 
+     * @return string
+     */
     public function getAttributeRenderersJsHtml()
     {
-        return $this->getLayout()
-            ->createBlock('customgrid/column_renderer_attribute_js')
+        return $this->_getAttributeColumnHelperBlock()
+            ->setTemplate('bl/customgrid/widget/grid/config/columns/renderer/attribute/js.phtml')
             ->setGridModel($this->getGridModel())
-            ->setJsObjectName($this->getARSMJsObjectName())
+            ->setJsObjectName($this->getASMJsObjectName())
             ->toHtml();
     }
     
-    protected function _getAttributesSelect()
-    {
-        if (!$this->getChild('attribute_renderer_select')) {
-            $this->setChild(
-                'attribute_renderer_select',
-                $this->getLayout()->createBlock('customgrid/column_renderer_attribute_select')
-            );
-        }
-        return $this->getChild('attribute_renderer_select');
-    }
-    
+    /**
+     * Return the HTML content of the attributes select for the given grid column,
+     * or a JS string representing the same HTML content for a dynamic column (using the ID placeholder)
+     * 
+     * @param BL_CustomGrid_Model_Grid_Column $column Grid column
+     * @return string
+     */
     public function getAttributesSelectHtml(BL_CustomGrid_Model_Grid_Column $column = null)
     {
         $htmlId = $this->getHtmlId();
@@ -380,21 +686,21 @@ class BL_CustomGrid_Block_Widget_Grid_Config_Columns_List extends Mage_Adminhtml
         $attributeCode  = (!$jsOutput ? $column->getIndex() : null);
         $rendererParams = (!$jsOutput ? $column->getRendererParams() : '');
         
-        return $this->_getAttributesSelect()
-            ->setData(array())
-            ->setId($htmlId . '-' . $columnId . '-ars')
+        return $this->_getAttributeColumnHelperBlock()
+            ->setTemplate('bl/customgrid/widget/grid/config/columns/attribute/select.phtml')
+            ->setBaseHtmlId($htmlId . '-' . $columnId . '-ars')
             ->setGridModel($this->getGridModel())
             ->setAttributeCode($attributeCode)
             ->setOutputAsJs($jsOutput)
             ->setRendererParams($rendererParams)
-            ->setSelectName('columns[' . $columnId . '][index]')
-            ->setSelectClassNames('select')
-            ->setEditableContainerId($this->getEditableContainerCssId($columnId))
-            ->setEditableCheckboxId($this->getEditableCheckboxCssId($columnId))
+            ->setAttributeSelectName('columns[' . $columnId . '][index]')
+            ->setAttributeSelectClassNames('select')
+            ->setEditableContainerHtmlId($this->getEditableContainerHtmlId($columnId))
+            ->setEditableCheckboxHtmlId($this->getEditableCheckboxHtmlId($columnId))
             ->setRendererTargetName('columns[' . $columnId . '][renderer_params]')
             ->setUseExternalConfigButton(true)
-            ->setConfigButtonId($this->getAttributeRendererConfigButtonCssId($columnId))
-            ->setSelectsManagerJsObjectName($this->getARSMJsObjectName())
+            ->setRendererConfigButtonHtmlId($this->getAttributeRendererConfigButtonHtmlId($columnId))
+            ->setSelectsManagerJsObjectName($this->getASMJsObjectName())
             ->toHtml();
     }
 }

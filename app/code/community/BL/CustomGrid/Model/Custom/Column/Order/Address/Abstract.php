@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -24,7 +24,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Order_Address_Abstract extends
     
     abstract public function getAddressType();
     
-    public function getAppliedFlagKey(
+    protected function _getAppliedFlagKey(
         $columnIndex,
         array $params,
         Mage_Adminhtml_Block_Widget_Grid $gridBlock,
@@ -51,7 +51,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Order_Address_Abstract extends
     
     public function getTableFieldName()
     {
-        return $this->getConfigParam('address_field');
+        return $this->getConfigParam('address_field_name');
     }
     
     protected function _getAdditionalJoinConditions(
@@ -62,6 +62,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Order_Address_Abstract extends
         $mainAlias,
         $tableAlias
     ) {
+        /** @var $adapter Zend_Db_Adapter_Abstract */
         list($adapter, $qi) = $this->_getCollectionAdapter($collection, true);
         return array($adapter->quoteInto($qi($tableAlias . '.address_type') . ' = ?', $this->getAddressType()));
     }

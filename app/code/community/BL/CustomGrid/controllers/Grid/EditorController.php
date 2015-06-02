@@ -9,18 +9,23 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class BL_CustomGrid_Grid_EditorController extends BL_CustomGrid_Controller_Grid_Action
 {
+    /**
+     * Initialize and register the grid type model from the current request
+     * 
+     * @return BL_CustomGrid_Model_Grid_Type_Abstract
+     */
     protected function _initGridType()
     {
         $gridType = null;
         
         if ($typeCode= $this->getRequest()->getParam('grid_type', null)) {
-            $gridType = Mage::getSingleton('customgrid/grid_type_config')->getTypeInstanceByCode($typeCode);
+            $gridType = $this->_getGridTypeConfig()->getTypeModelByCode($typeCode);
         }
         if (!$gridType) {
             Mage::throwException($this->__('Unknown grid type'));
@@ -30,21 +35,58 @@ class BL_CustomGrid_Grid_EditorController extends BL_CustomGrid_Controller_Grid_
         return $gridType;
     }
     
-    protected function _initEditedValue(BL_CustomGrid_Model_Grid_Type_Abstract $gridType)
+    
+    /**
+     * Return an object containing various informations (block type, ID, origin) about the edited value
+     * from the current request
+     * 
+     * @param BL_CustomGrid_Model_Grid_Type_Abstract $gridType Current grid type
+     * @return BL_CustomGrid_Object
+     */
+    protected function _getEditedValue(BL_CustomGrid_Model_Grid_Type_Abstract $gridType)
     {
+        /** @var $helper Mage_Core_Helper_Data */
+        $helper = Mage::helper('core');
+        $values = null;
+        
         if (($blockType = $this->getRequest()->getParam('block_type', null))
-            && ($blockType = Mage::helper('core')->urlDecode($blockType))
+            && ($blockType = $helper->urlDecode($blockType))
             && ($id = $this->getRequest()->getParam('id', null))
             && ($origin = $this->getRequest()->getParam('origin', null))
             && $gridType->isEditableValue($blockType, $id, $origin)) {
-            return array($blockType, $id, $origin);
+            return new BL_CustomGrid_Object(
+                array(
+                    'block_type' => $blockType,
+                    'id'         => $id,
+                    'origin'     => $origin,
+                )
+            );
         }
-        return null;
+        
+        return $values;
     }
     
     public function indexAction()
     {
-        return $this->_redirect('*/grid/');
+        $this->_redirect('*/grid/');
+    }
+    
+    /**
+     * Initialize the current edit request and return the corresponding initialized values
+     * 
+     * @return array
+     */
+    protected function _initEditRequest()
+    {
+        $gridModel = $this->_initGridModel();
+        $this->_initGridProfile();
+        $gridType = $this->_initGridType();
+        
+        if (!is_object($editedValue = $this->_getEditedValue($gridType))) {
+            Mage::throwException($this->__('This value is not editable'));
+        }
+        
+        return array($gridModel, $gridType, $editedValue);
     }
     
     public function editAction()
@@ -53,25 +95,21 @@ class BL_CustomGrid_Grid_EditorController extends BL_CustomGrid_Controller_Grid_
         $errorMessage = null;
         
         try {
-            $gridModel = $this->_initGridModel();
-            $this->_initGridProfile();
-            $gridType = $this->_initGridType();
+            /**
+             * @var $gridModel BL_CustomGrid_Model_Grid
+             * @var $gridType BL_CustomGrid_Model_Grid_Type_Abstract
+             */
+            list($gridModel, $gridType, $editedValue) = $this->_initEditRequest();
             
-            if ($editValues = $this->_initEditedValue($gridType)) {
-                list($blockType, $id, $origin) = $editValues;
-                
-                $editBlock = $gridType->getValueEditBlock(
-                    $blockType,
-                    $id,
-                    $origin,
-                    $this->getRequest(),
-                    $gridModel,
-                    false,
-                    true
-                );
-            } else {
-                Mage::throwException($this->__('This value is not editable'));
-            }
+            $editBlock = $gridType->getValueEditBlock(
+                $editedValue->getBlockType(),
+                $editedValue->getId(),
+                $editedValue->getOrigin(),
+                $this->getRequest(),
+                $gridModel,
+                false,
+                true
+            );
         } catch (Mage_Core_Exception $e) {
             $errorMessage = $this->__('Failed to edit the value : "%s"', $e->getMessage());
         }
@@ -79,6 +117,7 @@ class BL_CustomGrid_Grid_EditorController extends BL_CustomGrid_Controller_Grid_
         $this->loadLayout();
         
         if ($containerBlock = $this->getLayout()->getBlock('blcg.grid_editor.form_container')) {
+            /** @var $containerBlock BL_CustomGrid_Block_Widget_Grid_Editor_Form_Container */
             if (!is_null($errorMessage)) {
                 $containerBlock->setErrorMessage($errorMessage);
             } elseif ($editBlock instanceof Mage_Core_Block_Abstract) {
@@ -94,17 +133,17 @@ class BL_CustomGrid_Grid_EditorController extends BL_CustomGrid_Controller_Grid_
     public function editInGridAction()
     {
         try {
-            $gridModel = $this->_initGridModel();
-            $this->_initGridProfile();
-            $gridType = $this->_initGridType();
+            list($gridModel, $gridType, $editedValue) = $this->_initEditRequest();
             
-            if ($editValues = $this->_initEditedValue($gridType)) {
-                list($blockType, $id, $origin) = $editValues;
-                $content = $gridType->getValueEditBlock($blockType, $id, $origin, $this->getRequest(), $gridModel);
-                $this->_setActionSuccessJsonResponse(array('content' => $content));
-            } else {
-                Mage::throwException($this->__('This value is not editable'));
-            }
+            $content = $gridType->getValueEditBlock(
+                $editedValue->getBlockType(),
+                $editedValue->getId(),
+                $editedValue->getOrigin(),
+                $this->getRequest(),
+                $gridModel
+            );
+            
+            $this->_setActionSuccessJsonResponse(array('content' => $content));
         } catch (Exception $e) {
             $this->_setActionErrorJsonResponse($this->__('Failed to edit the value : "%s"', $e->getMessage()));
         }
@@ -113,17 +152,17 @@ class BL_CustomGrid_Grid_EditorController extends BL_CustomGrid_Controller_Grid_
     public function saveAction()
     {
         try {
-            $gridModel = $this->_initGridModel();
-            $this->_initGridProfile();
-            $gridType = $this->_initGridType();
+            list($gridModel, $gridType, $editedValue) = $this->_initEditRequest();
             
-            if ($editValues = $this->_initEditedValue($gridType)) {
-                list($blockType, $id, $origin) = $editValues;
-                $content = $gridType->saveEditedValue($blockType, $id, $origin, $this->getRequest(), $gridModel);
-                $this->_setActionSuccessJsonResponse(array('content' => $content));
-            } else {
-                Mage::throwException($this->__('This value is not editable'));
-            }
+            $content = $gridType->saveEditedValue(
+                $editedValue->getBlockType(),
+                $editedValue->getId(),
+                $editedValue->getOrigin(),
+                $this->getRequest(),
+                $gridModel
+            );
+            
+            $this->_setActionSuccessJsonResponse(array('content' => $content));
         } catch (Exception $e) {
             $this->_setActionErrorJsonResponse($this->__('Failed to save the value : "%s"', $e->getMessage()));
         }

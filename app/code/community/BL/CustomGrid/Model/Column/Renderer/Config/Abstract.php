@@ -9,12 +9,17 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 abstract class BL_CustomGrid_Model_Column_Renderer_Config_Abstract extends BL_CustomGrid_Model_Config_Abstract
 {
+    /**
+     * Default configuration window values
+     * 
+     * @var array
+     */
     static protected $_defaultConfigWindow = array(
         'width'  => 800,
         'height' => 450,
@@ -26,16 +31,15 @@ abstract class BL_CustomGrid_Model_Column_Renderer_Config_Abstract extends BL_Cu
         return true;
     }
     
-    public function getRendererInstanceByCode($code, $parameters = null)
-    {
-        return parent::getElementInstanceByCode($code, $parameters);
-    }
-    
-    protected function _getConfigWindowValues(
-        Varien_Simplexml_Element $xmlElement,
-        array $baseValues,
-        Mage_Core_Helper_Abstract $helper
-    ) {
+    /**
+     * Load and parse the config window values from the given XML element into the given element model
+     * 
+     * @param BL_CustomGrid_Object $model Element model
+     * @param Varien_Simplexml_Element $xmlElement Corresponding XML element
+     * @return BL_CustomGrid_Model_Column_Renderer_Config_Abstract
+     */
+     protected function _loadElementModelConfigWindow(BL_CustomGrid_Object $model, Varien_Simplexml_Element $xmlElement)
+     {
         $configWindow = self::$_defaultConfigWindow;
         $useDefaultTitle = true;
         
@@ -60,49 +64,40 @@ abstract class BL_CustomGrid_Model_Column_Renderer_Config_Abstract extends BL_Cu
             $configWindow += $windowValues;
         }
         if ($useDefaultTitle) {
-            if (isset($baseValues['name'])) {
-                $configWindow['title'] = $helper->__($configWindow['title'], $baseValues['name']);
-            } else {
-                $configWindow['title'] = '';
-            }
+            $configWindow['title'] = $model->getHelper()->__($configWindow['title'], $model->getName());
         }
         
-        return $configWindow;
+        $model->setData('config_window', $configWindow);
+        return $this;
     }
     
-    public function getElementsArrayAdditionalSubValues(
-        Varien_Simplexml_Element $xmlElement,
-        array $baseValues,
-        Mage_Core_Helper_Abstract $helper
-    ) {
-        $configWindow = null;
-        $isCustomizable = (bool) $xmlElement->descend('parameters');
-        
-        if ($isCustomizable) {
-            $configWindow = $this->_getConfigWindowValues($xmlElement, $baseValues, $helper);
-        }
-        
-        return array(
-            'config_window'   => $configWindow,
-            'is_customizable' => $isCustomizable,
-        );
-    }
-    
-    public function getRenderersArray()
+    protected function _prepareElementModel(BL_CustomGrid_Object $model, Varien_Simplexml_Element $xmlElement)
     {
-        return $this->getElementsArray();
+        if ($model->isCustomizable()) {
+            $this->_loadElementModelConfigWindow($model, $xmlElement);
+        }
+        return $this;
     }
     
-    public function getRenderersInstances()
+    /**
+     * Return the renderer model corresponding to the given code
+     * 
+     * @param string $code Column renderer code
+     * @return BL_CustomGrid_Model_Column_Renderer_Abstract|null
+     */
+    public function getRendererModelByCode($code)
     {
-        $models = array();
-        
-        foreach ($this->getElementsCodes() as $code) {
-            if ($model = $this->getElementInstanceByCode($code)) {
-                $models[$code] = $model;
-            }
-        }
-        
-        return $models;
+        return parent::getElementModelByCode($code);
+    }
+    
+    /**
+     * Return all the available renderers models
+     * 
+     * @param bool $sorted Whether the rendererers models should be sorted
+     * @return BL_CustomGrid_Model_Column_Renderer_Abstract[]
+     */
+    public function getRenderersModels($sorted = false)
+    {
+        return parent::getElementsModels($sorted);
     }
 }

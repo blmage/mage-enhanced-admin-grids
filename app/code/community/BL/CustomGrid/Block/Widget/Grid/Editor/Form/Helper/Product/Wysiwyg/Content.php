@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -25,6 +25,9 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Helper_Product_Wysiwyg_Content
                 'method' => 'post',
             )
         );
+        
+        /** @var $helper BL_CustomGrid_Helper_Editor */
+        $helper = $this->helper('customgrid/editor');
         
         $config = array();
         $config['document_base_url'] = $this->_getData('store_media_url');
@@ -43,7 +46,7 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Helper_Product_Wysiwyg_Content
                 'style'      => 'width:725px; height:460px;',
                 'required'   => true,
                 'force_load' => true,
-                'config'     => $this->helper('customgrid/editor')->getWysiwygConfig($config)
+                'config'     => $helper->getWysiwygConfig($config),
             )
         );
         

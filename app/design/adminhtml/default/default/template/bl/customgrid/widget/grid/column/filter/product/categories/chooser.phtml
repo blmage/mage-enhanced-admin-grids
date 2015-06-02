@@ -34,10 +34,11 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 ?>
+<?php /** @var $this BL_CustomGrid_Block_Widget_Grid_Column_Filter_Product_Categories_Chooser */ ?>
 <?php $_jsObjectName = $this->getJsObjectName() ?>
 <p class="form-buttons blcg-filter-form-buttons">
     <?php echo $this->getApplyButtonHtml() ?>
@@ -177,7 +178,7 @@ function blcgApplyCategories()
     if (typeof(parent.<?php echo $_jsObjectName ?>) != 'undefined') {
         parent.<?php echo $_jsObjectName ?>.applyChoice($('blcg_filtered_categories').value);
     } else {
-        alert('<?php echo $this->jsQuoteEscape($this->__('Can\'t apply choice : JS object can\'t be found')) ?>');
+        alert('<?php echo $this->jsQuoteEscape($this->__('Cannot apply choice : JS object cannot be found')) ?>');
     }
 }
 <?php endif ?>

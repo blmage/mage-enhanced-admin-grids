@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -42,7 +42,14 @@ class BL_CustomGrid_Model_Grid_Type_Cms_Page extends BL_CustomGrid_Model_Grid_Ty
     
     protected function _getBaseEditableFields($blockType)
     {
+        /** @var $helper Mage_Cms_Helper_Data */
         $helper = Mage::helper('cms');
+        /** @var $designSource Mage_Core_Model_Design_Source_Design */
+        $designSource = Mage::getSingleton('core/design_source_design');
+        /** @var $layoutSource Mage_Page_Model_Source_Layout */
+        $layoutSource = Mage::getSingleton('page/source_layout');
+        /** @var $pageModel Mage_Cms_Model_Page */
+        $pageModel = Mage::getSingleton('cms/page');
         
         $fields = array(
             'title' => array(
@@ -57,12 +64,12 @@ class BL_CustomGrid_Model_Grid_Type_Cms_Page extends BL_CustomGrid_Model_Grid_Ty
             ),
             'root_template' => array(
                 'type'        => 'select',
-                'form_values' => Mage::getSingleton('page/source_layout')->toOptionArray(),
+                'form_values' => $layoutSource->toOptionArray(),
                 'required'    => true,
             ),
             'is_active' => array(
                 'type'          => 'select',
-                'form_options'  => Mage::getModel('cms/page')->getAvailableStatuses(),
+                'form_options'  => $pageModel->getAvailableStatuses(),
                 'required'      => true,
             ),
             'meta_keywords' => array(
@@ -94,11 +101,11 @@ class BL_CustomGrid_Model_Grid_Type_Cms_Page extends BL_CustomGrid_Model_Grid_Ty
             ),
             'custom_theme' => array(
                 'type'        => 'select',
-                'form_values' => Mage::getModel('core/design_source_design')->getAllOptions(),
+                'form_values' => $designSource->getAllOptions(),
             ),
             'custom_root_template' => array(
                 'type'        => 'select',
-                'form_values' => Mage::getSingleton('page/source_layout')->toOptionArray(true),
+                'form_values' => $layoutSource->toOptionArray(true),
             ),
             'custom_layout_update_xml' => array(
                 'type'       => 'textarea',
@@ -115,12 +122,10 @@ class BL_CustomGrid_Model_Grid_Type_Cms_Page extends BL_CustomGrid_Model_Grid_Ty
         );
         
         if (!Mage::app()->isSingleStoreMode()) {
-            $stores = Mage::getSingleton('adminhtml/system_store')->getStoreValuesForForm(false, true);
-            
             $fields['store_id'] = array(
                 'type'              => 'multiselect',
                 'required'          => true,
-                'form_values'       => $stores,
+                'form_values'       => $this->_getEditorHelper()->getStoreValuesForForm(false, true),
                 'render_block_type' => 'customgrid/widget_grid_editor_renderer_static_store',
             );
         }
@@ -135,11 +140,15 @@ class BL_CustomGrid_Model_Grid_Type_Cms_Page extends BL_CustomGrid_Model_Grid_Ty
     
     protected function _loadEditedEntity($blockType, BL_CustomGrid_Object $config, array $params, $entityId)
     {
-        return Mage::getModel('cms/page')->load($entityId);
+        /** @var $page Mage_Cms_Model_Page */
+        $page = Mage::getModel('cms/page');
+        $page->load($entityId);
+        return $page;
     }
     
     protected function _getLoadedEntityName($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
+        /** @var $entity Mage_Cms_Model_Page */
         return $entity->getTitle();
     }
     
@@ -150,7 +159,8 @@ class BL_CustomGrid_Model_Grid_Type_Cms_Page extends BL_CustomGrid_Model_Grid_Ty
     
     protected function _applyEditedFieldValue($blockType, BL_CustomGrid_Object $config, array $params, $entity, $value)
     {
-        if ($config['id'] == 'store_id') {
+        /** @var $entity Mage_Cms_Model_Page */
+        if ($config->getValueId() == 'store_id') {
             $entity->setStores($value);
             return $this;
         }
@@ -160,7 +170,8 @@ class BL_CustomGrid_Model_Grid_Type_Cms_Page extends BL_CustomGrid_Model_Grid_Ty
     
     protected function _getSavedFieldValueForRender($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
-        return ($config['id'] == 'store_id')
+        /** @var $entity Mage_Cms_Model_Page */
+        return ($config->getValueId() == 'store_id')
             ? $entity->getStores()
             : parent::_getSavedFieldValueForRender($blockType, $config, $params, $entity);
     }

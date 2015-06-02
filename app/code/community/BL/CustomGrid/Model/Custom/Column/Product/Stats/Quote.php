@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -23,7 +23,9 @@ class BL_CustomGrid_Model_Custom_Column_Product_Stats_Quote extends BL_CustomGri
         $helper = $this->_getBaseHelper();
         
         if (!Mage::app()->isSingleStoreMode()) {
-            $stores = Mage::getModel('adminhtml/system_config_source_store')->toOptionArray();
+            /** @var $storeSource Mage_Adminhtml_Model_System_Config_Source_Store */
+            $storeSource = Mage::getModel('adminhtml/system_config_source_store');
+            $stores = $storeSource->toOptionArray();
             
             array_unshift(
                 $stores,
@@ -86,8 +88,9 @@ class BL_CustomGrid_Model_Custom_Column_Product_Stats_Quote extends BL_CustomGri
     
     protected function _getCountSelect(Varien_Data_Collection_Db $collection, array $params, $countMode)
     {
-        $helper = $this->_getCollectionHelper();
+        /** @var $adapter Zend_Db_Adapter_Abstract */
         list($adapter, $qi) = $this->_getCollectionAdapter($collection, true);
+        $helper = $this->_getCollectionHelper();
         $mainAlias  = $helper->getCollectionMainTableAlias($collection);
         $quoteAlias = $this->_getUniqueTableAlias('_quote_' . $countMode);
         $itemAlias  = $this->_getUniqueTableAlias('_item_'  . $countMode);
@@ -137,7 +140,7 @@ class BL_CustomGrid_Model_Custom_Column_Product_Stats_Quote extends BL_CustomGri
         Mage_Adminhtml_Block_Widget_Grid $gridBlock,
         Varien_Data_Collection_Db $collection
     ) {
-        $countMode = $this->getConfigParam('count_mode');
+        $countMode  = $this->getConfigParam('count_mode');
         $countQuery = 'IFNULL((' . $this->_getCountSelect($collection, $params, $countMode) . '), 0)';
         $collection->getSelect()->columns(array($columnIndex => new Zend_Db_Expr($countQuery)));
         return $this;
@@ -152,8 +155,8 @@ class BL_CustomGrid_Model_Custom_Column_Product_Stats_Quote extends BL_CustomGri
         $condition = $columnBlock->getFilter()->getCondition();
        
         if ($fieldName && $condition && is_array($params)) {
-            $countMode = $this->getConfigParam('count_mode');
-            $adapter = $this->_getCollectionAdapter($collection);
+            $adapter    = $this->_getCollectionAdapter($collection);
+            $countMode  = $this->getConfigParam('count_mode');
             $countQuery = 'IFNULL((' . $this->_getCountSelect($collection, $params, $countMode) . '), 0)';
             
             if (is_array($condition) && isset($condition['from']) && isset($condition['to'])) {

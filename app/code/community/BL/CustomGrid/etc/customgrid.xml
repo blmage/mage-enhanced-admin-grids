@@ -10,7 +10,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 -->
@@ -1008,7 +1008,7 @@
                     <filter_mode_shortcut>
                         <label>Enable Filter Mode Shortcut</label>
                         <group>Filtering</group>
-                        <description><![CDATA[Allows to specify the filter mode directly in the filter field, by placing the corresponding code between square brackets at the beginning of the searched value.<br />Eg, use "<strong>[el]</strong>Example" to search for "Example" using "LIKE (exact)".<br />If no filter mode is indicated in the field, the value of "Filter Mode" will be used by default")]]></description>
+                        <description><![CDATA[Allows to specify the filter mode directly in the filter field, by placing the corresponding code between square brackets at the beginning of the searched value.<br />Eg, use "<strong>[el]</strong>Example" to search for "Example" using "LIKE (exact)".<br />If no filter mode is indicated in the field, the value of "Filter Mode" will be used by default]]></description>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>
@@ -1605,7 +1605,7 @@
                     <filter_mode_shortcut>
                         <label>Enable Filter Mode Shortcut</label>
                         <group>Filtering</group>
-                        <description><![CDATA[Allows to specify the filter mode directly in the filter field, by placing the corresponding code between square brackets at the beginning of the searched value.<br />Eg, use "<strong>[el]</strong>Example" to search for "Example" using "LIKE (exact)".<br />If no filter mode is indicated in the field, the value of "Filter Mode" will be used by default"]]></description>
+                        <description><![CDATA[Allows to specify the filter mode directly in the filter field, by placing the corresponding code between square brackets at the beginning of the searched value.<br />Eg, use "<strong>[el]</strong>Example" to search for "Example" using "LIKE (exact)".<br />If no filter mode is indicated in the field, the value of "Filter Mode" will be used by default]]></description>
                         <visible>1</visible>
                         <type>select</type>
                         <source_model>customgrid/system_config_source_yesno</source_model>

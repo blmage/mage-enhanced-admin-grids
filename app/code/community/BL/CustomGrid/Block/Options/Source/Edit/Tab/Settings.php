@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -38,24 +38,24 @@ class BL_CustomGrid_Block_Options_Source_Edit_Tab_Settings extends BL_CustomGrid
     
     protected function _prepareLayout()
     {
-        $this->setChild(
-            'continue_button',
-            $this->getLayout()
-                ->createBlock('adminhtml/widget_button')
-                ->setData(
-                    array(
-                        'label'   => $this->__('Continue'),
-                        'onclick' => "setSettings('" . $this->getContinueUrl() . "', 'options_source_type')",
-                        'class'   => 'save',
-                    )
-                )
+        $continueButton = $this->getLayout()->createBlock('adminhtml/widget_button');
+        
+        $continueButton->setData(
+            array(
+                'label'   => $this->__('Continue'),
+                'onclick' => "setSettings('" . $this->getContinueUrl() . "', 'options_source_type')",
+                'class'   => 'save',
+            )
         );
         
+        $this->setChild('continue_button', $continueButton);
         return parent::_prepareLayout();
     }
     
     protected function _prepareForm()
     {
+        $optionsSource = $this->getOptionsSource();
+        
         $form = new Varien_Data_Form();
         $fieldset = $form->addFieldset('settings', array('legend' => $this->__('Settings')));
         
@@ -67,7 +67,7 @@ class BL_CustomGrid_Block_Options_Source_Edit_Tab_Settings extends BL_CustomGrid
                 'title'  => $this->__('Type'),
                 'name'   => 'type',
                 'value'  => '',
-                'values' => Mage::getSingleton('customgrid/options_source')->getTypesAsOptionHash(true),
+                'values' => $optionsSource->getTypesAsOptionHash(true),
             )
         );
         
@@ -81,13 +81,18 @@ class BL_CustomGrid_Block_Options_Source_Edit_Tab_Settings extends BL_CustomGrid
         return $this;
     }
     
+    /**
+     * Return the URL usable to go to the next step of the options source creation
+     * 
+     * @return string
+     */
     public function getContinueUrl()
     {
         return $this->getUrl(
             '*/*/new',
             array(
-                '_current' => true,
                 'type' => '{{type}}',
+                '_current' => true,
             )
         );
     }

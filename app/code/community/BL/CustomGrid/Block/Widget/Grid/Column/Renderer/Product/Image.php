@@ -9,19 +9,28 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Product_Image extends
     Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
+    /**
+     * Return the name and the URL of the product image from the given row
+     * 
+     * @param Varien_Object $row Row product
+     * @return array|null
+     */
     protected function _getImageUrl(Varien_Object $row)
     {
         if (strlen($image = $this->_getValue($row)) && ($image != 'no_selection')) {
-            $dummyProduct  = Mage::getModel('catalog/product');
             $attributeCode = $this->getColumn()->getAttributeCode();
-            $helper = $this->helper('catalog/image')->init($dummyProduct, $attributeCode, $image);
+            /** @var $dummyProduct Mage_Catalog_Model_Product */
+            $dummyProduct  = Mage::getModel('catalog/product');
+            /** @var $helper Mage_Catalog_Helper_Image */
+            $helper = $this->helper('catalog/image');
+            $helper->init($dummyProduct, $attributeCode, $image);
             $helper->placeholder('bl/customgrid/images/catalog/product/placeholder.jpg');
             
             if (!$this->getColumn()->getBrowserResizeOnly()
@@ -35,6 +44,12 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Product_Image extends
         return null;
     }
     
+    /**
+     * Return the original URL of the product image from the given row
+     * 
+     * @param Varien_Object $row Row product
+     * @return string|null
+     */
     protected function _getOriginalImageUrl(Varien_Object $row)
     {
         return (strlen($image = $this->_getValue($row)) && ($image != 'no_selection'))

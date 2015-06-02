@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2013 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
  
@@ -29,10 +29,30 @@ class BL_CustomGrid_Model_Custom_Column_Order_Items_Custom extends
             'original_price'  => 'Original Price',
             'status'          => 'Status',
             'quantity'        => 'Qty',
+            'qty_ordered'     => 'Ordered Qty',
+            'qty_canceled'    => 'Canceled Qty',
+            'qty_invoiced'    => 'Invoiced Qty',
+            'qty_shipped'     => 'Shipped Qty',
+            'qty_refunded'    => 'Refunded Qty',
             'tax_amount'      => 'Tax Amount',
             'tax_percent'     => 'Tax Percent',
             'discount_amount' => 'Discount Amount',
             'row_total'       => 'Row Total',
+        );
+    }
+    
+    protected function _getItemDefaultBaseValuesKeys()
+    {
+        return array(
+            'name',
+            'sku',
+            'original_price',
+            'status',
+            'quantity',
+            'tax_amount',
+            'tax_percent',
+            'discount_amount',
+            'row_total',
         );
     }
     

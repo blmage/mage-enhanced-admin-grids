@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -53,6 +53,19 @@ class BL_CustomGrid_Helper_Grid extends Mage_Core_Helper_Abstract
         'block' => array(),
         'collection' => array(),
     );
+    
+    /**
+     * Return whether the given grid block has been rewrited by this extension
+     * 
+     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
+     * @return bool
+     */
+    public function isRewritedGridBlock(Mage_Adminhtml_Block_Widget_Grid $gridBlock)
+    {
+        /** @var $helper BL_CustomGrid_Helper_Data */
+        $helper = Mage::helper('customgrid');
+        return $helper->isRewritedGridBlock($gridBlock);
+    }
     
     /**
      * Return the columns that are actually displayable for the given grid block
@@ -152,7 +165,7 @@ class BL_CustomGrid_Helper_Grid extends Mage_Core_Helper_Abstract
      * @param callable $callback Verification callback
      * @param array $params Callback parameters
      * @param bool $addNative Whether the native callback parameters should be appended to the callback call
-     * @return this
+     * @return BL_CustomGrid_Helper_Grid
      */
     public function addVerificationCallback($type, $blockType, $callback, array $params = array(), $addNative = true)
     {
@@ -235,11 +248,9 @@ class BL_CustomGrid_Helper_Grid extends Mage_Core_Helper_Abstract
      */
     public function verifyGridBlock(Mage_Adminhtml_Block_Widget_Grid $gridBlock, BL_CustomGrid_Model_Grid $gridModel)
     {
-        if (($gridBlock instanceof Mage_Adminhtml_Block_Widget_Grid)
-            && Mage::helper('customgrid')->isRewritedGridBlock($gridBlock)) {
-            return $this->_verifyGridElement('block', $gridModel->getBlockType(), $gridBlock, $gridModel);
-        }
-        return false;
+        return (($gridBlock instanceof Mage_Adminhtml_Block_Widget_Grid) && $this->isRewritedGridBlock($gridBlock))
+            ? $this->_verifyGridElement('block', $gridModel->getBlockType(), $gridBlock, $gridModel)
+            : false;
     }
     
     /**
@@ -254,11 +265,9 @@ class BL_CustomGrid_Helper_Grid extends Mage_Core_Helper_Abstract
         Mage_Adminhtml_Block_Widget_Grid $gridBlock,
         BL_CustomGrid_Model_Grid $gridModel
     ) {
-        if (($collection = $gridBlock->getCollection())
-            && ($collection instanceof Varien_Data_Collection_Db)) {
-            return $this->_verifyGridElement('collection', $gridModel->getBlockType(), $collection, $gridModel);
-        }
-        return false;
+        return (($collection = $gridBlock->getCollection()) && ($collection instanceof Varien_Data_Collection_Db))
+            ? $this->_verifyGridElement('collection', $gridModel->getBlockType(), $collection, $gridModel)
+            : false;
     }
     
     /**
@@ -290,10 +299,9 @@ class BL_CustomGrid_Helper_Grid extends Mage_Core_Helper_Abstract
         BL_CustomGrid_Model_Grid $gridModel,
         $checkFromOneDotSix
     ) {
-        if ($checkFromOneDotSix) {
-            return ($collection instanceof Mage_Catalog_Model_Resource_Product_Collection);
-        }
-        return ($collection instanceof Mage_Catalog_Model_Resource_Eav_Mysql4_Product_Collection);
+        return $checkFromOneDotSix
+            ? ($collection instanceof Mage_Catalog_Model_Resource_Product_Collection)
+            : ($collection instanceof Mage_Catalog_Model_Resource_Eav_Mysql4_Product_Collection);
     }
     
     /**
@@ -325,10 +333,9 @@ class BL_CustomGrid_Helper_Grid extends Mage_Core_Helper_Abstract
         BL_CustomGrid_Model_Grid $gridModel,
         $checkFromOneDotSix
     ) {
-        if ($checkFromOneDotSix) {
-            return ($collection instanceof Mage_Sales_Model_Resource_Order_Grid_Collection);
-        }
-        return ($collection instanceof Mage_Sales_Model_Mysql4_Order_Grid_Collection);
+        return $checkFromOneDotSix
+            ? ($collection instanceof Mage_Sales_Model_Resource_Order_Grid_Collection)
+            : ($collection instanceof Mage_Sales_Model_Mysql4_Order_Grid_Collection);
     }
     
     /**
@@ -360,10 +367,9 @@ class BL_CustomGrid_Helper_Grid extends Mage_Core_Helper_Abstract
         BL_CustomGrid_Model_Grid $gridModel,
         $checkFromOneDotSix
     ) {
-        if ($checkFromOneDotSix) {
-            return ($collection instanceof Mage_Sales_Model_Resource_Order_Invoice_Grid_Collection);
-        }
-        return ($collection instanceof Mage_Sales_Model_Mysql4_Order_Invoice_Grid_Collection);
+        return $checkFromOneDotSix
+            ? ($collection instanceof Mage_Sales_Model_Resource_Order_Invoice_Grid_Collection)
+            : ($collection instanceof Mage_Sales_Model_Mysql4_Order_Invoice_Grid_Collection);
     }
     
     /**
@@ -395,10 +401,9 @@ class BL_CustomGrid_Helper_Grid extends Mage_Core_Helper_Abstract
         BL_CustomGrid_Model_Grid $gridModel,
         $checkFromOneDotSix
     ) {
-        if ($checkFromOneDotSix) {
-            return ($collection instanceof Mage_Sales_Model_Resource_Order_Shipment_Grid_Collection);
-        }
-        return ($collection instanceof Mage_Sales_Model_Mysql4_Order_Shipment_Grid_Collection);
+        return $checkFromOneDotSix
+            ? ($collection instanceof Mage_Sales_Model_Resource_Order_Shipment_Grid_Collection)
+            : ($collection instanceof Mage_Sales_Model_Mysql4_Order_Shipment_Grid_Collection);
     }
     
     /**
@@ -430,9 +435,8 @@ class BL_CustomGrid_Helper_Grid extends Mage_Core_Helper_Abstract
         BL_CustomGrid_Model_Grid $gridModel,
         $checkFromOneDotSix
     ) {
-        if ($checkFromOneDotSix) {
-            return ($collection instanceof Mage_Sales_Model_Resource_Order_Creditmemo_Grid_Collection);
-        }
-        return ($collection instanceof Mage_Sales_Model_Mysql4_Order_Creditmemo_Grid_Collection);
+        return $checkFromOneDotSix
+            ? ($collection instanceof Mage_Sales_Model_Resource_Order_Creditmemo_Grid_Collection)
+            : ($collection instanceof Mage_Sales_Model_Mysql4_Order_Creditmemo_Grid_Collection);
     }
 }

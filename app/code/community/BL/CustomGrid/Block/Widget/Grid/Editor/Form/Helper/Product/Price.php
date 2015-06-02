@@ -9,23 +9,38 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Helper_Product_Price extends
     Mage_Adminhtml_Block_Catalog_Product_Helper_Form_Price
 {
+    /**
+     * Return tax helper
+     * 
+     * @return Mage_Tax_Helper_Data
+     */
     protected function _getTaxHelper()
     {
         return Mage::helper('tax');
     }
     
+    /**
+     * Return the HTML ID of the element varying on tax amount change
+     * 
+     * @return string
+     */
     protected function getTaxObservingSpanId()
     {
         return 'dynamic-tax-' . $this->getHtmlId();
     }
     
+    /**
+     * Return the store under which the price is being edited
+     * 
+     * @return Mage_Core_Model_Store|null
+     */
     public function getStore()
     {
         if ($attribute = $this->getEntityAttribute()) {
@@ -59,12 +74,16 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Helper_Product_Price extends
     
     protected function _getTaxObservingCode($attribute)
     {
+        /** @var $helper BL_CustomGrid_Helper_Data */
+        $helper = Mage::helper('customgrid');
+        /** @var $coreHelper Mage_Core_Helper_Data */
+        $coreHelper = Mage::helper('core');
         $taxHelper  = $this->_getTaxHelper();
         $taxRates   = $taxHelper->getAllRatesByProductClass($this->getStore());
         $taxClassId = $this->getForm()->getDataObject()->getTaxClassId();
-        $recalculateFunction = Mage::helper('core')->uniqHash('recalculateTax');
+        $recalculateFunction = $coreHelper->uniqHash('recalculateTax');
         
-        if (Mage::helper('customgrid')->isMageVersionGreaterThan(1, 5)) {
+        if ($helper->isMageVersionGreaterThan(1, 5)) {
             $priceFormat = $taxHelper->getPriceFormat($this->getStore());
         } else {
             $priceFormat = $taxHelper->getPriceFormat();

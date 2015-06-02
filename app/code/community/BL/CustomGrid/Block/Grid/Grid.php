@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -30,6 +30,11 @@ class BL_CustomGrid_Block_Grid_Grid extends Mage_Adminhtml_Block_Widget_Grid
         return parent::_prepareCollection();
     }
     
+    /**
+     * Add the "Actions" colum to the columns list
+     * 
+     * @return BL_CustomGrid_Block_Grid_Grid
+     */
     protected function _prepareActionColumn()
     {
         return $this->addColumn(
@@ -86,7 +91,9 @@ class BL_CustomGrid_Block_Grid_Grid extends Mage_Adminhtml_Block_Widget_Grid
     
     protected function _prepareColumns()
     {
-        $gridTypesHash = Mage::getSingleton('customgrid/grid_type_config')->getTypesAsOptionHash(true);
+        /** @var $gridTypeConfig BL_CustomGrid_Model_Grid_Type_Config */
+        $gridTypeConfig = Mage::getSingleton('customgrid/grid_type_config');
+        $gridTypesHash  = $gridTypeConfig->getTypesAsOptionHash(true);
         
         $this->addColumn(
             'grid_id',
@@ -173,9 +180,15 @@ class BL_CustomGrid_Block_Grid_Grid extends Mage_Adminhtml_Block_Widget_Grid
         return parent::_prepareColumns();
     }
     
-    protected function _isRowEditAllowed($item)
+    /**
+     * Return whether the given grid model can be edited by the current user
+     * 
+     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @return bool
+     */
+    protected function _isRowEditAllowed(BL_CustomGrid_Model_Grid $gridModel)
     {
-        return $item->checkUserPermissions(
+        return $gridModel->checkUserPermissions(
             array(
                 BL_CustomGrid_Model_Grid::ACTION_CUSTOMIZE_COLUMNS,
                 BL_CustomGrid_Model_Grid::ACTION_ENABLE_DISABLE,

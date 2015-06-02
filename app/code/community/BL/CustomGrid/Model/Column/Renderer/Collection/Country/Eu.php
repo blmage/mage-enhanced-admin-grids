@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2013 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -37,7 +37,7 @@ class BL_CustomGrid_Model_Column_Renderer_Collection_Country_Eu extends
                     $euCountries = explode(',', $euCountries);
                 }
             }
-        } elseif (Mage::helper('customgrid')->isMageVersionGreaterThan(1, 6)) {
+        } elseif ($this->_getHelper()->isMageVersionGreaterThan(1, 6)) {
             $euCountries = $this->_getSystemConfigCountries('general/country/eu_countries');
         }
         
@@ -58,11 +58,11 @@ class BL_CustomGrid_Model_Column_Renderer_Collection_Country_Eu extends
         
         $euCountries  = $this->_getEuCountries();
         $allCountries = array();
-        $countries = Mage::getResourceModel('directory/country_collection')
-            ->loadData()
-            ->toOptionArray(false);
+        /** @var $countriesCollection Mage_Directory_Model_Mysql4_Country_Collection */
+        $countriesCollection = Mage::getResourceModel('directory/country_collection');
+        $countries = $countriesCollection->loadData()->toOptionArray(false);
         
-        $countries  = Mage::helper('customgrid')->getOptionHashFromOptionArray($countries);
+        $countries  = $this->_getHelper()->getOptionHashFromOptionArray($countries);
         $isEuCountry = array();
         
         foreach ($euCountries as $key => $code) {

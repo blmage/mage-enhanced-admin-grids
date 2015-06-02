@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -107,7 +107,9 @@ class BL_CustomGrid_Model_Custom_Column_Order_Status_Color extends BL_CustomGrid
     public function getOrderStatuses()
     {
         if (!$this->hasData('order_statuses')) {
-            $this->setData('order_statuses', Mage::getSingleton('sales/order_config')->getStatuses());
+            /** @var $orderConfig Mage_Sales_Model_Order_Config */
+            $orderConfig = Mage::getSingleton('sales/order_config');
+            $this->setData('order_statuses', $orderConfig->getStatuses());
         }
         return $this->_getData('order_statuses');
     }

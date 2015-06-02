@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -22,7 +22,18 @@ abstract class BL_CustomGrid_Model_Custom_Column_Simple_Abstract extends BL_Cust
         Varien_Data_Collection_Db $collection
     );
     
-    protected function _shouldForceFieldOrder(
+    /**
+     * Return whether a sort on the given column from the given grid block should be enforced
+     * 
+     * @param Varien_Data_Collection_Db $collection Grid collection
+     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
+     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @param string $columnBlockId Grid column block ID
+     * @param string $columnIndex Grid column index
+     * @param array $params Customization params values
+     * @return bool
+     */
+    protected function _shouldForceFieldSort(
         Varien_Data_Collection_Db $collection,
         Mage_Adminhtml_Block_Widget_Grid $gridBlock,
         BL_CustomGrid_Model_Grid $gridModel,
@@ -34,6 +45,15 @@ abstract class BL_CustomGrid_Model_Custom_Column_Simple_Abstract extends BL_Cust
             && $this->_getGridHelper()->isEavEntityGrid($gridBlock, $gridModel);
     }
     
+    /**
+     * Enforce the sort on the given column for the given grid block
+     * 
+     * @param string $columnBlockId Grid column block ID
+     * @param string $columnIndex Grid column index
+     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
+     * @param Varien_Data_Collection_Db $collection Grid collection
+     * @return BL_CustomGrid_Model_Custom_Column_Simple_Abstract
+     */
     public function addSortToGridCollection(
         $columnBlockId,
         $columnIndex,
@@ -60,7 +80,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Simple_Abstract extends BL_Cust
             true
         );
         
-        if ($this->_shouldForceFieldOrder($collection, $gridBlock, $gridModel, $columnBlockId, $columnIndex, $params)) {
+        if ($this->_shouldForceFieldSort($collection, $gridBlock, $gridModel, $columnBlockId, $columnIndex, $params)) {
             $gridBlock->blcg_addCollectionCallback(
                 self::GC_EVENT_AFTER_SET,
                 array($this, 'addSortToGridCollection'),
@@ -72,6 +92,18 @@ abstract class BL_CustomGrid_Model_Custom_Column_Simple_Abstract extends BL_Cust
         return $this;
     }
     
+    /**
+     * Add the given field to the given collection
+     * 
+     * @param Varien_Db_Select $select Grid collection select
+     * @param string $columnIndex Grid column index
+     * @param string $fieldName Field name
+     * @param string $tableAlias Field table alias
+     * @param array $params Customization params
+     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
+     * @param Varien_Data_Collection_Db $collection Grid collection
+     * @return BL_CustomGrid_Model_Custom_Column_Simple_Abstract
+     */
     protected function _addFieldToSelect(
         Varien_Db_Select $select,
         $columnIndex,

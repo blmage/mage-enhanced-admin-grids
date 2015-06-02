@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2013 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -41,6 +41,13 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Static_Product_Inventory exten
         return $this;
     }
     
+    /**
+     * Return the specified inventory value from the given product
+     * 
+     * @param Mage_Catalog_Model_Product $product Product
+     * @param string $field Inventory field name
+     * @return mixed
+     */
     protected function _getProductInventoryData(Mage_Catalog_Model_Product $product, $field)
     {
         return $product->getStockItem()

@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -39,7 +39,7 @@ class BL_CustomGrid_Block_Grid_Profile_Form_Assign extends BL_CustomGrid_Block_G
                 'name'     => 'is_restricted',
                 'label'    => $this->__('Restricted'),
                 'required' => true,
-                'values'   => Mage::getSingleton('customgrid/system_config_source_yesno')->toOptionArray(),
+                'values'   => $this->_getYesNoOptionArray(),
                 'value'    => ($gridProfile->isRestricted() ? '1' : '0')
             )
         );
@@ -57,7 +57,7 @@ class BL_CustomGrid_Block_Grid_Profile_Form_Assign extends BL_CustomGrid_Block_G
                 'name'     => 'assigned_to',
                 'label'    => $this->__('Assigned To'),
                 'required' => true,
-                'values'   => Mage::getSingleton('customgrid/system_config_source_admin_role')->toOptionArray(false),
+                'values'   => $this->_getAdminRolesOptionArray(false),
                 'value'    => $gridProfile->getAssignedToRoleIds(),
             )
         );

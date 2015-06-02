@@ -9,11 +9,11 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Grid_Edit_Tab_Settings extends BL_CustomGrid_Block_Widget_Form implements
+class BL_CustomGrid_Block_Grid_Edit_Tab_Settings extends BL_CustomGrid_Block_Grid_Form_Abstract implements
     Mage_Adminhtml_Block_Widget_Tab_Interface
 {
     public function getTabLabel()
@@ -36,6 +36,17 @@ class BL_CustomGrid_Block_Grid_Edit_Tab_Settings extends BL_CustomGrid_Block_Wid
         return false;
     }
     
+    protected function _getFormHtmlIdPrefix()
+    {
+        return 'blcg_grid_' . $this->getGridModel()->getId() . '_settings_';
+    }
+    
+    /**
+     * Return the field note corresponding to the given key
+     * 
+     * @param string $noteKey Note key
+     * @return string|null
+     */
     public function getFormFieldNote($noteKey)
     {
         if (!$this->hasData('form_field_notes')) {
@@ -65,6 +76,36 @@ class BL_CustomGrid_Block_Grid_Edit_Tab_Settings extends BL_CustomGrid_Block_Wid
         return $this->getData('form_field_notes/' . $noteKey);
     }
     
+    /**
+     * Return default array parameters behaviours as an option array
+     * 
+     * @return array
+     */
+    protected function _getDefaultArrayBehavioursOptionArray()
+    {
+        /** @var $source BL_CustomGrid_Model_System_Config_Source_Default_Param_Behaviour_Array */
+        $source = Mage::getSingleton('customgrid/system_config_source_default_param_behaviour_array');
+        return $source->toOptionArray();
+    }
+    
+    /**
+     * Return default scalar parameters behaviours as an option array
+     * 
+     * @return array
+     */
+    protected function _getDefaultScalarBehavioursOptionArray()
+    {
+        /** @var $source BL_CustomGrid_Model_System_Config_Source_Default_Param_Behaviour_Scalar */
+        $source = Mage::getSingleton('customgrid/system_config_source_default_param_behaviour_scalar');
+        return $source->toOptionArray();
+    }
+    
+    /**
+     * Add profiles-related fields to the given form, return the corresponding fieldset
+     * 
+     * @param Varien_Data_Form $form Form
+     * @return Varien_Data_Form_Element_Fieldset
+     */
     protected function _addProfilesFieldsToForm(Varien_Data_Form $form)
     {
         $gridModel = $this->getGridModel();
@@ -84,7 +125,7 @@ class BL_CustomGrid_Block_Grid_Edit_Tab_Settings extends BL_CustomGrid_Block_Wid
                 array(
                     'name'   => 'restricted',
                     'label'  => $this->__('Restricted'),
-                    'values' => Mage::getSingleton('customgrid/system_config_source_yesno')->toOptionArray(),
+                    'values' => $this->_getYesNoOptionArray(),
                     'note'   => $this->__($this->getFormFieldNote('profiles_default_restricted')),
                 )
             );
@@ -95,7 +136,7 @@ class BL_CustomGrid_Block_Grid_Edit_Tab_Settings extends BL_CustomGrid_Block_Wid
                 array(
                     'name'   => 'assigned_to',
                     'label'  => $this->__('Assigned To'),
-                    'values' => Mage::getSingleton('customgrid/system_config_source_admin_role')->toOptionArray(),
+                    'values' => $this->_getAdminRolesOptionArray(),
                     'note'   => $this->__($this->getFormFieldNote('profiles_default_assigned_to')),
                 )
             );
@@ -108,7 +149,7 @@ class BL_CustomGrid_Block_Grid_Edit_Tab_Settings extends BL_CustomGrid_Block_Wid
                 array(
                     'name'   => 'remembered_session_params',
                     'label'  => $this->__('Remembered Session Parameters'),
-                    'values' => Mage::getSingleton('customgrid/system_config_source_grid_param')->toOptionArray(),
+                    'values' => $this->_getGridParamsOptionArray(),
                     'note'   => $this->__($this->getFormFieldNote('profiles_remembered_session_params')),
                 )
             );
@@ -118,9 +159,15 @@ class BL_CustomGrid_Block_Grid_Edit_Tab_Settings extends BL_CustomGrid_Block_Wid
         return $fieldset;
     }
     
+    /**
+     * Add customization params-related fields to the given form, return the corresponding fieldset
+     * 
+     * @param Varien_Data_Form $form Form
+     * @return Varien_Data_Form_Element_Fieldset
+     */
     protected function _addCustomizationParamsFieldsToForm(Varien_Data_Form $form)
     {
-        $yesNoValues = Mage::getSingleton('customgrid/system_config_source_yesno')->toOptionArray();
+        $yesNoOptions = $this->_getYesNoOptionArray();
         
         $fieldset = $form->addFieldset(
             'customization_parameters',
@@ -130,129 +177,50 @@ class BL_CustomGrid_Block_Grid_Edit_Tab_Settings extends BL_CustomGrid_Block_Wid
             )
         );
         
-        $fieldset->addField(
-            'display_system_part',
-            'select',
-            array(
-                'name'   => 'display_system_part',
-                'label'  => $this->__('Display "System" Column'),
-                'values' => $yesNoValues,
-            )
+        $fieldTypes = array(
+            'display_system_part'        => 'Display "System" Column',
+            'ignore_custom_headers'      => 'Ignore Custom Headers (Base Grid Columns)',
+            'ignore_custom_widths'       => 'Ignore Custom Widths (Base Grid Columns)',
+            'ignore_custom_alignments'   => 'Ignore Custom Alignments (Base Grid Columns)',
+            'pagination_values'          => 'Custom Pagination Values',
+            'default_pagination_value'   => 'Default Pagination Value',
+            'merge_base_pagination'      => 'Merge Base Pagination Values',
+            'pin_header'                 => 'Pin Pager And Mass-Actions Block',
+            'rss_links_window'           => 'Move RSS Links in a Dedicated Window',
+            'hide_original_export_block' => 'Hide Original Export Block',
+            'hide_filter_reset_button'   => 'Hide Original Filter Reset Button',
         );
         
-        $fieldset->addField(
-            'ignore_custom_headers',
-            'select',
-            array(
-                'name'   => 'ignore_custom_headers',
-                'label'  => $this->__('Ignore Custom Headers (Base Grid Columns)'),
-                'values' => $yesNoValues,
-            )
-        );
-        
-        $fieldset->addField(
-            'ignore_custom_widths',
-            'select',
-            array(
-                'name'   => 'ignore_custom_widths',
-                'label'  => $this->__('Ignore Custom Widths (Base Grid Columns)'),
-                'values' => $yesNoValues,
-            )
-        );
-        
-        $fieldset->addField(
-            'ignore_custom_alignments',
-            'select',
-            array(
-                'name'   => 'ignore_custom_alignments',
-                'label'  => $this->__('Ignore Custom Alignments (Base Grid Columns)'),
-                'values' => $yesNoValues,
-            )
-        );
-        
-        $fieldset->addField(
-            'pagination_values',
-            'text',
-            array(
-                'name'  => 'pagination_values',
-                'label' => $this->__('Custom Pagination Values'),
-                'note'  => $this->__($this->getFormFieldNote('pagination_values')),
-             )
-        );
-        
-        $fieldset->addField(
-            'default_pagination_value',
-            'text',
-            array(
-                'name'  => 'default_pagination_value',
-                'label' => $this->__('Default Pagination Value'),
-                'note'  => $this->__($this->getFormFieldNote('default_pagination_value')),
-            )
-        );
-        
-        $fieldset->addField(
-            'merge_base_pagination',
-            'select',
-            array(
-                'name'   => 'merge_base_pagination',
-                'label'  => $this->__('Merge Base Pagination Values'),
-                'values' => $yesNoValues,
-                'note'   => $this->__($this->getFormFieldNote('merge_base_pagination')),
-            )
-        );
-        
-        $fieldset->addField(
-            'pin_header',
-            'select',
-            array(
-                'name'   => 'pin_header',
-                'label'  => $this->__('Pin Pager And Mass-Actions Block'),
-                'values' => $yesNoValues,
-            )
-        );
-        
-        $fieldset->addField(
-            'rss_links_window',
-            'select',
-            array(
-                'name'   => 'rss_links_window',
-                'label'  => $this->__('Move RSS Links in a Dedicated Window'),
-                'values' => $yesNoValues,
-            )
-        );
-        
-        $fieldset->addField(
-            'hide_original_export_block',
-            'select',
-            array(
-                'name'   => 'hide_original_export_block',
-                'label'  => $this->__('Hide Original Export Block'),
-                'values' => $yesNoValues,
-            )
-        );
-        
-        $fieldset->addField(
-            'hide_filter_reset_button',
-            'select',
-            array(
-                'name'   => 'hide_filter_reset_button',
-                'label'  => $this->__('Hide Original Filter Reset Button'),
-                'values' => $yesNoValues,
-            )
-        );
+        foreach ($fieldTypes as $fieldName => $fieldLabel) {
+            $field = $fieldset->addField(
+                $fieldName,
+                'select',
+                array(
+                    'name'   => $fieldName,
+                    'label'  => $this->__($fieldLabel),
+                    'values' => $yesNoOptions,
+                )
+            );
+            
+            if ($note = $this->getFormFieldNote($fieldName)) {
+                $field->setNote($note);
+            }
+        }
         
         $this->_addSuffixToFieldsetFieldNames($fieldset, 'customization_params');
         return $fieldset;
     }
     
+    /**
+     * Add default params-related fields to the given form, return the corresponding fieldset
+     * 
+     * @param Varien_Data_Form $form Form
+     * @return Varien_Data_Form_Element_Fieldset
+     */
     protected function _addDefaultParamsFieldsToForm(Varien_Data_Form $form)
     {
-        $gridParams = Mage::getSingleton('customgrid/system_config_source_grid_param')
-            ->toOptionArray(false);
-        $arrayOptions   = Mage::getSingleton('customgrid/system_config_source_default_param_behaviour_array')
-            ->toOptionArray();
-        $scalarOptions  = Mage::getSingleton('customgrid/system_config_source_default_param_behaviour_scalar')
-            ->toOptionArray();
+        $arrayOptions  = $this->_getDefaultArrayBehavioursOptionArray();
+        $scalarOptions = $this->_getDefaultScalarBehavioursOptionArray();
         
         $fieldset = $form->addFieldset(
             'default_params_behaviours',
@@ -262,7 +230,7 @@ class BL_CustomGrid_Block_Grid_Edit_Tab_Settings extends BL_CustomGrid_Block_Wid
             )
         );
         
-        foreach ($gridParams as $gridParam) {
+        foreach ($this->_getGridParamsOptionArray(false) as $gridParam) {
             if ($isFilterGridParam = ($gridParam['value'] == BL_CustomGrid_Model_Grid::GRID_PARAM_FILTER)) {
                 $formFieldNoteKey = 'default_array_behaviour';
             } else {
@@ -285,12 +253,11 @@ class BL_CustomGrid_Block_Grid_Edit_Tab_Settings extends BL_CustomGrid_Block_Wid
         return $fieldset;
     }
     
-    protected function _prepareForm()
+    protected function _addFieldsToForm(Varien_Data_Form $form)
     {
-        $gridModel = $this->getGridModel();
+        parent::_addFieldsToForm($form);
         
-        $form = new Varien_Data_Form();
-        $form->setHtmlIdPrefix('blcg_grid_' . $gridModel->getId() . '_settings_');
+        $gridModel = $this->getGridModel();
         $useConfigFieldsets = array();
         
         if ($gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_ASSIGN_PROFILES)
@@ -310,9 +277,11 @@ class BL_CustomGrid_Block_Grid_Edit_Tab_Settings extends BL_CustomGrid_Block_Wid
             }
         }
         
-        $form->setValues($gridModel->getData());
-        $this->setForm($form);
-        
-        return parent::_prepareForm();
+        return $this;
+    }
+    
+    protected function _getFormValues()
+    {
+        return $this->getGridModel()->getData();
     }
 }

@@ -9,8 +9,18 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+/**
+ * @method int getGridId() Return the ID of the corresponding grid model
+ * @method int|null getDefaultPage() Return the default page value
+ * @method int|null getDefaultLimit() Return the default limit value
+ * @method string|null getDefaultSort() Return the default sort value
+ * @method string|null getDefaultDir() Return the default direction value
+ * @method string|null getDefaultFilter() Return the default filter value
+ * @method int getIsRestricted() Return whether this profile is restricted to its assigned roles
  */
 
 class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
@@ -165,7 +175,7 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
      * Set array data in the adminhtml session, for the given base key
      * 
      * @param string $sessionBaseKey Base key
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Profile
      */
     protected function _setSessionArrayData($sessionBaseKey, array $data)
     {
@@ -202,7 +212,7 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
     /**
      * Set the new remembered session values
      * 
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Profile
      */
     public function setRememberedSessionValues(array $sessionValues)
     {
@@ -223,7 +233,7 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
      * Set the new applied filters for this profile in session
      * 
      * @param array $filters New applied filters
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Profile
      */
     public function setSessionAppliedFilters(array $filters)
     {
@@ -244,7 +254,7 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
      * Set the new removed filters for this profile in session
      * 
      * @param array $filters New removed filters
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Profile
      */
     public function setSessionRemovedFilters(array $filters)
     {
@@ -306,9 +316,9 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
         } elseif (!empty($otherChosenIds)) {
             $gridModel->throwPermissionException();
         } else {
-            $usersIds = Mage::getModel('admin/user')
-                ->getCollection()
-                ->getAllIds();
+            /** @var $usersCollection Mage_Admin_Model_Mysql4_User_Collection */
+            $usersCollection = Mage::getModel('admin/user')->getCollection();
+            $usersIds = $usersCollection->getAllIds();
             
             foreach ($usersIds as $userId) {
                 if (($userId != $ownUserId) && ($gridModel->getUserDefaultProfileId($userId) === $profileId)) {
@@ -351,9 +361,9 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
         } elseif (!empty($otherChosenIds)) {
             $gridModel->throwPermissionException();
         } else {
-            $rolesIds = Mage::getModel('admin/roles')
-                ->getCollection()
-                ->getAllIds();
+            /** @var $rolesCollection Mage_Admin_Model_Mysql4_Role_Collection */
+            $rolesCollection = Mage::getModel('admin/roles')->getCollection();
+            $rolesIds = $rolesCollection->getAllIds();
             
             foreach ($rolesIds as $roleId) {
                 if (($roleId != $ownRoleId) && ($gridModel->getRoleDefaultProfileId($roleId) === $profileId)) {
@@ -370,7 +380,7 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
      * (expected values and corresponding possibilities depending on permissions)
      *
      * @param array $values Array with "users", "roles" and "global" keys, holding corresponding value(s)
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Profile
      */
     public function chooseAsDefault(array $values)
     {
@@ -410,7 +420,7 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
      * @param int|null $checkedProfileId Checked profile ID (may be null in case of a new profile)
      * @param array $checkedProfileValues Checked profile values
      * @param BL_CustomGrid_Model_Grid_Profile[] $profiles List of all other profiles to check against
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Profile
      */
     protected function _checkProfileDuplication($checkedProfileId, array $checkedProfileValues, array $profiles)
     {
@@ -430,7 +440,7 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
      * 
      * @param int|null $profileId Updated profile ID
      * @param array $values New profile values
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Profile
      */
     protected function _checkProfileNewValues($profileId, array &$values)
     {
@@ -518,7 +528,7 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
      *
      * @param int $toProfileId ID of the profile on which to copy the given values
      * @param array $values Copied values (possible values : "columns", and each grid parameter key - eg "page")
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Profile
      */
     public function copyToExisting($toProfileId, array $values)
     {
@@ -546,7 +556,7 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
      * Update base values
      *
      * @param array $values New values
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Profile
      */
     public function update(array $values)
     {
@@ -668,7 +678,7 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
      *
      * @param array $appliable Appliable values
      * @param array $removable Removable values
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Profile
      */
     public function updateDefaultParameters(array $appliable, array $removable)
     {
@@ -695,7 +705,7 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
      * (Un-)Restrict and/or (un-)assign this profile
      *
      * @param array $values Array with "is_restricted" and "assigned_to" keys, holding corresponding value(s)
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Profile
      */
     public function assign(array $values)
     {
@@ -730,7 +740,7 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
     /**
      * Delete this profile
      *
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Profile
      */
     public function delete()
     {

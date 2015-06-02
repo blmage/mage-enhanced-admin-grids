@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -31,6 +31,7 @@ class BL_CustomGrid_Block_Messages extends Mage_Adminhtml_Block_Messages
     
     protected function _beforeToHtml()
     {
+        /** @var $session BL_CustomGrid_Model_Session */
         $session = Mage::getSingleton('customgrid/session');
         $this->addMessages($session->getMessages(true));
         $this->setEscapeMessageFlag($session->getEscapeMessages(true));
@@ -47,6 +48,11 @@ class BL_CustomGrid_Block_Messages extends Mage_Adminhtml_Block_Messages
         return Mage_Core_Block_Template::_toHtml();
     }
     
+    /**
+     * Return the format usable to render messages dates
+     * 
+     * @return string
+     */
     public function getDateFormat()
     {
         if (!$this->hasData('date_format')) {
@@ -56,6 +62,12 @@ class BL_CustomGrid_Block_Messages extends Mage_Adminhtml_Block_Messages
         return $this->_getData('date_format');
     }
     
+    /**
+     * Format the given message date
+     * 
+     * @param string $date Message date
+     * @return string
+     */
     protected function _formatDate($date)
     {
         return Mage::app()->getLocale()
@@ -63,6 +75,12 @@ class BL_CustomGrid_Block_Messages extends Mage_Adminhtml_Block_Messages
             ->toString($this->getDateFormat());
     }
     
+    /**
+     * Return the current number of messages, either globally or for the given type
+     * 
+     * @param string|null $type Message type
+     * @return int
+     */
     public function getMessagesCount($type = null)
     {
         if (!is_null($type)) {
@@ -71,17 +89,30 @@ class BL_CustomGrid_Block_Messages extends Mage_Adminhtml_Block_Messages
         return $this->getMessageCollection()->count();
     }
     
+    /**
+     * Return whether there currently are messages, either globally or for the given type
+     * 
+     * @param string|null $type Message type
+     * @return bool
+     */
     public function hasMessages($type = null)
     {
         return ($this->getMessagesCount($type) > 0);
     }
     
+    /**
+     * Return current messages, arranged by date
+     * 
+     * @param string|null $type Message type
+     * @return array
+     */
     public function getDatedMessages($type = null)
     {
         $datedMessages = array();
         
         if ($messages = $this->getMessages($type)) {
             foreach ($messages as $message) {
+                /** @var $message Mage_Core_Model_Message_Abstract */
                 if ($messageId = $message->getIdentifier()) {
                     list(, $date) = explode('|', $messageId);
                     
@@ -99,10 +130,35 @@ class BL_CustomGrid_Block_Messages extends Mage_Adminhtml_Block_Messages
         return $datedMessages;
     }
     
+    /**
+     * Return the text from the given message
+     * 
+     * @param Mage_Core_Model_Message_Abstract $message Message
+     * @return string
+     */
+    protected function _getMessageText(Mage_Core_Model_Message_Abstract $message)
+    {
+        return ($this->_escapeMessageFlag ? $this->htmlEscape($message->getText()) : $message->getText());
+    }
+    
+    /**
+     * Return current messages as HTML
+     * 
+     * @param string|null $type Message type
+     * @return string
+     */
     public function getMessagesHtml($type = null)
     {
         if (!is_null($type)) {
             $html = '';
+            
+            if (isset($this->_messagesContentWrapperTagName)) {
+                $contentWrapperStartTag = '<' . $this->_messagesContentWrapperTagName . '>';
+                $contentWrapperEndTag   = '</' . $this->_messagesContentWrapperTagName . '>';
+            } else {
+                $contentWrapperStartTag = '';
+                $contentWrapperEndTag   = '';
+            }
             
             foreach ($this->getDatedMessages($type) as $date => $messages) {
                 $html .= '<div class="blcg-messages-list">';
@@ -112,21 +168,12 @@ class BL_CustomGrid_Block_Messages extends Mage_Adminhtml_Block_Messages
                 $html .= '<' . $this->_messagesFirstLevelTagName . '>';
                 
                 foreach ($messages as $message) {
-                    $html.= '<' . $this->_messagesSecondLevelTagName . '>';
-                    
-                    if (isset($this->_messagesContentWrapperTagName)) {
-                        $html.= '<' . $this->_messagesContentWrapperTagName . '>';
-                    }
-                    
-                    $html.= $this->_escapeMessageFlag
-                        ? $this->htmlEscape($message->getText())
-                        : $message->getText();
-                    
-                    if (isset($this->_messagesContentWrapperTagName)) {
-                        $html.= '</' . $this->_messagesContentWrapperTagName . '>';
-                    }
-                    
-                    $html.= '</' . $this->_messagesSecondLevelTagName . '>';
+                    /** @var $message Mage_Core_Model_Message_Abstract */
+                    $html .= '<' . $this->_messagesSecondLevelTagName . '>';
+                    $html .= $contentWrapperStartTag;
+                    $html .= $this->_getMessageText($message);
+                    $html .= $contentWrapperEndTag;
+                    $html .= '</' . $this->_messagesSecondLevelTagName . '>';
                 }
                 
                 $html .= '</' . $this->_messagesFirstLevelTagName . '>';
@@ -140,6 +187,11 @@ class BL_CustomGrid_Block_Messages extends Mage_Adminhtml_Block_Messages
         return parent::getGroupedHtml();
     }
     
+    /**
+     * Return messages types as option hash
+     * 
+     * @return array
+     */
     public function getMessagesTypes()
     {
         return array(
@@ -150,15 +202,27 @@ class BL_CustomGrid_Block_Messages extends Mage_Adminhtml_Block_Messages
         );
     }
     
+    /**
+     * Return whether the initialization JS script should be included in this block output
+     * 
+     * @return bool
+     */
     public function getIncludeJsScript()
     {
         return $this->getDataSetDefault('include_js_script', true);
     }
     
+    /**
+     * Return the wrapper ID to use when on Ajax mode
+     * 
+     * @return string
+     */
     public function getAjaxModeWrapperId()
     {
         if (!$this->hasData('ajax_mode_wrapper_id')) {
-            $this->setData('ajax_mode_wrapper_id', $this->helper('core')->uniqHash('blcg-ajax-messages-wrapper-'));
+            /** @var $helper Mage_Helper_Core_Data */
+            $helper = $this->helper('core');
+            $this->setData('ajax_mode_wrapper_id', $helper->uniqHash('blcg-ajax-messages-wrapper-'));
         }
         return $this->_getData('ajax_mode_wrapper_id');
     }

@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -19,7 +19,7 @@ class BL_CustomGrid_Model_Grid_Absorber extends BL_CustomGrid_Model_Grid_Worker
      * Initialize the current grid model's variable names from the given block
      *
      * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Absorber
      */
     protected function _absorbGridBlockVarNames(Mage_Adminhtml_Block_Widget_Grid $gridBlock)
     {
@@ -61,7 +61,9 @@ class BL_CustomGrid_Model_Grid_Absorber extends BL_CustomGrid_Model_Grid_Worker
      */
     protected function _getValidColumnAlignment($alignment)
     {
-        return array_key_exists($alignment, Mage::getSingleton('customgrid/grid_column')->getAlignments())
+        /** @var $columnModel BL_CustomGrid_Model_Grid_Column */
+        $columnModel = Mage::getSingleton('customgrid/grid_column');
+        return array_key_exists($alignment, $columnModel->getAlignments())
             ? $alignment
             : BL_CustomGrid_Model_Grid_Column::ALIGNMENT_LEFT;
     }
@@ -71,7 +73,7 @@ class BL_CustomGrid_Model_Grid_Absorber extends BL_CustomGrid_Model_Grid_Worker
      *
      * @param Mage_Adminhtml_Block_Widget_Grid_Column $columnBlock Column block
      * @param int $order Column order
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Absorber
      */
     protected function _absorbColumnFromBlock(Mage_Adminhtml_Block_Widget_Grid_Column $columnBlock, $order)
     {
@@ -103,7 +105,7 @@ class BL_CustomGrid_Model_Grid_Absorber extends BL_CustomGrid_Model_Grid_Worker
      *
      * @param string $index Collection row value's index
      * @param int $order Column order
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Absorber
      */
     protected function _absorbColumnFromCollection($index, $order)
     {
@@ -134,15 +136,17 @@ class BL_CustomGrid_Model_Grid_Absorber extends BL_CustomGrid_Model_Grid_Worker
      * Initialize the current grid model values from the given grid block, and save it afterwards
      *
      * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Absorber
      */
     public function initGridModelFromGridBlock(Mage_Adminhtml_Block_Widget_Grid $gridBlock)
     {
-        $gridModel = $this->getGridModel();
+        /** @var $gridHelper BL_CustomGrid_Helper_Grid */
+        $gridHelper = Mage::helper('customgrid/grid');
+        $gridModel  = $this->getGridModel();
         
         // Reset / Initialization
         $gridModel->setBlockId($gridBlock->getId());
-        $gridModel->setHasVaryingBlockId(Mage::helper('customgrid/grid')->isVaryingGridBlockId($gridBlock->getId()));
+        $gridModel->setHasVaryingBlockId($gridHelper->isVaryingGridBlockId($gridBlock->getId()));
         $gridModel->setBlockType($gridBlock->getType());
         $gridModel->resetColumnsValues();
         $this->_absorbGridBlockVarNames($gridBlock);
@@ -177,7 +181,7 @@ class BL_CustomGrid_Model_Grid_Absorber extends BL_CustomGrid_Model_Grid_Worker
      * 
      * @param string $origin Columns origin
      * @param string[] $foundBlockIds Found column block IDs
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Absorber
      */
     protected function _checkMissingOriginColumns($origin, array $foundBlockIds)
     {
@@ -198,7 +202,7 @@ class BL_CustomGrid_Model_Grid_Absorber extends BL_CustomGrid_Model_Grid_Worker
      * Check the grid columns from the current grid model against the given grid block
      * 
      * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Absorber
      */
     protected function _checkGridColumnsAgainstGridBlock(Mage_Adminhtml_Block_Widget_Grid $gridBlock)
     {
@@ -281,7 +285,7 @@ class BL_CustomGrid_Model_Grid_Absorber extends BL_CustomGrid_Model_Grid_Worker
     /**
      * Check the validity of each attribute column from the current grid model
      * 
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Absorber
      */
     protected function _checkAttributeColumnsValidity()
     {
@@ -309,7 +313,7 @@ class BL_CustomGrid_Model_Grid_Absorber extends BL_CustomGrid_Model_Grid_Worker
     /**
      * Check the validity of each custom column from the current grid model
      * 
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Absorber
      */
     protected function _checkCustomColumnsValidity()
     {

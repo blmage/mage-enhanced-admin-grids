@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -22,13 +22,16 @@ class BL_CustomGrid_Model_Grid_Type_Customer_Group extends BL_CustomGrid_Model_G
     
     protected function _getBaseEditableFields($blockType)
     {
+        /** @var $taxClassSource Mage_Tax_Model_Class_Source_Customer */
+        $taxClassSource = Mage::getSingleton('tax/class_source_customer');
+        
         $taxClassField = array(
             'type'        => 'select',
             'required'    => true,
             'field_name'  => 'tax_class_id',
             'form_name'   => 'tax_class_id',
             'form_class'  => 'required-entry',
-            'form_values' => Mage::getSingleton('tax/class_source_customer')->toOptionArray(),
+            'form_values' => $taxClassSource->toOptionArray(),
         );
         
         $fields = array(
@@ -54,7 +57,10 @@ class BL_CustomGrid_Model_Grid_Type_Customer_Group extends BL_CustomGrid_Model_G
     
     protected function _loadEditedEntity($blockType, BL_CustomGrid_Object $config, array $params, $entityId)
     {
-        return Mage::getModel('customer/group')->load($entityId);
+        /** @var $group Mage_Customer_Model_Group */
+        $group = Mage::getModel('customer/group');
+        $group->load($entityId);
+        return $group;
     }
     
     protected function _isEditedEntityLoaded(
@@ -69,6 +75,7 @@ class BL_CustomGrid_Model_Grid_Type_Customer_Group extends BL_CustomGrid_Model_G
     
     protected function _checkEntityEditableField($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
+        /** @var $entity Mage_Customer_Model_Group */
         if (parent::_checkEntityEditableField($blockType, $config, $params, $entity)) {
             if (($config->getValueId() == 'type')
                 && ($entity->getId() == Mage_Customer_Model_Group::NOT_LOGGED_IN_ID)) {
@@ -91,6 +98,7 @@ class BL_CustomGrid_Model_Grid_Type_Customer_Group extends BL_CustomGrid_Model_G
         $entity,
         $value
     ) {
+        /** @var $entity Mage_Customer_Model_Group */
         if ($entity->getId() == Mage_Customer_Model_Group::NOT_LOGGED_IN_ID) {
             // Prevent unicity check (also done in original form, because code input is disabled and setCode is forced)
             $entity->setCode(null);

@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -43,9 +43,6 @@ class BL_CustomGrid_Block_Grid_Profile_Form_Copy_New extends BL_CustomGrid_Block
         );
         
         if ($gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_ASSIGN_PROFILES)) {
-            $yesNoValues = Mage::getSingleton('customgrid/system_config_source_yesno')->toOptionArray();
-            $rolesValues = Mage::getSingleton('customgrid/system_config_source_admin_role')->toOptionArray(false);
-            
             $restrictedField = $fieldset->addField(
                 'is_restricted',
                 'select',
@@ -53,7 +50,7 @@ class BL_CustomGrid_Block_Grid_Profile_Form_Copy_New extends BL_CustomGrid_Block
                     'name'     => 'is_restricted',
                     'label'    => $this->__('Restricted'),
                     'required' => true,
-                    'values'   => $yesNoValues,
+                    'values'   => $this->_getYesNoOptionArray(),
                 )
             );
             
@@ -64,7 +61,7 @@ class BL_CustomGrid_Block_Grid_Profile_Form_Copy_New extends BL_CustomGrid_Block
                     'name'     => 'assigned_to',
                     'label'    => $this->__('Assigned To'),
                     'required' => true,
-                    'values'   => $rolesValues,
+                    'values'   => $this->_getAdminRolesOptionArray(false),
                 )
             );
             

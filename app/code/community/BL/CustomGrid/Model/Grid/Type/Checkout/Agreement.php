@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -22,6 +22,7 @@ class BL_CustomGrid_Model_Grid_Type_Checkout_Agreement extends BL_CustomGrid_Mod
     
     protected function _getBaseEditableFields($blockType)
     {
+        /** @var $helper Mage_Checkout_Helper_Data */
         $helper = Mage::helper('checkout');
         
         $fields = array(
@@ -70,12 +71,10 @@ class BL_CustomGrid_Model_Grid_Type_Checkout_Agreement extends BL_CustomGrid_Mod
         );
         
         if (!Mage::app()->isSingleStoreMode()) {
-            $stores = Mage::getSingleton('adminhtml/system_store')->getStoreValuesForForm(false, true);
-            
             $fields['store_id'] = array(
                 'type'              => 'multiselect',
                 'required'          => true,
-                'form_values'       => $stores,
+                'form_values'       => $this->_getEditorHelper()->getStoreValuesForForm(false, true),
                 'render_block_type' => 'customgrid/widget_grid_editor_renderer_static_store',
             );
         }
@@ -108,7 +107,10 @@ class BL_CustomGrid_Model_Grid_Type_Checkout_Agreement extends BL_CustomGrid_Mod
     
     protected function _loadEditedEntity($blockType, BL_CustomGrid_Object $config, array $params, $entityId)
     {
-        return Mage::getModel('checkout/agreement')->load($entityId);
+        /** @var $agreement Mage_Checkout_Model_Agreement */
+        $agreement = Mage::getModel('checkout/agreement');
+        $agreement->load($entityId);
+        return $agreement;
     }
     
     protected function _getEditRequiredAclPermissions($blockType)
@@ -118,6 +120,7 @@ class BL_CustomGrid_Model_Grid_Type_Checkout_Agreement extends BL_CustomGrid_Mod
     
     protected function _applyEditedFieldValue($blockType, BL_CustomGrid_Object $config, array $params, $entity, $value)
     {
+        /** @var $entity Mage_Checkout_Model_Agreement */
         if ($config->getValueId() == 'store_id') {
             $entity->setStores($value);
             return $this;
@@ -128,6 +131,7 @@ class BL_CustomGrid_Model_Grid_Type_Checkout_Agreement extends BL_CustomGrid_Mod
     
     protected function _getSavedFieldValueForRender($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
+        /** @var $entity Mage_Checkout_Model_Agreement */
         return ($config->getValueId() == 'store_id')
             ? $entity->getStores()
             : parent::_getSavedFieldValueForRender($blockType, $config, $params, $entity);

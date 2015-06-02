@@ -9,26 +9,23 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class BL_CustomGrid_Model_Grid_Rewriter_File extends BL_CustomGrid_Model_Grid_Rewriter_Abstract
 {
-    protected function _rewriteGrid($blcgClass, $originalClass, $blockType)
+    protected function _rewriteGrid($blcgClassName, $originalClassName, $blockType)
     {
-        $classParts = explode('_', str_replace($this->_getBlcgClassPrefix(), '', $blcgClass));
-        $fileName = array_pop($classParts) . '.php';
+        $classParts = explode('_', str_replace($this->_getBlcgClassNameBase(), '', $blcgClassName));
+        $fileName   = array_pop($classParts) . '.php';
         $rewriteFolder = dirname(__FILE__) . '/../../../Block/Rewrite/' . implode('/', $classParts);
         
         $ioFile = new Varien_Io_File();
         $ioFile->setAllowCreateFolders(true);
-        $ioFile->checkAndCreateFolder($rewriteFolder);
-        $ioFile->cd($rewriteFolder);
+        $ioFile->open(array('path' => $rewriteFolder));
         
-        // Use open() to initialize Varien_Io_File::$_iwd
-        // Prevents a warning when chdir() is used without error control in Varien_Io_File::read()
-        if ($ioFile->fileExists($fileName, true) && $ioFile->open()) {
+        if ($ioFile->fileExists($fileName, true)) {
             $isUpToDate = false;
             
             if ($content = $ioFile->read($fileName)) {
@@ -71,7 +68,7 @@ class BL_CustomGrid_Model_Grid_Rewriter_File extends BL_CustomGrid_Model_Grid_Re
 
 ';
         
-        $content .= $this->_getRewriteCode($blcgClass, $originalClass, $blockType);
+        $content .= $this->_getRewriteCode($blcgClassName, $originalClassName, $blockType) . "\n";
         
         if (!$ioFile->write($fileName, $content)) {
             Mage::throwException(Mage::helper('customgrid')->__('Could not write to the file'));

@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -63,7 +63,7 @@ abstract class BL_CustomGrid_Model_Column_Renderer_Abstract extends BL_CustomGri
      * Set the user-defined values for the renderer parameters
      * 
      * @param array $values User values
-     * @return this
+     * @return BL_CustomGrid_Model_Column_Renderer_Abstract
      */
     public function setValues(array $values)
     {

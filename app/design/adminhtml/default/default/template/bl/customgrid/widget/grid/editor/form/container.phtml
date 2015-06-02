@@ -9,10 +9,11 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 ?>
+<?php /** @var $this BL_CustomGrid_Block_Widget_Grid_Editor_Form_Container */ ?>
 <?php $_jsObjectName = $this->getEditorJsObjectName() ?>
 <?php if ($this->getErrorMessage()): ?>
     <?php echo $this->getErrorMessage() ?>
@@ -23,10 +24,10 @@ document.observe('dom:loaded', function() {
     if (typeof(<?php echo $_jsObjectName ?>) != 'undefined') {
         <?php echo $_jsObjectName ?>.cancelEdit(false, '<?php echo $this->jsQuoteEscape($this->getErrorMessage()) ?>');
     } else {
-        alert('<?php echo $this->jsQuoteEscape($this->__('Can\'t find editor JS object')) ?>');
+        alert('<?php echo $this->jsQuoteEscape($this->__('Cannot find editor JS object')) ?>');
     }
     <?php else: ?>
-    alert('<?php echo $this->jsQuoteEscape($this->__('Can\'t find editor JS object')) ?>');
+    alert('<?php echo $this->jsQuoteEscape($this->__('Cannot find editor JS object')) ?>');
     <?php endif ?>
 });
 //]]>
@@ -69,10 +70,10 @@ blcgGridEditorForm.submit = function(url) {
             
             <?php echo $_jsObjectName ?>.validateEdit($(this.formId).serialize(true));
         } else {
-            alert('<?php echo $this->jsQuoteEscape($this->__('Can\'t save value : editor JS object can\'t be found')) ?>');
+            alert('<?php echo $this->jsQuoteEscape($this->__('Cannot save value : editor JS object cannot be found')) ?>');
         }
         <?php else: ?>
-        alert('<?php echo $this->jsQuoteEscape($this->__('Can\'t save value : editor JS object can\'t be found')) ?>');
+        alert('<?php echo $this->jsQuoteEscape($this->__('Cannot save value : editor JS object cannot be found')) ?>');
         <?php endif ?>
     }
     return false;

@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -47,7 +47,7 @@ class BL_CustomGrid_Helper_Editor extends Mage_Core_Helper_Abstract
      * 
      * @param string $value Config value
      * @param string $key Value key
-     * @return this
+     * @return BL_CustomGrid_Helper_Editor
      */
     protected function _cleanWysiwygConfig(&$value, $key)
     {
@@ -98,5 +98,19 @@ class BL_CustomGrid_Helper_Editor extends Mage_Core_Helper_Abstract
         $value = $filterInternal->filter($value);
         
         return $value;
+    }
+    
+    /**
+     * Return the stores values, ready for being used in forms
+     * 
+     * @param bool $empty Whether empty value should be included
+     * @param bool $all Whether "All Store Views" value should be included
+     * @return array
+     */
+    public function getStoreValuesForForm($empty = false, $all = false)
+    {
+        /** @var $storeConfig Mage_Adminhtml_Model_System_Store */
+        $storeConfig = Mage::getSingleton('adminhtml/system_store');
+        return $storeConfig->getStoreValuesForForm($empty, $all);
     }
 }

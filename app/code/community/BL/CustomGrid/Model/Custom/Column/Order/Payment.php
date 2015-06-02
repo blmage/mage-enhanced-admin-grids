@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -38,6 +38,6 @@ class BL_CustomGrid_Model_Custom_Column_Order_Payment extends BL_CustomGrid_Mode
     
     public function getTableFieldName()
     {
-        return $this->getConfigParam('payment_field');
+        return $this->getConfigParam('payment_field_name');
     }
 }

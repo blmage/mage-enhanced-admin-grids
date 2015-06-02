@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -18,34 +18,34 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Attribute_Product extends
 {
     protected function _prepareLayout()
     {
-        $return   = parent::_prepareLayout();
+        $returnValue = parent::_prepareLayout();
         $inGrid   = $this->getEditedInGrid();
         $required = $this->getIsRequiredValueEdit();
-       
-        Varien_Data_Form::setFieldsetElementRenderer(
-            $this->getLayout()
-                ->createBlock('customgrid/widget_grid_editor_form_renderer_product_fieldset_element')
-                ->setEditedInGrid($inGrid)
-                ->setIsRequiredValueEdit($required)
-        );
         
-        return $return;
+        /** @var $elementRenderer BL_CustomGrid_Block_Widget_Grid_Editor_Form_Renderer_Product_Fieldset_Element */
+        $elementRenderer = $this->getLayout()
+            ->createBlock('customgrid/widget_grid_editor_form_renderer_product_fieldset_element');
+        
+        $elementRenderer->setEditedInGrid($inGrid)->setIsRequiredValueEdit($required);
+        Varien_Data_Form::setFieldsetElementRenderer($elementRenderer);
+        
+        return $returnValue;
     }
     
     protected function _prepareForm()
     {
-        $return   = parent::_prepareForm();
+        $returnValue = parent::_prepareForm();
         $inGrid   = $this->getEditedInGrid();
         $required = $this->getIsRequiredValueEdit();
         
         if ($form = $this->getForm()) {
             if ($urlKey = $form->getElement('url_key')) {
-                $urlKey->setRenderer(
-                    $this->getLayout()
-                        ->createBlock('customgrid/widget_grid_editor_form_renderer_product_attribute_urlkey')
-                        ->setEditedInGrid($inGrid)
-                        ->setIsRequiredValueEdit($required)
-                );
+                /** @var $renderer BL_CustomGrid_Block_Widget_Grid_Editor_Form_Renderer_Product_Attribute_Urlkey */
+                $renderer = $this->getLayout()
+                    ->createBlock('customgrid/widget_grid_editor_form_renderer_product_attribute_urlkey');
+                
+                $renderer->setEditedInGrid($inGrid)->setIsRequiredValueEdit($required);
+                $urlKey->setRenderer($renderer);
             }
             if ($tierPrice = $form->getElement('tier_price')) {
                 $tierPrice->setRenderer(
@@ -64,12 +64,14 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Attribute_Product extends
             Mage::dispatchEvent('adminhtml_catalog_product_edit_prepare_form', array('form' => $form));
         }
         
-        return $return;
+        return $returnValue;
     }
     
     protected function _getAdditionalElementTypes()
     {
         $config = Mage::getConfig();
+        /** @var $helper BL_CustomGrid_Helper_Data */
+        $helper= $this->helper('customgrid');
         
         $result = array(
             'price'    => $config->getBlockClassName('customgrid/widget_grid_editor_form_helper_product_price'),
@@ -79,11 +81,11 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Attribute_Product extends
             'textarea' => $config->getBlockClassName('customgrid/widget_grid_editor_form_helper_product_wysiwyg'),
         );
         
-        if ($this->helper('customgrid')->isMageVersionGreaterThan(1, 6)) {
+        if ($helper->isMageVersionGreaterThan(1, 6)) {
             $result['weight'] = $config->getBlockClassName('adminhtml/catalog_product_helper_form_weight');
         }
         
-        $response = new Varien_Object();
+        $response = new BL_CustomGrid_Object();
         $response->setTypes(array());
         Mage::dispatchEvent('adminhtml_catalog_product_edit_element_types', array('response' => $response));
         

@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -182,8 +182,9 @@ class BL_CustomGrid_Model_Custom_Column_Product_Categories extends BL_CustomGrid
         $forFilter = false,
         $categoryIds = null
     ) {
-        $mainAlias = $this->_getCollectionMainTableAlias($collection);
+        /** @var $adapter Zend_Db_Adapter_Abstract */
         list($adapter, $qi) = $this->_getCollectionAdapter($collection, true);
+        $mainAlias = $this->_getCollectionMainTableAlias($collection);
         $productAlias = $this->_getUniqueTableAlias($forFilter ? '_filter' : '_select');
         $mainField = ($forFilter ? 'COUNT(*)' : 'GROUP_CONCAT(' . $qi($productAlias . '.category_id') . ')');
         
@@ -231,13 +232,13 @@ class BL_CustomGrid_Model_Custom_Column_Product_Categories extends BL_CustomGrid
                 $categoryIds = array_filter(array_unique(explode(',', $columnBlock->getFilter()->getValue())));
                 $filterMode  = $this->_extractStringParam($params, 'filter_mode', self::FILTER_MODE_ONE_CHOOSEN, true);
                 $operator = '>=';
-                $number = '1';
+                $number   = '1';
                 
                 if ($filterMode == self::FILTER_MODE_ALL_CHOOSEN) {
                     $number = count($categoryIds);
                 } elseif ($filterMode == self::FILTER_MODE_NONE_CHOOSEN) {
                     $operator = '=';
-                    $number = '0';
+                    $number   = '0';
                 } elseif ($filterMode == self::FILTER_MODE_CUSTOM) {
                     if (!is_int($number = $this->_extractIntParam($params, 'custom_filter_number', null, true))
                         || !($operator = $this->_extractStringParam($params, 'custom_filter_operator', null, true))) {
@@ -260,21 +261,23 @@ class BL_CustomGrid_Model_Custom_Column_Product_Categories extends BL_CustomGrid
         array $params,
         Mage_Core_Model_Store $store
     ) {
-        $categoryTree = null;
-        $categoryHash = array();
+        /** @var $categoryModel Mage_Catalog_Model_Category */
+        $categoryModel = Mage::getModel('catalog/category');
+        $categoryTree  = null;
+        $categoryHash  = array();
+        
         $displayIds = $this->_extractBoolParam($params, 'display_ids');
         $displayFullPaths = $this->_extractBoolParam($params, 'full_paths');
         
         if ($displayFullPaths) {
-            $categoryTree = Mage::getModel('catalog/category')
-                ->getTreeModel()
+            $categoryTree = $categoryModel->getTreeModel()
                 ->setStoreId($store->getId())
                 ->load();
         }
         if (!$displayIds) {
-            $collection = Mage::getModel('catalog/category')
-                ->getCollection()
-                ->setStoreId($store->getId())
+            /** @var $collection Mage_Catalog_Model_Resource_Eav_Mysql4_Category_Collection */
+            $collection = $categoryModel->getCollection();
+            $collection->setStoreId($store->getId())
                 ->addAttributeToSelect('name')
                 ->load(); 
             
@@ -282,6 +285,7 @@ class BL_CustomGrid_Model_Custom_Column_Product_Categories extends BL_CustomGrid
                 $categoryTree->addCollectionData($collection);
             } else {
                 foreach ($collection as $category) {
+                    /** @var $category Mage_Catalog_Model_Category */
                     $categoryHash[$category->getId()] = $category;
                 }
             }

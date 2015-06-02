@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -22,6 +22,7 @@ class BL_CustomGrid_Model_Grid_Type_Cms_Widget extends BL_CustomGrid_Model_Grid_
     
     protected function _getBaseEditableFields($blockType)
     {
+        /** @var $helper Mage_Widget_Helper_Data */
         $helper = Mage::helper('widget');
         
         $fields = array(
@@ -36,12 +37,10 @@ class BL_CustomGrid_Model_Grid_Type_Cms_Widget extends BL_CustomGrid_Model_Grid_
         );
         
         if (!Mage::app()->isSingleStoreMode()) {
-            $stores = Mage::getSingleton('adminhtml/system_store')->getStoreValuesForForm(false, true);
-            
             $fields['store_ids'] = array(
                 'type'              => 'multiselect',
                 'required'          => true,
-                'form_values'       => $stores,
+                'form_values'       => $this->_getEditorHelper()->getStoreValuesForForm(),
                 'render_block_type' => 'customgrid/widget_grid_editor_renderer_static_store',
             );
         }
@@ -56,11 +55,15 @@ class BL_CustomGrid_Model_Grid_Type_Cms_Widget extends BL_CustomGrid_Model_Grid_
     
     protected function _loadEditedEntity($blockType, BL_CustomGrid_Object $config, array $params, $entityId)
     {
-        return Mage::getModel('widget/widget_instance')->load($entityId);
+        /** @var $widget Mage_Widget_Model_Widget_Instance */
+        $widget = Mage::getModel('widget/widget_instance');
+        $widget->load($entityId);
+        return $widget;
     }
     
     protected function _getLoadedEntityName($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
+        /** @var $entity Mage_Widget_Model_Widget_Instance */
         return $entity->getTitle();
     }
     
@@ -71,6 +74,7 @@ class BL_CustomGrid_Model_Grid_Type_Cms_Widget extends BL_CustomGrid_Model_Grid_
     
     protected function _prepareWidgetPageGroups($entity)
     {
+        /** @var $entity Mage_Widget_Model_Widget_Instance */
         /**
          * Groups coming from the edit form do not have the same values as if they were loaded,
          * so prepare the given (loaded) ones to make them look like they have just been edited
@@ -101,6 +105,7 @@ class BL_CustomGrid_Model_Grid_Type_Cms_Widget extends BL_CustomGrid_Model_Grid_
     
     protected function _applyEditedFieldValue($blockType, BL_CustomGrid_Object $config, array $params, $entity, $value)
     {
+        /** @var $entity Mage_Widget_Model_Widget_Instance */
         if ($config->getValueId() == 'sort_order') {
             $entity->setSortOrder(empty($value) ? '0' : $value);
             return $this;
@@ -115,6 +120,7 @@ class BL_CustomGrid_Model_Grid_Type_Cms_Widget extends BL_CustomGrid_Model_Grid_
         $entity,
         $value
     ) {
+        /** @var $entity Mage_Widget_Model_Widget_Instance */
         if (is_string($result = $entity->validate())) {
             Mage::throwException($result);
         }
@@ -124,6 +130,7 @@ class BL_CustomGrid_Model_Grid_Type_Cms_Widget extends BL_CustomGrid_Model_Grid_
     
     protected function _getSavedFieldValueForRender($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
+        /** @var $entity Mage_Widget_Model_Widget_Instance */
         if ($config->getValueId() == 'store_ids') {
             $storesIds = $entity->getStoreIds();
             return (is_array($storesIds) ? $storesIds : explode(',', $storesIds));

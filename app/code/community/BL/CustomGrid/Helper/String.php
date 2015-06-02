@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -60,6 +60,7 @@ class BL_CustomGrid_Helper_String extends Mage_Core_Helper_Abstract
             return '';
         }
         
+        /** @var $helper Mage_Core_Helper_String */
         $helper = Mage::helper('core/string');
         $originalLength = $helper->strlen($string);
         
@@ -90,7 +91,7 @@ class BL_CustomGrid_Helper_String extends Mage_Core_Helper_Abstract
      * 
      * @param string $htmlTag HTML opening tag
      * @param string[] $openedTags Currently opened tags
-     * @return this
+     * @return BL_CustomGrid_Helper_String
      */
     protected function _handleHtmlOpeningTag($htmlTag, array &$openedTags)
     {
@@ -119,10 +120,11 @@ class BL_CustomGrid_Helper_String extends Mage_Core_Helper_Abstract
      * @param int $totalLength Length of the current truncated string
      * @param int $truncateLength Maximum truncated string length
      * @param bool $breakWords Whether words can be broken
-     * @return this
+     * @return BL_CustomGrid_Helper_String
      */
     protected function _supplementTruncatedHtml($content, &$truncated, &$totalLength, $truncateLength, $breakWords)
     {
+        /** @var $helper Mage_Core_Helper_String */
         $helper = Mage::helper('core/string');
         $htmlEntitiesRegex = '/&[0-9a-z]{2,8};|&#[0-9]{1,7};|&#x[0-9a-f]{1,6};/i';
         
@@ -184,6 +186,7 @@ class BL_CustomGrid_Helper_String extends Mage_Core_Helper_Abstract
             return '';
         }
         
+        /** @var $helper Mage_Core_Helper_String */
         $helper = Mage::helper('core/string');
         
         if ($helper->strlen(preg_replace('/<.*?>/', '', $string)) <= $truncateLength) {
@@ -234,10 +237,9 @@ class BL_CustomGrid_Helper_String extends Mage_Core_Helper_Abstract
      */
     public function lcfirst($string)
     {
-        if (function_exists('lcfirst')) {
-            return lcfirst($string);
-        }
-        return strtolower(substr($string, 0, 1)) . substr($string, 1);
+        return function_exists('lcfirst')
+            ? lcfirst($string)
+            : strtolower(substr($string, 0, 1)) . substr($string, 1);
     }
     
     /**

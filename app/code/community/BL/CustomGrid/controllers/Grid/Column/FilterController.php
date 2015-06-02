@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -20,9 +20,10 @@ class BL_CustomGrid_Grid_Column_FilterController extends Mage_Adminhtml_Controll
         $this->loadLayout();
         
         if ($chooserBlock = $this->getLayout()->getBlock('blcg.filter.categories.chooser')) {
+            /** @var $chooserBlock BL_CustomGrid_Block_Widget_Grid_Column_Filter_Product_Categories_Chooser */
             $categoryIds = array_unique(explode(',', $this->getRequest()->getParam('ids', '')));
             $chooserBlock->setJsObjectName($this->getRequest()->getParam('js_object_name'));
-            $chooserBlock->setCategoryIds($categoryIds);
+            $chooserBlock->setSelectedCategoriesIds($categoryIds);
         }
         
         $this->renderLayout();
@@ -30,12 +31,14 @@ class BL_CustomGrid_Grid_Column_FilterController extends Mage_Adminhtml_Controll
     
     public function categoriesJsonAction()
     {
-        $this->getResponse()
-            ->setBody(
-                $this->getLayout()
-                    ->createBlock('customgrid/widget_grid_column_filter_product_categories_chooser')
-                    ->setCategoryIds(array_unique(explode(',', $this->getRequest()->getParam('ids', ''))))
-                    ->getCategoryChildrenJson($this->getRequest()->getParam('category'))
-            );
+        /** @var $chooserBlock BL_CustomGrid_Block_Widget_Grid_Column_Filter_Product_Categories_Chooser */
+        $chooserBlock = $this->getLayout()
+            ->createBlock('customgrid/widget_grid_column_filter_product_categories_chooser');
+        
+        $selectedCategoriesIds = array_unique(explode(',', $this->getRequest()->getParam('ids', '')));
+        $chooserBlock->setSelectedCategoriesIds($selectedCategoriesIds);
+        
+        $mainCategoryId = $this->getRequest()->getParam('category');
+        $this->getResponse()->setBody($chooserBlock->getCategoryChildrenJson($mainCategoryId));
     }
 }

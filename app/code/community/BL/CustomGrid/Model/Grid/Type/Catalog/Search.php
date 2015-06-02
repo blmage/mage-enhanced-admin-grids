@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -22,6 +22,7 @@ class BL_CustomGrid_Model_Grid_Type_Catalog_Search extends BL_CustomGrid_Model_G
     
     protected function _getBaseEditableFields($blockType)
     {
+        /** @var $helper Mage_Catalog_Helper_Data */
         $helper = Mage::helper('catalog');
         
         $fields = array(
@@ -59,11 +60,9 @@ class BL_CustomGrid_Model_Grid_Type_Catalog_Search extends BL_CustomGrid_Model_G
         );
         
         if (!Mage::app()->isSingleStoreMode()) {
-            $stores = Mage::getSingleton('adminhtml/system_store')->getStoreValuesForForm(true, false);
-            
             $fields['store_id'] = array(
                 'type'              => 'select',
-                'form_values'       => $stores,
+                'form_values'       => $this->_getEditorHelper()->getStoreValuesForForm(true, false),
                 'required'          => true,
                 'render_block_type' => 'customgrid/widget_grid_editor_renderer_static_store',
             );
@@ -79,11 +78,15 @@ class BL_CustomGrid_Model_Grid_Type_Catalog_Search extends BL_CustomGrid_Model_G
     
     protected function _loadEditedEntity($blockType, BL_CustomGrid_Object $config, array $params, $entityId)
     {
-        return Mage::getModel('catalogsearch/query')->load($entityId);
+        /** @var $query Mage_Catalogsearch_Model_Query */
+        $query = Mage::getModel('catalogsearch/query');
+        $query->load($entityId);
+        return $query;
     }
     
     protected function _getLoadedEntityName($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
+        /** @var $entity Mage_Catalogsearch_Model_Query */
         return $entity->getQueryText();
     }
     
@@ -99,6 +102,10 @@ class BL_CustomGrid_Model_Grid_Type_Catalog_Search extends BL_CustomGrid_Model_G
         $entity,
         $value
     ) {
+        /**
+         * @var $entity Mage_Catalogsearch_Model_Query
+         * @var $duplicate Mage_Catalogsearch_Model_Query
+         */
         $duplicate = Mage::getModel('catalogsearch/query')
             ->setStoreId($entity->getStoreId())
             ->loadByQueryText($entity->getQueryText());

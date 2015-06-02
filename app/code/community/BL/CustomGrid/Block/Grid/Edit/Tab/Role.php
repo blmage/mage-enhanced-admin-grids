@@ -9,23 +9,54 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Grid_Edit_Tab_Role extends BL_CustomGrid_Block_Widget_Form
+class BL_CustomGrid_Block_Grid_Edit_Tab_Role extends BL_CustomGrid_Block_Grid_Form_Abstract implements
+    Mage_Adminhtml_Block_Widget_Tab_Interface
 {
-    protected function _prepareForm()
+    public function getTabLabel()
     {
-        $role    = $this->getRole();
-        $roleId  = $role->getId();
-        $options = Mage::getSingleton('customgrid/system_config_source_boolean_config')->toOptionArray();
-        $gridModel  = $this->getGridModel();
-        $roleConfig = $gridModel->getRoleConfig($roleId);
+        return $this->__('%s Role (Grid)', $this->getRoleName());
+    }
+    
+    public function getTabTitle()
+    {
+        return $this->__('%s Role (Grid)', $this->getRoleName());
+    }
+    
+    public function canShowTab()
+    {
+        return true;
+    }
+    
+    public function isHidden()
+    {
+        return false;
+    }
+    
+    protected function _getFormHtmlIdPrefix()
+    {
+        return 'role_permissions_' . $this->getRoleId() . '_';
+    }
+    
+    protected function _getFormFieldNameSuffix()
+    {
+        return 'roles_permissions[' . $this->getRoleId() . ']';
+    }
+    
+    protected function _addFieldsToForm(Varien_Data_Form $form)
+    {
+        parent::_addFieldsToForm($form);
         
-        $form = new Varien_Data_Form();
-        $form->setHtmlIdPrefix('role_permissions_' . $roleId . '_');
-        $form->setFieldNameSuffix('roles_permissions[' . $roleId . ']');
+        /** @var $booleanConfigSource BL_CustomGrid_Model_System_Config_Source_Boolean_Config */
+        $booleanConfigSource = Mage::getSingleton('customgrid/system_config_source_boolean_config');
+        $options = $booleanConfigSource->toOptionArray();
+        
+        $gridModel  = $this->getGridModel();
+        $roleId  = $this->getRoleId();
+        $roleConfig = $gridModel->getRoleConfig($roleId);
         
         foreach ($gridModel->getGridActions(true) as $key => $actionsGroup) {
             $fieldset = $form->addFieldset(
@@ -51,7 +82,36 @@ class BL_CustomGrid_Block_Grid_Edit_Tab_Role extends BL_CustomGrid_Block_Widget_
             }
         }
         
-        $this->setForm($form);
-        return parent::_prepareForm();
+        return $this;
+    }
+    
+    /**
+     * Return the current admin role
+     * 
+     * @return Mage_Admin_Model_Role
+     */
+    public function getRole()
+    {
+        return $this->_getData('role');
+    }
+    
+    /**
+     * Return the ID of the current admin role
+     * 
+     * @return int
+     */
+    public function getRoleId()
+    {
+        return $this->getDataSetDefault('role_id', $this->getRole()->getId());
+    }
+    
+    /**
+     * Return the name of the current admin role
+     * 
+     * @return string
+     */
+    public function getRoleName()
+    {
+        return $this->getDataSetDefault('role_name', $this->getRole()->getRoleName());
     }
 }

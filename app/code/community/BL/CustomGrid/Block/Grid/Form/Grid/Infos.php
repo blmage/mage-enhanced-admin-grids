@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -20,11 +20,21 @@ class BL_CustomGrid_Block_Grid_Form_Grid_Infos extends BL_CustomGrid_Block_Grid_
         return $this->getUrl('customgrid/grid/saveGridInfos');
     }
     
+    /**
+     * Return whether the disabled field can be displayed
+     * 
+     * @return bool
+     */
     public function canDisplayDisabledField()
     {
         return $this->getGridModel()->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_ENABLE_DISABLE);
     }
     
+    /**
+     * Return whether the forced type code field can be displayed
+     * 
+     * @return bool
+     */
     public function canDisplayForcedTypeCodeField()
     {
         return $this->getGridModel()->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_EDIT_FORCED_TYPE);
@@ -62,7 +72,7 @@ class BL_CustomGrid_Block_Grid_Form_Grid_Infos extends BL_CustomGrid_Block_Grid_
                     'name'     => 'disabled',
                     'label'    => $this->__('Disabled'),
                     'required' => true,
-                    'values'   => Mage::getSingleton('customgrid/system_config_source_yesno')->toOptionArray(),
+                    'values'   => $this->_getYesNoOptionArray(),
                     'value'    => ($gridModel->getDisabled() ? '1' : '0'),
                 )
             );
@@ -98,7 +108,7 @@ class BL_CustomGrid_Block_Grid_Form_Grid_Infos extends BL_CustomGrid_Block_Grid_
                     'name'   => 'forced_type_code',
                     'label'  => $this->__('Forced Grid Type'),
                     'note'   => $this->__($note),
-                    'values' => Mage::getSingleton('customgrid/grid_type_config')->getTypesAsOptionHash(true, true),
+                    'values' => $gridModel->getGridTypeConfig()->getTypesAsOptionHash(true, true),
                     'value'  => $gridModel->getForcedTypeCode(),
                 )
             );

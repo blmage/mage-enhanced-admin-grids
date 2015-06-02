@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -19,20 +19,35 @@ class BL_CustomGrid_Block_Grid_Edit_Tabs extends Mage_Adminhtml_Block_Widget_Tab
     {
         parent::__construct();
         $this->setId('blcg_grid_edit_tabs');
-        $this->setDestElementId('blcg_grid_edit_form');
+        $this->setDestElementId('edit_form');
         $this->setTitle($this->__('Custom Grid'));
     }
     
+    /**
+     * Return whether the profile edit tab can be displayed
+     * 
+     * @return bool
+     */
     protected function _canDisplayProfileEditTab()
     {
         return $this->getGridModel()->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_EDIT_PROFILES);
     }
     
+    /**
+     * Return whether the profile assign tab can be displayed
+     * 
+     * @return bool
+     */
     protected function _canDisplayProfileAssignTab()
     {
         return $this->getGridModel()->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_ASSIGN_PROFILES);
     }
     
+    /**
+     * Return whether the grid informations tab can be displayed
+     * 
+     * @return bool
+     */
     protected function _canDisplayInfosTab()
     {
         return $this->getGridModel()
@@ -44,12 +59,22 @@ class BL_CustomGrid_Block_Grid_Edit_Tabs extends Mage_Adminhtml_Block_Widget_Tab
             );
     }
     
+    /**
+     * Return whether the grid columns tab can be displayed
+     * 
+     * @return bool
+     */
     protected function _canDisplayColumnsTab()
     {
         return $this->getGridModel()
             ->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_CUSTOMIZE_COLUMNS);
     }
     
+    /**
+     * Return whether the grid settings tab can be displayed
+     * 
+     * @return bool
+     */
     protected function _canDisplaySettingsTab()
     {
         return $this->getGridModel()
@@ -63,6 +88,11 @@ class BL_CustomGrid_Block_Grid_Edit_Tabs extends Mage_Adminhtml_Block_Widget_Tab
             );
     }
     
+    /**
+     * Return whether the roles permissions tabs can be displayed
+     * 
+     * @return bool
+     */
     protected function _canDisplayRolesTabs()
     {
         return $this->getGridModel()
@@ -87,20 +117,13 @@ class BL_CustomGrid_Block_Grid_Edit_Tabs extends Mage_Adminhtml_Block_Widget_Tab
             $this->addTab('settings', 'customgrid/grid_edit_tab_settings');
         }
         if ($this->_canDisplayRolesTabs()) {
-            $roles = Mage::getModel('admin/roles')->getCollection();
+            /** @var $roles Mage_Admin_Model_Mysql4_Roles_Collection */
+            $roles = Mage::getResourceModel('admin/roles_collection');
             
             foreach ($roles as $role) {
-                $this->addTab(
-                    'role_' . $role->getRoleId(),
-                    array(
-                        'label'   => $this->__('%s Role (Grid)', $role->getRoleName()),
-                        'active'  => false,
-                        'content' => $this->getLayout()
-                            ->createBlock('customgrid/grid_edit_tab_role')
-                            ->setRole($role)
-                            ->toHtml(),
-                    )
-                );
+                /** @var $role Mage_Admin_Model_Role */
+                $this->addTab('role_' . $role->getRoleId(), 'customgrid/grid_edit_tab_role');
+                $this->setTabData('role_' . $role->getRoleId(), 'role', $role);
             }
         }
         return parent::_prepareLayout();
@@ -111,11 +134,21 @@ class BL_CustomGrid_Block_Grid_Edit_Tabs extends Mage_Adminhtml_Block_Widget_Tab
         return $this->getChildHtml('profile_switcher') . parent::_toHtml();
     }
     
+    /**
+     * Return the current grid model
+     * 
+     * @return BL_CustomGrid_Model_Grid
+     */
     public function getGridModel()
     {
         return Mage::registry('blcg_grid');
     }
     
+    /**
+     * Return the current grid profile
+     * 
+     * @return BL_CustomGrid_Model_Grid_Profile
+     */
     public function getGridProfile()
     {
         return Mage::registry('blcg_grid_profile');

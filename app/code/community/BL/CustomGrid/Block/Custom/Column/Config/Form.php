@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -44,14 +44,8 @@ class BL_CustomGrid_Block_Custom_Column_Config_Form extends BL_CustomGrid_Block_
         return $fields;
     }
     
-    public function getTranslationModule()
+    protected function _getTranslationModule()
     {
-        if (!$this->hasData('translation_module')) {
-            if (!$module = $this->getCustomColumn()->getModule()) {
-                $module = 'customgrid';
-            }
-            $this->setData('translation_module', $module);
-        }
-        return $this->_getData('translation_module');
+        return $this->getCustomColumn()->getModule();
     }
 }

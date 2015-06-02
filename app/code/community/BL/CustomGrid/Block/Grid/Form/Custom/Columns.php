@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -25,6 +25,12 @@ class BL_CustomGrid_Block_Grid_Form_Custom_Columns extends BL_CustomGrid_Block_G
         return false;
     }
     
+    /**
+     * Return the field note usable for the given custom column
+     * 
+     * @param BL_CustomGrid_Model_Custom_Column_Abstract $customColumn Custom column
+     * @return string
+     */
     protected function _getCustomColumnFieldNote(BL_CustomGrid_Model_Custom_Column_Abstract $customColumn)
     {
         $note = $customColumn->getDescription();

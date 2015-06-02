@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -40,6 +40,16 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
     }
     
     /**
+     * Return editor helper
+     *
+     * @return BL_CustomGrid_Helper_Editor
+     */
+    protected function _getEditorHelper()
+    {
+        return Mage::helper('customgrid/editor');
+    }
+    
+    /**
      * Return layout model
      *
      * @return Mage_Core_Model_Layout
@@ -61,7 +71,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
         if ($controller) {
             $this->_request = $controller->getRequest();
         } else {
-            throw new Exception(Mage::helper('core')->__('Can\'t retrieve request object'));
+            throw new Exception(Mage::helper('core')->__('Cannot retrieve request object'));
         }
         
         return $this->_request;
@@ -314,8 +324,9 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      */
     public function getExportTypes($blockType)
     {
-        if (!$this->hasData('export_types')
-            || !is_array($exportTypes = $this->getData('export_types/' . $blockType))) {
+        if (!is_array($exportTypes = $this->getData('export_types/' . $blockType))) {
+            /** @var $urlHelper Mage_Adminhtml_Helper_Data */
+            $urlHelper   = Mage::helper('adminhtml');
             $exportTypes = array();
             
             foreach ($this->_getExportTypes($blockType) as $key => $exportType) {
@@ -327,14 +338,14 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
                     }
                 }
                 
-                if ($exportType->hasRoute() && !$exportType->hasUrl()) {
+                if (!$exportType->hasUrl()) {
                     $urlParams = array('_current' => true, 'isAjax' => null);
                     
                     if (is_array($additionalParams = $exportType->getUrlParams())) {
                         $urlParams = array_merge($urlParams, $additionalParams);
                     }
                     
-                    $exportType->setUrl(Mage::helper('adminhtml')->getUrl($exportType->getRoute(), $urlParams));
+                    $exportType->setUrl($urlHelper->getUrl($exportType->getRoute(), $urlParams));
                 }
                 
                 $exportTypes[$key] = $exportType;
@@ -402,7 +413,9 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
     {
         if (!$this->hasData('custom_columns')) {
             $code = $this->getCode();
-            $configColumns = Mage::getSingleton('customgrid/grid_type_config')->getCustomColumnsByTypeCode($code);
+            /** @var $gridTypeConfig BL_CustomGrid_Model_Grid_Type_Config */
+            $gridTypeConfig = Mage::getSingleton('customgrid/grid_type_config');
+            $configColumns  = $gridTypeConfig->getCustomColumnsByTypeCode($code);
             $response = new BL_CustomGrid_Object(array('columns' => array()));
             
             Mage::dispatchEvent(
@@ -529,11 +542,14 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
         $dataKey = $valueOrigin . '_action_base_urls/' . $blockTypeCode . '/' . $routeCode;
         
         if (!$baseUrl = $this->getData($dataKey)) {
+            /** @var $helper Mage_Core_Helper_Data */
+            $coreHelper = Mage::helper('core');
+            
             $baseUrl = Mage::helper('adminhtml')->getUrl(
                 $route,
                 array(
                     'grid_type'   => $this->getCode(),
-                    'block_type'  => Mage::helper('core')->urlEncode($blockType),
+                    'block_type'  => $coreHelper->urlEncode($blockType),
                     'id'          => '{{value_key}}',
                     'origin'      => $valueOrigin,
                     'is_external' => '{{in_grid}}',
@@ -750,7 +766,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      * @param string $valueId Value ID
      * @param BL_CustomGrid_Model_Grid_Edit_Config $config Value config
      * @param array $subConfigs Which sub configs must be built (key = config key, value = array of parameters)
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Type_Abstract
      */
     protected function _buildEditableValueSubConfigs(
         $blockType,
@@ -758,7 +774,8 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
         BL_CustomGrid_Model_Grid_Edit_Config $config,
         array $subConfigs
     ) {
-        $helper = Mage::helper('customgrid/string');
+        /** @var $stringHelper BL_CustomGrid_Helper_String */
+        $stringHelper = Mage::helper('customgrid/string');
         
         foreach ($subConfigs as $subKey => $subParams) {
             $subKeyLength = strlen($subKey);
@@ -770,7 +787,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
                     $key = substr($key, $subKeyLength+1);
                     
                     if ($subParams['camelize']) {
-                        $key = $helper->camelize($key);
+                        $key = $stringHelper->camelize($key);
                     }
                     
                     $subValue = $config->getDataSetDefault($subKey, array());
@@ -792,7 +809,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      * @param string $blockType Grid block type
      * @param string $fieldId Field ID
      * @param BL_CustomGrid_Model_Grid_Edit_Config $config Field config
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Type_Abstract
      */
     protected function _prepareEditableFieldCommonConfig(
         $blockType,
@@ -874,6 +891,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
             'renderer_params' => array(),
         );
         
+        /** @var $config BL_CustomGrid_Model_Grid_Edit_Config */
         $config = Mage::getModel('customgrid/grid_edit_config', $config);
         $this->_prepareEditableFieldCommonConfig($blockType, $fieldId, $config);
         $this->_buildEditableValueSubConfigs($blockType, $fieldId, $config, $this->_getEditableSubConfigs());
@@ -952,7 +970,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      * @param string $attributeCode Attribute code
      * @param Mage_Eav_Model_Entity_Attribute $attribute Attribute object
      * @param BL_CustomGrid_Model_Grid_Edit_Config $config Attribute config
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Type_Abstract
      */
     protected function _prepareEditableAttributeCommonConfig(
         $blockType,
@@ -1491,7 +1509,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      * @param BL_CustomGrid_Object $config Edited value config
      * @param array $params Edit parameters
      * @param mixed $entity Edited entity
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Type_Abstract
      */
     protected function _registerEditedEntity($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
@@ -1586,19 +1604,20 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
             $editBlockType = 'customgrid/widget_grid_editor_form_static_' . $editBlockType;
         }
         
-        return $this->_getLayout()->createBlock(
-            $editBlockType,
-            '',
-            array(
-                'edited_entity'      => $entity,
-                'edited_entity_name' => $this->_getLoadedEntityName($blockType, $config, $params, $entity),
-                'edited_value'       => $config,
-                'edit_config'        => $config->getConfig(),
-                'edited_in_grid'     => (bool) $config->getDataSetDefault('config/in_grid', false),
-                'edit_params'        => $params,
-                'grid_block_type'    => $blockType,
-            )
-        );
+        return $this->_getLayout()
+            ->createBlock(
+                $editBlockType,
+                '',
+                array(
+                    'edited_entity'      => $entity,
+                    'edited_entity_name' => $this->_getLoadedEntityName($blockType, $config, $params, $entity),
+                    'edited_value'       => $config,
+                    'edit_config'        => $config->getConfig(),
+                    'edited_in_grid'     => (bool) $config->getDataSetDefault('config/in_grid', false),
+                    'edit_params'        => $params,
+                    'grid_block_type'    => $blockType,
+                )
+            );
     }
     
     /**
@@ -1609,7 +1628,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      * @param array $params Edit parameters
      * @param mixed $entity Edited entity
      * @param Mage_Core_Block_Abstract $editBlock Edit block instance
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Type_Abstract
      */
     protected function _prepareFieldEditBlock(
         $blockType,
@@ -1653,20 +1672,21 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
             $editBlockType = 'customgrid/widget_grid_editor_form_attribute_' . $editBlockType;
         }
         
-        return $this->_getLayout()->createBlock(
-            $editBlockType,
-            '',
-            array(
-                'edited_entity'      => $entity,
-                'edited_entity_name' => $this->_getLoadedEntityName($blockType, $config, $params, $entity),
-                'edited_attribute'   => $config->getData('config/attribute'),
-                'edited_value'       => $config,
-                'edit_config'        => $config->getConfig(),
-                'edited_in_grid'     => (bool) $config->getDataSetDefault('config/in_grid', false),
-                'edit_params'        => $params,
-                'grid_block_type'    => $blockType,
-            )
-        );
+        return $this->_getLayout()
+            ->createBlock(
+                $editBlockType,
+                '',
+                array(
+                    'edited_entity'      => $entity,
+                    'edited_entity_name' => $this->_getLoadedEntityName($blockType, $config, $params, $entity),
+                    'edited_attribute'   => $config->getData('config/attribute'),
+                    'edited_value'       => $config,
+                    'edit_config'        => $config->getConfig(),
+                    'edited_in_grid'     => (bool) $config->getDataSetDefault('config/in_grid', false),
+                    'edit_params'        => $params,
+                    'grid_block_type'    => $blockType,
+                )
+            );
     }
     
     /**
@@ -1677,7 +1697,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      * @param array $params Edit parameters
      * @param mixed $entity Edited entity
      * @param Mage_Core_Block_Abstract $editBlock Edit block instance
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Type_Abstract
      */
     protected function _prepareAttributeEditBlock(
         $blockType,
@@ -1848,7 +1868,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
             Mage::throwException($this->getHelper()->__('This value is not editable'));
         }
         
-        $editConfig  = new BL_CustomGrid_Object(
+        $editConfig = new BL_CustomGrid_Object(
             array(
                 'value_id' => $valueId,
                 'origin'   => $origin, 
@@ -1900,7 +1920,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      * @param mixed $value Edited field value
      * @param string $eventName Dispatched event name
      * @param array $additional Additional parameters
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Type_Abstract
      */
     protected function _dispatchSaveEvent(
         $blockType,
@@ -1999,7 +2019,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      * @param array $params Edit parameters
      * @param mixed $entity Edited entity
      * @param mixed $value Edited field value
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Type_Abstract
      */
     protected function _beforeApplyEditedFieldValue(
         $blockType,
@@ -2022,7 +2042,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      * @param array $params Edit parameters
      * @param mixed $entity Edited entity
      * @param mixed $value Edited field value
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Type_Abstract
      */
     protected function _applyEditedFieldValue($blockType, BL_CustomGrid_Object $config, array $params, $entity, $value)
     {
@@ -2038,7 +2058,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      * @param array $params Edit parameters
      * @param mixed $entity Edited entity
      * @param mixed $value Edited field value
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Type_Abstract
      */
     protected function _beforeSaveEditedFieldValue(
         $blockType,
@@ -2083,7 +2103,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      * @param mixed $entity Edited entity
      * @param mixed $value Edited field value
      * @param bool $result Save result
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Type_Abstract
      */
     protected function _afterSaveEditedFieldValue(
         $blockType,
@@ -2165,7 +2185,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      * @param array $params Edit parameters
      * @param mixed $entity Edited entity
      * @param mixed $value Edited attribute value
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Type_Abstract
      */
     protected function _beforeApplyEditedAttributeValue(
         $blockType,
@@ -2188,7 +2208,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      * @param array $params Edit parameters
      * @param mixed $entity Edited entity
      * @param mixed $value Edited attribute value
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Type_Abstract
      */
     protected function _applyEditedAttributeValue(
         $blockType,
@@ -2209,7 +2229,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      * @param array $params Edit parameters
      * @param mixed $entity Edited entity
      * @param mixed $value Edited attribute value
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Type_Abstract
      */
     protected function _beforeSaveEditedAttributeValue(
         $blockType,
@@ -2258,7 +2278,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      * @param mixed $entity Edited entity
      * @param mixed $value Edited field value
      * @param bool $result Save result
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Type_Abstract
      */
     protected function _afterSaveEditedAttributeValue(
         $blockType,
@@ -2370,7 +2390,8 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
             $renderBlockType = 'customgrid/widget_grid_editor_renderer_static_' . $renderBlockType;
         }
         
-        return $this->_getLayout()->createBlock(
+        return $this->_getLayout()
+        ->createBlock(
             $renderBlockType,
             '',
             array(
@@ -2393,7 +2414,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      * @param mixed $entity Edited entity
      * @param mixed $value Prepared field value
      * @param Mage_Core_Block_Abstract $rendererBlock Renderer block instance
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Type_Abstract
      */
     protected function _prepareSavedFieldValueRendererBlock(
         $blockType,
@@ -2470,19 +2491,20 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
             $renderBlockType = 'customgrid/widget_grid_editor_renderer_attribute_' . $renderBlockType;
         }
         
-        return $this->_getLayout()->createBlock(
-            $renderBlockType,
-            '',
-            array(
-                'edited_entity'    => $entity,
-                'edited_attribute' => $config->getData('config/attribute'),
-                'edited_value'     => $config,
-                'edit_config'      => $config->getConfig(),
-                'renderable_value' => $value,
-                'edit_params'      => $params,
-                'grid_block_type'  => $blockType,
-            )
-        );
+        return $this->_getLayout()
+            ->createBlock(
+                $renderBlockType,
+                '',
+                array(
+                    'edited_entity'    => $entity,
+                    'edited_attribute' => $config->getData('config/attribute'),
+                    'edited_value'     => $config,
+                    'edit_config'      => $config->getConfig(),
+                    'renderable_value' => $value,
+                    'edit_params'      => $params,
+                    'grid_block_type'  => $blockType,
+                )
+            );
     }
     
     /**
@@ -2494,7 +2516,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      * @param mixed $entity Edited entity
      * @param mixed $value Prepared attribute value
      * @param Mage_Core_Block_Abstract $rendererBlock Renderer block instance
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Type_Abstract
      */
     protected function _prepareSavedAttributeValueRendererBlock(
         $blockType,
@@ -2575,7 +2597,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
             Mage::throwException($this->_getBaseHelper()->__('This value is not editable'));
         }
         
-        $editConfig  = new BL_CustomGrid_Object(
+        $editConfig = new BL_CustomGrid_Object(
             array(
                 'value_id' => $valueId,
                 'origin'   => $origin, 
@@ -2656,7 +2678,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      * Do some actions before given collection is set on given grid
      * 
      * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
-     * @param Varien_Data_Collection $collection Grid $collection
+     * @param Varien_Data_Collection $collection Grid collection
      * @return BL_CustomGrid_Model_Grid_Type_Abstract
      */
     public function beforeGridSetCollection(
@@ -2671,7 +2693,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      * Do some actions after given collection was set on given grid
      * 
      * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
-     * @param Varien_Data_Collection $collection Grid $collection
+     * @param Varien_Data_Collection $collection Grid collection
      * @return BL_CustomGrid_Model_Grid_Type_Abstract
      */
     public function afterGridSetCollection(
@@ -2685,7 +2707,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      * Do some actions before given grid loads given collection for export
      * 
      * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
-     * @param Varien_Data_Collection $collection Grid $collection
+     * @param Varien_Data_Collection $collection Grid collection
      * @return BL_CustomGrid_Model_Grid_Type_Abstract
      */
     public function beforeGridExportLoadCollection(
@@ -2699,7 +2721,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      * Do some actions after given grid has loaded given collection for export
      * 
      * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block instance
-     * @param Varien_Data_Collection $collection Grid $collection
+     * @param Varien_Data_Collection $collection Grid collection
      * @return BL_CustomGrid_Model_Grid_Type_Abstract
      */
     public function afterGridExportLoadCollection(

@@ -14,10 +14,10 @@ class BL_CustomGrid_Model_Custom_Column_Order_Customer_Group extends
         $values = array();
         
         if ($this->_extractBoolParam($params, 'use_default_behaviour')) {
+            /** @var $collection Mage_Customer_Model_Entity_Group_Collection */
+            $collection = Mage::getResourceModel('customer/group_collection');
             $values['type'] = 'options'; 
-            $values['options'] = Mage::getModel('customer/group')
-                ->getResourceCollection()
-                ->toOptionHash();
+            $values['options'] = $collection->toOptionHash();
         }
         
         return $values;

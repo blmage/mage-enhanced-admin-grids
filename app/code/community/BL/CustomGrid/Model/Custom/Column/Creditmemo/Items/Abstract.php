@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2013 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -28,20 +28,21 @@ abstract class BL_CustomGrid_Model_Custom_Column_Creditmemo_Items_Abstract exten
             $ordersIds = array();
             
             foreach ($collection as $creditmemo) {
+                /** @var $creditmemo Mage_Sales_Model_Order_Creditmemo */
                 $creditmemosIds[] = $creditmemo->getId();
                 $ordersIds[] = $creditmemo->getOrderId();
             }
             
-            $items = Mage::getModel('sales/order_creditmemo_item')
-                ->getCollection()
-                ->addFieldToFilter('parent_id', array('in' => $creditmemosIds))
-                ->load();
+            /** @var $items Mage_Sales_Model_Mysql4_Order_Creditmemo_Item_Collection */
+            $items = Mage::getResourceModel('sales/order_creditmemo_item_collection');
+            $items->addFieldToFilter('parent_id', array('in' => $creditmemosIds));
+            $items->load();
             
             $orders = $this->_getOrdersCollection($ordersIds);
             $eventName = 'blcg_custom_column_creditmemo_items_list_order_items_collection';
             $ordersItems = $this->_getOrdersItemsCollection($ordersIds, false, $eventName);
             $propertyName = 'sales/order_creditmemo::_items';
-            $itemsProperty =  Mage::helper('customgrid/reflection')->getModelReflectionProperty($propertyName, true);
+            $itemsProperty = $this->_getReflectionHelper()->getModelReflectionProperty($propertyName, true);
             
             if ($itemsProperty) {
                 foreach ($collection as $creditmemo) {
@@ -50,16 +51,19 @@ abstract class BL_CustomGrid_Model_Custom_Column_Creditmemo_Items_Abstract exten
                     $creditmemoItems = clone $items;
                     
                     if ($order = $orders->getItemById($orderId)) {
+                        /** @var $order Mage_Sales_Model_Order */
                         $creditmemo->setOrder($order);
                     }
                     
                     foreach ($creditmemoItems as $item) {
+                        /** @var $item Mage_Sales_Model_Order_Creditmemo_Item */
                         if ($item->getParentId() != $creditmemoId) {
                             $creditmemoItems->removeItemByKey($item->getId());
                         } else {
                             $item->setCreditmemo($creditmemo);
                             
                             if ($orderItem = $ordersItems->getItemById($item->getOrderItemId())) {
+                                /** @var $orderItem Mage_Sales_Model_Order_Item */
                                 $item->setOrderItem($orderItem);
                                 
                                 if ($order) {
@@ -73,17 +77,19 @@ abstract class BL_CustomGrid_Model_Custom_Column_Creditmemo_Items_Abstract exten
                 }
             } else {
                 foreach ($collection as $creditmemo) {
+                    /** @var $creditmemo Mage_Sales_Model_Order_Creditmemo */
                     $creditmemo->setData('_blcg_items_init_error', true);
                 }
                 
-                Mage::getSingleton('customgrid/session')
-                    ->addError(Mage::helper('customgrid')->__('An error occurred while initializing items'));
+                /** @var $session BL_CustomGrid_Model_Session */
+                $session = Mage::getSingleton('customgrid/session');
+                $session->addError($this->_getBaseHelper()->__('An error occurred while initializing items'));
             }
         }
         return $this;
     }
     
-    protected function _getItemsTable()
+    protected function _getItemsTableName()
     {
         return 'sales/creditmemo_item';
     }

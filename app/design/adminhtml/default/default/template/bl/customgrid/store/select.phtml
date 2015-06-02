@@ -9,37 +9,41 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 ?>
+<?php /** @var $this BL_CustomGrid_Block_Store_Select */ ?>
 <?php if ($_websites = $this->getWebsites()): ?>
-  <select name="<?php echo $this->getSelectName() ?>" id="<?php echo $this->getSelectId() ?>" class="<?php echo $this->getSelectClassNames() ?>">
-  <?php if ($this->getHasUseGridOption()): ?>
-      <option value=""><?php echo $this->htmlEscape($this->getUseGridLabel()) ?></option>
-  <?php endif ?>
-  <?php if ($this->getHasUseDefaultOption()): ?>
-      <option value="0"<?php if ($this->hasStoreId() && ($this->getStoreId() == 0)): ?> selected="selected"<?php endif ?>><?php echo $this->htmlEscape($this->getDefaultStoreName()) ?></option>
-  <?php endif ?>
-      <?php foreach ($_websites as $_website): ?>
-          <?php $_showWebsite = false ?>
-          <?php foreach ($_website->getGroups() as $_group): ?>
-              <?php $_showGroup=false ?>
-              <?php foreach ($this->getStores($_group) as $_store): ?>
-                  <?php if ($_showWebsite == false): ?>
-                      <?php $_showWebsite = true ?>
-                      <optgroup label="<?php echo $this->htmlEscape($_website->getName()) ?>"></optgroup>
-                  <?php endif ?>
-                  <?php if ($_showGroup == false): ?>
-                      <?php $_showGroup = true ?>
-                      <optgroup label="&nbsp;&nbsp;&nbsp;<?php echo $this->htmlEscape($_group->getName()) ?>">
-                  <?php endif ?>
-                  <option value="<?php echo $_store->getId() ?>"<?php if ($this->getStoreId() == $_store->getId()): ?> selected="selected"<?php endif ?>>&nbsp;&nbsp;&nbsp;&nbsp;<?php echo $this->htmlEscape($_store->getName()) ?></option>
-              <?php endforeach ?>
-              <?php if ($_showGroup): ?>
-                  </optgroup>
-              <?php endif ?>
-          <?php endforeach ?>
-      <?php endforeach ?>
-  </select>
+    <select name="<?php echo $this->getSelectName() ?>" id="<?php echo $this->getSelectId() ?>" class="<?php echo $this->getSelectClassNames() ?>">
+    <?php if ($this->getHasUseGridOption()): ?>
+        <option value=""><?php echo $this->htmlEscape($this->getUseGridLabel()) ?></option>
+    <?php endif ?>
+    <?php if ($this->getHasUseDefaultOption()): ?>
+        <option value="0"<?php if ($this->hasStoreId() && ($this->getStoreId() == 0)): ?> selected="selected"<?php endif ?>><?php echo $this->htmlEscape($this->getDefaultStoreName()) ?></option>
+    <?php endif ?>
+    <?php foreach ($_websites as $_website): ?>
+        <?php /** @var $_website Mage_Core_Model_Website */ ?>
+        <?php $_shownWebsite = false ?>
+        <?php foreach ($_website->getGroups() as $_group): ?>
+            <?php /** @var $_group Mage_Core_Model_Store_Group */ ?>
+            <?php $_shownGroup = false ?>
+            <?php foreach ($this->getStores($_group) as $_store): ?>
+                <?php /** @var $_store Mage_Core_Model_Store */ ?>
+                <?php if (!$_shownWebsite): ?>
+                    <?php $_shownWebsite = true ?>
+                    <optgroup label="<?php echo $this->htmlEscape($_website->getName()) ?>"></optgroup>
+                <?php endif ?>
+                <?php if (!$_shownGroup): ?>
+                    <?php $_shownGroup = true ?>
+                    <optgroup label="&nbsp;&nbsp;&nbsp;<?php echo $this->htmlEscape($_group->getName()) ?>">
+                <?php endif ?>
+                <option value="<?php echo $_store->getId() ?>"<?php if ($this->getStoreId() == $_store->getId()): ?> selected="selected"<?php endif ?>>&nbsp;&nbsp;&nbsp;&nbsp;<?php echo $this->htmlEscape($_store->getName()) ?></option>
+            <?php endforeach ?>
+            <?php if ($_shownGroup): ?>
+                </optgroup>
+            <?php endif ?>
+        <?php endforeach ?>
+    <?php endforeach ?>
+    </select>
 <?php endif ?>

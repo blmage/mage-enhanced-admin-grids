@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -26,7 +26,7 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Container extends BL_CustomGri
         $this->_addButton(
             'save',
             array(
-                'label'   => $this->helper('adminhtml')->__('Save'),
+                'label'   => $this->__('Save'),
                 'onclick' => 'blcgGridEditorForm.submit();',
                 'class'   => 'save',
             ),
@@ -34,11 +34,17 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Container extends BL_CustomGri
         );
     }
     
-    public function getUseDefaultForm()
+    public function getUseDefaultJsFormObject()
     {
         return false;
     }
     
+    /**
+     * Set the given form block as the "form" child of this block
+     * 
+     * @param Mage_Core_Block_Abstract $formBlock Form block
+     * @return BL_CustomGrid_Block_Widget_Grid_Editor_Form_Container
+     */
     public function setChildForm(Mage_Core_Block_Abstract $formBlock)
     {
         return $this->setChild('form', $formBlock);
@@ -49,19 +55,18 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Container extends BL_CustomGri
         return ($this->getChild('form') ? parent::getFormHtml() : '');
     }
     
+    /**
+     * Return the editor JS object name
+     * 
+     * @return string
+     */
     public function getEditorJsObjectName()
     {
         if (!$this->hasData('editor_js_object_name')) {
-            if ($jsObjectName = $this->getRequest()->getParam('editor_js_object_name', false)) {
-                $jsObjectName = $this->helper('customgrid/string')->sanitizeJsObjectName($jsObjectName);
-                
-                if ($this->getRequest()->getParam('is_external', false)) {
-                    $jsObjectName = 'parent.' . $jsObjectName;
-                }
-            } else {
-                $jsObjectName = false;
+            if (($jsObjectName = $this->_getJsObjectName('editor_js_object_name'))
+                && $this->getRequest()->getParam('is_external', false)) {
+                $this->setData('editor_js_object_name', 'parent.' . $jsObjectName);
             }
-            $this->setData('editor_js_object_name', $jsObjectName);
         }
         return $this->_getData('editor_js_object_name');
     }

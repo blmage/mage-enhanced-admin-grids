@@ -1,0 +1,48 @@
+<?php
+/**
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
+ *
+ * @category   BL
+ * @package    BL_CustomGrid
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+?>
+<?php /** @var $this BL_CustomGrid_Block_Widget_Grid_Config_Columns_Helper_Collection */ ?>
+<div class="nobr">
+<?php if ($this->getIsForcedRenderer()): ?>
+    <?php if ($_renderer = $this->getRenderer() ): ?>
+        <input type="hidden" name="<?php echo $this->getRendererSelectName() ?>" id="<?php echo $this->getRendererSelectHtmlId() ?>" value="<?php echo $this->htmlEscape($_renderer->getCode()) ?>" />
+        <?php echo $this->htmlEscape($_renderer->getName()) ?>
+    <?php else: ?>
+        <?php echo $this->htmlEscape($this->getForcedRendererLabel()) ?>
+    <?php endif ?>
+<?php else: ?>
+    <select name="<?php echo $this->getRendererSelectName() ?>" id="<?php echo $this->getRendererSelectHtmlId() ?>" class="<?php echo $this->getRendererSelectClassNames() ?>">
+        <option value=""></option>
+        <?php foreach ($this->getRenderers(true) as $_renderer): ?>
+            <option value="<?php echo $this->htmlEscape($_renderer->getCode()) ?>"<?php if ($this->getRendererCode() == $_renderer->getCode()): ?> selected="selected"<?php endif ?>><?php echo $this->htmlEscape($_renderer->getName()) ?></option>
+        <?php endforeach ?>
+    </select>
+<?php endif ?>
+<?php if ($this->getRendererTargetName() && (!$this->getIsForcedRenderer() || $this->getRenderer())): ?>
+    <input type="hidden" name="<?php echo $this->getRendererTargetName() ?>" id="<?php echo $this->getRendererTargetHtmlId() ?>" value="<?php echo $this->getRendererParams() ?>" />
+    <span class="blcg-collection-renderers-config-button" id="<?php echo $this->getRendererConfigButtonHtmlId() ?>" title="<?php echo $this->__('Configuration') ?>" style="display:none;"></span>
+    <?php if ($_jsObjectName = $this->getSelectsManagerJsObjectName()): ?>
+<script type="text/javascript">
+//<![CDATA[
+<?php echo $_jsObjectName ?>.registerSelect(
+    '<?php echo $this->getRendererSelectHtmlId() ?>',
+    '<?php echo $this->getRendererConfigButtonHtmlId() ?>',
+    '<?php echo $this->getRendererTargetHtmlId() ?>'
+);
+//]]>
+</script>
+    <?php endif?>
+<?php endif ?>
+</div>

@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -25,11 +25,23 @@ class BL_CustomGrid_Block_Grid_Form_Default_Params extends BL_CustomGrid_Block_G
         return false;
     }
     
+    /**
+     * Return the header of the grid column corresponding to the given block ID
+     * 
+     * @param string $columnBlockId Grid column block ID
+     * @return string
+     */
     protected function _getGridColumnHeader($columnBlockId)
     {
         return (($header = $this->getGridModel()->getColumnHeader($columnBlockId)) ? $header : $columnBlockId);
     }
     
+    /**
+     * Return whether the given filter value possibly corresponds to an empty filter
+     * 
+     * @param mixed $value Filter value
+     * @return bool
+     */
     protected function _isPossiblyEmptyFilterValue($value)
     {
         $isEmpty = false;
@@ -46,6 +58,15 @@ class BL_CustomGrid_Block_Grid_Form_Default_Params extends BL_CustomGrid_Block_G
         return $isEmpty;
     }
     
+    /**
+     * Render the given sub value from a grid default filter, applied on the grid column corresponding to
+     * the given block ID
+     * 
+     * @param string $columnBlockId Grid column block ID
+     * @param mixed $filterValue Default filter value
+     * @param bool $isAppliable Whether the sub value is rendered in the appliable params fieldset (otherwise removable)
+     * @return string
+     */
     protected function _renderDefaultFilterSubValue($columnBlockId, $filterValue, $isAppliable)
     {
         if (!$isAppliable && is_array($filterValue) && isset($filterValue['value'])) {
@@ -61,6 +82,13 @@ class BL_CustomGrid_Block_Grid_Form_Default_Params extends BL_CustomGrid_Block_G
         return $value;
     }
     
+    /**
+     * Render the given default filter value
+     * 
+     * @param array|string $value Default filter value (array or encoded string)
+     * @param mixed $isAppliable Whether the value is rendered in the appliable params fieldset (otherwise removable)
+     * @return string
+     */
     protected function _renderDefaultFilterValue($value, $isAppliable)
     {
         if ($isAppliable && !is_array($value)) {
@@ -84,6 +112,13 @@ class BL_CustomGrid_Block_Grid_Form_Default_Params extends BL_CustomGrid_Block_G
         return $value;
     }
     
+    /**
+     * Render the given default param value
+     * 
+     * @param mixed $value Default param value
+     * @param mixed $isAppliable Whether the value is rendered in the appliable params fieldset (otherwise removable)
+     * @return string
+     */
     protected function _renderDefaultParamValue($type, $value, $isAppliable)
     {
         if (($type == BL_CustomGrid_Model_Grid::GRID_PARAM_PAGE)
@@ -99,13 +134,18 @@ class BL_CustomGrid_Block_Grid_Form_Default_Params extends BL_CustomGrid_Block_G
         return $value;
     }
     
+    /**
+     * Add removable params-related fields to the given form
+     * 
+     * @param Varien_Data_Form $form Form
+     * @return BL_CustomGrid_Block_Grid_Form_Default_Params
+     */
     protected function _addRemovableParamsFieldsToForm(Varien_Data_Form $form)
     {
         $gridModel   = $this->getGridModel();
         $gridProfile = $gridModel->getProfile();
-        $dependenceBlock = $this->getDependenceBlock();
-        $gridParams  = Mage::getSingleton('customgrid/system_config_source_grid_param')->toOptionArray(false);
-        $yesNoValues = Mage::getSingleton('customgrid/system_config_source_yesno')->toOptionArray();
+        $yesNoValues = $this->_getYesNoOptionArray();
+        $dependenceBlock   = $this->getDependenceBlock();
         $hasNoDefaultParam = true;
         
         $fieldset = $form->addFieldset(
@@ -116,7 +156,7 @@ class BL_CustomGrid_Block_Grid_Form_Default_Params extends BL_CustomGrid_Block_G
             )
         );
         
-        foreach ($gridParams as $gridParam) {
+        foreach ($this->_getGridParamsOptionArray(false) as $gridParam) {
             if (!is_null($currentValue = $gridProfile->getData('default_' . $gridParam['value']))) {
                 $hasNoDefaultParam = false;
                 $renderedValue = $this->_renderDefaultParamValue($gridParam['value'], $currentValue, false);
@@ -152,12 +192,17 @@ class BL_CustomGrid_Block_Grid_Form_Default_Params extends BL_CustomGrid_Block_G
         return $this;
     }
     
+    /**
+     * Add appliable params-related fields to the given form
+     * 
+     * @param Varien_Data_Form $form Form
+     * @return BL_CustomGrid_Block_Grid_Form_Default_Params
+     */
     protected function _addAppliableParamsFieldsToForm(Varien_Data_Form $form)
     {
+        $yesNoValues = $this->_getYesNoOptionArray();
         $dependenceBlock = $this->getDependenceBlock();
         $defaultParams   = (array) $this->getDataSetDefault('default_params', array());
-        $gridParams  = Mage::getSingleton('customgrid/system_config_source_grid_param')->toOptionArray(false);
-        $yesNoValues = Mage::getSingleton('customgrid/system_config_source_yesno')->toOptionArray();
         
         $fieldset = $form->addFieldset(
             'apply',
@@ -167,7 +212,7 @@ class BL_CustomGrid_Block_Grid_Form_Default_Params extends BL_CustomGrid_Block_G
             )
         );
         
-        foreach ($gridParams as $gridParam) {
+        foreach ($this->_getGridParamsOptionArray(false) as $gridParam) {
             if (isset($defaultParams[$gridParam['value']])) {
                 $renderedValue = $this->_renderDefaultParamValue(
                     $gridParam['value'],

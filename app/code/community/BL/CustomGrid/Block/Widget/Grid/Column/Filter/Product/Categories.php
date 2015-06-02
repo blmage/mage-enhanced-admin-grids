@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -25,14 +25,16 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Product_Categories extends
             
             $html = '<select name="' . $this->_getHtmlName() . '" id="' . $this->_getHtmlId() . '" class="no-changes">'
                 . '<option value=""></option>'
-                . '<option value="1"' . $existentSelected . '>' .$this->__('With') . '</option>'
-                . '<option value="0"' . $nonExistentSelected . '>' .$this->__('Without') . '</option>'
+                . '<option value="1"' . $existentSelected . '>' . $this->__('With') . '</option>'
+                . '<option value="0"' . $nonExistentSelected . '>' . $this->__('Without') . '</option>'
                 . '</select>';
         } else {
-            $htmlId = $this->helper('core')->uniqHash($this->_getHtmlId());
-            $jsId = $this->helper('core')->uniqHash('blcgCategoriesFilter');
+            /** @var $helper Mage_Core_Helper_Data */
+            $helper = $this->helper('core');
+            $jsId   = $helper->uniqHash('blcgCategoriesFilter');
+            $htmlId = $helper->uniqHash($this->_getHtmlId());
             $windowUrl = $this->getUrl('customgrid/grid_column_filter/categories', array('js_object_name' => $jsId));
-            $windowJsonConfig = $this->helper('core')->jsonEncode(
+            $windowJsonConfig = $helper->jsonEncode(
                 array(
                     'width'  => '700px',
                     'height' => '480px',

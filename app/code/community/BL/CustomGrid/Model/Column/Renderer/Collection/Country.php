@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -21,7 +21,9 @@ class BL_CustomGrid_Model_Column_Renderer_Collection_Country extends
         Mage_Core_Model_Store $store,
         BL_CustomGrid_Model_Grid $gridModel
     ) {
-        $options = Mage::getResourceModel('directory/country_collection')->load()->toOptionArray(false);
+        /** @var $countriesCollection Mage_Directory_Model_Mysql4_Country_Collection */
+        $countriesCollection = Mage::getResourceModel('directory/country_collection');
+        $options = $countriesCollection->load()->toOptionArray(false);
         $implodedSeparator = $this->getData('values/imploded_separator');
         
         if (empty($implodedSeparator) && ($implodedSeparator != '0')) {
@@ -32,7 +34,7 @@ class BL_CustomGrid_Model_Column_Renderer_Collection_Country extends
             'filter'   => 'customgrid/widget_grid_column_filter_select',
             'renderer' => 'customgrid/widget_grid_column_renderer_options',
             'options'  => $options,
-            'empty_option_label'   => Mage::helper('cms')->__('All Countries'),
+            'empty_option_label'   => $this->_getHelper()->__('All Countries'),
             'imploded_values'      => (bool) $this->getData('values/imploded_values'),
             'imploded_separator'   => $implodedSeparator,
             'filter_mode'          => $this->getData('values/filter_mode'),

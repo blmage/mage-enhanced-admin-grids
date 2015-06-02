@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -26,12 +26,18 @@ class BL_CustomGrid_Block_Custom_Column_Config extends BL_CustomGrid_Block_Confi
             . ');';
         
         if ($formBlock = $this->getChild('form')) {
+            /** @var $formBlock BL_CustomGrid_Block_Custom_Column_Config_Form */
             $formBlock->setConfigValues($this->getConfigValues());
         }
         
         return parent::_beforeToHtml();
     }
     
+    /**
+     * Return the current custom column
+     * 
+     * @return BL_CustomGrid_Model_Custom_Column_Abstract
+     */
     public function getCustomColumn()
     {
         return Mage::registry('blcg_custom_column');
@@ -57,11 +63,16 @@ class BL_CustomGrid_Block_Custom_Column_Config extends BL_CustomGrid_Block_Confi
         return 'blcgCustomColumnConfigForm';
     }
     
-    public function getUseDefaultForm()
+    public function getUseDefaultJsFormObject()
     {
         return false;
     }
     
+    /**
+     * Return the HTML ID of the target element for the configuration values
+     * 
+     * @return string
+     */
     public function getConfigTargetId()
     {
         return $this->getDataSetDefault('config_target_id', '');

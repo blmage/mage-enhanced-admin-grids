@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -124,7 +124,7 @@ $connection->addColumn(
     $tables['grid'],
     'default_filter_behaviour',
     "enum ('default', 'force_original', 'force_custom', 'merge_default', 'merge_on_original', 'merge_on_custom') "
-        . "character set utf8 default NULL"
+    . "character set utf8 default NULL"
 );
 
 /**

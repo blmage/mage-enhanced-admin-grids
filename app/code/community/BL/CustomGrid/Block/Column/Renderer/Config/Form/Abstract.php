@@ -9,14 +9,25 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 abstract class BL_CustomGrid_Block_Column_Renderer_Config_Form_Abstract extends BL_CustomGrid_Block_Config_Form_Abstract
 {
-    abstract public function getRenderer();
+    /**
+     * Return the column type handled by the current column renderer
+     * 
+     * @return string
+     */
     abstract public function getRendererType();
+    
+    /**
+     * Return the current column renderer
+     * 
+     * @return BL_CustomGrid_Model_Column_Renderer_Abstract
+     */
+    abstract public function getRenderer();
     
     protected function _getFormCode()
     {
@@ -40,14 +51,8 @@ abstract class BL_CustomGrid_Block_Column_Renderer_Config_Form_Abstract extends 
         return $fields;
     }
     
-    public function getTranslationModule()
+    protected function _getTranslationModule()
     {
-        if (!$this->hasData('translation_module')) {
-            if (!$module = $this->getRenderer()->getModule()) {
-                $module = 'customgrid';
-            }
-            $this->setData('translation_module', $module);
-        }
-        return $this->_getData('translation_module');
+        return $this->getRenderer()->getModule();
     }
 }

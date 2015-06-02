@@ -9,17 +9,27 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2013 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Sales_Items_Sub_Value_Default extends
     BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Sales_Items_Sub_Abstract
 {
+    /**
+     * Self render callbacks based on value key
+     * 
+     * @var string[]
+     */
     static protected $_renderMethods = array(
         'name'            => '_renderItemName',
         'sku'             => '_renderItemSku',
         'quantity'        => '_renderItemQty',
+        'qty_ordered'     => '_renderItemSingleQty',
+        'qty_canceled'    => '_renderItemSingleQty',
+        'qty_invoiced'    => '_renderItemSingleQty',
+        'qty_shipped'     => '_renderItemSingleQty',
+        'qty_refunded'    => '_renderItemSingleQty',
         'original_price'  => '_renderItemPrice',
         'tax_amount'      => '_renderItemPrice',
         'discount_amount' => '_renderItemPrice',
@@ -27,33 +37,73 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Sales_Items_Sub_Value_Defa
         'row_total'       => '_renderItemRowTotal',
     );
     
+    /**
+     * Render the name of the current item
+     * 
+     * @return string
+     */
     protected function _renderItemName()
     {
         return $this->htmlEscape($this->getItem()->getName());
     }
     
+    /**
+     * Render the SKU of the current item
+     * 
+     * @return string
+     */
     protected function _renderItemSku()
     {
         return implode('<br />', $this->helper('catalog')->splitSku($this->htmlEscape($this->getItem()->getSku())));
     }
     
+    /**
+     * Render the full quantities informations of the current item
+     * 
+     * @return string
+     */
     protected function _renderItemQty()
     {
         return $this->getValue()->hasOrder()
             ? $this->getItemRenderer()->getColumnHtml($this->getItem(), 'qty')
-            : $this->getItem()->getQty()*1;
+            : $this->_renderItemSingleQty();
     }
     
+    /**
+     * Render the current quantity value of the current item
+     * 
+     * @return string
+     */
+    protected function _renderItemSingleQty()
+    {
+        return $this->getItem()->getDataUsingMethod($this->getCode())*1;
+    }
+    
+    /**
+     * Render the current price value of the current item
+     * 
+     * @return string
+     */
     protected function _renderItemPrice()
     {
         return $this->getItemRenderer()->displayPriceAttribute($this->getCode());
     }
     
+    /**
+     * Render the tax percent of the current item
+     * 
+     * @return string
+     */
     protected function _renderItemTaxPercent()
     {
         return $this->getItemRenderer()->displayTaxPercent($this->getItem());
     }
     
+    /**
+     * Render the row total of the current item
+     * 
+     * @return string
+     */
     protected function _renderItemRowTotal()
     {
         $item = $this->getItem();

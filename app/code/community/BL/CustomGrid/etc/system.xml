@@ -10,7 +10,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 -->
@@ -26,7 +26,7 @@
             <label>Base Configuration</label>
             <tab>customgrid</tab>
             <frontend_type>text</frontend_type>
-            <sort_order>10</sort_order>
+            <sort_order>100</sort_order>
             <show_in_default>1</show_in_default>
             <show_in_website>0</show_in_website>
             <show_in_store>0</show_in_store>
@@ -34,7 +34,7 @@
                 <global translate="label" module="customgrid">
                     <label>General</label>
                     <frontend_type>text</frontend_type>
-                    <sort_order>1000</sort_order>
+                    <sort_order>100</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>0</show_in_website>
                     <show_in_store>0</show_in_store>
@@ -43,7 +43,7 @@
                             <label>Global Exclusions</label>
                             <frontend_model>customgrid/system_config_form_field_grid_exceptions</frontend_model>
                             <backend_model>customgrid/system_config_backend_serialized_grid_exceptions</backend_model>
-                            <sort_order>10</sort_order>
+                            <sort_order>100</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -53,7 +53,7 @@
                             <label>Complementary Exceptions</label>
                             <frontend_model>customgrid/system_config_form_field_grid_exceptions</frontend_model>
                             <backend_model>customgrid/system_config_backend_serialized_grid_exceptions</backend_model>
-                            <sort_order>20</sort_order>
+                            <sort_order>200</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -63,7 +63,7 @@
                             <label>Complementary Exceptions Handling Mode</label>
                             <frontend_type>select</frontend_type>
                             <source_model>customgrid/system_config_source_exceptions_handling_mode</source_model>
-                            <sort_order>30</sort_order>
+                            <sort_order>300</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -71,7 +71,7 @@
                         <store_parameter translate="label comment" module="customgrid">
                             <label>Store View ID Parameter</label>
                             <frontend_type>text</frontend_type>
-                            <sort_order>40</sort_order>
+                            <sort_order>400</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -81,7 +81,7 @@
                             <label>Use drag'n'drop for sorting columns</label>
                             <frontend_type>select</frontend_type>
                             <source_model>customgrid/system_config_source_yesno</source_model>
-                            <sort_order>50</sort_order>
+                            <sort_order>500</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -92,7 +92,7 @@
                 <customization_params translate="label" module="customgrid">
                     <label>Customization Parameters - Default Values</label>
                     <frontend_type>text</frontend_type>
-                    <sort_order>2000</sort_order>
+                    <sort_order>200</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>0</show_in_website>
                     <show_in_store>0</show_in_store>
@@ -101,7 +101,7 @@
                             <label>Display "System" Column</label>
                             <frontend_type>select</frontend_type>
                             <source_model>customgrid/system_config_source_yesno</source_model>
-                            <sort_order>10</sort_order>
+                            <sort_order>100</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -110,7 +110,7 @@
                             <label>Ignore Custom Headers (Base Grid Columns)</label>
                             <frontend_type>select</frontend_type>
                             <source_model>customgrid/system_config_source_yesno</source_model>
-                            <sort_order>20</sort_order>
+                            <sort_order>200</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -119,7 +119,7 @@
                             <label>Ignore Custom Widths (Base Grid Columns)</label>
                             <frontend_type>select</frontend_type>
                             <source_model>customgrid/system_config_source_yesno</source_model>
-                            <sort_order>30</sort_order>
+                            <sort_order>300</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -128,7 +128,7 @@
                             <label>Ignore Custom Alignments (Base Grid Columns)</label>
                             <frontend_type>select</frontend_type>
                             <source_model>customgrid/system_config_source_yesno</source_model>
-                            <sort_order>40</sort_order>
+                            <sort_order>400</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -136,7 +136,7 @@
                         <pagination_values translate="label comment" module="customgrid">
                             <label>Custom Pagination Values</label>
                             <frontend_type>text</frontend_type>
-                            <sort_order>50</sort_order>
+                            <sort_order>500</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -145,7 +145,7 @@
                         <default_pagination_value translate="label comment" module="customgrid">
                             <label>Default Pagination Value</label>
                             <frontend_type>text</frontend_type>
-                            <sort_order>60</sort_order>
+                            <sort_order>600</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -155,7 +155,7 @@
                             <label>Merge Base Pagination Values</label>
                             <frontend_type>select</frontend_type>
                             <source_model>customgrid/system_config_source_yesno</source_model>
-                            <sort_order>70</sort_order>
+                            <sort_order>700</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -165,7 +165,7 @@
                             <label>Pin Pager And Mass-Actions Block</label>
                             <frontend_type>select</frontend_type>
                             <source_model>customgrid/system_config_source_yesno</source_model>
-                            <sort_order>80</sort_order>
+                            <sort_order>800</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -174,7 +174,7 @@
                             <label>Move RSS Links in a Dedicated Window</label>
                             <frontend_type>select</frontend_type>
                             <source_model>customgrid/system_config_source_yesno</source_model>
-                            <sort_order>90</sort_order>
+                            <sort_order>900</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -183,7 +183,7 @@
                             <label>Hide Original Export Block</label>
                             <frontend_type>select</frontend_type>
                             <source_model>customgrid/system_config_source_yesno</source_model>
-                            <sort_order>100</sort_order>
+                            <sort_order>1000</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -192,7 +192,7 @@
                             <label>Hide Original Filter Reset Button</label>
                             <frontend_type>select</frontend_type>
                             <source_model>customgrid/system_config_source_yesno</source_model>
-                            <sort_order>110</sort_order>
+                            <sort_order>1100</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -202,7 +202,7 @@
                 <default_params_behaviours translate="label" module="customgrid">
                     <label>Default Parameters Behaviours - Default Values</label>
                     <frontend_type>text</frontend_type>
-                    <sort_order>3000</sort_order>
+                    <sort_order>300</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>0</show_in_website>
                     <show_in_store>0</show_in_store>
@@ -211,7 +211,7 @@
                             <label>Page Number</label>
                             <frontend_type>select</frontend_type>
                             <source_model>customgrid/system_config_source_default_param_behaviour_scalar</source_model>
-                            <sort_order>10</sort_order>
+                            <sort_order>100</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -221,7 +221,7 @@
                             <label>Page Size</label>
                             <frontend_type>select</frontend_type>
                             <source_model>customgrid/system_config_source_default_param_behaviour_scalar</source_model>
-                            <sort_order>20</sort_order>
+                            <sort_order>200</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -231,7 +231,7 @@
                             <label>Sort</label>
                             <frontend_type>select</frontend_type>
                             <source_model>customgrid/system_config_source_default_param_behaviour_scalar</source_model>
-                            <sort_order>30</sort_order>
+                            <sort_order>300</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -241,7 +241,7 @@
                             <label>Sort Direction</label>
                             <frontend_type>select</frontend_type>
                             <source_model>customgrid/system_config_source_default_param_behaviour_scalar</source_model>
-                            <sort_order>40</sort_order>
+                            <sort_order>400</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -251,7 +251,7 @@
                             <label>Filters</label>
                             <frontend_type>select</frontend_type>
                             <source_model>customgrid/system_config_source_default_param_behaviour_array</source_model>
-                            <sort_order>50</sort_order>
+                            <sort_order>500</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -262,7 +262,7 @@
                 <profiles translate="label" module="customgrid">
                     <label>Profiles - Default Values</label>
                     <frontend_type>text</frontend_type>
-                    <sort_order>4000</sort_order>
+                    <sort_order>400</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>0</show_in_website>
                     <show_in_store>0</show_in_store>
@@ -271,7 +271,7 @@
                             <label>Restricted</label>
                             <frontend_type>select</frontend_type>
                             <source_model>customgrid/system_config_source_yesno</source_model>
-                            <sort_order>10</sort_order>
+                            <sort_order>100</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -281,7 +281,7 @@
                             <label>Assigned To</label>
                             <frontend_type>multiselect</frontend_type>
                             <source_model>customgrid/system_config_source_admin_role</source_model>
-                            <sort_order>20</sort_order>
+                            <sort_order>200</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -292,7 +292,7 @@
                             <frontend_type>multiselect</frontend_type>
                             <source_model>customgrid/system_config_source_grid_param</source_model>
                             <backend_model>customgrid/system_config_backend_grid_param</backend_model>
-                            <sort_order>30</sort_order>
+                            <sort_order>300</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -303,7 +303,7 @@
                 <custom_columns translate="label" module="customgrid">
                     <label>Custom Columns</label>
                     <frontend_type>text</frontend_type>
-                    <sort_order>5000</sort_order>
+                    <sort_order>500</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>0</show_in_website>
                     <show_in_store>0</show_in_store>
@@ -312,7 +312,7 @@
                             <label>Add Group Name In Default Header</label>
                             <frontend_type>select</frontend_type>
                             <source_model>customgrid/system_config_source_yesno</source_model>
-                            <sort_order>10</sort_order>
+                            <sort_order>100</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -321,7 +321,7 @@
                             <label>Behaviour When Unverified Grid Block</label>
                             <frontend_type>select</frontend_type>
                             <source_model>customgrid/system_config_source_custom_column_unverified_behaviour</source_model>
-                            <sort_order>20</sort_order>
+                            <sort_order>200</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -330,7 +330,7 @@
                             <label>Behaviour When Unverified Grid Collection</label>
                             <frontend_type>select</frontend_type>
                             <source_model>customgrid/system_config_source_custom_column_unverified_behaviour</source_model>
-                            <sort_order>30</sort_order>
+                            <sort_order>300</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -343,7 +343,7 @@
             <label>Rewriters Configuration</label>
             <tab>customgrid</tab>
             <frontend_type>text</frontend_type>
-            <sort_order>20</sort_order>
+            <sort_order>200</sort_order>
             <show_in_default>1</show_in_default>
             <show_in_website>0</show_in_website>
             <show_in_store>0</show_in_store>
@@ -352,7 +352,7 @@
                     <label>eval()ed Classes</label>
                     <comment><![CDATA[Rewriting classes are automatically eval()ed at runtime.<br /><strong>eval() must be available on your server</strong>.]]></comment>
                     <frontend_type>text</frontend_type>
-                    <sort_order>10</sort_order>
+                    <sort_order>100</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>0</show_in_website>
                     <show_in_store>0</show_in_store>
@@ -361,7 +361,7 @@
                             <label>Enabled</label>
                             <frontend_type>select</frontend_type>
                             <source_model>customgrid/system_config_source_yesno</source_model>
-                            <sort_order>10</sort_order>
+                            <sort_order>100</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -370,7 +370,7 @@
                             <label>Priority</label>
                             <comment><![CDATA[Rewriters with lower priority values are used first]]></comment>
                             <frontend_type>text</frontend_type>
-                            <sort_order>20</sort_order>
+                            <sort_order>200</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -379,7 +379,7 @@
                             <label>Display Error Messages</label>
                             <frontend_type>select</frontend_type>
                             <source_model>customgrid/system_config_source_yesno</source_model>
-                            <sort_order>30</sort_order>
+                            <sort_order>300</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -388,7 +388,7 @@
                             <label>Display Error Messages If Rewrite Success</label>
                             <frontend_type>select</frontend_type>
                             <source_model>customgrid/system_config_source_yesno</source_model>
-                            <sort_order>40</sort_order>
+                            <sort_order>400</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -399,7 +399,7 @@
                             <comment><![CDATA[Error messages are written to the exceptions log]]></comment>
                             <frontend_type>select</frontend_type>
                             <source_model>customgrid/system_config_source_yesno</source_model>
-                            <sort_order>50</sort_order>
+                            <sort_order>500</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -408,7 +408,7 @@
                             <label>Log Error Messages If Rewrite Success</label>
                             <frontend_type>select</frontend_type>
                             <source_model>customgrid/system_config_source_yesno</source_model>
-                            <sort_order>60</sort_order>
+                            <sort_order>600</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -420,7 +420,7 @@
                     <label>Auto-generated Class Files</label>
                     <comment><![CDATA[Rewriting classes are automatically generated in corresponding files inside the <span>app/code/community/BL/CustomGrid/Block/Rewrite</span> directory.<br />Each file is only re-generated when the rewrite code is significantly changed.<br /><strong>Check your folder permissions before using this method.</strong>]]></comment>
                     <frontend_type>text</frontend_type>
-                    <sort_order>20</sort_order>
+                    <sort_order>200</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>0</show_in_website>
                     <show_in_store>0</show_in_store>
@@ -429,7 +429,7 @@
                             <label>Enabled</label>
                             <frontend_type>select</frontend_type>
                             <source_model>customgrid/system_config_source_yesno</source_model>
-                            <sort_order>10</sort_order>
+                            <sort_order>100</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -438,7 +438,7 @@
                             <label>Priority</label>
                             <comment><![CDATA[Rewriters with lower priority values are used first]]></comment>
                             <frontend_type>text</frontend_type>
-                            <sort_order>20</sort_order>
+                            <sort_order>200</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -447,7 +447,7 @@
                             <label>Display Error Messages</label>
                             <frontend_type>select</frontend_type>
                             <source_model>customgrid/system_config_source_yesno</source_model>
-                            <sort_order>30</sort_order>
+                            <sort_order>300</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -456,7 +456,7 @@
                             <label>Display Error Messages If Rewrite Success</label>
                             <frontend_type>select</frontend_type>
                             <source_model>customgrid/system_config_source_yesno</source_model>
-                            <sort_order>40</sort_order>
+                            <sort_order>400</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -467,7 +467,7 @@
                             <comment><![CDATA[Error messages are written to the exceptions log]]></comment>
                             <frontend_type>select</frontend_type>
                             <source_model>customgrid/system_config_source_yesno</source_model>
-                            <sort_order>50</sort_order>
+                            <sort_order>500</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -476,7 +476,7 @@
                             <label>Log Error Messages If Rewrite Success</label>
                             <frontend_type>select</frontend_type>
                             <source_model>customgrid/system_config_source_yesno</source_model>
-                            <sort_order>60</sort_order>
+                            <sort_order>600</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -490,7 +490,7 @@
             <label>Editors Configuration</label>
             <tab>customgrid</tab>
             <frontend_type>text</frontend_type>
-            <sort_order>30</sort_order>
+            <sort_order>300</sort_order>
             <show_in_default>1</show_in_default>
             <show_in_website>0</show_in_website>
             <show_in_store>0</show_in_store>
@@ -498,7 +498,7 @@
                 <sitemap translate="label" module="customgrid">
                     <label>Google Sitemap</label>
                     <frontend_type>text</frontend_type>
-                    <sort_order>1000</sort_order>
+                    <sort_order>100</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>0</show_in_website>
                     <show_in_store>0</show_in_store>
@@ -507,7 +507,7 @@
                             <label>Delete File Before Save</label>
                             <frontend_type>select</frontend_type>
                             <source_model>customgrid/system_config_source_yesno</source_model>
-                            <sort_order>10</sort_order>
+                            <sort_order>100</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>

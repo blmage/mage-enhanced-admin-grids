@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -20,6 +20,15 @@ class BL_CustomGrid_Model_Grid_Type_Tax_Rule extends BL_CustomGrid_Model_Grid_Ty
         return array('adminhtml/tax_rule_grid');
     }
     
+    /**
+     * Return the currently edited value from the given tax rule, according to the given edit config
+     * 
+     * @param string $blockType Grid block type
+     * @param BL_CustomGrid_Object $config Edit config
+     * @param array $params Edit parameters
+     * @param Mage_Tax_Model_Calculation_Rule $entity Edited tax rule
+     * @return mixed
+     */
     public function getTaxRuleValue($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
         $value = null;
@@ -47,21 +56,22 @@ class BL_CustomGrid_Model_Grid_Type_Tax_Rule extends BL_CustomGrid_Model_Grid_Ty
     
     protected function _getBaseEditableFields($blockType)
     {
+        /** @var $helper Mage_Tax_Helper_Data */
         $helper = Mage::helper('tax');
+        /** @var $taxClassModel Mage_Tax_Model_Class */
+        $taxClassModel = Mage::getModel('tax/class');
+        /** @var $taxRateModel Mage_Tax_Model_Calculation_Rate */
+        $taxRateModel  = Mage::getModel('tax/calculation_rate');
         
-        $productClasses = Mage::getModel('tax/class')
-            ->getCollection()
+        $productClasses = $taxClassModel->getCollection()
             ->setClassTypeFilter(Mage_Tax_Model_Class::TAX_CLASS_TYPE_PRODUCT)
             ->toOptionArray();
         
-        $customerClasses = Mage::getModel('tax/class')
-            ->getCollection()
+        $customerClasses = $taxClassModel->getCollection()
             ->setClassTypeFilter(Mage_Tax_Model_Class::TAX_CLASS_TYPE_CUSTOMER)
             ->toOptionArray();
         
-        $rates = Mage::getModel('tax/calculation_rate')
-            ->getCollection()
-            ->toOptionArray();
+        $rates = $taxRateModel->getCollection()->toOptionArray();
         
         $fields = array(
             'code' => array(
@@ -118,11 +128,15 @@ class BL_CustomGrid_Model_Grid_Type_Tax_Rule extends BL_CustomGrid_Model_Grid_Ty
     
     protected function _loadEditedEntity($blockType, BL_CustomGrid_Object $config, array $params, $entityId)
     {
-        return Mage::getModel('tax/calculation_rule')->load($entityId);
+        /** @var $taxRule Mage_Tax_Model_Calculation_Rule */
+        $taxRule = Mage::getModel('tax/calculation_rule');
+        $taxRule->load($entityId);
+        return $taxRule;
     }
     
     protected function _getLoadedEntityName($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
+        /** @var $entity Mage_Tax_Model_Calculation_Rule */
         return $entity->getCode();
     }
     
@@ -138,6 +152,7 @@ class BL_CustomGrid_Model_Grid_Type_Tax_Rule extends BL_CustomGrid_Model_Grid_Ty
         $entity,
         &$value
     ) {
+        /** @var $entity Mage_Tax_Model_Calculation_Rule */
         $entity->addData(
             array(
                 'tax_rate' => array_unique($entity->getRates()),

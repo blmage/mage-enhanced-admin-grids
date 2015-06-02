@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -34,13 +34,23 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
     }
     
     /**
-     * Retrieve current request object
+     * Return current request object
      *
      * @return Mage_Core_Controller_Request_Http
      */
     protected function _getRequest()
     {
         return Mage::app()->getRequest();
+    }
+    
+    /**
+     * Return base helper
+     * 
+     * @return BL_CustomGrid_Helper_Data
+     */
+    protected function _getHelper()
+    {
+        return Mage::helper('customgrid');
     }
     
     /**
@@ -113,9 +123,12 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
         if (!$this->hasData('grid_models_collection')) {
             if (($moduleName = $this->_getData('module_name'))
                 && ($controllerName = $this->_getData('controller_name'))) {
-                $collection = Mage::getModel('customgrid/grid')
-                    ->getCollection()
-                    ->addFieldToFilter('module_name', $moduleName)
+                /**
+                 * @var $collection BL_CustomGrid_Model_Mysql4_Grid_Collection
+                 */
+                $collection = Mage::getResourceModel('customgrid/grid_collection');
+                
+                $collection->addFieldToFilter('module_name', $moduleName)
                     ->addFieldToFilter('controller_name', $controllerName)
                     ->load();
                 
@@ -138,6 +151,7 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
         $matchingGridModel = null;
         
         foreach ($this->getGridModelsCollection() as $gridModel) {
+            /** @var $gridModel BL_CustomGrid_Model_Grid */
             if ($gridModel->matchGridBlock($blockType, $blockId)) {
                 if (!$exceptExcluded || !$this->isExcludedGridModel($gridModel)) {
                     $matchingGridModel = $gridModel;
@@ -160,10 +174,12 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
         $dataKey = 'excluded_grid_models/' . $gridModel->getId();
         
         if (!$this->hasData($dataKey)) {
+            /** @var $configHelper BL_CustomGrid_Helper_Config */
+            $configHelper = Mage::helper('customgrid/config');
+            
             $this->setData(
                 $dataKey,
-                Mage::helper('customgrid/config')
-                    ->isExcludedGridBlock($gridModel->getBlockType(), $gridModel->getRewritingClassName())
+                $configHelper->isExcludedGridBlock($gridModel->getBlockType(), $gridModel->getRewritingClassName())
             );
         }
         
@@ -174,7 +190,7 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
      * Add the given grid model to the list of excluded grid models
      * 
      * @param BL_CustomGrid_Model_Grid $gridModel Excluded grid model
-     * @return this
+     * @return BL_CustomGrid_Model_Observer
      */
     public function addExcludedGridModel(BL_CustomGrid_Model_Grid $gridModel)
     {
@@ -221,7 +237,7 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
      * Add the given block type to the list of rewrited block types
      * 
      * @param string $blockType Rewrited block type
-     * @return this
+     * @return BL_CustomGrid_Model_Observer
      */
     public function addRewritedBlockType($blockType)
     {
@@ -238,13 +254,20 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
     {
         foreach ($rewriteErrors as $error) {
             if (isset($error['rewriter']) && isset($error['exception'])) {
-                if (($isSuccess && $error['rewriter']->getDisplayErrorsIfSuccess())
-                    || (!$isSuccess && $error['rewriter']->getDisplayErrors())) {
-                    Mage::getSingleton('customgrid/session')->addError($error['exception']->getMessage());
+                /** @var $rewriter BL_CustomGrid_Model_Grid_Rewriter_Abstract */
+                $rewriter  = $error['rewriter'];
+                /** @var $exception Exception */
+                $exception = $error['exception'];
+                
+                if (($isSuccess && $rewriter->getDisplayErrorsIfSuccess())
+                    || (!$isSuccess && $rewriter->getDisplayErrors())) {
+                    /** @var $session BL_CustomGrid_Model_Session */
+                    $session = Mage::getSingleton('customgrid/session');
+                    $session->addError($exception->getMessage());
                 }
-                if (($isSuccess && $error['rewriter']->getLogErrorsIfSuccess())
-                    || (!$isSuccess && $error['rewriter']->getLogErrors())) {
-                    Mage::logException($error['exception']);
+                if (($isSuccess && $rewriter->getLogErrorsIfSuccess())
+                    || (!$isSuccess && $rewriter->getLogErrors())) {
+                    Mage::logException($exception);
                 }
             }
         }
@@ -262,27 +285,31 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
         
         if (!$this->isRewritedBlockType($blockType)) {
             list($configGroup, $configClass, $rewritingClassName) = $this->getBlockTypeInfos($blockType);
-            $rewriters = Mage::getSingleton('customgrid/grid_rewriter_config')->getEnabledRewriters(true);
-            $rewriteErrors = array();
-            $blcgClass = false;
+            $blcgClassName = false;
             
-            if (!$originalClass = $rewritingClassName) {
-                $originalClass = $this->getBlockClassName($configGroup, $configClass);
+            /** @var $rewritersConfig BL_CustomGrid_Model_Grid_Rewriter_Config */
+            $rewritersConfig = Mage::getSingleton('customgrid/grid_rewriter_config');
+            $rewriters = $rewritersConfig->getEnabledRewriters(true);
+            $rewriteErrors = array();
+            
+            if (!$originalClassName = $rewritingClassName) {
+                $originalClassName = $this->getBlockClassName($configGroup, $configClass);
             }
             
             foreach ($rewriters as $rewriter) {
+                /** @var $rewriter BL_CustomGrid_Model_Grid_Rewriter_Abstract */
                 try {
-                    $blcgClass = $rewriter->rewriteGrid($originalClass, $blockType);
+                    $blcgClassName = $rewriter->rewriteGrid($originalClassName, $blockType);
                 } catch (Exception $e) {
-                    $blcgClass = false;
+                    $blcgClassName = false;
                     $rewriteErrors[] = array('exception' => $e, 'rewriter' => $rewriter);
                 }
-                if ($blcgClass) {
+                if ($blcgClassName) {
                     break;
                 }
             }
             
-            if ($blcgClass) {
+            if ($blcgClassName) {
                 $this->_handleGridBlockRewriteErrors($rewriteErrors, true);
                 
                 if ($rewritingClassName) {
@@ -293,15 +320,17 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
                 $rewriteXml = new Varien_Simplexml_Config();
                 
                 $rewriteXml->loadString(
-                    '<config><global>'
+                    '<config>'
+                    . '<global>'
                     . '<blocks>'
                     . '<' . $configGroup . '>'
                     . '<rewrite>'
-                    . '<' . $configClass . '>' . $blcgClass . '</' . $configClass . '>'
+                    . '<' . $configClass . '>' . $blcgClassName . '</' . $configClass . '>'
                     . '</rewrite>'
                     . '</' . $configGroup . '>'
                     . '</blocks>'
-                    . '</global></config>'
+                    . '</global>'
+                    . '</config>'
                 );
                 
                 $this->_getMageConfig()->extend($rewriteXml, true);
@@ -327,6 +356,7 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
         $request = $this->_getRequest();
         
         if ((!$gridId = $request->getParam('grid_id', null))
+            /** @var $gridModel BL_CustomGrid_Model_Grid */
             || (!$gridModel = Mage::getModel('customgrid/grid')->load($gridId))
             || !$gridModel->getId()
             || $gridModel->getDisabled()
@@ -343,7 +373,7 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
      * Register given layout handles, they will be added to the layout update upon layout load
      * 
      * @param string|array $handle
-     * @return this
+     * @return BL_CustomGrid_Model_Observer
      */
     public function registerAdditionalLayoutHandles(array $layoutHandles)
     {
@@ -364,6 +394,7 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
         $gridModelsCollection = $this->getGridModelsCollection();
         
         foreach ($gridModelsCollection as $gridModel) {
+            /** @var $gridModel BL_CustomGrid_Model_Grid */
             if ($this->isObsoleteGridModel($gridModel)) {
                 // Remove obsolete grid models from the collection to avoid them later being used by confound
                 $gridModelsCollection->removeItemByKey($gridModel->getId());
@@ -392,9 +423,12 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
     public function beforeControllerActionLayoutLoad(Varien_Event_Observer $observer)
     {
         if ($layout = $observer->getLayout()) {
+            /**
+             * @var $layout Mage_Core_Model_Layout
+             */
             $layoutHandles = $this->getDataSetDefault('additional_layout_handles', array());
             
-            if (Mage::helper('customgrid')->isMageVersionLesserThan(1, 7)) {
+            if ($this->_getHelper()->isMageVersionLesserThan(1, 7)) {
                 $layoutHandles[] = 'blcg_magento_version_to_16';
             } else {
                 $layoutHandles[] = 'blcg_magento_version_from_17';
@@ -418,7 +452,7 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
             $blockId   = $gridBlock->getId();
             
             if ($gridModel = $this->getGridModel($blockType, $blockId)) {
-                if (Mage::helper('customgrid')->isRewritedGridBlock($gridBlock)) {
+                if ($this->_getHelper()->isRewritedGridBlock($gridBlock)) {
                     $gridBlock->blcg_setGridModel($gridModel);
                     $gridBlock->blcg_setTypeModel($gridModel->getTypeModel());
                 } else {
@@ -442,41 +476,48 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
         BL_CustomGrid_Model_Grid $gridModel,
         $isNewGridModel
     ) {
-        $helper = Mage::helper('customgrid');
+        $helper = $this->_getHelper();
         $layout = $gridBlock->getLayout();
         
         // Apply main blocks
+        
+        /** @var $configBlock BL_CustomGrid_Block_Widget_Grid_Config */
+        $configBlock  = $layout->createBlock('customgrid/widget_grid_config');
+        /** @var $editorBlock BL_CustomGrid_Block_Widget_Grid_Columns_Editor */
+        $editorBlock  = $layout->createBlock('customgrid/widget_grid_columns_editor');
+        /** @var $filtersBlock BL_CustomGrid_Block_Widget_Grid_Columns_Filters */
+        $filtersBlock = $layout->createBlock('customgrid/widget_grid_columns_filters');
+        
         $gridBlock->setChild(
             'blcg_grid_config',
-            $layout->createBlock('customgrid/widget_grid_config')
-                ->setGridBlock($gridBlock)
+            $configBlock->setGridBlock($gridBlock)
                 ->setGridModel($gridModel)
                 ->setIsNewGridModel($isNewGridModel)
         );
         
         $gridBlock->setChild(
             'blcg_grid_columns_editor',
-            $layout->createBlock('customgrid/widget_grid_columns_editor')
-                ->setGridBlock($gridBlock)
+            $editorBlock->setGridBlock($gridBlock)
                 ->setGridModel($gridModel)
                 ->setIsNewGridModel($isNewGridModel)
         );
         
         $gridBlock->setChild(
             'blcg_grid_columns_filters',
-            $layout->createBlock('customgrid/widget_grid_columns_filters')
-                ->setGridBlock($gridBlock)
+            $filtersBlock->setGridBlock($gridBlock)
                 ->setGridModel($gridModel)
                 ->setIsNewGridModel($isNewGridModel)
         );
         
         if (!$isNewGridModel) {
             // Rearrange filter buttons
+            
+            /** @var $filterButtonsList Mage_Core_Block_Text_List */
             $filterButtonsList   = $layout->createBlock('core/text_list');
             $resetFilterButton   = $gridBlock->getChild('reset_filter_button');
-            $defaultFilterButton = $layout->createBlock('customgrid/widget_grid_button_default_filter_reapply')
-                ->setGridBlock($gridBlock)
-                ->setGridModel($gridModel);
+            $defaultFilterButton = $layout->createBlock('customgrid/widget_grid_button_default_filter_reapply');
+            /** @var $defaultFilterButton BL_CustomGrid_Block_Widget_Grid_Button_Default_Filter_Reapply */
+            $defaultFilterButton->setGridBlock($gridBlock)->setGridModel($gridModel);
             
             if (!$gridModel->getHideFilterResetButton() && $resetFilterButton) {
                 $filterButtonsList->append($resetFilterButton);
@@ -498,6 +539,43 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
     }
     
     /**
+     * Handle the given output grid block
+     * 
+     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Output grid block
+     */
+    protected function _handleOutputGridBlock(Mage_Adminhtml_Block_Widget_Grid $gridBlock)
+    {
+        $blockId   = $gridBlock->getId();
+        $blockType = $gridBlock->getType();
+        $isNewGridModel = false;
+        
+        if (is_null($gridModel = $this->getGridModel($blockType, $blockId, false))) {
+            /** @var $configHelper BL_CustomGrid_Helper_Config */
+            $configHelper = Mage::helper('customgrid/config');
+            
+            if (!$rewritingClassName = $this->getData('original_rewrites/' . $blockType)) {
+                list(,, $rewritingClassName) = $this->getBlockTypeInfos($blockType);
+            }
+            if ($configHelper->isExcludedGridBlock($blockType, $rewritingClassName)) {
+                return;
+            }
+            
+            /** @var $gridModel BL_CustomGrid_Model_Grid */
+            $gridModel = Mage::getModel('customgrid/grid');
+            $gridModel->setId(null)
+                ->setModuleName($this->getModuleName())
+                ->setControllerName($this->getControllerName())
+                ->setRewritingClassName($rewritingClassName);
+            
+            $isNewGridModel = true;
+        }
+        
+        if (!$gridModel->getDisabled() && !$this->isExcludedGridModel($gridModel)) {
+            $this->_prepareGridBlock($gridBlock, $gridModel, $isNewGridModel);
+        }
+    }
+    
+    /**
      * Callback for the "core_block_abstract_to_html_before" event observer
      * Create new grid models when necessary, set own sub blocks and custom template to the rewrited grid blocks
      *
@@ -507,31 +585,10 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
     {
         if (($gridBlock = $observer->getEvent()->getBlock())
             && ($gridBlock instanceof Mage_Adminhtml_Block_Widget_Grid)
+            /** @var $gridBlock Mage_Adminhtml_Block_Widget_Grid */
             && ($gridBlock->getTemplate() == 'widget/grid.phtml')
-            && ($blockType = $gridBlock->getType())) {
-            $blockId = $gridBlock->getId();
-            $isNewGridModel = false;
-            
-            if (is_null($gridModel = $this->getGridModel($blockType, $blockId, false))) {
-                if (!$rewritingClassName = $this->getData('original_rewrites/' . $blockType)) {
-                    list(,, $rewritingClassName) = $this->getBlockTypeInfos($blockType);
-                }
-                if (Mage::helper('customgrid/config')->isExcludedGridBlock($blockType, $rewritingClassName)) {
-                    return;
-                }
-                
-                $gridModel = Mage::getModel('customgrid/grid')
-                    ->setId(null)
-                    ->setModuleName($this->getModuleName())
-                    ->setControllerName($this->getControllerName())
-                    ->setRewritingClassName($rewritingClassName);
-                
-                $isNewGridModel = true;
-            }
-            
-            if (!$gridModel->getDisabled() && !$this->isExcludedGridModel($gridModel)) {
-                $this->_prepareGridBlock($gridBlock, $gridModel, $isNewGridModel);
-            }
+            && $gridBlock->getType()) {
+            $this->_handleOutputGridBlock($gridBlock);
         }
     }
     
@@ -545,14 +602,16 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
      */
     public function afterBlockToHtml(Varien_Event_Observer $observer)
     {
-        if (Mage::helper('customgrid')->isAjaxRequest()
+        if ($this->_getHelper()->isAjaxRequest()
             && !$this->hasData('has_output_ajax_messages_block')
             && ($transport = $observer->getEvent()->getTransport())
             && ($gridBlock = $observer->getEvent()->getBlock())
             && ($gridBlock instanceof Mage_Adminhtml_Block_Widget_Grid)) {
+            /** @var $gridBlock Mage_Adminhtml_Block_Widget_Grid */
             $layout = $gridBlock->getLayout();
             
             if (!$messagesBlock = $layout->getBlock('blcg.messages')) {
+                /** @var $messagesBlock BL_CustomGrid_Block_Messages */
                 $messagesBlock = $layout->createBlock('customgrid/messages');
             }
             

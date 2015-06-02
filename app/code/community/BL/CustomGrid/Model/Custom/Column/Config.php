@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -93,9 +93,11 @@ class BL_CustomGrid_Model_Custom_Column_Config
     protected function _getParsedBaseParams(array $params)
     {
         if (isset($params['@'])) {
+            /** @var $baseHelper BL_CustomGrid_Helper_Data */
+            $baseHelper = Mage::helper('customgrid');
             $module = (isset($params['@']['module']) ? $params['@']['module'] : 'customgrid'); 
             $translatable = (isset($params['@']['translate']) ? explode(' ', $params['@']['translate']) : array());
-            $helper = Mage::helper('customgrid')->getSafeHelper((string) $module);
+            $helper = $helper->getSafeHelper((string) $module);
             unset($params['@']);
         } else {
             $translatable = false;
@@ -122,15 +124,15 @@ class BL_CustomGrid_Model_Custom_Column_Config
     
     protected function _loadXmlElementCustomizationParams(Varien_Simplexml_Element $xmlElement)
     {
-        /** @var $configHelper BL_CustomGrid_Helper_Xml_Config */
-        $configHelper = Mage::helper('customgrid/xml_config');
+        /** @var $helper BL_CustomGrid_Helper_Xml_Config */
+        $helper = Mage::helper('customgrid/xml_config');
         $params = array();
         
         foreach ($xmlElement->asCanonicalArray() as $key => $data) {
             if (is_array($data)) {
                 $data['sort_order'] = (isset($data['sort_order']) ? (int) $data['sort_order'] : 'top');
-                $data['values'] = $configHelper->getElementParamOptionsValues($data);
-                $data['helper_block'] = $configHelper->getElementParamHelperBlock($data);
+                $data['values'] = $helper->getElementParamOptionsValues($data);
+                $data['helper_block'] = $helper->getElementParamHelperBlock($data);
                 $params[$key] = $data;
             }
         }
@@ -234,9 +236,11 @@ class BL_CustomGrid_Model_Custom_Column_Config
             $xmlValues = $xmlElement->asArray();
         }
         
+        /** @var $baseHelper BL_CustomGrid_Helper_Data */
+        $baseHelper = Mage::helper('customgrid');
         $module = (isset($xmlValues['@']['module']) ? (string) $xmlValues['@']['module'] : 'customgrid'); 
         $customColumn->setModule($module);
-        $helper = Mage::helper('customgrid')->getSafeHelper($module);
+        $helper = $baseHelper->getSafeHelper($module);
         
         $customColumn->addData($this->_getRawFieldsFromXmlValues($xmlValues));
         $customColumn->addData($this->_getBooleanFieldsFromXmlValues($xmlValues));

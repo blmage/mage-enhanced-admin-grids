@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -18,6 +18,11 @@ abstract class BL_CustomGrid_Block_Column_Renderer_Config_Abstract extends BL_Cu
     protected $_blockGroup = 'customgrid';
     protected $_mode = 'config';
     
+    /**
+     * Return the current column renderer
+     * 
+     * @return BL_CustomGrid_Model_Column_Renderer_Abstract
+     */
     abstract public function getRenderer(); 
     
     protected function _beforeToHtml()
@@ -28,6 +33,7 @@ abstract class BL_CustomGrid_Block_Column_Renderer_Config_Abstract extends BL_Cu
             . ');';
         
         if ($formBlock = $this->getChild('form')) {
+            /** @var $formBlock BL_CustomGrid_Block_Column_Renderer_Config_Form_Abstract */
             $formBlock->setConfigValues($this->getConfigValues());
         }
         
@@ -49,11 +55,16 @@ abstract class BL_CustomGrid_Block_Column_Renderer_Config_Abstract extends BL_Cu
         return 'blcgRendererConfigForm';
     }
     
-    public function getUseDefaultForm()
+    public function getUseDefaultJsFormObject()
     {
         return false;
     }
     
+    /**
+     * Return the HTML ID of the target element for the renderer values
+     * 
+     * @return string
+     */
     public function getRendererTargetId()
     {
         return $this->getDataSetDefault('renderer_target_id', '');

@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -66,13 +66,13 @@ class BL_CustomGrid_Model_Grid_Type_Product extends BL_CustomGrid_Model_Grid_Typ
     
     protected function _getAvailableAttributes($blockType)
     {
-        $attributes = Mage::getResourceModel('catalog/product')
-            ->loadAllAttributes()
-            ->getAttributesByCode();
-        
+        /** @var $productResource Mage_Catalog_Model_Resource_Eav_Mysql4_Product */
+        $productResource = Mage::getResourceModel('catalog/product');
+        $attributes = $productResource->loadAllAttributes()->getAttributesByCode();
         $availableAttributes = array();
         
         foreach ($attributes as $attribute) {
+            /** @var $attribute Mage_Eav_Model_Entity_Attribute */
             if ($this->_isAvailableAttribute($blockType, $attribute)) {
                 $availableAttributes[$attribute->getAttributeCode()] = $attribute;
             }
@@ -97,15 +97,15 @@ class BL_CustomGrid_Model_Grid_Type_Product extends BL_CustomGrid_Model_Grid_Typ
     
     protected function _checkAttributeEditability($blockType, Mage_Eav_Model_Entity_Attribute $attribute)
     {
-        if (parent::_checkAttributeEditability($blockType, $attribute)) {
-            return ($attribute->getFrontend()->getInputType() != 'media_image');
-        }
-        return false;
+        return parent::_checkAttributeEditability($blockType, $attribute)
+            && ($attribute->getFrontend()->getInputType() != 'media_image');
     }
     
     protected function _getAdditionalEditableAttributes($blockType)
     {
-        return array('sku' => Mage::getResourceModel('catalog/product')->getAttribute('sku'));
+        /** @var $productResource Mage_Catalog_Model_Resource_Eav_Mysql4_Product */
+        $productResource = Mage::getResourceModel('catalog/product');
+        return array('sku' => $productResource->getAttribute('sku'));
     }
     
     protected function _prepareEditableAttributeCommonConfig(
@@ -160,17 +160,31 @@ class BL_CustomGrid_Model_Grid_Type_Product extends BL_CustomGrid_Model_Grid_Typ
         return array('entity_id');
     }
     
+    /**
+     * Return the ID of the default store
+     * 
+     * @return int
+     */
     protected function _getDefaultStoreId()
     {
         return Mage_Catalog_Model_Abstract::DEFAULT_STORE_ID;
     }
     
-    protected function _getProductInventoryData($product, $field, $useConfigDefault=false)
+    /**
+     * Return the specified inventory data from the given product
+     * 
+     * @param Mage_Catalog_Model_Product $product Product
+     * @param string $field Inventory field name
+     * @param bool $useConfigDefault Whether the field uses config values by default
+     * @return mixed
+     */
+    protected function _getProductInventoryData(Mage_Catalog_Model_Product $product, $field, $useConfigDefault = false)
     {
-        if ($product->getStockItem()) {
+        if ($stockItem = $product->getStockItem()) {
+            /** @var $stockItem Mage_CatalogInventory_Model_Stock_Item */
             if (!$useConfigDefault
-                || ($product->getStockItem()->getData('use_config_' . $field) == 0)) {
-                return $product->getStockItem()->getDataUsingMethod($field);
+                || ($stockItem->getData('use_config_' . $field) == 0)) {
+                return $stockItem->getDataUsingMethod($field);
             }
         }
         return Mage::getStoreConfig(Mage_CatalogInventory_Model_Stock_Item::XML_PATH_ITEM . $field);
@@ -188,12 +202,17 @@ class BL_CustomGrid_Model_Grid_Type_Product extends BL_CustomGrid_Model_Grid_Typ
             }
         }
         
-        Mage::getSingleton('cms/wysiwyg_config')->setStoreId($storeId);
+        /** @var $wysiwygConfig Mage_Cms_Model_Wysiwyg_Config */
+        $wysiwygConfig = Mage::getSingleton('cms/wysiwyg_config');
+        $wysiwygConfig->setStoreId($storeId);
         
-        return Mage::getModel('catalog/product')
-            ->setStoreId($storeId)
+        /** @var $product Mage_Catalog_Model_Product */
+        $product = Mage::getModel('catalog/product');
+        $product->setStoreId($storeId)
             ->setData('_edit_mode', true)
             ->load($entityId);
+        
+        return $product;
     }
     
     protected function _getEditedEntityRegistryKeys($blockType, BL_CustomGrid_Object $config, array $params, $entity)
@@ -203,11 +222,14 @@ class BL_CustomGrid_Model_Grid_Type_Product extends BL_CustomGrid_Model_Grid_Typ
     
     protected function _checkEntityEditableField($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
+        /** @var $entity Mage_Catalog_Model_Product */
         if (parent::_checkEntityEditableField($blockType, $config, $params, $entity)) {
             if ($config->getValueId() == 'qty') {
                 $helper = $this->_getBaseHelper();
+                /** @var $coreHelper Mage_Core_Helper_Data */
+                $coreHelper = Mage::helper('core');
                 
-                if (!Mage::helper('core')->isModuleEnabled('Mage_CatalogInventory')) {
+                if (!$coreHelper->isModuleEnabled('Mage_CatalogInventory')) {
                     Mage::throwException($helper->__('The "Mage_CatalogInventory" module is disabled'));
                 }
                 if ($entity->isComposite()) {
@@ -227,11 +249,15 @@ class BL_CustomGrid_Model_Grid_Type_Product extends BL_CustomGrid_Model_Grid_Typ
     
     protected function _checkEntityEditableAttribute($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
+        /** @var $entity Mage_Catalog_Model_Product */
         if (parent::_checkEntityEditableAttribute($blockType, $config, $params, $entity)) {
             $helper = $this->_getBaseHelper();
             $isEditable = false;
-            $attributeCode = $config->getData('config/attribute')->getAttributeCode();
             $productAttributes = $entity->getAttributes();
+            
+            /** @var $attribute Mage_Eav_Model_Entity_Attribute */
+            $attribute = $config->getData('config/attribute');
+            $attributeCode = $attribute->getAttributeCode();
             
             foreach ($productAttributes as $attribute) {
                 if ($attribute->getAttributeCode() == $attributeCode) {
@@ -271,6 +297,7 @@ class BL_CustomGrid_Model_Grid_Type_Product extends BL_CustomGrid_Model_Grid_Typ
     
     protected function _getUseDefaultValueForAttribute(Mage_Eav_Model_Entity_Attribute $attribute, $entity)
     {
+        /** @var $entity Mage_Catalog_Model_Product */
         if (!$attribute->isScopeGlobal() && $entity->getStoreId()) {
             // This method ensures that the attributes (other than the edited one) using default values
             // for the current store (ie values from higher scopes) will keep this behaviour after save
@@ -297,7 +324,9 @@ class BL_CustomGrid_Model_Grid_Type_Product extends BL_CustomGrid_Model_Grid_Typ
     protected function _getUseDefaultValueForSave(BL_CustomGrid_Object $config, array $params, $formName = null)
     {
         if (is_null($formName)) {
-            $formName = $config->getData('config/attribute')->getAttributeCode();
+            /** @var $attribute Mage_Eav_Model_Entity_Attribute */
+            $attribute = $config->getData('config/attribute');
+            $formName  = $attribute->getAttributeCode();
         }
         return isset($params['global'])
             && isset($params['global']['use_default'])
@@ -308,7 +337,9 @@ class BL_CustomGrid_Model_Grid_Type_Product extends BL_CustomGrid_Model_Grid_Typ
     protected function _prepareDefaultValues(BL_CustomGrid_Object $config, $entity)
     {
         $attributes = $entity->getAttributes();
-        $editedAttributeCode = $config->getData('config/attribute')->getAttributeCode();
+        /** @var $attribute Mage_Eav_Model_Entity_Attribute */
+        $attribute  = $config->getData('config/attribute');
+        $editedAttributeCode = $attribute->getAttributeCode();
         
         foreach ($attributes as $attribute) {
             $attributeCode = $attribute->getAttributeCode();
@@ -326,8 +357,10 @@ class BL_CustomGrid_Model_Grid_Type_Product extends BL_CustomGrid_Model_Grid_Typ
     
     protected function _applyEditedFieldValue($blockType, BL_CustomGrid_Object $config, array $params, $entity, $value)
     {
+        /** @var $entity Mage_Catalog_Model_Product */
         if ($config->getValueId() == 'qty') {
             $productId = $entity->getId();
+            /** @var $stockItem Mage_CatalogInventory_Model_Stock_Item */
             $stockItem = Mage::getModel('cataloginventory/stock_item');
             $stockItem->setData(array());
             $stockItem->loadByProduct($productId)->setProductId($productId);
@@ -346,8 +379,10 @@ class BL_CustomGrid_Model_Grid_Type_Product extends BL_CustomGrid_Model_Grid_Typ
     
     protected function _saveEditedFieldValue($blockType, BL_CustomGrid_Object $config, array $params, $entity, $value)
     {
+        /** @var $entity Mage_Catalog_Model_Product */
         if ($config->getValueId() == 'qty') {
             if ($stockItem = $entity->getData('_blcg_gtp_stock_item')) {
+                /** @var $stockItem Mage_CatalogInventory_Model_Stock_Item */
                 $stockItem->save();
             }
             return true;
@@ -386,10 +421,11 @@ class BL_CustomGrid_Model_Grid_Type_Product extends BL_CustomGrid_Model_Grid_Typ
         $entity,
         &$value
     ) {
+        /** @var $entity Mage_Catalog_Model_Product */
+        
         if (Mage::app()->isSingleStoreMode()) {
             $entity->setWebsiteIds(array(Mage::app()->getStore(true)->getWebsite()->getId()));
         }
-        
         if (isset($params['global']) && isset($params['global']['url_key_create_redirect'])) {
             $entity->setData('save_rewrites_history', (bool) $params['global']['url_key_create_redirect']);
         }
@@ -406,6 +442,7 @@ class BL_CustomGrid_Model_Grid_Type_Product extends BL_CustomGrid_Model_Grid_Typ
         $entity,
         $value
     ) {
+        /** @var $entity Mage_Catalog_Model_Product */
         parent::_applyEditedAttributeValue($blockType, $config, $params, $entity, $value);
         $entity->validate();
         return $this;
@@ -428,9 +465,11 @@ class BL_CustomGrid_Model_Grid_Type_Product extends BL_CustomGrid_Model_Grid_Typ
     
     protected function _getSavedFieldValueForRender($blockType, BL_CustomGrid_Object $config, array $params, $entity)
     {
+        /** @var $entity Mage_Catalog_Model_Product */
         if ($config->getValueId() == 'qty') {
             if ($stockItem = $entity->getStockItem()) {
                 // Reload stock item to get the updated value
+                /** @var $stockItem Mage_CatalogInventory_Model_Stock_Item */
                 $stockItem->setProductId(null)->assignProduct($entity);
             }
             $value = $this->_getProductInventoryData($entity, 'qty')*1;
@@ -466,8 +505,9 @@ class BL_CustomGrid_Model_Grid_Type_Product extends BL_CustomGrid_Model_Grid_Typ
         Mage_Adminhtml_Block_Widget_Grid $gridBlock, 
         Varien_Data_Collection $collection
     ) {
-        if ($collection instanceof Mage_Catalog_Model_Resource_Eav_Mysql4_Product_Collection ||
-            $collection instanceof Mage_Catalog_Model_Resource_Product_Collection) {
+        if (($collection instanceof Mage_Catalog_Model_Resource_Eav_Mysql4_Product_Collection)
+            || ($collection instanceof Mage_Catalog_Model_Resource_Product_Collection)) {
+            /** @var $collection Mage_Catalog_Model_Resource_Eav_Mysql4_Product_Collection */
             $collection->addWebsiteNamesToResult();
         }
         return $this;

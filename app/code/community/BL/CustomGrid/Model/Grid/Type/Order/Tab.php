@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -25,9 +25,17 @@ class BL_CustomGrid_Model_Grid_Type_Order_Tab extends BL_CustomGrid_Model_Grid_T
         );
     }
     
+    /**
+     * Return the ID of the current order
+     * 
+     * @return int
+     */
     protected function _getOrderId()
     {
-        return (($order = Mage::registry('current_order')) ? $order->getId() : 0);
+        return ($order = Mage::registry('current_order'))
+            /** @var $order Mage_Sales_Model_Order */
+            ? $order->getId()
+            : 0;
     }
     
     protected function _getExportTypes($blockType)
@@ -46,6 +54,7 @@ class BL_CustomGrid_Model_Grid_Type_Order_Tab extends BL_CustomGrid_Model_Grid_T
     {
         if (is_null($gridBlock)) {
             if (!Mage::registry('current_order')) {
+                /** @var $order Mage_Sales_Model_Order */
                 $order = Mage::getModel('sales/order');
                 
                 if ($orderId = $this->_getRequest()->getParam('order_id')) {

@@ -9,25 +9,34 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class BL_CustomGrid_Column_Renderer_CollectionController extends BL_CustomGrid_Controller_Grid_Action
 {
+    /**
+     * Return the config model for collection column renderers
+     * 
+     * @return BL_CustomGrid_Model_Column_Renderer_Config_Collection
+     */
+    protected function _getConfig()
+    {
+        return Mage::getSingleton('customgrid/column_renderer_config_collection');
+    }
+    
+    /**
+     * Initialize and register the current collection column renderer from the current request
+     * 
+     * @return BL_CustomGrid_Model_Column_Renderer_Attribute_Abstract
+     */
     protected function _initRenderer()
     {
         if ($code = $this->getRequest()->getParam('code')) {
-            $renderer = Mage::getSingleton('customgrid/column_renderer_config_collection')
-                ->getObjectElementByCode($code);
-            
-            if ($renderer->isEmpty()) {
-                $renderer = null;
-            }
+            $renderer = $this->_getConfig()->getRendererModelByCode($code);
         } else {
             $renderer = null;
         }
-        
         Mage::register('blcg_collection_column_renderer', $renderer);
         return $renderer;
     }
@@ -38,13 +47,12 @@ class BL_CustomGrid_Column_Renderer_CollectionController extends BL_CustomGrid_C
             $this->loadLayout('blcg_empty');
             
             if ($configBlock = $this->getLayout()->getBlock('blcg.column_renderer.collection.config')) {
+                /** @var $configBlock BL_CustomGrid_Block_Column_Renderer_Collection_Config */
                 if ($rendererTargetId = $this->getRequest()->getParam('renderer_target_id')) {
                     $configBlock->setRendererTargetId($rendererTargetId);
                 }
                 if ($params = $this->getRequest()->getParam('params')) {
-                    $configBlock->setConfigValues(
-                        Mage::getSingleton('customgrid/column_renderer_config_collection')->decodeParameters($params)
-                    );
+                    $configBlock->setConfigValues($this->_getConfig()->decodeParameters($params));
                 }
             }
             
@@ -65,7 +73,7 @@ class BL_CustomGrid_Column_Renderer_CollectionController extends BL_CustomGrid_C
     {
         $this->_saveConfigFormFieldsetsStates();
         $params = $this->getRequest()->getPost('parameters', array());
-        $params = Mage::getSingleton('customgrid/column_renderer_config_collection')->encodeParameters($params);
+        $params = $this->_getConfig()->encodeParameters($params);
         $this->_setActionSuccessJsonResponse(array('parameters' => $params));
     }
 }

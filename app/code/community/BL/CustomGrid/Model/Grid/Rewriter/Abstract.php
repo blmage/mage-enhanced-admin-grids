@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -17,32 +17,60 @@ abstract class BL_CustomGrid_Model_Grid_Rewriter_Abstract extends BL_CustomGrid_
 {
     const REWRITE_CODE_VERSION = 3; // bump this value when significant changes are made to the rewriting code
     
-    protected function _getBlcgClassPrefix()
+    /**
+     * Return the fixed base of the rewriting class names used by the extension
+     * 
+     * @return string
+     */
+    protected function _getBlcgClassNameBase()
     {
         return 'BL_CustomGrid_Block_Rewrite_';
     }
     
-    protected function _getBlcgClass($originalClass, $blockType)
+    /**
+     * Return the rewriting class name corresponding to the the given original class name
+     * 
+     * @param string $originalClassName Original class name
+     * @param string $blockType Grid block type
+     * @return string
+     */
+    protected function _getBlcgClassName($originalClassName, $blockType)
     {
-        $classParts = array_map('ucfirst', array_map('strtolower', explode('_', $originalClass)));
-        return $this->_getBlcgClassPrefix() . implode('_', $classParts);
+        $classParts = array_map('ucfirst', array_map('strtolower', explode('_', $originalClassName)));
+        return $this->_getBlcgClassNameBase() . implode('_', $classParts);
     }
     
-    abstract protected function _rewriteGrid($blcgClass, $originalClass, $blockType);
+    /**
+     * Apply the rewrite corresponding to the given class names
+     * 
+     * @param string $blcgClassName Rewriting class name
+     * @param string $originalClassName Original class name
+     * @param string $blockType Grid block type
+     * @return BL_CustomGrid_Model_Grid_Rewriter_Abstract
+     */
+    abstract protected function _rewriteGrid($blcgClassName, $originalClassName, $blockType);
     
-    final public function rewriteGrid($originalClass, $blockType)
+    /**
+     * Rewrite the grid block corresponding to the given class name
+     * 
+     * @param string $originalClassName Original class name
+     * @param string $blockType Grid block type
+     * @return string|false The name of the rewriting class if the rewrite succeeded, false otherwise
+     */
+    final public function rewriteGrid($originalClassName, $blockType)
     {
+        /** @var $helper BL_CustomGrid_Helper_Data */
         $helper = Mage::helper('customgrid');
-        $blcgClass = $this->_getBlcgClass($originalClass, $blockType);
+        $blcgClassName  = $this->_getBlcgClassName($originalClassName, $blockType);
         $rewriteSuccess = false;
         
         try {
-            if (!class_exists($originalClass, true)) {
-                Mage::throwException($helper->__('The original class "%s" does not exist', $originalClass));
+            if (!class_exists($originalClassName, true)) {
+                Mage::throwException($helper->__('The original class "%s" does not exist', $originalClassName));
             }
-            if (class_exists($blcgClass, false)) {
-                if (get_parent_class($blcgClass) !== $originalClass) {
-                    Mage::throwException($helper->__('The rewriting class "%s" already exists', $blcgClass));
+            if (class_exists($blcgClassName, false)) {
+                if (get_parent_class($blcgClassName) !== $originalClassName) {
+                    Mage::throwException($helper->__('The rewriting class "%s" already exists', $blcgClassName));
                 } else {
                     // The existing rewriting class already does what we want to do, so it's actually fine
                     $rewriteSuccess = true;
@@ -50,11 +78,11 @@ abstract class BL_CustomGrid_Model_Grid_Rewriter_Abstract extends BL_CustomGrid_
             }
             
             if (!$rewriteSuccess) {
-                $this->_rewriteGrid($blcgClass, $originalClass, $blockType);
+                $this->_rewriteGrid($blcgClassName, $originalClassName, $blockType);
                 
-                if (!class_exists($blcgClass, true)) {
+                if (!class_exists($blcgClassName, true)) {
                     $message = 'The generated rewriting class "%s" can not be found';
-                    Mage::throwException($helper->__($message, $blcgClass));
+                    Mage::throwException($helper->__($message, $blcgClassName));
                 }
             }
             
@@ -65,12 +93,20 @@ abstract class BL_CustomGrid_Model_Grid_Rewriter_Abstract extends BL_CustomGrid_
             Mage::throwException($helper->__($message, $blockType, $e->getMessage(), $this->getId()));
         }
         
-        return ($rewriteSuccess ? $blcgClass : false);
+        return ($rewriteSuccess ? $blcgClassName : false);
     }
     
-    protected function _getRewriteCode($blcgClass, $originalClass, $blockType)
+    /**
+     * Return the PHP code usable to define the rewriting class corresponding to the given class names
+     * 
+     * @param string $blcgClassName Rewriting class name
+     * @param string $originalClassName Original class name
+     * @param string $blockType Grid block type
+     * @return string
+     */
+    protected function _getRewriteCode($blcgClassName, $originalClassName, $blockType)
     {
-        return 'class ' . $blcgClass . ' extends ' . $originalClass . '
+        return 'class ' . $blcgClassName . ' extends ' . $originalClassName . '
 {
     private $_blcg_gridModel    = null;
     private $_blcg_typeModel    = null;

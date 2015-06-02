@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2013 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
  
@@ -27,13 +27,14 @@ abstract class BL_CustomGrid_Model_Custom_Column_Order_Items_Abstract extends
             $ordersIds = array();
             
             foreach ($collection as $order) {
+                /** @var $order Mage_Sales_Model_Order */
                 $ordersIds[] = $order->getId();
             }
             
             $eventName = 'blcg_custom_column_order_items_list_order_items_collection';
             $items = $this->_getOrdersItemsCollection($ordersIds, true, $eventName);
             $propertyName  = 'sales/order::_items';
-            $itemsProperty = Mage::helper('customgrid/reflection')->getModelReflectionProperty($propertyName, true);
+            $itemsProperty = $this->_getReflectionHelper()->getModelReflectionProperty($propertyName, true);
             
             if ($itemsProperty) {
                 foreach ($collection as $order) {
@@ -41,6 +42,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Order_Items_Abstract extends
                     $orderItems = clone $items;
                     
                     foreach ($orderItems as $item) {
+                        /** @var $item Mage_Sales_Model_Order_Item */
                         if ($item->getOrderId() != $orderId) {
                             $orderItems->removeItemByKey($item->getId());
                         } else {
@@ -55,14 +57,15 @@ abstract class BL_CustomGrid_Model_Custom_Column_Order_Items_Abstract extends
                     $order->setData('_blcg_items_init_error', true);
                 }
                 
-                Mage::getSingleton('customgrid/session')
-                    ->addError(Mage::helper('customgrid')->__('An error occurred while initializing items'));
+                /** @var $session BL_CustomGrid_Model_Session */
+                $session = Mage::getSingleton('customgrid/session');
+                $session->addError($this->_getBaseHelper()->__('An error occurred while initializing items'));
             }
         }
         return $this;
     }
     
-    protected function _getItemsTable()
+    protected function _getItemsTableName()
     {
         return 'sales/order_item';
     }

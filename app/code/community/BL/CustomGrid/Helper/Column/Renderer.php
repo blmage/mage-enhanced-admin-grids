@@ -9,7 +9,7 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -183,6 +183,31 @@ class BL_CustomGrid_Helper_Column_Renderer extends Mage_Core_Helper_Abstract
     }
     
     /**
+     * Return the wildcards usable for text related values
+     * 
+     * @param BL_CustomGrid_Model_Column_Renderer_Abstract $renderer Column renderer
+     * @return array
+     */
+    protected function _getTextWildcards(BL_CustomGrid_Model_Column_Renderer_Abstract $renderer)
+    {
+        /** @var $stringHelper Mage_Core_Helper_String */
+        $stringHelper = Mage::helper('core/string');
+        $values = array();
+        $singleWildcard = strval($renderer->getData('values/single_wildcard'));
+        $multipleWildcard = strval($renderer->getData('values/multiple_wildcard'));
+        
+        if ($stringHelper->strlen($singleWildcard) === 1) {
+            $values['single_wildcard'] = $singleWildcard;
+        }
+        if (($stringHelper->strlen($multipleWildcard) === 1)
+            && ($multipleWildcard !== $singleWildcard)) {
+            $values['multiple_wildcard'] = $multipleWildcard;
+        }
+        
+        return $values;
+    }
+    
+    /**
      * Return text related values
      * 
      * @param BL_CustomGrid_Model_Column_Renderer_Abstract $renderer Column renderer
@@ -217,18 +242,7 @@ class BL_CustomGrid_Helper_Column_Renderer extends Mage_Core_Helper_Abstract
         if ($values['filter_mode_shortcut']
             || ($values['filter_mode'] == BL_CustomGrid_Block_Widget_Grid_Column_Filter_Text::MODE_EXACT_LIKE)
             || ($values['filter_mode'] == BL_CustomGrid_Block_Widget_Grid_Column_Filter_Text::MODE_INSIDE_LIKE)) {
-            /** @var $stringHelper Mage_Core_Helper_String */
-            $stringHelper = Mage::helper('core/string');
-            $singleWildcard = strval($renderer->getData('values/single_wildcard'));
-            $multipleWildcard = strval($renderer->getData('values/multiple_wildcard'));
-            
-            if ($stringHelper->strlen($singleWildcard) === 1) {
-                $values['single_wildcard'] = $singleWildcard;
-            }
-            if (($stringHelper->strlen($multipleWildcard) === 1)
-                && ($multipleWildcard !== $singleWildcard)) {
-                $values['multiple_wildcard'] = $multipleWildcard;
-            }
+            $values += $this->_getTextWildcards($renderer);
         }
         
         return $values;

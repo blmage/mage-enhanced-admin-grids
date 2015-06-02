@@ -9,13 +9,20 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2013 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Product_Inventory extends
     Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
+    /**
+     * Return whether the given row uses config values for the current column,
+     * and the corresponding data if appropriate
+     * 
+     * @param Varien_Object $row Grid row
+     * @return array
+     */
     protected function _getUseConfigData(Varien_Object $row)
     {
         $data = null;
@@ -26,8 +33,9 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Product_Inventory extends
                 $useConfig = true;
                 
                 if ($this->getColumn()->getFieldName() == 'min_sale_qty') {
-                    $data = $this->helper('cataloginventory/minsaleqty')
-                        ->getConfigValue(Mage_Customer_Model_Group::CUST_GROUP_ALL);
+                    /** @var $helper Mage_CatalogInventory_Helper_Minsaleqty */
+                    $helper = $this->helper('cataloginventory/minsaleqty');
+                    $data   = $helper->getConfigValue(Mage_Customer_Model_Group::CUST_GROUP_ALL);
                 } else {
                     $data = Mage::getStoreConfig($this->getColumn()->getSystemConfigPath());
                 }
@@ -37,6 +45,12 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Product_Inventory extends
         return array($useConfig, $data);
     }
     
+    /**
+     * Render the given data that uses config values
+     * 
+     * @param mixed $data Data from config
+     * @return string
+     */
     protected function _renderUseConfigData($data)
     {
         if (($text = $this->getColumn()->getUseConfigPrefix()) !== '') {
@@ -57,7 +71,7 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Product_Inventory extends
             $data = $row->getData($this->getColumn()->getIndex());
         }
         if ($fieldType == 'boolean') {
-            $data = $this->helper('customgrid')->__($data ? 'Yes' : 'No');
+            $data = $this->__($data ? 'Yes' : 'No');
         } elseif ($fieldType == 'decimal') {
             $data *= 1;
         } elseif (($fieldType == 'options')

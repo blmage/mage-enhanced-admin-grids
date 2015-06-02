@@ -9,8 +9,29 @@
  *
  * @category   BL
  * @package    BL_CustomGrid
- * @copyright  Copyright (c) 2014 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @copyright  Copyright (c) 2015 Benoît Leulliette <benoit.leulliette@gmail.com>
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+/**
+ * @method int getGridId() Return the ID of the corresponding grid model
+ * @method string getBlockId() Return the ID of the column block
+ * @method string getIndex() Return the index of the column block
+ * @method string|null getWidth() Return the width of the column block
+ * @method string|null getAlign() Return the alignment of the column block
+ * @method string|null getHeader() Return the header of the column block
+ * @method int getOrder() Return the sort order
+ * @method string getOrigin() Return the origin
+ * @method int getIsVisible() Return whether this column is visible
+ * @method int getIsSystem() Return whether the column block is a "system" block
+ * @method int getIsMissing() Return whether this column was found to be missing
+ * @method int|null getStoreId() Return the forced store ID
+ * @method string|null getRendererType() Return the renderer code (for collection or custom columns)
+ * @method string|null getRendererParams() Return the encoded renderer parameters (for any renderer)
+ * @method int getIsEditAllowed() Return whether the values are editable for this column
+ * @method int getProfileId() Return the corresponding profile ID
+ * @method string|null getCustomizationParams() Return the encoded customization parameters (for custom columns)
+ * @method int getIsOnlyFilterable() Return whether this column should only be filterable
  */
 
 class BL_CustomGrid_Model_Grid_Column extends BL_CustomGrid_Object
@@ -65,7 +86,9 @@ class BL_CustomGrid_Model_Grid_Column extends BL_CustomGrid_Object
         if (($gridModel = $this->_getData('grid_model')) instanceof BL_CustomGrid_Model_Grid) {
             return $gridModel;
         } elseif (!$graceful) {
-            Mage::throwException(Mage::helper('customgrid')->__('Invalid grid model'));
+            /** @var $helper BL_CustomGrid_Helper_Data */
+            $helper = Mage::helper('customgrid');
+            Mage::throwException($helper->__('Invalid grid model'));
         }
         return null;
     }
@@ -177,6 +200,19 @@ class BL_CustomGrid_Model_Grid_Column extends BL_CustomGrid_Object
     }
     
     /**
+     * Return the given value if it is a valid alignment, "left" otherwise
+     * 
+     * @param string $value Checked alignment value
+     * @return string
+     */
+    protected function _getValidAlignment($value)
+    {
+        return array_key_exists($value, self::getAlignments())
+            ? $value
+            : self::ALIGNMENT_LEFT;
+    }
+    
+    /**
      * Parse the given user values and return the corresponding proper column values,
      * basing on the given behaviour flags
      *
@@ -201,7 +237,7 @@ class BL_CustomGrid_Model_Grid_Column extends BL_CustomGrid_Object
         $values = array();
         $values['is_visible'] = (bool) $userValues->getData('is_visible');
         $values['is_only_filterable'] = ($values['is_visible'] && $userValues->getData('filter_only'));
-        $values['align']  = Mage::getSingleton('customgrid/grid')->getValidAlignment($userValues->getData('align'));
+        $values['align']  = $this->_getValidAlignment($userValues->getData('align'));
         $values['header'] = $userValues->getData('header');
         $values['order']  = (int) $userValues->getData('order');
         $values['width']  = $userValues->getData('width');
@@ -273,7 +309,7 @@ class BL_CustomGrid_Model_Grid_Column extends BL_CustomGrid_Object
      * @param array $columns New columns values
      * @param bool $allowEditable Whether the user has the permission to choose which columns should be editable
      * @param string[] $availableAttributeCodes Available attributes codes
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Column
      */
     protected function _updateGridModelExistingColumns(
         BL_CustomGrid_Model_Grid $gridModel,
@@ -311,7 +347,7 @@ class BL_CustomGrid_Model_Grid_Column extends BL_CustomGrid_Object
      * @param array $columns New columns values
      * @param bool $allowEditable Whether the user has the permission to choose which columns should be editable
      * @param string[] $availableAttributeCodes Available attributes codes
-     * @return this
+     * @return BL_CustomGrid_Model_Grid_Column
      */
     protected function _updateGridModelAttributeColumns(
         BL_CustomGrid_Model_Grid $gridModel,
@@ -471,6 +507,7 @@ class BL_CustomGrid_Model_Grid_Column extends BL_CustomGrid_Object
     public function getAlignments()
     {
         if (is_null(self::$_alignmentsHash)) {
+            /** @var $helper BL_CustomGrid_Helper_Data */
             $helper = Mage::helper('customgrid');
             
             self::$_alignmentsHash = array(
@@ -490,6 +527,7 @@ class BL_CustomGrid_Model_Grid_Column extends BL_CustomGrid_Object
     public function getOrigins()
     {
         if (is_null(self::$_originsHash)) {
+            /** @var $helper BL_CustomGrid_Helper_Data */
             $helper = Mage::helper('customgrid');
             
             self::$_originsHash = array(
