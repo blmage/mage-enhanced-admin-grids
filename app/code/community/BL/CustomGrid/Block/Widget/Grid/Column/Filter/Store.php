@@ -93,7 +93,7 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Store extends
      * that belong to the given website
      * 
      * @param Mage_Core_Model_Website $website Current website
-     * @param Mage_Core_Model_Store_Group[] $storeGroup All store groups
+     * @param Mage_Core_Model_Store_Group[] $storeGroups All store groups
      * @param Mage_Core_Model_Store[] $stores All stores
      * @param bool $shownWebsite Whether the website has been displayed
      * @return string
@@ -122,10 +122,6 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Store extends
     /**
      * Return the HTML content for the options corresponding to the available websites
      * 
-     * @param Mage_Core_Model_Website $website Current website
-     * @param Mage_Core_Model_Store_Group[] $storeGroup All store groups
-     * @param Mage_Core_Model_Store[] $stores All stores
-     * @param bool $shownWebsite Whether the website has been displayed
      * @return string
      */
     protected function _getWebsitesOptionsHtml()
@@ -153,7 +149,7 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Store extends
             . '<option value="0"' . (strval($value) === '0' ? ' selected="selected"' : '') . '>'
             . $this->__('All Store Views')
             . '</option>'
-            . $this->_getWebsitesOptionsHtml($value)
+            . $this->_getWebsitesOptionsHtml()
             . '<option value="_deleted_"' . ($value == '_deleted_' ? ' selected="selected"' : '') . '>'
             . $this->__('[ deleted ]')
             . '</option>'

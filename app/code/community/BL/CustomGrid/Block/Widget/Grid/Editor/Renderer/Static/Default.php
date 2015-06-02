@@ -61,7 +61,8 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Default extends
     /**
      * Render the given choices-based value
      * 
-     * @param string $renderableValue Renderable choices-based value
+     * @param array $formOptions Form options
+     * @param string $key Base key where to find values in the form options
      * @return string
      */
     protected function _getChoiceValues(array $formOptions, $key)

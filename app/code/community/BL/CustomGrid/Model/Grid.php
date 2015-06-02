@@ -720,8 +720,8 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     /**
      * Profiles sort callback
      *
-     * @param BL_CustomGrid_Model_Grid_Profile $a One profile
-     * @param BL_CustomGrid_Model_Grid_Profile $b Another profile
+     * @param BL_CustomGrid_Model_Grid_Profile $profileA One profile
+     * @param BL_CustomGrid_Model_Grid_Profile $profileB Another profile
      * @return int
      */
     protected function _sortProfiles($profileA, $profileB)

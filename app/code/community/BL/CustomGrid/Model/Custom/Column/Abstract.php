@@ -526,7 +526,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract extends BL_CustomGrid_
      * @param BL_CustomGrid_Model_Grid $gridModel Grid model
      * @param BL_CustomGrid_Model_Grid_Column $columnModel Grid column model
      * @param array $params Customization params values
-     * @param array $rendererTypes Previous and current renderer codes (keys: "old" and "current")
+     * @param array $renderers Previous and current renderer codes (keys: "previous" and "current")
      * @return bool
      */
     public function shouldInvalidateFilters(

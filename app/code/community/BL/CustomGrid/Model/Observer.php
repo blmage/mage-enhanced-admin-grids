@@ -372,7 +372,7 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
     /**
      * Register given layout handles, they will be added to the layout update upon layout load
      * 
-     * @param string|array $handle
+     * @param string|array $layoutHandles Additional layout handles
      * @return BL_CustomGrid_Model_Observer
      */
     public function registerAdditionalLayoutHandles(array $layoutHandles)

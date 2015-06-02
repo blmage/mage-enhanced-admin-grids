@@ -234,7 +234,7 @@ abstract class BL_CustomGrid_Block_Config_Form_Abstract extends BL_CustomGrid_Bl
      * Prepare the dependences for the given field
      * 
      * @param Varien_Object $field Field object
-     * @param string $formField Form field ID
+     * @param string $formFieldId Form field ID
      * @return BL_CustomGrid_Block_Config_Form_Abstract
      */
     protected function _prepareFieldDependences(Varien_Object $field, $formFieldId)

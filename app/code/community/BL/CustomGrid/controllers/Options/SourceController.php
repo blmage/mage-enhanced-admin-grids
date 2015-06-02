@@ -18,7 +18,7 @@ class BL_CustomGrid_Options_SourceController extends Mage_Adminhtml_Controller_A
     /**
      * Initialize and register the options source from the current request
      * 
-     * @return BL_CustomGrid_Model_Options_Source
+     * @return BL_CustomGrid_Model_Options_Source|false
      */
     protected function _initOptionsSource($requireId = false)
     {

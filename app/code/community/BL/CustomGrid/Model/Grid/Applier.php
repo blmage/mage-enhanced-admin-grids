@@ -142,7 +142,7 @@ class BL_CustomGrid_Model_Grid_Applier extends BL_CustomGrid_Model_Grid_Worker
      * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
      * @param array $baseData Base column data
      * @param Mage_Eav_Model_Entity_Attribute[] $attributes Available attributes
-     * @param string[] $adddedAttributes Attributes that were already added (values format: "[code]_[store_id]")
+     * @param string[] $addedAttributes Attributes that were already added (values format: "[code]_[store_id]")
      * @return array
      */
     protected function _getAttributeColumnBlockValues(

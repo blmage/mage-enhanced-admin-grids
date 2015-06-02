@@ -97,7 +97,7 @@ class BL_CustomGrid_Model_Custom_Column_Config
             $baseHelper = Mage::helper('customgrid');
             $module = (isset($params['@']['module']) ? $params['@']['module'] : 'customgrid'); 
             $translatable = (isset($params['@']['translate']) ? explode(' ', $params['@']['translate']) : array());
-            $helper = $helper->getSafeHelper((string) $module);
+            $helper = $baseHelper->getSafeHelper((string) $module);
             unset($params['@']);
         } else {
             $translatable = false;

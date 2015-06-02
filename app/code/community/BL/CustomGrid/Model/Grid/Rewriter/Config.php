@@ -20,7 +20,7 @@ class BL_CustomGrid_Model_Grid_Rewriter_Config extends BL_CustomGrid_Object
      * 
      * @param string $code Rewriter code
      * @param array $config Config values
-     * @return BL_CustomGrid_Model_Grid_Rewriter_Abstract
+     * @return BL_CustomGrid_Model_Grid_Rewriter_Abstract|false
      */
     protected function _getRewriter($code, array $config)
     {
@@ -58,7 +58,7 @@ class BL_CustomGrid_Model_Grid_Rewriter_Config extends BL_CustomGrid_Object
      * Return the rewriter model corresponding to the given code
      * 
      * @param string $code Rewriter code
-     * @return BL_CustomGrid_Model_Grid_Rewriter_Abstract
+     * @return BL_CustomGrid_Model_Grid_Rewriter_Abstract|false
     */
     public function getRewriter($code)
     {

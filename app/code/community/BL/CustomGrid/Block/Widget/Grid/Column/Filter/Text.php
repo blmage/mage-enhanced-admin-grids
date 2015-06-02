@@ -148,7 +148,8 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Text extends Mage_Adminhtml_
      * and return a valid (but "useless") collection condition
      * 
      * @param string $value Filter value
-     * @param string $filterMode Filter mode
+     * @param Varien_Data_Collection_Db $collection Grid collection
+     * @param string $filterIndex Filter index
      * @param bool $isNegative Whether negative filter is enabled
      * @return array
      */
