@@ -45,7 +45,8 @@ $connection->addConstraint(
     'base_profile_id',
     $tables['grid_profile'],
     'profile_id',
-    'RESTRICT'
+    'RESTRICT',
+    'CASCADE'
 );
 
 $connection->addColumn(
@@ -60,7 +61,8 @@ $connection->addConstraint(
     'global_default_profile_id',
     $tables['grid_profile'],
     'profile_id',
-    'SET NULL'
+    'SET NULL',
+    'CASCADE'
 );
 
 /**

@@ -65,9 +65,11 @@ $installer->run(
     KEY `FK_CUSTOM_GRID_GRID_COLUMN_GRID` (`grid_id`),
     KEY `FK_CUSTOM_GRID_GRID_COLUMN_STORE` (`store_id`),
     CONSTRAINT `FK_CUSTOM_GRID_GRID_COLUMN_GRID`
-        FOREIGN KEY (`grid_id`) REFERENCES `{$tables['grid']}` (`grid_id`) ON DELETE CASCADE,
+        FOREIGN KEY (`grid_id`) REFERENCES `{$tables['grid']}` (`grid_id`)
+        ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT `FK_CUSTOM_GRID_GRID_COLUMN_STORE`
-        FOREIGN KEY (`store_id`) REFERENCES `{$tables['store']}` (`store_id`) ON DELETE SET NULL
+        FOREIGN KEY (`store_id`) REFERENCES `{$tables['store']}` (`store_id`)
+        ON DELETE SET NULL ON UPDATE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
     CREATE TABLE IF NOT EXISTS `{$tables['options_source']}` (
@@ -91,7 +93,7 @@ $installer->run(
     KEY `FK_CUSTOMGRID_OPTIONS_SOURCE_MODEL_SOURCE` (`source_id`),
     CONSTRAINT `FK_CUSTOMGRID_OPTIONS_SOURCE_MODEL_SOURCE`
         FOREIGN KEY (`source_id`) REFERENCES `{$tables['options_source']}` (`source_id`)
-        ON DELETE CASCADE
+        ON DELETE CASCADE ON UPDATE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
     CREATE TABLE IF NOT EXISTS `{$tables['source_option']}` (
@@ -103,7 +105,7 @@ $installer->run(
     KEY `FK_CUSTOMGRID_OPTIONS_SOURCE_OPTION_SOURCE` (`source_id`),
     CONSTRAINT `FK_CUSTOMGRID_OPTIONS_SOURCE_OPTION_SOURCE`
         FOREIGN KEY (`source_id`) REFERENCES `{$tables['options_source']}` (`source_id`)
-        ON DELETE CASCADE
+        ON DELETE CASCADE ON UPDATE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
     "
 );
