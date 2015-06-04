@@ -22,7 +22,7 @@
             <!-- Some needed elements from editor handle -->
             <action method="addJs"><script>prototype/window.js</script></action>
             <action method="addItem"><type>js_css</type><name>prototype/windows/themes/default.css</name></action>
-
+            
             <action method="addLinkRel"><rel>stylesheet</rel><href>//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css</href></action>
         </reference>
         

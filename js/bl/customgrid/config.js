@@ -1404,9 +1404,7 @@ blcg.Grid.ProfilesBar.prototype = {
             profileOptionsClassName: 'blcg-grid-profiles-list-options',
             fixedPartClassName: 'blcg-grid-profiles-bar-fixed-part',
             profilesListClassName: 'blcg-grid-profiles-list',
-            pagerClassName: 'blcg-grid-profiles-bar-pager',
-            listCurrentLevelClassName: 'blcg-grid-profiles-list-current-level',
-            listLevelsCountClassName: 'blcg-grid-profiles-list-levels-count',
+            listCountBaseClassName: 'blcg-grid-profiles-list-count-',
             currentClassName: 'blcg-current',
             baseClassName: 'blcg-base',
             disabledClassName: 'blcg-disabled',
@@ -1444,6 +1442,8 @@ blcg.Grid.ProfilesBar.prototype = {
             }
         }.bind(this));
         
+        this.refreshProfileItemsCount();
+        
         if (this.currentProfile) {
             this.actions.each(function(pair) {
                 if (!pair.value.appliesToBase && this.currentProfile.isBase) {
@@ -1455,7 +1455,13 @@ blcg.Grid.ProfilesBar.prototype = {
                 
                 var item  = $(document.createElement('button'));
                 item.id   = this.config.profileItemIdPrefix + this.currentProfile.id;
-                item.type = 'button';
+                
+                try {
+                    item.type = 'button';
+                } catch (e) {
+                    // Prevent crash on IE 8
+                }
+                
                 item.update('<span><span>' + pair.value.label.escapeHTML() + '</span></span>');
                 item.writeAttribute('title', pair.value.label);
                 item.addClassName('blcg-grid-profiles-bar-button');
@@ -1472,7 +1478,7 @@ blcg.Grid.ProfilesBar.prototype = {
                 }.bind(this));
                 
                 if (pair.key == 'copy_new') {
-                    this.profilesList.up().insert(item);
+                    this.profilesList.up().insert({top: item});
                 } else {
                     this.profileOptions.insert(item);
                 }
@@ -1485,13 +1491,25 @@ blcg.Grid.ProfilesBar.prototype = {
         return $(this.config.profileItemIdPrefix + profileId);
     },
     
+    refreshProfileItemsCount: function()
+    {
+        $w(this.profilesList.className).each(function(listClass) {
+            if (listClass.substr(0, this.config.listCountBaseClassName.length) == this.config.listCountBaseClassName) {
+                this.profilesList.removeClassName(listClass);
+            }
+        }.bind(this));
+        
+        this.profilesList.addClassName('' + this.config.listCountBaseClassName + this.profiles.size());
+    },
+    
     addProfileItem: function(profile, insertBeforeId)
     {
         var item = $(document.createElement('li'));
-        item.id = this.config.profileItemIdPrefix + profile.id;
-        item.update('<span>' + profile.name.escapeHTML() + '</span>');
-        item.writeAttribute('title', profile.name);
-        item.observe('click', this.applyLeftClickAction.bind(this, profile.id));
+        item.id  = this.config.profileItemIdPrefix + profile.id;
+        item.update('<div><span>' + profile.name.escapeHTML() + '</span></div>');
+        var itemButton = item.down('span');
+        itemButton.writeAttribute('title', profile.name);
+        itemButton.observe('click', this.applyLeftClickAction.bind(this, profile.id));
         
         if (profile.isBase) {
             item.addClassName(this.config.baseClassName);
@@ -1542,6 +1560,7 @@ blcg.Grid.ProfilesBar.prototype = {
         }
         
         this.addProfileItem(profile, insertBeforeId);
+        this.refreshProfileItemsCount();
     },
     
     deleteProfile: function(profileId)
@@ -1554,6 +1573,8 @@ blcg.Grid.ProfilesBar.prototype = {
             this.profiles.unset(profile.id);
             this.deleteProfileItem(profile.id);
         }
+        
+        this.refreshProfileItemsCount();
     },
     
     renameProfile: function(profileId, newName)
