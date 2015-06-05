@@ -20,25 +20,25 @@ class BL_CustomGrid_Model_System_Config_Source_Admin_User
      * 
      * @var array|null
      */
-    static protected $_optionArray = null;
+    protected $_optionArray = null;
     
     /**
      * @return array
      */
     public function toOptionArray()
     {
-        if (is_null(self::$_optionArray)) {
+        if (is_null($this->_optionArray)) {
             /** @var $collection Mage_Admin_Model_Mysql4_User_Collection */
             $collection = Mage::getModel('admin/user')->getCollection();
             
             foreach ($collection as $user) {
                 /** @var $user Mage_Admin_Model_User */
-                self::$_optionArray[] = array(
+                $this->_optionArray[] = array(
                     'value' => $user->getUserId(),
                     'label' => $user->getUsername(),
                 );
             }
         }
-        return self::$_optionArray;
+        return $this->_optionArray;
     }
 }

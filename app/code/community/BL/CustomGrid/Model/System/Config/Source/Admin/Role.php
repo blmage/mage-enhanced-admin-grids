@@ -22,7 +22,7 @@ class BL_CustomGrid_Model_System_Config_Source_Admin_Role
      * 
      * @var array|null
      */
-    static protected $_optionArray = null;
+    protected $_optionArray = null;
     
     /**
      * @param bool $includeCreatorRole Whether the "Creator Role" option should be included
@@ -30,21 +30,21 @@ class BL_CustomGrid_Model_System_Config_Source_Admin_Role
      */
     public function toOptionArray($includeCreatorRole = true)
     {
-        if (is_null(self::$_optionArray)) {
+        if (is_null($this->_optionArray)) {
             /** @var $collection Mage_Admin_Model_Mysql4_Role_Collection */
             $collection = Mage::getModel('admin/role')->getCollection();
             $collection->setRolesFilter();
             
             foreach ($collection as $role) {
                 /** @var $role Mage_Admin_Model_Role */
-                self::$_optionArray[] = array(
+                $this->_optionArray[] = array(
                     'value' => $role->getRoleId(),
                     'label' => $role->getRoleName(),
                 );
             }
         }
         
-        $options = self::$_optionArray;
+        $options = $this->_optionArray;
         
         if ($includeCreatorRole) {
             /** @var $helper BL_CustomGrid_Helper_Data */

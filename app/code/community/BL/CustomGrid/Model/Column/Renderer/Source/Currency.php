@@ -15,20 +15,28 @@
 
 class BL_CustomGrid_Model_Column_Renderer_Source_Currency
 {
-    static protected $_optionArray = null;
+    /**
+     * Options cache
+     * 
+     * @var array|null
+     */
+    protected $_optionArray = null;
     
+    /**
+     * @return array
+     */
     public function toOptionArray()
     {
-        if (is_null(self::$_optionArray)) {
+        if (is_null($this->_optionArray)) {
             /** @var $currencyModel Mage_Directory_Model_Currency */
             $currencyModel = Mage::getModel('directory/currency');
             $currencies    = Mage::app()->getLocale()->getOptionCurrencies();
             $allowedCodes  = $currencyModel->getConfigAllowCurrencies();
-            self::$_optionArray = array();
+            $this->_optionArray = array();
             
             foreach ($currencies as $currency) {
                 if (in_array($currency['value'], $allowedCodes)) {
-                    self::$_optionArray[] = $currency;
+                    $this->_optionArray[] = $currency;
                 }
             }
             
@@ -38,7 +46,7 @@ class BL_CustomGrid_Model_Column_Renderer_Source_Currency
             $helper = Mage::helper('customgrid');
             
             array_unshift(
-                self::$_optionArray, 
+                $this->_optionArray, 
                 array(
                     'value' => BL_CustomGrid_Helper_Column_Renderer::CURRENCY_TYPE_BASE,
                     'label' => $helper->__('Use Base Currency'),
@@ -49,9 +57,12 @@ class BL_CustomGrid_Model_Column_Renderer_Source_Currency
                 )
             );
         }
-        return self::$_optionArray;
+        return $this->_optionArray;
     }
     
+    /**
+     * @return array
+     */
     public function toOptionHash()
     {
         /**

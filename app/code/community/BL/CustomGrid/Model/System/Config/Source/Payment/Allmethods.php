@@ -21,17 +21,17 @@ class BL_CustomGrid_Model_System_Config_Source_Payment_Allmethods
      * 
      * @var array|null
      */
-    static protected $_optionArray = null;
+    protected $_optionArray = null;
     
     /**
      * @return array
      */
     public function toOptionArray()
     {
-        if (is_null(self::$_optionArray)) {
+        if (is_null($this->_optionArray)) {
             $helper = Mage::helper('payment');
-            self::$_optionArray = $helper->getPaymentMethodList(true, true);
+            $this->_optionArray = $helper->getPaymentMethodList(true, true);
         }
-        return self::$_optionArray;
+        return $this->_optionArray;
     }
 }

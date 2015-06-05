@@ -20,16 +20,19 @@ class BL_CustomGrid_Model_Column_Renderer_Source_Options_Source
      * 
      * @var array|null
      */
-    static protected $_optionArray = null;
+    protected $_optionArray = null;
     
+    /**
+     * @return array
+     */
     public function toOptionArray()
     {
-        if (is_null(self::$_optionArray)) {
+        if (is_null($this->_optionArray)) {
             /** @var $collection BL_CustomGrid_Model_Mysql4_Options_Source_Collection */
             $collection = Mage::getResourceModel('customgrid/options_source_collection');
-            self::$_optionArray = $collection->load()->toOptionArray();
-            array_unshift(self::$_optionArray, array('value' => '', 'label' => ''));
+            $this->_optionArray = $collection->load()->toOptionArray();
+            array_unshift($this->_optionArray, array('value' => '', 'label' => ''));
         }
-        return self::$_optionArray;
+        return $this->_optionArray;
     }
 }

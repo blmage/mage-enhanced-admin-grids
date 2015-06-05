@@ -21,7 +21,7 @@ class BL_CustomGrid_Model_System_Config_Source_Shipping_Methods
      * 
      * @var array|null
      */
-    static protected $_optionArray = null;
+    protected $_optionArray = null;
     
     /**
      * Designed for use in the Sales Order grid.
@@ -30,7 +30,7 @@ class BL_CustomGrid_Model_System_Config_Source_Shipping_Methods
      */
     public function toOptionArray()
     {
-        if (is_null(self::$_optionArray)) {
+        if (is_null($this->_optionArray)) {
             /** @var $res Mage_Core_Model_Resource */
             $resource   = Mage::getSingleton('core/resource');
             $connection = $resource->getConnection(Mage_Core_Model_Resource::DEFAULT_READ_RESOURCE);
@@ -40,17 +40,17 @@ class BL_CustomGrid_Model_System_Config_Source_Shipping_Methods
             $select->distinct(true);
             
             $methods = $connection->fetchCol($select);
-            self::$_optionArray = array();
+            $this->_optionArray = array();
             
             foreach ($methods as $method) {
                 // There isn't a sensible way to get a generic label for a method, as it can differ for each order.
                 // As a result, just use the method code as the label as well.
-                self::$_optionArray[] = array(
+                $this->_optionArray[] = array(
                     'value' => $method,
                     'label' => $method,
                 );
             }
         }
-        return self::$_optionArray;
+        return $this->_optionArray;
     }
 }
