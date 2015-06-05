@@ -453,7 +453,7 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
         $mapProperty = null;
         
         if (version_compare(phpversion(), '5.3.0', '<') === true) {
-            // ReflectionProperty::setAccessible() was added in PHP 5.3.2
+            // ReflectionProperty::setAccessible() was added in PHP 5.3.0
             $collectionClass = get_class($collection);
             $reflectionClass = 'Blcg_Hc_' . $collectionClass;
             

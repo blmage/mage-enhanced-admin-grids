@@ -87,7 +87,7 @@ class BL_CustomGrid_Model_Custom_Column_Product_Stats_Wishlist extends BL_Custom
                 array()
             )
             ->where($qi($itemAlias . '.product_id') . ' = ' . $qi($mainAlias . '.entity_id'))
-            ->group($qi($itemAlias . '.product_id'));
+            ->group($itemAlias . '.product_id');
         
         if (isset($params['store_id'])) {
             if (is_array($params['store_id'])) {
