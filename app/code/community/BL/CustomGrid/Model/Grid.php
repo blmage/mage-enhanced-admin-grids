@@ -195,19 +195,34 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     }
     
     /**
+     * Return the worker model of the given type
+     * 
+     * @param string $type Worker type
+     * @return BL_CustomGrid_Model_Grid_Worker
+     */
+    protected function _getWorker($type)
+    {
+        if (!$this->hasData($type)) {
+            $worker = Mage::getModel('customgrid/grid_' . $type);
+            
+            if ($worker instanceof BL_CustomGrid_Model_Grid_Worker) {
+                /** @var $worker BL_CustomGrid_Model_Grid_Worker */
+                $worker->setGridModel($this);
+            }
+            
+            $this->setData($type, $worker);
+        }
+        return $this->_getData($type);
+    }
+    
+    /**
      * Return the absorber model usable to initialize/update the grid model values from a grid block
      * 
      * @return BL_CustomGrid_Model_Grid_Absorber
      */
     public function getAbsorber()
     {
-        if (!$this->hasData('absorber')) {
-            /** @var $absorber BL_CustomGrid_Model_Grid_Absorber */
-            $absorber = Mage::getModel('customgrid/grid_absorber');
-            $absorber->setGridModel($this);
-            $this->setData('absorber', $absorber);
-        }
-        return $this->_getData('absorber');
+        return $this->_getWorker('absorber');
     }
     
     /**
@@ -217,13 +232,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
      */
     public function getApplier()
     {
-        if (!$this->hasData('applier')) {
-            /** @var $applier BL_CustomGrid_Model_Grid_Applier */
-            $applier = Mage::getModel('customgrid/grid_applier');
-            $applier->setGridModel($this);
-            $this->setData('applier', $applier);
-        }
-        return $this->_getData('applier');
+        return $this->_getWorker('applier');
     }
     
     /**
@@ -233,13 +242,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
      */
     public function getExporter()
     {
-        if (!$this->hasData('exporter')) {
-            /** @var $exporter BL_CustomGrid_Model_Grid_Exporter */
-            $exporter = Mage::getModel('customgrid/grid_exporter');
-            $exporter->setGridModel($this);
-            $this->setData('exporter', $exporter);
-        }
-        return $this->_getData('exporter');
+        return $this->_getWorker('exporter');
     }
     
     /**

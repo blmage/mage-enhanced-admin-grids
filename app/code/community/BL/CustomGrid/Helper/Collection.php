@@ -41,12 +41,8 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
      * 
      * @var string[]
      */
-    static protected $_baseFiltersMapCallbacks = array(
+    protected $_baseFiltersMapCallbacks = array(
         'adminhtml/catalog_product_grid'  => '_prepareCatalogProductFiltersMap',
-        'adminhtml/sales_order_grid'      => '_prepareSalesOrderFiltersMap',
-        'adminhtml/sales_invoice_grid'    => '_prepareSalesInvoiceFiltersMap',
-        'adminhtml/sales_shipment_grid'   => '_prepareSalesShipmentFiltersMap',
-        'adminhtml/sales_creditmemo_grid' => '_prepareSalesCreditmemoFiltersMap',
     );
     
     /**
@@ -457,7 +453,7 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
         $mapProperty = null;
         
         if (version_compare(phpversion(), '5.3.0', '<') === true) {
-            // ReflectionProperty::setAccessible() was added in PHP 5.3
+            // ReflectionProperty::setAccessible() was added in PHP 5.3.2
             $collectionClass = get_class($collection);
             $reflectionClass = 'Blcg_Hc_' . $collectionClass;
             
@@ -709,14 +705,25 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
         $previousFiltersMap = $this->_getCollectionFiltersMap($collection);
         $collection->setFlag(self::COLLECTION_PREVIOUS_MAP_FLAG, $previousFiltersMap);
         
-        if (isset(self::$_baseFiltersMapCallbacks[$blockType])) {
+        if (isset($this->_baseFiltersMapMainTableFields[$blockType])) {
+            $this->addFilterToCollectionMap(
+                $collection,
+                $this->buildFiltersMapArray(
+                    $this->_baseFiltersMapMainTableFields[$blockType],
+                    $this->getCollectionMainTableAlias($collection)
+                )
+            );
+        }
+        
+        if (isset($this->_baseFiltersMapCallbacks[$blockType])) {
             call_user_func(
-                array($this, self::$_baseFiltersMapCallbacks[$blockType]),
+                array($this, $this->_baseFiltersMapCallbacks[$blockType]),
                 $collection,
                 $gridBlock,
                 $gridModel
             );
         }
+        
         if (isset($this->_additionalFiltersMapCallbacks[$blockType])) {
             foreach ($this->_additionalFiltersMapCallbacks[$blockType] as $callback) {
                 call_user_func_array(
@@ -775,177 +782,94 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
         Mage_Adminhtml_Block_Widget_Grid $gridBlock,
         BL_CustomGrid_Model_Grid $gridModel
     ) {
-        $this->addFilterToCollectionMap(
-            $collection,
-            $this->buildFiltersMapArray(
-                array(
-                    'entity_id',
-                    'type_id',
-                    'attribute_set_id',
-                    'sku',
-                    'has_options',
-                    'required_options',
-                    'created_at',
-                    'updated_at',
-                ),
-                $this->getCollectionMainTableAlias($collection)
-            )
-        );
-        
         return $this->addFilterToCollectionMap($collection, $this->getAttributeTableAlias('qty') . '.qty', 'qty');
     }
     
     /**
-     * Base filters map callback for sales order grids
-     *
-     * @param Varien_Data_Collection_Db $collection Grid collection
-     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
-     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
-     * @return BL_CustomGrid_Helper_Collection
+     * Base main table fields to use when building filters map for a given grid block
+     * 
+     * @var array
      */
-    protected function _prepareSalesOrderFiltersMap(
-        Varien_Data_Collection_Db $collection,
-        Mage_Adminhtml_Block_Widget_Grid $gridBlock,
-        BL_CustomGrid_Model_Grid $gridModel
-    ) {
-        return $this->addFilterToCollectionMap(
-            $collection,
-            $this->buildFiltersMapArray(
-                array(
-                    'entity_id',
-                    'status',
-                    'store_id',
-                    'store_name',
-                    'customer_id',
-                    'base_grand_total',
-                    'base_total_paid',
-                    'grand_total',
-                    'total_paid',
-                    'increment_id',
-                    'base_currency_code',
-                    'order_currency_code',
-                    'shipping_name',
-                    'billing_name',
-                    'created_at',
-                    'updated_at',
-                ),
-                $this->getCollectionMainTableAlias($collection)
-            )
-        );
-    }
-    
-    /**
-     * Base filters map callback for sales invoice grids
-     *
-     * @param Varien_Data_Collection_Db $collection Grid collection
-     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
-     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
-     * @return BL_CustomGrid_Helper_Collection
-     */
-    protected function _prepareSalesInvoiceFiltersMap(
-        Varien_Data_Collection_Db $collection,
-        Mage_Adminhtml_Block_Widget_Grid $gridBlock,
-        BL_CustomGrid_Model_Grid $gridModel
-    ) {
-        return $this->addFilterToCollectionMap(
-            $collection,
-            $this->buildFiltersMapArray(
-                array(
-                    'entity_id',
-                    'store_id',
-                    'base_grand_total',
-                    'grand_total',
-                    'order_id',
-                    'state',
-                    'store_currency_code',
-                    'order_currency_code',
-                    'base_currency_code',
-                    'global_currency_code',
-                    'increment_id',
-                    'order_increment_id',
-                    'created_at',
-                    'order_created_at',
-                    'billing_name',
-                ),
-                $this->getCollectionMainTableAlias($collection)
-            )
-        );
-    }
-    
-    /**
-     * Base filters map callback for sales shipment grids
-     *
-     * @param Varien_Data_Collection_Db $collection Grid collection
-     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
-     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
-     * @return BL_CustomGrid_Helper_Collection
-     */
-    protected function _prepareSalesShipmentFiltersMap(
-        Varien_Data_Collection_Db $collection,
-        Mage_Adminhtml_Block_Widget_Grid $gridBlock,
-        BL_CustomGrid_Model_Grid $gridModel
-    ) {
-        return $this->addFilterToCollectionMap(
-            $collection,
-            $this->buildFiltersMapArray(
-                array(
-                    'entity_id',
-                    'store_id',
-                    'total_qty',
-                    'order_id',
-                    'shipment_status',
-                    'increment_id',
-                    'order_increment_id',
-                    'created_at',
-                    'order_created_at',
-                    'shipping_name',
-                ),
-                $this->getCollectionMainTableAlias($collection)
-            )
-        );
-    }
-    
-    /**
-     * Base filters map callback for sales creditmemo grids
-     *
-     * @param Varien_Data_Collection_Db $collection Grid collection
-     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
-     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
-     * @return BL_CustomGrid_Helper_Collection
-     */
-    protected function _prepareSalesCreditmemoFiltersMap(
-        Varien_Data_Collection_Db $collection,
-        Mage_Adminhtml_Block_Widget_Grid $gridBlock,
-        BL_CustomGrid_Model_Grid $gridModel
-    ) {
-        return $this->addFilterToCollectionMap(
-            $collection,
-            $this->buildFiltersMapArray(
-                array(
-                    'entity_id',
-                    'store_id',
-                    'store_to_order_rate',
-                    'base_to_order_rate',
-                    'grand_total',
-                    'store_to_base_rate',
-                    'base_to_global_rate',
-                    'base_grand_total',
-                    'order_id',
-                    'creditmemo_status',
-                    'state',
-                    'invoice_id',
-                    'store_currency_code',
-                    'order_currency_code',
-                    'base_currency_code',
-                    'global_currency_code',
-                    'increment_id',
-                    'order_increment_id',
-                    'created_at',
-                    'order_created_at',
-                    'billing_name',
-                ),
-                $this->getCollectionMainTableAlias($collection)
-            )
-        );
-    }
+    protected $_baseFiltersMapMainTableFields = array(
+        'adminhtml/catalog_product_grid' => array(
+            'entity_id',
+            'type_id',
+            'attribute_set_id',
+            'sku',
+            'has_options',
+            'required_options',
+            'created_at',
+            'updated_at',
+        ),
+        'adminhtml/sales_order_grid' => array(
+            'entity_id',
+            'status',
+            'store_id',
+            'store_name',
+            'customer_id',
+            'base_grand_total',
+            'base_total_paid',
+            'grand_total',
+            'total_paid',
+            'increment_id',
+            'base_currency_code',
+            'order_currency_code',
+            'shipping_name',
+            'billing_name',
+            'created_at',
+            'updated_at',
+        ),
+        'adminhtml/sales_invoice_grid' => array(
+            'entity_id',
+            'store_id',
+            'base_grand_total',
+            'grand_total',
+            'order_id',
+            'state',
+            'store_currency_code',
+            'order_currency_code',
+            'base_currency_code',
+            'global_currency_code',
+            'increment_id',
+            'order_increment_id',
+            'created_at',
+            'order_created_at',
+            'billing_name',
+        ),
+        'adminhtml/sales_shipment_grid' => array(
+            'entity_id',
+            'store_id',
+            'total_qty',
+            'order_id',
+            'shipment_status',
+            'increment_id',
+            'order_increment_id',
+            'created_at',
+            'order_created_at',
+            'shipping_name',
+        ),
+        'adminhtml/sales_creditmemo_grid' => array(
+            'entity_id',
+            'store_id',
+            'store_to_order_rate',
+            'base_to_order_rate',
+            'grand_total',
+            'store_to_base_rate',
+            'base_to_global_rate',
+            'base_grand_total',
+            'order_id',
+            'creditmemo_status',
+            'state',
+            'invoice_id',
+            'store_currency_code',
+            'order_currency_code',
+            'base_currency_code',
+            'global_currency_code',
+            'increment_id',
+            'order_increment_id',
+            'created_at',
+            'order_created_at',
+            'billing_name',
+        ),
+    );
 }
