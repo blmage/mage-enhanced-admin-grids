@@ -549,7 +549,8 @@ abstract class BL_CustomGrid_Model_Custom_Column_Sales_Items_Abstract extends BL
                 $valueCode = $itemValue->getCode();
                 $shouldDisplay = $this->_extractBoolParam($params, 'display_' . $valueCode, null);
                 
-                if ((is_null($shouldDisplay) && !$itemValue->getDefault()) || !$shouldDisplay) {
+                if ((is_null($shouldDisplay) && !$itemValue->getDefault())
+                    || (!is_null($shouldDisplay) && !$shouldDisplay)) {
                     unset($itemValues[$key]);
                 } elseif ($customHeader = $this->_extractStringParam($params, 'custom_header_' . $valueCode, null)) {
                     $itemValue->setName($customHeader);
