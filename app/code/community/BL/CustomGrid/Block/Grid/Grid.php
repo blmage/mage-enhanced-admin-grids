@@ -55,34 +55,34 @@ class BL_CustomGrid_Block_Grid_Grid extends Mage_Adminhtml_Block_Widget_Grid
                             'base' => '*/*/edit',
                         ),
                         'permissions' => array(
-                            BL_CustomGrid_Model_Grid::ACTION_CUSTOMIZE_COLUMNS,
-                             BL_CustomGrid_Model_Grid::ACTION_ENABLE_DISABLE,
-                            BL_CustomGrid_Model_Grid::ACTION_EDIT_FORCED_TYPE,
-                            BL_CustomGrid_Model_Grid::ACTION_EDIT_CUSTOMIZATION_PARAMS,
-                            BL_CustomGrid_Model_Grid::ACTION_EDIT_DEFAULT_PARAMS_BEHAVIOURS,
-                            BL_CustomGrid_Model_Grid::ACTION_EDIT_ROLES_PERMISSIONS,
-                            BL_CustomGrid_Model_Grid::ACTION_ASSIGN_PROFILES,
-                            BL_CustomGrid_Model_Grid::ACTION_EDIT_PROFILES,
+                            BL_CustomGrid_Model_Grid_Sentry::ACTION_CUSTOMIZE_COLUMNS,
+                            BL_CustomGrid_Model_Grid_Sentry::ACTION_ENABLE_DISABLE,
+                            BL_CustomGrid_Model_Grid_Sentry::ACTION_EDIT_FORCED_TYPE,
+                            BL_CustomGrid_Model_Grid_Sentry::ACTION_EDIT_CUSTOMIZATION_PARAMS,
+                            BL_CustomGrid_Model_Grid_Sentry::ACTION_EDIT_DEFAULT_PARAMS_BEHAVIOURS,
+                            BL_CustomGrid_Model_Grid_Sentry::ACTION_EDIT_ROLES_PERMISSIONS,
+                            BL_CustomGrid_Model_Grid_Sentry::ACTION_ASSIGN_PROFILES,
+                            BL_CustomGrid_Model_Grid_Sentry::ACTION_EDIT_PROFILES,
                         ),
                     ),
                     array(
                         'caption'     => $this->__('Enable'),
                         'url'         => array('base' => '*/*/enable'),
                         'field'       => 'grid_id',
-                        'permissions' => array(BL_CustomGrid_Model_Grid::ACTION_ENABLE_DISABLE),
+                        'permissions' => array(BL_CustomGrid_Model_Grid_Sentry::ACTION_ENABLE_DISABLE),
                     ),
                     array(
                         'caption'     => $this->__('Disable'),
                         'url'         => array('base' => '*/*/disable'),
                         'field'       => 'grid_id',
-                        'permissions' => array(BL_CustomGrid_Model_Grid::ACTION_ENABLE_DISABLE),
+                        'permissions' => array(BL_CustomGrid_Model_Grid_Sentry::ACTION_ENABLE_DISABLE),
                     ),
                     array(
                         'caption'     => $this->__('Delete'),
                         'confirm'     => $this->__('Are you sure?'),
                         'url'         => array('base' => '*/*/delete'),
                         'field'       => 'grid_id',
-                        'permissions' => array(BL_CustomGrid_Model_Grid::ACTION_DELETE),
+                        'permissions' => array(BL_CustomGrid_Model_Grid_Sentry::ACTION_DELETE),
                     )
                 ),
             )
@@ -190,14 +190,14 @@ class BL_CustomGrid_Block_Grid_Grid extends Mage_Adminhtml_Block_Widget_Grid
     {
         return $gridModel->checkUserPermissions(
             array(
-                BL_CustomGrid_Model_Grid::ACTION_CUSTOMIZE_COLUMNS,
-                BL_CustomGrid_Model_Grid::ACTION_ENABLE_DISABLE,
-                BL_CustomGrid_Model_Grid::ACTION_EDIT_FORCED_TYPE,
-                BL_CustomGrid_Model_Grid::ACTION_EDIT_CUSTOMIZATION_PARAMS,
-                BL_CustomGrid_Model_Grid::ACTION_EDIT_DEFAULT_PARAMS_BEHAVIOURS,
-                BL_CustomGrid_Model_Grid::ACTION_EDIT_ROLES_PERMISSIONS,
-                BL_CustomGrid_Model_Grid::ACTION_ASSIGN_PROFILES,
-                BL_CustomGrid_Model_Grid::ACTION_EDIT_PROFILES,
+                BL_CustomGrid_Model_Grid_Sentry::ACTION_CUSTOMIZE_COLUMNS,
+                BL_CustomGrid_Model_Grid_Sentry::ACTION_ENABLE_DISABLE,
+                BL_CustomGrid_Model_Grid_Sentry::ACTION_EDIT_FORCED_TYPE,
+                BL_CustomGrid_Model_Grid_Sentry::ACTION_EDIT_CUSTOMIZATION_PARAMS,
+                BL_CustomGrid_Model_Grid_Sentry::ACTION_EDIT_DEFAULT_PARAMS_BEHAVIOURS,
+                BL_CustomGrid_Model_Grid_Sentry::ACTION_EDIT_ROLES_PERMISSIONS,
+                BL_CustomGrid_Model_Grid_Sentry::ACTION_ASSIGN_PROFILES,
+                BL_CustomGrid_Model_Grid_Sentry::ACTION_EDIT_PROFILES,
             )
         );
     }

@@ -641,7 +641,7 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
             
             $gridModel->getApplier()->applyBaseDefaultLimitToGridBlock($gridBlock);
             
-            if ($gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_USE_DEFAULT_PARAMS)) {
+            if ($gridModel->checkUserActionPermission(BL_CustomGrid_Model_Grid_Sentry::ACTION_USE_DEFAULT_PARAMS)) {
                 $gridModel->getApplier()->applyDefaultsToGridBlock($gridBlock);
             }
             
@@ -665,11 +665,15 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
         $blockId   = $gridBlock->getId();
         
         if ($gridModel = $this->getGridModel($blockType, $blockId)) {
+            $canUseCustomizedColumns = $gridModel->checkUserActionPermission(
+                BL_CustomGrid_Model_Grid_Sentry::ACTION_USE_CUSTOMIZED_COLUMNS
+            );
+            
             if ($collection = $gridBlock->getCollection()) {
                 $collection->setPageSize(1)->setCurPage(1)->load();
                 $applyFromCollection = $gridModel->getAbsorber()->checkGridModelAgainstGridBlock($gridBlock);
                 
-                if ($gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_USE_CUSTOMIZED_COLUMNS)) {
+                if ($canUseCustomizedColumns) {
                     $gridModel->getApplier()->applyGridModelColumnsToGridBlock($gridBlock, $applyFromCollection);
                 }
                 
@@ -677,7 +681,7 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
             } else {
                 $gridModel->getAbsorber()->checkGridModelAgainstGridBlock($gridBlock);
                 
-                if ($gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_USE_CUSTOMIZED_COLUMNS)) {
+                if ($canUseCustomizedColumns) {
                     $gridModel->getApplier()->applyGridModelColumnsToGridBlock($gridBlock, false);
                 }
             }

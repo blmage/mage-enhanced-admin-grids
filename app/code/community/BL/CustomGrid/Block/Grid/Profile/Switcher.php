@@ -25,7 +25,7 @@ class BL_CustomGrid_Block_Grid_Profile_Switcher extends Mage_Adminhtml_Block_Tem
     {
         $gridModel = $this->getGridModel();
         
-        if ($gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_CUSTOMIZE_COLUMNS)) {
+        if ($gridModel->checkUserActionPermission(BL_CustomGrid_Model_Grid_Sentry::ACTION_CUSTOMIZE_COLUMNS)) {
             $profiles = $this->getProfiles();
             return (count($profiles) > 1 ? parent::_toHtml() : '');
         }

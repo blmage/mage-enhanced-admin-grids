@@ -241,7 +241,10 @@ class BL_CustomGrid_Model_Grid_Column extends BL_CustomGrid_Object
         $values['header'] = $userValues->getData('header');
         $values['order']  = (int) $userValues->getData('order');
         $values['width']  = $userValues->getData('width');
-        $values['is_edit_allowed'] = ($allowEditable && $userValues->getData('editable'));
+        
+        if ($allowEditable) {
+            $values['is_edit_allowed'] = (bool) $userValues->getData('editable');
+        }
         
         if ($allowStore && (($storeId = $userValues->getData('store_id')) !== '')) {
             $values['store_id'] = $storeId;
@@ -397,14 +400,14 @@ class BL_CustomGrid_Model_Grid_Column extends BL_CustomGrid_Object
      */
     public function updateGridModelColumns(BL_CustomGrid_Model_Grid $gridModel, array $columns)
     {
-        if (!$gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_CUSTOMIZE_COLUMNS)) {
-            $gridModel->throwPermissionException();
-        }
+        $gridModel->checkUserActionPermission(BL_CustomGrid_Model_Grid_Sentry::ACTION_CUSTOMIZE_COLUMNS, false);
         
         $this->setGridModel($gridModel);
         $gridModel->getColumnBlockIdsByOrigin();
-        $allowEditable = $gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_CHOOSE_EDITABLE_COLUMNS);
         $availableAttributeCodes = $gridModel->getAvailableAttributesCodes();
+        $allowEditable = $gridModel->checkUserActionPermission(
+            BL_CustomGrid_Model_Grid_Sentry::ACTION_CHOOSE_EDITABLE_COLUMNS
+        );
         
         $this->_updateGridModelExistingColumns($gridModel, $columns, $allowEditable, $availableAttributeCodes);
         
@@ -424,9 +427,8 @@ class BL_CustomGrid_Model_Grid_Column extends BL_CustomGrid_Object
      */
     public function updateGridModelCustomColumns(BL_CustomGrid_Model_Grid $gridModel, array $columnsCodes)
     {
-        if (!$gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_CUSTOMIZE_COLUMNS)) {
-            $gridModel->throwPermissionException();
-        }
+        $gridModel->checkUserActionPermission(BL_CustomGrid_Model_Grid_Sentry::ACTION_CUSTOMIZE_COLUMNS, false);
+        
         if ($typeModel = $gridModel->getTypeModel()) {
             $typeCode = $typeModel->getCode();
         } else {

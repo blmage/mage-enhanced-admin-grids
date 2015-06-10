@@ -42,7 +42,7 @@ class BL_CustomGrid_Block_Grid_Profile_Form_Copy_New extends BL_CustomGrid_Block
             )
         );
         
-        if ($gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_ASSIGN_PROFILES)) {
+        if ($gridModel->checkUserActionPermission(BL_CustomGrid_Model_Grid_Sentry::ACTION_ASSIGN_PROFILES)) {
             $restrictedField = $fieldset->addField(
                 'is_restricted',
                 'select',

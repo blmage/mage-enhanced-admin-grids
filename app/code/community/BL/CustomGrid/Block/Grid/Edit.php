@@ -22,7 +22,7 @@ class BL_CustomGrid_Block_Grid_Edit extends BL_CustomGrid_Block_Widget_Form_Cont
         $this->_controller = 'grid';
         parent::__construct();
         
-        if (!$this->getGridModel()->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_DELETE)) {
+        if (!$this->getGridModel()->checkUserActionPermission(BL_CustomGrid_Model_Grid_Sentry::ACTION_DELETE)) {
             $this->_removeButton('delete');
         }
         

@@ -1799,7 +1799,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
         Mage_Adminhtml_Block_Widget_Grid $gridBlock = null,
         array $params = array()
     ) {
-        $isAllowed = $gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_EDIT_COLUMNS_VALUES);
+        $isAllowed = $gridModel->checkUserActionPermission(BL_CustomGrid_Model_Grid_Sentry::ACTION_EDIT_COLUMNS_VALUES);
         
         if ($isAllowed && !is_null($permissions = $this->_getEditRequiredAclPermissions($blockType))) {
             $session = Mage::getSingleton('admin/session');

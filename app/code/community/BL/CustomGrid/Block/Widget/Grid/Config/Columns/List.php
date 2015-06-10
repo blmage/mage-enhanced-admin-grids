@@ -128,7 +128,8 @@ class BL_CustomGrid_Block_Widget_Grid_Config_Columns_List extends Mage_Adminhtml
         if (!$this->hasData('can_choose_editable_columns')) {
             $this->setData(
                 'can_choose_editable_columns',
-                $this->getGridModel()->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_CHOOSE_EDITABLE_COLUMNS)
+                $this->getGridModel()
+                    ->checkUserActionPermission(BL_CustomGrid_Model_Grid_Sentry::ACTION_CHOOSE_EDITABLE_COLUMNS)
             );
         }
         return $this->_getData('can_choose_editable_columns');
@@ -206,7 +207,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config_Columns_List extends Mage_Adminhtml
                     $this->canHaveAttributeColumns(),
                     true,
                     false,
-                    $this->canChooseEditableColumns(),
+                    true,
                     true
                 )
             );

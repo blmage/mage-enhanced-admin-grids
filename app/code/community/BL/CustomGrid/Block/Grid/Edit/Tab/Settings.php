@@ -118,7 +118,7 @@ class BL_CustomGrid_Block_Grid_Edit_Tab_Settings extends BL_CustomGrid_Block_Gri
             )
         );
         
-        if ($gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_ASSIGN_PROFILES)) {
+        if ($gridModel->checkUserActionPermission(BL_CustomGrid_Model_Grid_Sentry::ACTION_ASSIGN_PROFILES)) {
             $fieldset->addField(
                 'profiles_default_restricted',
                 'select',
@@ -142,7 +142,7 @@ class BL_CustomGrid_Block_Grid_Edit_Tab_Settings extends BL_CustomGrid_Block_Gri
             );
         }
         
-        if ($gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_EDIT_PROFILES)) {
+        if ($gridModel->checkUserActionPermission(BL_CustomGrid_Model_Grid_Sentry::ACTION_EDIT_PROFILES)) {
             $fieldset->addField(
                 'profiles_remembered_session_params',
                 'multiselect',
@@ -257,17 +257,23 @@ class BL_CustomGrid_Block_Grid_Edit_Tab_Settings extends BL_CustomGrid_Block_Gri
     {
         parent::_addFieldsToForm($form);
         
-        $gridModel = $this->getGridModel();
+        $gridModel   = $this->getGridModel();
         $useConfigFieldsets = array();
+        $actionCodes = array(
+            'assign_profiles' => BL_CustomGrid_Model_Grid_Sentry::ACTION_ASSIGN_PROFILES,
+            'edit_profiles'   => BL_CustomGrid_Model_Grid_Sentry::ACTION_EDIT_PROFILES,
+            'edit_customization_params' => BL_CustomGrid_Model_Grid_Sentry::ACTION_EDIT_CUSTOMIZATION_PARAMS,
+            'edit_default_params_behaviours' => BL_CustomGrid_Model_Grid_Sentry::ACTION_EDIT_DEFAULT_PARAMS_BEHAVIOURS,
+        );
         
-        if ($gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_ASSIGN_PROFILES)
-            || $gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_EDIT_PROFILES)) {
+        if ($gridModel->checkUserActionPermission($actionCodes['assign_profiles'])
+            || $gridModel->checkUserActionPermission($actionCodes['edit_profiles'])) {
             $useConfigFieldsets[] = $this->_addProfilesFieldsToForm($form);
         }
-        if ($gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_EDIT_CUSTOMIZATION_PARAMS)) {
+        if ($gridModel->checkUserActionPermission($actionCodes['edit_customization_params'])) {
             $useConfigFieldsets[] = $this->_addCustomizationParamsFieldsToForm($form);
         }
-        if ($gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_EDIT_DEFAULT_PARAMS_BEHAVIOURS)) {
+        if ($gridModel->checkUserActionPermission($actionCodes['edit_default_params_behaviours'])) {
             $useConfigFieldsets[] = $this->_addDefaultParamsFieldsToForm($form);
         }
         

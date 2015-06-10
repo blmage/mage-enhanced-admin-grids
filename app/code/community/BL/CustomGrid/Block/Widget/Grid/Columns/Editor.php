@@ -29,7 +29,7 @@ class BL_CustomGrid_Block_Widget_Grid_Columns_Editor extends Mage_Adminhtml_Bloc
         
         if (!$this->getIsNewGridModel()
             && ($gridModel = $this->getGridModel())
-            && $gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_EDIT_COLUMNS_VALUES)
+            && $gridModel->checkUserActionPermission(BL_CustomGrid_Model_Grid_Sentry::ACTION_EDIT_COLUMNS_VALUES)
             && ($gridBlock = $this->getGridBlock())
             && $helper->isRewritedGridBlock($gridBlock)) {
             return parent::_toHtml();
@@ -201,7 +201,7 @@ class BL_CustomGrid_Block_Widget_Grid_Columns_Editor extends Mage_Adminhtml_Bloc
         $gridModel = $this->getGridModel();
         $config = array();
         
-        if ($gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_USE_CUSTOMIZED_COLUMNS)) {
+        if ($gridModel->checkUserActionPermission(BL_CustomGrid_Model_Grid_Sentry::ACTION_USE_CUSTOMIZED_COLUMNS)) {
             $columns = $this->_getEditableCustomizedColumns();
         } else {
             $columns = $this->_getEditableDefaultColumns();

@@ -58,7 +58,7 @@ class BL_CustomGrid_Block_Grid_Edit_Tab_Role extends BL_CustomGrid_Block_Grid_Fo
         $roleId  = $this->getRoleId();
         $roleConfig = $gridModel->getRoleConfig($roleId);
         
-        foreach ($gridModel->getGridActions(true) as $key => $actionsGroup) {
+        foreach ($gridModel->getSentry()->getGridActions(true) as $key => $actionsGroup) {
             $fieldset = $form->addFieldset(
                 'fieldset_' . $key,
                 array(

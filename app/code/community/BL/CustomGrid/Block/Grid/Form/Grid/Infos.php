@@ -27,7 +27,8 @@ class BL_CustomGrid_Block_Grid_Form_Grid_Infos extends BL_CustomGrid_Block_Grid_
      */
     public function canDisplayDisabledField()
     {
-        return $this->getGridModel()->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_ENABLE_DISABLE);
+        return $this->getGridModel()
+            ->checkUserActionPermission(BL_CustomGrid_Model_Grid_Sentry::ACTION_ENABLE_DISABLE);
     }
     
     /**
@@ -37,7 +38,8 @@ class BL_CustomGrid_Block_Grid_Form_Grid_Infos extends BL_CustomGrid_Block_Grid_
      */
     public function canDisplayForcedTypeCodeField()
     {
-        return $this->getGridModel()->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_EDIT_FORCED_TYPE);
+        return $this->getGridModel()
+            ->checkUserActionPermission(BL_CustomGrid_Model_Grid_Sentry::ACTION_EDIT_FORCED_TYPE);
     }
     
     public function hasOnlyReadOnlyFields()

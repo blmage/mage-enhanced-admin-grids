@@ -85,11 +85,11 @@ class BL_CustomGrid_Grid_ProfileController extends BL_CustomGrid_Controller_Grid
         $this->_prepareFormLayout(
             'default',
             array(
-                BL_CustomGrid_Model_Grid::ACTION_CHOOSE_OWN_USER_DEFAULT_PROFILE,
-                BL_CustomGrid_Model_Grid::ACTION_CHOOSE_OTHER_USERS_DEFAULT_PROFILE,
-                BL_CustomGrid_Model_Grid::ACTION_CHOOSE_OWN_ROLE_DEFAULT_PROFILE,
-                BL_CustomGrid_Model_Grid::ACTION_CHOOSE_OTHER_ROLES_DEFAULT_PROFILE,
-                BL_CustomGrid_Model_Grid::ACTION_CHOOSE_GLOBAL_DEFAULT_PROFILE,
+                BL_CustomGrid_Model_Grid_Sentry::ACTION_CHOOSE_OWN_USER_DEFAULT_PROFILE,
+                BL_CustomGrid_Model_Grid_Sentry::ACTION_CHOOSE_OTHER_USERS_DEFAULT_PROFILE,
+                BL_CustomGrid_Model_Grid_Sentry::ACTION_CHOOSE_OWN_ROLE_DEFAULT_PROFILE,
+                BL_CustomGrid_Model_Grid_Sentry::ACTION_CHOOSE_OTHER_ROLES_DEFAULT_PROFILE,
+                BL_CustomGrid_Model_Grid_Sentry::ACTION_CHOOSE_GLOBAL_DEFAULT_PROFILE,
             )
         );
         $this->renderLayout();
@@ -121,7 +121,7 @@ class BL_CustomGrid_Grid_ProfileController extends BL_CustomGrid_Controller_Grid
     
     public function copyToNewFormAction()
     {
-        $this->_prepareFormLayout('copy_new', BL_CustomGrid_Model_Grid::ACTION_COPY_PROFILES_TO_NEW);
+        $this->_prepareFormLayout('copy_new', BL_CustomGrid_Model_Grid_Sentry::ACTION_COPY_PROFILES_TO_NEW);
         $this->renderLayout();
     }
     
@@ -164,7 +164,7 @@ class BL_CustomGrid_Grid_ProfileController extends BL_CustomGrid_Controller_Grid
     
     public function copyToExistingFormAction()
     {
-        $this->_prepareFormLayout('copy_existing', BL_CustomGrid_Model_Grid::ACTION_COPY_PROFILES_TO_EXISTING);
+        $this->_prepareFormLayout('copy_existing', BL_CustomGrid_Model_Grid_Sentry::ACTION_COPY_PROFILES_TO_EXISTING);
         $this->renderLayout();
     }
     
@@ -207,7 +207,7 @@ class BL_CustomGrid_Grid_ProfileController extends BL_CustomGrid_Controller_Grid
     
     public function editFormAction()
     {
-        $this->_prepareFormLayout('edit', BL_CustomGrid_Model_Grid::ACTION_EDIT_PROFILES);
+        $this->_prepareFormLayout('edit', BL_CustomGrid_Model_Grid_Sentry::ACTION_EDIT_PROFILES);
         $this->renderLayout();
     }
     
@@ -245,7 +245,7 @@ class BL_CustomGrid_Grid_ProfileController extends BL_CustomGrid_Controller_Grid
     
     public function assignFormAction()
     {
-        $this->_prepareFormLayout('assign', BL_CustomGrid_Model_Grid::ACTION_ASSIGN_PROFILES);
+        $this->_prepareFormLayout('assign', BL_CustomGrid_Model_Grid_Sentry::ACTION_ASSIGN_PROFILES);
         $this->renderLayout();
     }
     

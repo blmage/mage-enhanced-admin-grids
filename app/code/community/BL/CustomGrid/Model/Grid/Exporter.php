@@ -49,10 +49,11 @@ class BL_CustomGrid_Model_Grid_Exporter extends BL_CustomGrid_Model_Grid_Worker
     {
         $gridModel = $this->getGridModel();
         
-        if (!$gridModel->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_EXPORT_RESULTS)) {
-            $gridModel->throwPermissionException(
-                $gridModel->getHelper()->__('You are not allowed to export this grid results')
-            );
+        if (!$gridModel->checkUserActionPermission(BL_CustomGrid_Model_Grid_Sentry::ACTION_EXPORT_RESULTS)) {
+            $gridModel->getSentry()
+                ->throwPermissionException(
+                    $gridModel->getHelper()->__('You are not allowed to export this grid results')
+                );
         }
         if (!$this->canExport($gridModel)) {
             Mage::throwException($gridModel->getHelper()->__('This grid results can not be exported'));

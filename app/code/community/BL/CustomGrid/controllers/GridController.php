@@ -167,7 +167,7 @@ class BL_CustomGrid_GridController extends BL_CustomGrid_Controller_Grid_Action
         $this->_prepareWindowFormLayout(
             'custom_columns',
             array(),
-            BL_CustomGrid_Model_Grid::ACTION_CUSTOMIZE_COLUMNS
+            BL_CustomGrid_Model_Grid_Sentry::ACTION_CUSTOMIZE_COLUMNS
         );
         $this->renderLayout();
     }
@@ -219,7 +219,7 @@ class BL_CustomGrid_GridController extends BL_CustomGrid_Controller_Grid_Action
         $this->_prepareWindowFormLayout(
             'default_params',
             array('default_params' => $defaultParams),
-            BL_CustomGrid_Model_Grid::ACTION_EDIT_DEFAULT_PARAMS
+            BL_CustomGrid_Model_Grid_Sentry::ACTION_EDIT_DEFAULT_PARAMS
         );
         
         $this->renderLayout();
@@ -281,7 +281,7 @@ class BL_CustomGrid_GridController extends BL_CustomGrid_Controller_Grid_Action
                 'total_size'  => $this->getRequest()->getParam('total_size'),
                 'first_index' => $this->getRequest()->getParam('first_index'),
             ),
-            BL_CustomGrid_Model_Grid::ACTION_EXPORT_RESULTS
+            BL_CustomGrid_Model_Grid_Sentry::ACTION_EXPORT_RESULTS
         );
         $this->renderLayout();
     }
@@ -337,8 +337,8 @@ class BL_CustomGrid_GridController extends BL_CustomGrid_Controller_Grid_Action
             'grid_infos',
             array(),
             array(
-                BL_CustomGrid_Model_Grid::ACTION_VIEW_GRID_INFOS,
-                BL_CustomGrid_Model_Grid::ACTION_EDIT_FORCED_TYPE,
+                BL_CustomGrid_Model_Grid_Sentry::ACTION_VIEW_GRID_INFOS,
+                BL_CustomGrid_Model_Grid_Sentry::ACTION_EDIT_FORCED_TYPE,
             )
         );
         $this->renderLayout();
@@ -469,8 +469,8 @@ class BL_CustomGrid_GridController extends BL_CustomGrid_Controller_Grid_Action
                 'callback' => array($gridModel, 'updateDefaultParametersBehaviours'),
             ),
             'roles_permissions' => array(
-                'type' => 'grid',
-                'callback' => array($gridModel, 'updateRolesPermissions'),
+                'type' => 'sentry',
+                'callback' => array($gridModel->getSentry(), 'setGridRolesPermissions'),
             ),
             'profile_edit' => array(
                 'type' => 'profile',

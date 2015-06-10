@@ -30,7 +30,8 @@ class BL_CustomGrid_Block_Grid_Edit_Tabs extends Mage_Adminhtml_Block_Widget_Tab
      */
     protected function _canDisplayProfileEditTab()
     {
-        return $this->getGridModel()->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_EDIT_PROFILES);
+        return $this->getGridModel()
+            ->checkUserActionPermission(BL_CustomGrid_Model_Grid_Sentry::ACTION_EDIT_PROFILES);
     }
     
     /**
@@ -40,7 +41,8 @@ class BL_CustomGrid_Block_Grid_Edit_Tabs extends Mage_Adminhtml_Block_Widget_Tab
      */
     protected function _canDisplayProfileAssignTab()
     {
-        return $this->getGridModel()->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_ASSIGN_PROFILES);
+        return $this->getGridModel()
+            ->checkUserActionPermission(BL_CustomGrid_Model_Grid_Sentry::ACTION_ASSIGN_PROFILES);
     }
     
     /**
@@ -53,8 +55,8 @@ class BL_CustomGrid_Block_Grid_Edit_Tabs extends Mage_Adminhtml_Block_Widget_Tab
         return $this->getGridModel()
             ->checkUserPermissions(
                 array(
-                    BL_CustomGrid_Model_Grid::ACTION_EDIT_FORCED_TYPE,
-                    BL_CustomGrid_Model_Grid::ACTION_ENABLE_DISABLE,
+                    BL_CustomGrid_Model_Grid_Sentry::ACTION_EDIT_FORCED_TYPE,
+                    BL_CustomGrid_Model_Grid_Sentry::ACTION_ENABLE_DISABLE,
                 )
             );
     }
@@ -67,7 +69,7 @@ class BL_CustomGrid_Block_Grid_Edit_Tabs extends Mage_Adminhtml_Block_Widget_Tab
     protected function _canDisplayColumnsTab()
     {
         return $this->getGridModel()
-            ->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_CUSTOMIZE_COLUMNS);
+            ->checkUserActionPermission(BL_CustomGrid_Model_Grid_Sentry::ACTION_CUSTOMIZE_COLUMNS);
     }
     
     /**
@@ -80,10 +82,10 @@ class BL_CustomGrid_Block_Grid_Edit_Tabs extends Mage_Adminhtml_Block_Widget_Tab
         return $this->getGridModel()
             ->checkUserPermissions(
                 array(
-                    BL_CustomGrid_Model_Grid::ACTION_EDIT_DEFAULT_PARAMS_BEHAVIOURS,
-                    BL_CustomGrid_Model_Grid::ACTION_EDIT_CUSTOMIZATION_PARAMS,
-                    BL_CustomGrid_Model_Grid::ACTION_ASSIGN_PROFILES,
-                    BL_CustomGrid_Model_Grid::ACTION_EDIT_PROFILES,
+                    BL_CustomGrid_Model_Grid_Sentry::ACTION_EDIT_DEFAULT_PARAMS_BEHAVIOURS,
+                    BL_CustomGrid_Model_Grid_Sentry::ACTION_EDIT_CUSTOMIZATION_PARAMS,
+                    BL_CustomGrid_Model_Grid_Sentry::ACTION_ASSIGN_PROFILES,
+                    BL_CustomGrid_Model_Grid_Sentry::ACTION_EDIT_PROFILES,
                 )
             );
     }
@@ -96,7 +98,7 @@ class BL_CustomGrid_Block_Grid_Edit_Tabs extends Mage_Adminhtml_Block_Widget_Tab
     protected function _canDisplayRolesTabs()
     {
         return $this->getGridModel()
-            ->checkUserPermissions(BL_CustomGrid_Model_Grid::ACTION_EDIT_ROLES_PERMISSIONS);
+            ->checkUserActionPermission(BL_CustomGrid_Model_Grid_Sentry::ACTION_EDIT_ROLES_PERMISSIONS);
     }
     
     protected function _prepareLayout()
