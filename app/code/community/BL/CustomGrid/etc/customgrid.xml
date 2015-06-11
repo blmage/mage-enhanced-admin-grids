@@ -376,6 +376,14 @@
                         <order_field>customer_dob</order_field>
                     </model_params>
                 </customer_dob>
+                
+                <weight model="customgrid/custom_column_order_base" module="customgrid">
+                    <name>Weight</name>
+                    <allow_renderers>1</allow_renderers>
+                    <model_params>
+                        <order_field>weight</order_field>
+                    </model_params>
+                </weight>
             </custom_columns>
         </sales_order>
         
