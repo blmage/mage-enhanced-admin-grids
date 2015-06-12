@@ -23,6 +23,7 @@ class BL_CustomGrid_Model_Grid_Type_Product extends BL_CustomGrid_Model_Grid_Typ
             'adminhtml/catalog_product_edit_tab_related',
             'adminhtml/catalog_product_edit_tab_upsell',
             'adminhtml/catalog_product_edit_tab_crosssell',
+            'adminhtml/sales_order_create_search_grid',
         );
     }
     
@@ -37,7 +38,7 @@ class BL_CustomGrid_Model_Grid_Type_Product extends BL_CustomGrid_Model_Grid_Typ
             'is_salable' => array(
                 'renderer' => '',
                 'config_values' => array(
-                    'filter' => false,
+                    'filter'   => false,
                     'sortable' => false
                 ),
             ),
