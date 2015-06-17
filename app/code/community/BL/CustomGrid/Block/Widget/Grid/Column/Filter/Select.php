@@ -69,9 +69,9 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Select extends Mage_Adminhtm
      */
     protected function _isValueSelected($value, $selectedValue)
     {
-        return (!is_null($selectedValue) && (is_array($selectedValue))
+        return is_array($selectedValue)
             ? in_array($value, $selectedValue)
-            : ($value == $selectedValue));
+            : (!is_null($selectedValue) && ($value == $selectedValue));
     }
     
     /**
