@@ -1533,7 +1533,7 @@ blcg.Grid.ProfilesBar.prototype = {
             } else {
                 this.previousArrow.removeClassName(this.config.disabledClassName);
             }
-            if (this.profilesCount > this.config.maxDisplayedCount) {
+            if (this.profilesCount >= this.config.maxDisplayedCount) {
                 if (this.currentDisplayIndex + this.config.maxDisplayedCount < this.profilesCount) {
                     this.nextArrow.removeClassName(this.config.disabledClassName);
                 } else {

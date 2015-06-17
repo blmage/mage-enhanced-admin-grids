@@ -195,6 +195,7 @@ div.blcg-collapseable a.open { background:url(images/collapse_arrow_up.png) 100%
     max-width:150px;
     height:28px;
     line-height:28px;
+    margin:0 !important;
 }
 
 .blcg-grid-profiles-list.blcg-grid-profiles-list-full li { max-width:none; }
