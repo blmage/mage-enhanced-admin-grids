@@ -15,6 +15,15 @@
 
 abstract class BL_CustomGrid_Model_Custom_Column_Simple_Abstract extends BL_CustomGrid_Model_Custom_Column_Abstract
 {
+    /**
+     * Add the column base field to the given grid collection
+     * 
+     * @param string $columnIndex Grid column index
+     * @param array $params Customization params values
+     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
+     * @param Varien_Data_Collection_Db $collection Grid collection
+     * @return BL_CustomGrid_Model_Custom_Column_Simple_Abstract
+     */
     abstract public function addFieldToGridCollection(
         $columnIndex,
         array $params,
