@@ -19,7 +19,8 @@ class BL_CustomGrid_Model_Column_Renderer_Attribute_Product_Image extends BL_Cus
         Mage_Eav_Model_Entity_Attribute $attribute,
         BL_CustomGrid_Model_Grid $gridModel
     ) {
-        return ($attribute->getFrontendModel() == 'catalog/product_attribute_frontend_image');
+        return ($attribute->getFrontendInput() == 'media_image')
+            || ($attribute->getFrontendModel() == 'catalog/product_attribute_frontend_image');
     }
     
     public function getColumnBlockValues(
