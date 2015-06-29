@@ -336,4 +336,16 @@ class BL_CustomGrid_Helper_Data extends Mage_Core_Helper_Abstract
         
         return $result;
     }
+    
+    /**
+     * Return the default non-admin store ID
+     * 
+     * @return int
+     */
+    public function getDefaultNonAdminStoreId()
+    {
+        $stores = Mage::app()->getStores(false);
+        $store  = array_shift($stores);
+        return $store->getId();
+    }
 }

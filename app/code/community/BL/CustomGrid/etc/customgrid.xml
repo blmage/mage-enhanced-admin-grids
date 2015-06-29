@@ -53,6 +53,13 @@
                     <allow_store>1</allow_store>
                 </categories>
                 
+                <frontend_link model="customgrid/custom_column_product_frontend_link" module="customgrid">
+                    <name>Frontend Link</name>
+                    <description>Displays the frontend link of each product</description>
+                    <allow_customization>1</allow_customization> 
+                    <allow_store>1</allow_store>
+                </frontend_link>
+                
                 <carts_count model="customgrid/custom_column_product_stats_quote" module="customgrid">
                     <name>Carts Number</name>
                     <description>Displays the number of carts containing each product</description>
