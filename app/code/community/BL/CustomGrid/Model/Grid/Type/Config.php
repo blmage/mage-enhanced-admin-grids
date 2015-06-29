@@ -58,8 +58,11 @@ class BL_CustomGrid_Model_Grid_Type_Config extends BL_CustomGrid_Model_Config_Ab
     {
         $optionHash = array();
         
-        foreach ($this->getTypesModels($sorted) as $model) {
+        foreach ($this->getTypesModels() as $model) {
             $optionHash[$model->getCode()] = $model->getName();
+        }
+        if ($sorted) {
+            asort($optionHash, SORT_LOCALE_STRING);
         }
         if ($withEmpty) {
             /** @var $helper BL_CustomGrid_Helper_Data */
