@@ -265,7 +265,7 @@ class BL_CustomGrid_Model_Custom_Column_Applier extends BL_CustomGrid_Object
     }
     
     /**
-     * Handle an error that occured while applying the current custom column to a grid block.
+     * Handle an error that occurred while applying the current custom column to a grid block.
      * By default, it adds the given corresponding error message to the session
      * 
      * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block

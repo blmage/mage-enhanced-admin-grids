@@ -536,11 +536,11 @@ blcg.Grid.Tools = {
                 
                 onSuccess: blcg.Tools.handleAjaxOnSuccessResponse.curry(
                     blcg.Grid.Tools.reloadGrid.curry(gridObjectName, [], additionalReloadParams),
-                    blcg.Tools.translate('An error occured while reapplying the default filter')
+                    blcg.Tools.translate('An error occurred while reapplying the default filter')
                 ),
                 
                 onFailure: blcg.Tools.handleAjaxOnErrorResponse.curry(
-                    blcg.Tools.translate('An error occured while reapplying the default filter')
+                    blcg.Tools.translate('An error occurred while reapplying the default filter')
                 )
             });
         }
@@ -1805,11 +1805,11 @@ blcg.Grid.ProfilesBar.prototype = {
                             this.handleActionResponse(response);
                             this.isActionRunning = false;
                         }.bind(this),
-                        blcg.Tools.translate('An error occured while applying the action')
+                        blcg.Tools.translate('An error occurred while applying the action')
                     ), 
                     
                     onFailure: function(transport) {
-                        alert(blcg.Tools.translate('An error occured while applying the action'));
+                        alert(blcg.Tools.translate('An error occurred while applying the action'));
                         this.isActionRunning = false;
                     }.bind(this)
                 });
@@ -1850,7 +1850,7 @@ blcg.Grid.Form.prototype = {
             gridObjectName: null,
             additionalParams: {},
             submitMethod: 'post',
-            errorMessage: blcg.Tools.translate('An error occured while saving the values')
+            errorMessage: blcg.Tools.translate('An error occurred while saving the values')
         }, config || {});
     },
     
@@ -1917,11 +1917,11 @@ blcg.Grid.ConfigForm.prototype = {
                 
                 onSuccess: blcg.Tools.handleAjaxOnSuccessResponse.curry(
                     function(transport, response) { this.updateContent(response.parameters); }.bind(this),
-                    blcg.Tools.translate('An error occured while applying the values')
+                    blcg.Tools.translate('An error occurred while applying the values')
                 ),
                 
                 onFailure: blcg.Tools.handleAjaxOnErrorResponse.curry(
-                    blcg.Tools.translate('An error occured while applying the values')
+                    blcg.Tools.translate('An error occurred while applying the values')
                 )
             });
             
@@ -2967,7 +2967,7 @@ blcg.Grid.Editor.prototype = {
                     onSuccess: function(transport) {
                         var response= blcg.Tools.handleAjaxOnSuccessResponse(
                             null,
-                            blcg.Tools.translate('An error occured while initializing the edit form'),
+                            blcg.Tools.translate('An error occurred while initializing the edit form'),
                             transport
                         );
                         
@@ -3017,7 +3017,7 @@ blcg.Grid.Editor.prototype = {
                                 }
                             } catch (e) {
                                 this.cancelEdit();
-                                alert(blcg.Tools.translate('An error occured while initializing the edit form'));
+                                alert(blcg.Tools.translate('An error occurred while initializing the edit form'));
                             }
                         } else {
                             this.cancelEdit();
@@ -3027,7 +3027,7 @@ blcg.Grid.Editor.prototype = {
                     onFailure: function(transport) {
                         this.isRequestRunning = false;
                         this.cancelEdit();
-                        alert(blcg.Tools.translate('An error occured while initializing the edit form'));
+                        alert(blcg.Tools.translate('An error occurred while initializing the edit form'));
                     }.bind(this)
                 });
             } else {
@@ -3088,7 +3088,7 @@ blcg.Grid.Editor.prototype = {
                     onSuccess: function(transport) {
                         var response= blcg.Tools.handleAjaxOnSuccessResponse(
                             null,
-                            blcg.Tools.translate('An error occured while editing the value'),
+                            blcg.Tools.translate('An error occurred while editing the value'),
                             transport
                         );
                         
@@ -3111,7 +3111,7 @@ blcg.Grid.Editor.prototype = {
                                 this.positionCellOverlay(cell, null, this.compareCells(cell, this.shortHoveredCell));
                             } catch (e) {
                                 this.cancelEdit();
-                                alert(blcg.Tools.translate('An error occured while editing the value'));
+                                alert(blcg.Tools.translate('An error occurred while editing the value'));
                             }
                         } else {
                             this.cancelEdit();
@@ -3120,7 +3120,7 @@ blcg.Grid.Editor.prototype = {
                     
                     onFailure: function(transport) {
                         this.isRequestRunning = false;
-                        this.cancelEdit(false, blcg.Tools.translate('An error occured while editing the value'));
+                        this.cancelEdit(false, blcg.Tools.translate('An error occurred while editing the value'));
                     }.bind(this)
                 });
             } else {
