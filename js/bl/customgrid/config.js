@@ -68,6 +68,21 @@ if (typeof(blcg.Grid.Filter) == 'undefined') {
 blcg.Tools = {
     windowsCount: 0,
     
+    isPrimitiveValue: function(value)
+    {
+        var valueType = Object.prototype.toString.call(value);
+        return (valueType == '[object Boolean]')
+            || (valueType == '[object Number]')
+            || (valueType == '[object String]');
+    },
+    
+    isEmptyValue: function(value)
+    {
+        return (value === null)
+            || (value === undefined)
+            || ((Object.isArray(value) || Object.isString(value)) && (value.length === 0));
+    },
+    
     openDialog: function(windowConfig, otherWindow)
     {
         if (!otherWindow && $('blcg_window') && (typeof(Windows) != 'undefined')) {
@@ -145,6 +160,34 @@ blcg.Tools = {
         return isValid;
     },
     
+    buildQueryStringFromValue: function(value, currentParamName)
+    {
+        var parts = [];
+        var isEmptyParamName = this.isEmptyValue(currentParamName);
+        
+        if (this.isPrimitiveValue(value)) {
+            if (!isEmptyParamName) {
+                parts.push(currentParamName + '=' + encodeURIComponent(value));
+            }
+        } else if (Object.isArray(value)) {
+            if (!isEmptyParamName) {
+                var paramName = currentParamName + '[]';
+                
+                for (var i=0, l=value.length; i<l; i++) {
+                    parts.push(this.buildQueryStringFromValue(value[i], paramName));
+                }
+            }
+        } else if (value) {
+            $H(value).each(function(pair) {
+                var paramName = encodeURIComponent(pair.key);
+                paramName = (!isEmptyParamName ? currentParamName + '[' + paramName + ']' : paramName);
+                parts.push(this.buildQueryStringFromValue(pair.value, paramName));
+            }.bind(this));
+        }
+        
+        return parts.join('&');
+    },
+    
     openDialogFromUrl: function(url, windowConfig)
     {
         var window = this.openDialog(windowConfig);
@@ -172,7 +215,7 @@ blcg.Tools = {
         
         new Ajax.Updater('modal_dialog_message', url, {
             method: 'post',
-            parameters: $H(data).toQueryString(),
+            parameters: blcg.Tools.buildQueryStringFromValue(data),
             evalScripts: true,
             onComplete: function(transport) {
                 if (!blcg.Tools.checkDialogAjaxResponse(transport)) {

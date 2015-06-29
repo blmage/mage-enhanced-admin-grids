@@ -39,6 +39,19 @@ class BL_CustomGrid_Model_Grid_Exporter extends BL_CustomGrid_Model_Grid_Worker
     }
     
     /**
+     * Return the additional parameters that should be included in the export forms
+     * 
+     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
+     * @return array
+     */
+    public function getAdditionalFormParams(Mage_Adminhtml_Block_Widget_Grid $gridBlock)
+    {
+        return ($typeModel = $this->getGridModel()->getTypeModel())
+            ? $typeModel->getAdditionalExportParams($this->getGridModel()->getBlockType(), $gridBlock)
+            : array();
+    }
+    
+    /**
      * If allowed and possible, export current grid's results in given format
      *
      * @param string $format Export format

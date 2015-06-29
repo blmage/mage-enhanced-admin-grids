@@ -67,7 +67,7 @@ class BL_CustomGrid_Block_Grid_Form_Export extends BL_CustomGrid_Block_Grid_Form
     {
         $exportSizes = array();
         
-        if ($totalSize = $this->getTotalSize()) {
+        if ($totalSize = $this->_getData('total_size')) {
             $exportSizes[$totalSize] = $this->__('Total (%s)', $totalSize);
         }
         
@@ -142,6 +142,19 @@ class BL_CustomGrid_Block_Grid_Form_Export extends BL_CustomGrid_Block_Grid_Form
                 'value'    => (int) $this->getDataSetDefault('first_index', 1),
             )
         );
+        
+        if (is_array($additionalParams = $this->_getData('additional_params'))) {
+            foreach ($additionalParams as $key => $value) {
+                $fieldset->addField(
+                    $key,
+                    'hidden',
+                    array(
+                        'name'  => $form->addSuffixToName($key, 'additional_params'),
+                        'value' => $value,
+                    )
+                );
+            }
+        }
         
         $this->getDependenceBlock()
             ->addFieldMap($sizeField->getHtmlId(), 'size')

@@ -635,15 +635,17 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
     public function getExportFormButtonHtml()
     {
         if (!$this->hasData('export_form_button_html')) {
-            $gridModel  = $this->getGridModel();
-            $buttonHtml = '';
+            $gridModel    = $this->getGridModel();
+            $gridExporter = $gridModel->getExporter();
+            $buttonHtml   = '';
             
-            if ($gridModel->getExporter()->canExport()
+            if ($gridExporter->canExport()
                 && $gridModel->checkUserActionPermission(BL_CustomGrid_Model_Grid_Sentry::ACTION_EXPORT_RESULTS)
                 && ($gridBlock = $this->getRewritedGridBlock())) {
                 $params = array(
                     'total_size'  => $gridBlock->blcg_getCollectionSize(),
-                    'first_index' => (($gridBlock->blcg_getPage() -1) * $gridBlock->blcg_getLimit() +1),
+                    'first_index' => (($gridBlock->blcg_getPage() - 1) * $gridBlock->blcg_getLimit() + 1),
+                    'additional_params' => $gridExporter->getAdditionalFormParams($gridBlock),
                 );
                 
                 $functionName = $this->_prepareButtonScript(

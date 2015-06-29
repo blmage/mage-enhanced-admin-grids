@@ -357,6 +357,28 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
     }
     
     /**
+     * Return the additional parameters that should be included in the export forms
+     * 
+     * @param string $blockType Grid block type
+     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
+     * @return array
+     */
+    public function getAdditionalExportParams($blockType, Mage_Adminhtml_Block_Widget_Grid $gridBlock)
+    {
+        $params = array();
+        
+        if ($massactionBlock = $gridBlock->getMassactionBlock()) {
+            $selectedIds = $massactionBlock->getSelected();
+            
+            if (!empty($selectedIds)) {
+                $params[$massactionBlock->getFormFieldNameInternal()] = implode(',', $selectedIds);
+            }
+        }
+        
+        return $params;
+    }
+    
+    /**
      * Return whether given request corresponds to an export request from this extension
      * 
      * @param string $blockType Grid block type

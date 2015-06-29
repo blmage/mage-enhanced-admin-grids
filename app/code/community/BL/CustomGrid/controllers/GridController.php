@@ -280,10 +280,27 @@ class BL_CustomGrid_GridController extends BL_CustomGrid_Controller_Grid_Action
             array(
                 'total_size'  => $this->getRequest()->getParam('total_size'),
                 'first_index' => $this->getRequest()->getParam('first_index'),
+                'additional_params' => $this->getRequest()->getParam('additional_params', array()),
             ),
             BL_CustomGrid_Model_Grid_Sentry::ACTION_EXPORT_RESULTS
         );
         $this->renderLayout();
+    }
+    
+    /**
+     * Restore in the request the additional parameters from the given export config
+     * 
+     * @param array $exportConfig Export config values
+     */
+    protected function _restoreExportAdditionalParams(array $exportConfig)
+    {
+        if (isset($exportConfig['additional_params']) && is_array($exportConfig['additional_params'])) {
+            foreach ($exportConfig['additional_params'] as $key => $value) {
+                if (!$this->getRequest()->has($key)) {
+                    $this->getRequest()->setParam($key, $value);
+                }
+            }
+        }
     }
     
     /**
@@ -301,6 +318,9 @@ class BL_CustomGrid_GridController extends BL_CustomGrid_Controller_Grid_Action
             if (!is_array($config = $this->getRequest()->getParam('export'))) {
                 $config = null;
             }
+            
+            $this->_restoreExportAdditionalParams($config);
+            
             if ($format == 'csv') {
                 $exportOutput = $gridModel->getExporter()->exportToCsv($config);
             } elseif ($format == 'xml') {
