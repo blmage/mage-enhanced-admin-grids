@@ -600,7 +600,7 @@ class BL_CustomGrid_GridController extends BL_CustomGrid_Controller_Grid_Action
     ) {
          try {
             $gridModel = $this->_initGridModel();
-            call_user_func_array(array($gridModel, $methodName));
+            call_user_func_array(array($gridModel, $methodName), $parameters);
             
             if ($saveAfter) {
                 $gridModel->save();
