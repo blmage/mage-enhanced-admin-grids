@@ -348,4 +348,16 @@ class BL_CustomGrid_Helper_Data extends Mage_Core_Helper_Abstract
         $store  = array_shift($stores);
         return $store->getId();
     }
+    
+    /**
+     * Unregister the resource singleton corresponding to the given class code
+     * 
+     * @param string $classCode Class code of the singletonized resource model
+     * @return BL_CustomGrid_Helper_Data
+     */
+    public function unregisterResourceSingleton($classCode)
+    {
+        Mage::unregister('_resource_singleton/' . $classCode);
+        return $this;
+    }
 }
