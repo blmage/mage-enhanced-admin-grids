@@ -57,4 +57,10 @@ class BL_CustomGrid_Column_Renderer_CollectionController
         $encoded = Mage::getSingleton('customgrid/column_renderer_collection')->encodeParameters($params);
         $this->getResponse()->setBody($encoded);
     }
+    
+    protected function _isAllowed()
+    {
+        return Mage::getSingleton('admin/session')
+            ->isAllowed('system/customgrid/customization/edit_columns');
+    }
 }

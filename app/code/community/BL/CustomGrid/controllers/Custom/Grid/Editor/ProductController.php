@@ -30,4 +30,10 @@ class BL_CustomGrid_Custom_Grid_Editor_ProductController
         
         $this->getResponse()->setBody($content->toHtml());
     }
+    
+    protected function _isAllowed()
+    {
+        return Mage::getSingleton('admin/session')
+            ->isAllowed('system/customgrid/editor/edit_columns');
+    }
 }

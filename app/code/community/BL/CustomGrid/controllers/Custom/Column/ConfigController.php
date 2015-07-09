@@ -59,4 +59,10 @@ class BL_CustomGrid_Custom_Column_ConfigController
         $encoded = Mage::getSingleton('customgrid/grid_type')->encodeParameters($params);
         $this->getResponse()->setBody($encoded);
     }
+    
+    protected function _isAllowed()
+    {
+        return Mage::getSingleton('admin/session')
+            ->isAllowed('system/customgrid/customization/edit_columns');
+    }
 }

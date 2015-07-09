@@ -37,4 +37,9 @@ class BL_CustomGrid_Custom_Grid_Column_FilterController
                 ->getCategoryChildrenJson($this->getRequest()->getParam('category'))
         );
     }
+    
+    protected function _isAllowed()
+    {
+        return true;
+    }
 }
