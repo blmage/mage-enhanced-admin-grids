@@ -68,4 +68,9 @@ class BL_CustomGrid_Custom_Column_ConfigController extends BL_CustomGrid_Control
         $params = $this->_getGridTypeConfig()->encodeParameters($params);
         $this->_setActionSuccessJsonResponse(array('parameters' => $params));
     }
+    
+    protected function _isAllowed()
+    {
+        return $this->_getAdminSession()->isAllowed('customgrid/customization/edit_columns');
+    }
 }

@@ -26,4 +26,9 @@ class BL_CustomGrid_Config_FormController extends BL_CustomGrid_Controller_Grid_
             $this->_setActionSuccessJsonResponse();
         }
     }
+    
+    protected function _isAllowed()
+    {
+        return true;
+    }
 }

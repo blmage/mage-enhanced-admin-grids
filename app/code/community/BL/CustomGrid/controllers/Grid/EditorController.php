@@ -167,4 +167,9 @@ class BL_CustomGrid_Grid_EditorController extends BL_CustomGrid_Controller_Grid_
             $this->_setActionErrorJsonResponse($this->__('Failed to save the value : "%s"', $e->getMessage()));
         }
     }
+    
+    protected function _isAllowed()
+    {
+        return $this->_getAdminSession()->isAllowed('customgrid/editor/edit_columns');
+    }
 }

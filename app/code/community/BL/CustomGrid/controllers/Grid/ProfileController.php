@@ -320,4 +320,10 @@ class BL_CustomGrid_Grid_ProfileController extends BL_CustomGrid_Controller_Grid
             $this->_setActionErrorJsonResponse($this->__('Invalid request'));
         }
     }
+    
+    protected function _isAllowed()
+    {
+        // Specific permissions are enforced by the models
+        return true;
+    }
 }

@@ -41,4 +41,9 @@ class BL_CustomGrid_Grid_Column_FilterController extends Mage_Adminhtml_Controll
         $mainCategoryId = $this->getRequest()->getParam('category');
         $this->getResponse()->setBody($chooserBlock->getCategoryChildrenJson($mainCategoryId));
     }
+    
+    protected function _isAllowed()
+    {
+        return true;
+    }
 }

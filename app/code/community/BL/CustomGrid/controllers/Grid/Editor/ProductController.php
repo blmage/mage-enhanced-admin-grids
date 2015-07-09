@@ -38,4 +38,9 @@ class BL_CustomGrid_Grid_Editor_ProductController extends Mage_Adminhtml_Control
         
         $this->getResponse()->setBody($contentBlock->toHtml());
     }
+    
+    protected function _isAllowed()
+    {
+        return $this->_getAdminSession()->isAllowed('customgrid/editor/edit_columns');
+    }
 }

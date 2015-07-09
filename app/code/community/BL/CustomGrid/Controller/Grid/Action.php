@@ -16,6 +16,16 @@
 class BL_CustomGrid_Controller_Grid_Action extends Mage_Adminhtml_Controller_Action
 {
     /**
+     * Return the admin session model
+     * 
+     * @return Mage_Admin_Model_Session
+     */
+    protected function _getAdminSession()
+    {
+        return Mage::getSingleton('admin/session');
+    }
+    
+    /**
      * Return our own session model
      * 
      * @return BL_CustomGrid_Model_Session

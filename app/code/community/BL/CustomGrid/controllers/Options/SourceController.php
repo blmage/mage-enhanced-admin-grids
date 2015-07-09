@@ -216,8 +216,6 @@ class BL_CustomGrid_Options_SourceController extends Mage_Adminhtml_Controller_A
     
     protected function _isAllowed()
     {
-        /** @var $session Mage_Admin_Model_Session */
-        $session = Mage::getSingleton('admin/session');
-        return $session->isAllowed('system/customgrid/options_source');
+        return $this->_getAdminSession()->isAllowed('system/customgrid/options_source');
     }
 }

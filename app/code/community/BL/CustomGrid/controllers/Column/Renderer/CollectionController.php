@@ -76,4 +76,9 @@ class BL_CustomGrid_Column_Renderer_CollectionController extends BL_CustomGrid_C
         $params = $this->_getConfig()->encodeParameters($params);
         $this->_setActionSuccessJsonResponse(array('parameters' => $params));
     }
+    
+    protected function _isAllowed()
+    {
+        return $this->_getAdminSession()->isAllowed('customgrid/customization/edit_columns');
+    }
 }

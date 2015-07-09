@@ -782,15 +782,14 @@ class BL_CustomGrid_GridController extends BL_CustomGrid_Controller_Grid_Action
     
     protected function _isAllowed()
     {
+        // Specific permissions are enforced by the models
         switch ($this->getRequest()->getActionName()) {
             case 'index':
             case 'grid':
             case 'massDelete':
             case 'massDisable':
             case 'massEnable':
-                /** @var $session Mage_Admin_Model_Session */
-                $session = Mage::getSingleton('admin/session');
-                return $session->isAllowed('customgrid/administration/view_grids_list');
+                return $this->_getAdminSession()->isAllowed('customgrid/administration/view_grids_list');
         }
         return true;
     }
