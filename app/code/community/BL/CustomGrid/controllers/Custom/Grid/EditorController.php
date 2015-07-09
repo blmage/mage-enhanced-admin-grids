@@ -147,4 +147,10 @@ class BL_CustomGrid_Custom_Grid_EditorController
             $this->getResponse()->setBody($this->__('Unknown grid'));
         }
     }
+    
+    protected function _isAllowed()
+    {
+        return Mage::getSingleton('admin/session')
+            ->isAllowed('system/customgrid/editor/edit_columns');
+    }
 }
