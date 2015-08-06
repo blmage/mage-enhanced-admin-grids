@@ -1,6 +1,8 @@
 {
     "name": "mage-eag/mage-enhanced-admin-grids",
     "type": "magento-module",
+    "license": "OSL-3.0",
+    "homepage": "https://github.com/mage-eag/mage-enhanced-admin-grids",
     "description": "Enhanced Admin Grids Extension for Magento",
     "require": {
         "magento-hackathon/magento-composer-installer": "*"
