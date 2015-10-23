@@ -31,7 +31,7 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Product_Categories
         } else {
             $htmlId = Mage::helper('core')->uniqHash($this->_getHtmlId());
             $jsId   = Mage::helper('core')->uniqHash('blcgCategoriesFilter');
-            $url    = $this->getUrl('customgrid/custom_grid_column_filter/categories', array('js_object' => $jsId));
+            $url    = $this->getUrl('adminhtml/blcg_custom_grid_column_filter/categories', array('js_object' => $jsId));
             $window = Mage::helper('core')->jsonEncode(array(
                 'width'        => '700px',
                 'height'       => '480px',

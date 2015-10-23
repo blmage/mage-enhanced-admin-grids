@@ -91,7 +91,7 @@ class BL_CustomGrid_Block_Column_Renderer_Attribute_Select
     
     public function getConfigUrl()
     {
-        return $this->getUrl('customgrid/column_renderer_attribute/index');
+        return $this->getUrl('adminhtml/blcg_column_renderer_attribute/index');
     }
     
     protected function _toHtml()

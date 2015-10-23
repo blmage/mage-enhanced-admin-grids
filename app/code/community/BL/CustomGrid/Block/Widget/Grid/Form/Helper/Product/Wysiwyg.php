@@ -27,7 +27,7 @@ class BL_CustomGrid_Block_Widget_Grid_Form_Helper_Product_Wysiwyg
                     'type'     => 'button',
                     'disabled' => $disabled,
                     'class'    => ($disabled) ? 'disabled' : '',
-                    'onclick'  => 'catalogWysiwygEditor.open(\''.Mage::helper('adminhtml')->getUrl('customgrid/custom_grid_editor_product/wysiwyg').'\', \''.$this->getHtmlId().'\')'
+                    'onclick'  => 'catalogWysiwygEditor.open(\''.Mage::helper('adminhtml')->getUrl('adminhtml/blcg_custom_grid_editor_product/wysiwyg').'\', \''.$this->getHtmlId().'\')'
                 ))->toHtml();
         }
         return $html;

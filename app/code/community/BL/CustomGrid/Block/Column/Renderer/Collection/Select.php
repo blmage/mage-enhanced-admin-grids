@@ -75,7 +75,7 @@ class BL_CustomGrid_Block_Column_Renderer_Collection_Select
     
     public function getConfigUrl()
     {
-        return $this->getUrl('customgrid/column_renderer_collection/index');
+        return $this->getUrl('adminhtml/blcg_column_renderer_collection/index');
     }
     
     public function getDescriptionsOutput()

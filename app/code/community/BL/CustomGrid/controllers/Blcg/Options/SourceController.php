@@ -13,7 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Options_SourceController extends Mage_Adminhtml_Controller_Action
+class BL_CustomGrid_Blcg_Options_SourceController extends Mage_Adminhtml_Controller_Action
 {
     protected function _initAction($layoutIds=null)
     {
@@ -78,7 +78,7 @@ class BL_CustomGrid_Options_SourceController extends Mage_Adminhtml_Controller_A
         $this->_initAction(array(
             'default',
             strtolower($this->getFullActionName()),
-            'customgrid_options_source_'.$source->getType()
+            'adminhtml_blcg_options_source_'.$source->getType()
         ))->_title($this->__('New Options Source'))->renderLayout();
     }
     
@@ -98,7 +98,7 @@ class BL_CustomGrid_Options_SourceController extends Mage_Adminhtml_Controller_A
         $this->_initAction(array(
             'default',
             strtolower($this->getFullActionName()),
-            'customgrid_options_source_'.$source->getType()
+            'adminhtml_blcg_options_source_'.$source->getType()
         ))->_title($source->getName())
             ->_addBreadcrumb($source->getName(), $source->getName())
             ->renderLayout();

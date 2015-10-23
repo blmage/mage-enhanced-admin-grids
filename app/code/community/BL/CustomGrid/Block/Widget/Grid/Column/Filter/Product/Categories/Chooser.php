@@ -191,7 +191,7 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Product_Categories_Chooser
     
     public function getLoadTreeUrl($expanded=null)
     {
-        return $this->getUrl('customgrid/custom_grid_column_filter/categoriesJson', array('_current' => true));
+        return $this->getUrl('adminhtml/blcg_custom_grid_column_filter/categoriesJson', array('_current' => true));
     }
     
     public function getSelectedCategoriesPathIds($rootId=false)

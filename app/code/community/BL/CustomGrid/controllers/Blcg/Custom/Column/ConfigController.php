@@ -13,7 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Custom_Column_ConfigController
+class BL_CustomGrid_Blcg_Custom_Column_ConfigController
     extends Mage_Adminhtml_Controller_Action
 {
     protected function _initCustomColumn()
@@ -48,7 +48,7 @@ class BL_CustomGrid_Custom_Column_ConfigController
             $this->loadLayout(array(
                 'empty', 
                 strtolower($this->getFullActionName()),
-                'customgrid_custom_column_config_unknown',
+                'adminhtml_blcg_custom_column_config_unknown',
             ))->renderLayout();
         }
     }

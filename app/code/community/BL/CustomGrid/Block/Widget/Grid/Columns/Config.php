@@ -52,12 +52,12 @@ class BL_CustomGrid_Block_Widget_Grid_Columns_Config
     
     public function getSaveUrl()
     {
-        return $this->getUrl('customgrid/custom_grid/save');
+        return $this->getUrl('adminhtml/blcg_custom_grid/save');
     }
     
     public function getDeleteUrl()
     {
-        return $this->getUrl('customgrid/custom_grid/delete', array('grid_id' => $this->getGridModel()->getId()));
+        return $this->getUrl('adminhtml/blcg_custom_grid/delete', array('grid_id' => $this->getGridModel()->getId()));
     }
     
     public function getCustomizeButtonHtml()

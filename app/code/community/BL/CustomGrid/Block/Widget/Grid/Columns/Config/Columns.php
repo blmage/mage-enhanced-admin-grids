@@ -151,12 +151,12 @@ class BL_CustomGrid_Block_Widget_Grid_Columns_Config_Columns
     
     public function getSaveUrl()
     {
-        return $this->getUrl('customgrid/custom_grid/save');
+        return $this->getUrl('adminhtml/blcg_custom_grid/save');
     }
     
     public function getCustomColumnConfigUrl()
     {
-        return $this->getUrl('customgrid/custom_column_config/index');
+        return $this->getUrl('adminhtml/blcg_custom_column_config/index');
     }
     
     // @todo restore getErrorText() from where it was lost

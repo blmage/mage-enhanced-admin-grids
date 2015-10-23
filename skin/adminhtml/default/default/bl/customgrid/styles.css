@@ -113,8 +113,8 @@ button.blcg-export span { padding-left:20px; background-image:url(images/ico_exp
 .blcg-column-editor-editing .blcg-editor-required-marker { display:none; }
 .grid table td.blcg-column-editor-editing-required { background:#ffdcdc !important; }
 .blcg-editor-scope-label { font-size:0.9em; }
-.customgrid-custom-grid-editor-edit { background:#fff; }
-.customgrid-custom-grid-editor-edit .middle { background:none; min-height:0; }
+.adminhtml-blcg-custom-grid-editor-edit { background:#fff; }
+.adminhtml-blcg-custom-grid-editor-edit .middle { background:none; min-height:0; }
 
 /* COLUMNS RENDERERS */
 
@@ -150,9 +150,9 @@ ul.blcg-custom-columns-help-features li { height:16px; padding:0 0 0 16px; line-
 .grid tr.filter .blcg-categories-filter .blcg-filter-button { position:absolute; top:0; right:0; }
 .grid tr.filter .blcg-filter-value { font-weight:normal; }
 .blcg-filter-form-buttons { float:right; }
-.customgrid-custom-grid-column-filter-categories { background:#fff; }
-.customgrid-custom-grid-column-filter-categories .middle { background:none; min-height:0; }
-.customgrid-custom-grid-column-filter-categories .wrapper-popup { min-width:680px; }
+.adminhtml-blcg-custom-grid-column-filter-categories { background:#fff; }
+.adminhtml-blcg-custom-grid-column-filter-categories .middle { background:none; min-height:0; }
+.adminhtml-blcg-custom-grid-column-filter-categories .wrapper-popup { min-width:680px; }
 
 /* PINNABLE GRID HEADER */
 
@@ -162,11 +162,11 @@ ul.blcg-custom-columns-help-features li { height:16px; padding:0 0 0 16px; line-
 
 /* CATEGORY FILTER TREE ACTION */
 
-.customgrid-custom-grid-column-filter-categories { background:#fff; }
-.customgrid-custom-grid-column-filter-categories .middle { background:none; min-height:0; }
-.customgrid-custom-grid-column-filter-categories .wrapper-popup { min-width:680px; }
-.customgrid-custom-grid-column-filter-categories .entry-edit { clear:both; }
-.customgrid-custom-grid-column-filter-categories .entry-edit .entry-edit-head { background:#666; }
+.adminhtml-blcg-custom-grid-column-filter-categories { background:#fff; }
+.adminhtml-blcg-custom-grid-column-filter-categories .middle { background:none; min-height:0; }
+.adminhtml-blcg-custom-grid-column-filter-categories .wrapper-popup { min-width:680px; }
+.adminhtml-blcg-custom-grid-column-filter-categories .entry-edit { clear:both; }
+.adminhtml-blcg-custom-grid-column-filter-categories .entry-edit .entry-edit-head { background:#666; }
 
 /* WINDOW STYLES */
 
