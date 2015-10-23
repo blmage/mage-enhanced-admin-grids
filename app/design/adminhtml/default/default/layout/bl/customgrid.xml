@@ -50,19 +50,19 @@
         </reference> 
     </blcg_magento_version_from_17>
     
-    <customgrid_grid_index>
+    <adminhtml_blcg_grid_index>
         <reference name="content">
             <block type="customgrid/grid" name="blcg.grid.index" />
         </reference>
-    </customgrid_grid_index>
+    </adminhtml_blcg_grid_index>
     
-    <customgrid_grid_grid>
+    <adminhtml_blcg_grid_grid>
         <block type="core/text_list" name="root" output="toHtml">
             <block type="customgrid/grid" name="blcg.grid.index" />
         </block>
-    </customgrid_grid_grid>
+    </adminhtml_blcg_grid_grid>
     
-    <customgrid_grid_edit>
+    <adminhtml_blcg_grid_edit>
         <reference name="left">
             <block type="customgrid/grid_edit_tabs" name="blcg.grid.edit.tabs">
                 <block type="customgrid/grid_profile_switcher" name="blcg.grid.edit.profile_switcher" as="profile_switcher" />
@@ -71,94 +71,94 @@
         <reference name="content">
             <block type="customgrid/grid_edit" name="blcg.grid.edit" />
         </reference>
-    </customgrid_grid_edit>
+    </adminhtml_blcg_grid_edit>
     
-    <customgrid_column_renderer_collection_index>
+    <adminhtml_blcg_column_renderer_collection_index>
         <reference name="content">
             <block type="customgrid/column_renderer_collection_config" name="blcg.column_renderer.collection.config" />
         </reference>
-    </customgrid_column_renderer_collection_index>
+    </adminhtml_blcg_column_renderer_collection_index>
     
-    <customgrid_column_renderer_collection_unknown>
+    <adminhtml_blcg_column_renderer_collection_unknown>
         <reference name="content">
             <remove name="blcg.column_renderer.collection.config" />
             <block type="adminhtml/template" name="blcg.column_renderer.collection.unknown" template="bl/customgrid/column/renderer/collection/unknown.phtml" />
         </reference>
-    </customgrid_column_renderer_collection_unknown>
+    </adminhtml_blcg_column_renderer_collection_unknown>
     
-    <customgrid_column_renderer_attribute_index>
+    <adminhtml_blcg_column_renderer_attribute_index>
         <reference name="content">
             <block type="customgrid/column_renderer_attribute_config" name="blcg.column_renderer.attribute.config" />
         </reference>
-    </customgrid_column_renderer_attribute_index>
+    </adminhtml_blcg_column_renderer_attribute_index>
     
-    <customgrid_column_renderer_attribute_unknown>
+    <adminhtml_blcg_column_renderer_attribute_unknown>
         <reference name="content">
             <remove name="blcg.column_renderer.attribute.config" />
             <block type="adminhtml/template" name="blcg.column_renderer.attribute.unknown" template="bl/customgrid/column/renderer/attribute/unknown.phtml" />
         </reference>
-    </customgrid_column_renderer_attribute_unknown>
+    </adminhtml_blcg_column_renderer_attribute_unknown>
     
-    <customgrid_custom_column_config_index>
+    <adminhtml_blcg_custom_column_config_index>
         <reference name="content">
             <block type="customgrid/custom_column_config" name="blcg.custom_column.config" />
         </reference>
-    </customgrid_custom_column_config_index>
+    </adminhtml_blcg_custom_column_config_index>
     
-    <customgrid_custom_column_config_unknown>
+    <adminhtml_blcg_custom_column_config_unknown>
         <reference name="content">
             <remove name="blcg.custom_column.config" />
             <block type="adminhtml/template" name="blcg.custom_column.unknown" template="bl/customgrid/custom/column/config/unknown.phtml" />
         </reference>
-    </customgrid_custom_column_config_unknown>
+    </adminhtml_blcg_custom_column_config_unknown>
     
-    <customgrid_grid_form_window_action>
+    <adminhtml_blcg_grid_form_window_action>
         <reference name="content">
             <block type="customgrid/grid_form_container" name="blcg.grid.form_container" />
         </reference>
-    </customgrid_grid_form_window_action>
+    </adminhtml_blcg_grid_form_window_action>
     
-    <customgrid_grid_form_window_error>
+    <adminhtml_blcg_grid_form_window_error>
         <reference name="content">
             <block type="adminhtml/template" name="blcg.grid.form_error" template="bl/customgrid/grid/form/error.phtml" />
         </reference>
-    </customgrid_grid_form_window_error>
+    </adminhtml_blcg_grid_form_window_error>
     
-    <customgrid_grid_profile_form_window_action>
+    <adminhtml_blcg_grid_profile_form_window_action>
         <reference name="content">
             <block type="customgrid/grid_profile_form_container" name="blcg.grid_profile.form_container" />
         </reference>
-    </customgrid_grid_profile_form_window_action>
+    </adminhtml_blcg_grid_profile_form_window_action>
     
-    <customgrid_grid_profile_form_window_error>
+    <adminhtml_blcg_grid_profile_form_window_error>
         <reference name="content">
             <block type="adminhtml/template" name="blcg.grid_profile.form_error" template="bl/customgrid/grid/form/error.phtml" />
         </reference>
-    </customgrid_grid_profile_form_window_error>
+    </adminhtml_blcg_grid_profile_form_window_error>
     
-    <customgrid_options_source_index>
+    <adminhtml_blcg_options_source_index>
         <reference name="content">
             <block type="customgrid/options_source" name="blcg.options_source.index" />
         </reference>
-    </customgrid_options_source_index>
+    </adminhtml_blcg_options_source_index>
     
-    <customgrid_options_source_new>
+    <adminhtml_blcg_options_source_new>
         <reference name="left">
             <block type="customgrid/options_source_edit_tabs" name="blcg.options_source.edit.tabs" />
         </reference>
         <reference name="content">
             <block type="customgrid/options_source_edit" name="blcg.options_source.edit" />
         </reference>
-    </customgrid_options_source_new>
+    </adminhtml_blcg_options_source_new>
     
-    <customgrid_options_source_edit>
+    <adminhtml_blcg_options_source_edit>
         <reference name="left">
             <block type="customgrid/options_source_edit_tabs" name="blcg.options_source.edit.tabs" />
         </reference>
         <reference name="content">
             <block type="customgrid/options_source_edit" name="blcg.options_source.edit" />
         </reference>
-    </customgrid_options_source_edit>
+    </adminhtml_blcg_options_source_edit>
     
     <blcg_grid_editor_handle_editor>
         <update handle="editor" />
@@ -175,15 +175,15 @@
         </reference>
     </blcg_grid_editor_handle_product>
     
-    <customgrid_grid_editor_edit>
+    <adminhtml_blcg_grid_editor_edit>
         <update handle="popup" />
         <remove name="footer" />
         <reference name="content">
             <block type="customgrid/widget_grid_editor_form_container" name="blcg.grid_editor.form_container" />
         </reference>
-    </customgrid_grid_editor_edit>
+    </adminhtml_blcg_grid_editor_edit>
     
-    <customgrid_grid_column_filter_categories>
+    <adminhtml_blcg_grid_column_filter_categories>
         <update handle="popup" />
         <remove name="footer" />
         <reference name="root">
@@ -195,5 +195,5 @@
         <reference name="content">
             <block type="customgrid/widget_grid_column_filter_product_categories_chooser" name="blcg.filter.categories.chooser" />
         </reference>
-    </customgrid_grid_column_filter_categories>
+    </adminhtml_blcg_grid_column_filter_categories>
 </layout>

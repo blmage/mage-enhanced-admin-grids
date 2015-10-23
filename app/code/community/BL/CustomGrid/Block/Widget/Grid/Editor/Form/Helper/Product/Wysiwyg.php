@@ -26,7 +26,7 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Helper_Product_Wysiwyg extends
             $layout     = Mage::getSingleton('core/layout');
             $htmlId     = $this->getHtmlId();
             $disabled   = ($this->getDisabled() || $this->getReadonly());
-            $wysiwygUrl = $helper->getUrl('customgrid/grid_editor_product/wysiwyg');
+            $wysiwygUrl = $helper->getUrl('adminhtml/blcg_grid_editor_product/wysiwyg');
             
             /** @var $editorButton Mage_Adminhtml_Block_Widget_Button */
             $editorButton = $layout->createBlock(

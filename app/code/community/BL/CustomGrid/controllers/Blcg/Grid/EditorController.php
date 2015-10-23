@@ -13,7 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Grid_EditorController extends BL_CustomGrid_Controller_Grid_Action
+class BL_CustomGrid_Blcg_Grid_EditorController extends BL_CustomGrid_Controller_Grid_Action
 {
     /**
      * Initialize and register the grid type model from the current request

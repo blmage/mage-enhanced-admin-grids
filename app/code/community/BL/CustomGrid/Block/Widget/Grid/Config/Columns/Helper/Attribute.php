@@ -239,7 +239,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config_Columns_Helper_Attribute extends Ma
      */
     public function getRendererConfigUrl()
     {
-        return $this->getUrl('customgrid/column_renderer_attribute');
+        return $this->getUrl('adminhtml/blcg_column_renderer_attribute');
     }
     
     /**

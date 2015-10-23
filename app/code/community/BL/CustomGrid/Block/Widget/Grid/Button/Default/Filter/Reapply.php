@@ -50,7 +50,7 @@ class BL_CustomGrid_Block_Widget_Grid_Button_Default_Filter_Reapply extends Mage
     public function getReapplyDefaultFilterUrl()
     {
         return $this->getUrl(
-            'customgrid/grid/reapplyDefaultFilter',
+            'adminhtml/blcg_grid/reapplyDefaultFilter',
             array(
                 'grid_id' => $this->getGridModel()->getId(),
                 'profile_id' => $this->getGridModel()->getProfileId(),

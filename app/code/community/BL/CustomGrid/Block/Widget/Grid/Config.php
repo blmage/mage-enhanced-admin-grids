@@ -141,7 +141,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
      */
     public function getCustomColumnsFormUrl()
     {
-        return $this->getUrl('customgrid/grid/customColumnsForm', $this->getBaseUrlParams());
+        return $this->getUrl('adminhtml/blcg_grid/customColumnsForm', $this->getBaseUrlParams());
     }
     
     /**
@@ -151,7 +151,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
      */
     public function getDefaultParamsFormUrl()
     {
-        return $this->getUrl('customgrid/grid/defaultParamsForm', $this->getBaseUrlParams());
+        return $this->getUrl('adminhtml/blcg_grid/defaultParamsForm', $this->getBaseUrlParams());
     }
     
     /**
@@ -161,7 +161,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
      */
     public function getExportFormUrl()
     {
-        return $this->getUrl('customgrid/grid/exportForm', $this->getBaseUrlParams());
+        return $this->getUrl('adminhtml/blcg_grid/exportForm', $this->getBaseUrlParams());
     }
     
     /**
@@ -171,7 +171,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
      */
     public function getGridInfosUrl()
     {
-        return $this->getUrl('customgrid/grid/gridInfos', $this->getBaseUrlParams());
+        return $this->getUrl('adminhtml/blcg_grid/gridInfos', $this->getBaseUrlParams());
     }
     
     /**
@@ -181,7 +181,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
      */
     public function getGridEditUrl()
     {
-        return $this->getUrl('customgrid/grid/edit', $this->getBaseUrlParams());
+        return $this->getUrl('adminhtml/blcg_grid/edit', $this->getBaseUrlParams());
     }
     
     /**
@@ -340,7 +340,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
     {
         $gridModel = $this->getGridModel();
         $actions   = array();
-        $actionsRoute  = 'customgrid/grid_profile/';
+        $actionsRoute  = 'adminhtml/blcg_grid_profile/';
         $actionsParams = array(
             'grid_id' => $gridModel->getId(),
             'profile_id' => $this->getProfileIdPlaceholder(),

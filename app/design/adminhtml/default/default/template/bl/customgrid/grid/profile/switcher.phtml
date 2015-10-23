@@ -34,7 +34,7 @@ function blcgSwitchProfile(select)
         return true;
     }
     
-    select.value = '<?php echo $this->getCurrentGridProfile()->getId() ?>';
+    select.value = '<?php echo $this->getGridProfile()->getId() ?>';
     return false;
 }
 //]]>

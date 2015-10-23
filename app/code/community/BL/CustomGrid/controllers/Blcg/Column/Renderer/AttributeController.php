@@ -13,20 +13,20 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Column_Renderer_CollectionController extends BL_CustomGrid_Controller_Grid_Action
+class BL_CustomGrid_Blcg_Column_Renderer_AttributeController extends BL_CustomGrid_Controller_Grid_Action
 {
     /**
-     * Return the config model for collection column renderers
+     * Return the config model for attribute column renderers
      * 
-     * @return BL_CustomGrid_Model_Column_Renderer_Config_Collection
+     * @return BL_CustomGrid_Model_Column_Renderer_Config_Attribute
      */
     protected function _getConfig()
     {
-        return Mage::getSingleton('customgrid/column_renderer_config_collection');
+        return Mage::getSingleton('customgrid/column_renderer_config_attribute');
     }
     
     /**
-     * Initialize and register the current collection column renderer from the current request
+     * Initialize and register the current attribute column renderer from the current request
      * 
      * @return BL_CustomGrid_Model_Column_Renderer_Attribute_Abstract
      */
@@ -37,7 +37,7 @@ class BL_CustomGrid_Column_Renderer_CollectionController extends BL_CustomGrid_C
         } else {
             $renderer = null;
         }
-        Mage::register('blcg_collection_column_renderer', $renderer);
+        Mage::register('blcg_attribute_column_renderer', $renderer);
         return $renderer;
     }
     
@@ -46,8 +46,8 @@ class BL_CustomGrid_Column_Renderer_CollectionController extends BL_CustomGrid_C
         if ($this->_initRenderer()) {
             $this->loadLayout('blcg_empty');
             
-            if ($configBlock = $this->getLayout()->getBlock('blcg.column_renderer.collection.config')) {
-                /** @var $configBlock BL_CustomGrid_Block_Column_Renderer_Collection_Config */
+            if ($configBlock = $this->getLayout()->getBlock('blcg.column_renderer.attribute.config')) {
+                /** @var $configBlock BL_CustomGrid_Block_Column_Renderer_Attribute_Config */
                 if ($rendererTargetId = $this->getRequest()->getParam('renderer_target_id')) {
                     $configBlock->setRendererTargetId($rendererTargetId);
                 }
@@ -62,7 +62,7 @@ class BL_CustomGrid_Column_Renderer_CollectionController extends BL_CustomGrid_C
                 array(
                     'blcg_empty', 
                     strtolower($this->getFullActionName()),
-                    'customgrid_column_renderer_collection_unknown',
+                    'adminhtml_blcg_column_renderer_attribute_unknown',
                 )
             );
             $this->renderLayout();

@@ -302,13 +302,13 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
         return array(
             'csv' => new BL_CustomGrid_Object(
                 array(
-                    'route' => 'customgrid/grid/exportCsv',
+                    'route' => 'adminhtml/blcg_grid/exportCsv',
                     'label' => $this->_getBaseHelper()->__('CSV'),
                 )
             ),
             'xml' => new BL_CustomGrid_Object(
                 array(
-                    'route' => 'customgrid/grid/exportExcel', 
+                    'route' => 'adminhtml/blcg_grid/exportExcel', 
                     'label' => $this->_getBaseHelper()->__('Excel'),
                 )
             ),
@@ -387,7 +387,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      */
     public function isExportRequest($blockType, Mage_Core_Controller_Request_Http $request)
     {
-        $route = $request->getModuleName()
+        $route = $request->getRouteName()
             . '/' . $request->getControllerName()
             . '/' . $request->getActionName();
         
@@ -603,7 +603,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
             self::EDITABLE_TYPE_FIELD,
             $fieldId,
             $config,
-            'customgrid/grid_editor/edit' . ($config->getInGrid() ? 'InGrid' : '')
+            'adminhtml/blcg_grid_editor/edit' . ($config->getInGrid() ? 'InGrid' : '')
         );
     }
     
@@ -622,7 +622,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
             self::EDITABLE_TYPE_FIELD,
             $fieldId,
             $config,
-            'customgrid/grid_editor/save'
+            'adminhtml/blcg_grid_editor/save'
         );
     }
     
@@ -646,7 +646,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
             self::EDITABLE_TYPE_ATTRIBUTE,
             $attributeCode,
             $config,
-            'customgrid/grid_editor/edit' . ($config->getInGrid() ? 'InGrid' : '')
+            'adminhtml/blcg_grid_editor/edit' . ($config->getInGrid() ? 'InGrid' : '')
         );
     }
     
@@ -670,7 +670,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
             self::EDITABLE_TYPE_ATTRIBUTE,
             $attributeCode,
             $config,
-            'customgrid/grid_editor/save'
+            'adminhtml/blcg_grid_editor/save'
         );
     }
     

@@ -173,7 +173,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config_Columns_Helper_Collection extends M
      */
     public function getRendererConfigUrl()
     {
-        return $this->getUrl('customgrid/column_renderer_collection');
+        return $this->getUrl('adminhtml/blcg_column_renderer_collection');
     }
     
     /**

@@ -13,7 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Custom_Column_ConfigController extends BL_CustomGrid_Controller_Grid_Action
+class BL_CustomGrid_Blcg_Custom_Column_ConfigController extends BL_CustomGrid_Controller_Grid_Action
 {
     /**
      * Initialize and register the custom column from the current request
@@ -54,7 +54,7 @@ class BL_CustomGrid_Custom_Column_ConfigController extends BL_CustomGrid_Control
                 array(
                     'blcg_empty', 
                     strtolower($this->getFullActionName()),
-                    'customgrid_custom_column_config_unknown',
+                    'adminhtml_blcg_custom_column_config_unknown',
                 )
             );
             $this->renderLayout();

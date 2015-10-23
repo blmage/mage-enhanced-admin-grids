@@ -576,8 +576,12 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
         $values = array_intersect_key($values, array_flip($editableKeys));
         $this->_checkProfileNewValues($profileId, $values);
         
-        if (!isset($values['remembered_session_params']) || is_array($values['remembered_session_params'])) {
-            $sessionParams = array_intersect($values['remembered_session_params'], $gridModel->getGridParamsKeys(true));
+        $rememberedSessionParams = isset($values['remembered_session_params'])
+            ? $values['remembered_session_params']
+            : array();
+        
+        if (is_array($rememberedSessionParams)) {
+            $sessionParams = array_intersect($rememberedSessionParams, $gridModel->getGridParamsKeys(true));
             
             if (in_array(BL_CustomGrid_Model_Grid::GRID_PARAM_NONE, $sessionParams)) {
                 $sessionParams = array(BL_CustomGrid_Model_Grid::GRID_PARAM_NONE);

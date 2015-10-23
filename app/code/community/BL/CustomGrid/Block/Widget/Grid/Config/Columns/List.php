@@ -275,7 +275,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config_Columns_List extends Mage_Adminhtml
      */
     public function getSaveUrl()
     {
-        return $this->getUrl('customgrid/grid/saveColumns');
+        return $this->getUrl('adminhtml/blcg_grid/saveColumns');
     }
     
     /**
@@ -285,7 +285,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config_Columns_List extends Mage_Adminhtml
      */
     public function getCustomColumnConfigUrl()
     {
-        return $this->getUrl('customgrid/custom_column_config/index');
+        return $this->getUrl('adminhtml/blcg_custom_column_config/index');
     }
     
     /**

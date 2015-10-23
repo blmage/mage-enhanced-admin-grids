@@ -299,6 +299,11 @@
             <sort_order>80000</sort_order>
         </customer_group>
         
+        <newsletter model="customgrid/grid_type_newsletter" module="customgrid">
+            <name>Newsletter</name>
+            <sort_order>85000</sort_order>
+        </newsletter>
+        
         <order_view_tab model="customgrid/grid_type_order_tab" module="customgrid">
             <name>Order View Tab</name>
             <sort_order>90000</sort_order>

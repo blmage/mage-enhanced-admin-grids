@@ -32,7 +32,7 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Product_Categories extends M
             $helper = $this->helper('core');
             $jsId   = $helper->uniqHash('blcgCategoriesFilter');
             $htmlId = $helper->uniqHash($this->_getHtmlId());
-            $windowUrl = $this->getUrl('customgrid/grid_column_filter/categories', array('js_object_name' => $jsId));
+            $windowUrl = $this->getUrl('adminhtml/blcg_grid_column_filter/categories', array('js_object_name' => $jsId));
             $windowJsonConfig = $helper->jsonEncode(
                 array(
                     'width'  => '700px',

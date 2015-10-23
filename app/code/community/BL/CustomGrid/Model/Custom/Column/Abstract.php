@@ -22,6 +22,7 @@
  * @method this setAllowStore(bool $flag) Set whether this column allows to choose a base store view
  * @method BL_CustomGrid_Model_Custom_Column_Abstract setCurrentBlockValues(array $currentBlockValues)
  */
+
 abstract class BL_CustomGrid_Model_Custom_Column_Abstract extends BL_CustomGrid_Object
 {
     /**

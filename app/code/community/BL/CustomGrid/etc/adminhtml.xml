@@ -219,12 +219,12 @@
                         <grids translate="title" module="customgrid">
                             <title>List</title>
                             <sort_order>10</sort_order>
-                            <action>customgrid/grid/index</action>
+                            <action>adminhtml/blcg_grid/index</action>
                         </grids>
                         <options_source translate="title" module="customgrid">
                             <title>Manage Options Source</title>
                             <sort_order>20</sort_order>
-                            <action>customgrid/options_source/index</action>
+                            <action>adminhtml/blcg_options_source/index</action>
                         </options_source>
                         <setup translate="title" module="customgrid">
                             <title>Base Configuration</title>

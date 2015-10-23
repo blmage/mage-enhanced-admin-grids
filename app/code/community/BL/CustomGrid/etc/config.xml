@@ -64,13 +64,13 @@
     </global>
     <admin>
         <routers>
-            <customgrid>
-                <use>admin</use>
+            <adminhtml>
                 <args>
-                    <module>BL_CustomGrid</module>
-                    <frontName>customgrid</frontName>
+                    <modules>
+                        <customgrid after="Mage_Adminhtml">BL_CustomGrid</customgrid>
+                    </modules>
                 </args>
-            </customgrid>
+            </adminhtml>
         </routers>
     </admin>
     <adminhtml>
