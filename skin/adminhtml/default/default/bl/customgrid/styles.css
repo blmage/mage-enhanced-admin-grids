@@ -340,8 +340,8 @@ div.blcg-collapseable a.open { background:url(images/collapse_arrow_up.png) 100%
 .blcg-column-editor-editing .blcg-editor-required-marker { display:none; }
 .grid table td.blcg-column-editor-editing-required { background:#ffdcdc !important; }
 .blcg-editor-scope-label { font-size:0.9em; }
-.customgrid-custom-grid-editor-edit { background:#fff; }
-.customgrid-custom-grid-editor-edit .middle { min-height:0; background:none; }
+.adminhtml-blcg-grid-editor-edit { background:#fff; }
+.adminhtml-blcg-grid-editor-edit .middle { min-height:0; background:none; }
 
 /* COLUMNS RENDERERS */
 
