@@ -17,7 +17,7 @@ class BL_CustomGrid_Block_Grid_Form_Default_Params extends BL_CustomGrid_Block_G
 {
     public function getFormAction()
     {
-        return $this->getUrl('customgrid/grid/saveDefaultParams');
+        return $this->getUrl('adminhtml/blcg_grid/saveDefaultParams');
     }
     
     public function getReloadGridAfterSuccess()

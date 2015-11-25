@@ -47,7 +47,7 @@ class BL_CustomGrid_Helper_Config_Form extends Mage_Core_Helper_Abstract
     {
         /** @var $helper Mage_Adminhtml_Helper_Data */
         $helper = Mage::helper('adminhtml');
-        return $helper->getUrl('customgrid/config_form/saveFieldsetState');
+        return $helper->getUrl('adminhtml/blcg_config_form/saveFieldsetState');
     }
     
     /**
