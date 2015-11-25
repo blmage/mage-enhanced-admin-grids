@@ -17,7 +17,7 @@ class BL_CustomGrid_Block_Grid_Form_Grid_Infos extends BL_CustomGrid_Block_Grid_
 {
     public function getFormAction()
     {
-        return $this->getUrl('customgrid/grid/saveGridInfos');
+        return $this->getUrl('adminhtml/blcg_grid/saveGridInfos');
     }
     
     /**
