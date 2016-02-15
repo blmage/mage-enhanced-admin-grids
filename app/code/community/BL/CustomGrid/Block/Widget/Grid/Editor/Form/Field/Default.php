@@ -115,12 +115,15 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Field_Default extends BL_Custo
      */
     protected function _getAdditionalCheckboxFieldValues(BL_CustomGrid_Model_Grid_Editor_Value_Config $valueConfig)
     {
+        $values = array();
+        
         if ($valueConfig->hasData('form_field/checked_callback')) {
             $values['checked'] = $valueConfig->runConfigCallback(
                 'form_field/checked_callback',
                 array($this->getEditorContext())
             );
         }
+        
         return $values;
     }
     

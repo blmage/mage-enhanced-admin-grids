@@ -189,6 +189,7 @@ class BL_CustomGrid_Model_Grid_Editor_Kickstarter extends BL_CustomGrid_Model_Gr
         BL_CustomGrid_Model_Grid $gridModel
     ) {
         $context = $this->prepareEditorContextFromRequest($request, $gridModel);
+        $valueConfig = null;
         
         if (!$context instanceof BL_CustomGrid_Model_Grid_Editor_Context) {
             Mage::throwException('Invalid editor context');

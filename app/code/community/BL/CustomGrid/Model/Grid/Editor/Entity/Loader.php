@@ -291,6 +291,8 @@ class BL_CustomGrid_Model_Grid_Editor_Entity_Loader extends BL_CustomGrid_Model_
      */
     public function getEditedEntityFromContext(BL_CustomGrid_Model_Grid_Editor_Context $context)
     {
+        $entity = null;
+        
         if (is_null($entityId = $this->getContextEditedEntityIdentifiers($context))) {
             Mage::throwException('Could not retrieve the edited entity identifiers from the editor context');
         } elseif (!$entity = $this->loadEditedEntity($entityId, $context)) {

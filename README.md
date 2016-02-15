@@ -3,7 +3,7 @@
 # Enhanced Admin Grids
 ## Version 1.0.0 (work-in-progress / edge)
 
-_This version includes the latest changes which are considered to be too experimental to be featured in the [base work-in-progress branch](https://github.com/mage-eag/mage-enhanced-admin-grids/tree/1.0.0-wip). As such, it should only be used for testing purposes._
+_This version includes the latest changes which are considered too experimental to be featured in the [base work-in-progress branch](https://github.com/mage-eag/mage-enhanced-admin-grids/tree/1.0.0-wip). As such, it should only be used for testing purposes._
 
 ### Final steps before beta release
 - [ ] write a FAQ page with the most common issues and questions

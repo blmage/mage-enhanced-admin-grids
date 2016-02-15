@@ -121,7 +121,9 @@ abstract class BL_CustomGrid_Model_Grid_Editor_Worker_Abstract extends BL_Custom
         array $defaultCallbacks = array(),
         $cacheable = false
     ) {
-        if ($cacheable && $this->hasData($dataKey = $this->_getActionCallbacksCacheKey($actionType, $context))) {
+        $dataKey = $this->_getActionCallbacksCacheKey($actionType, $context);
+        
+        if ($cacheable && $this->hasData($dataKey)) {
             $callbacks = $this->getData($dataKey);
         } else {
             if (!is_null($mainCallable)) {
@@ -136,6 +138,7 @@ abstract class BL_CustomGrid_Model_Grid_Editor_Worker_Abstract extends BL_Custom
                 $this->setData($dataKey, $callbacks);
             }
         }
+        
         return $callbacks;
     }
     

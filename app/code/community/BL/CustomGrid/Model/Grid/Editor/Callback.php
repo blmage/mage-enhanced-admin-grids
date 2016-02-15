@@ -50,7 +50,7 @@ class BL_CustomGrid_Model_Grid_Editor_Callback extends BL_CustomGrid_Object
      * @param BL_CustomGrid_Model_Grid_Editor_Callback $callbackB Another editor callback
      * @return int
      */
-    static public function sortCallbacks(
+    public static function sortCallbacks(
         BL_CustomGrid_Model_Grid_Editor_Callback $callbackA,
         BL_CustomGrid_Model_Grid_Editor_Callback $callbackB
     ) {
@@ -237,6 +237,7 @@ class BL_CustomGrid_Model_Grid_Editor_Callback extends BL_CustomGrid_Object
     {
         $availableParams['editorCallback'] = $this;
         $availableParams['previousReturnedValue'] = $previousReturnedValue;
+        $callParams = array();
         
         if (is_callable($callable = $this->_getData('callable'))) {
             $callable   = $this->_getResolvedCallable($callable);
