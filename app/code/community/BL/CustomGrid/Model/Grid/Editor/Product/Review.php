@@ -24,24 +24,24 @@ class BL_CustomGrid_Model_Grid_Editor_Product_Review extends BL_CustomGrid_Model
         );
     }
     
-    protected function _getBaseCallbacks()
+    public function getDefaultBaseCallbacks(BL_CustomGrid_Model_Grid_Editor_Callback_Manager $callbackManager)
     {
         return array(
-             $this->getCallbackFromCallable(
+            $callbackManager->getCallbackFromCallable(
                 array($this, 'checkBaseUserEditPermissions'),
                 self::WORKER_TYPE_SENTRY,
                 BL_CustomGrid_Model_Grid_Editor_Sentry::ACTION_TYPE_CHECK_BASE_USER_EDIT_PERMISSIONS,
                 BL_CustomGrid_Model_Grid_Editor_Callback::POSITION_MAIN,
                 BL_CustomGrid_Model_Grid_Editor_Callback::PRIORITY_EDITOR_INTERNAL_LOW
             ),
-            $this->getCallbackFromCallable(
+            $callbackManager->getCallbackFromCallable(
                 array($this, 'checkEditedEntityLoadedState'),
                 self::WORKER_TYPE_ENTITY_LOADER,
                 BL_CustomGrid_Model_Grid_Editor_Entity_Loader::ACTION_TYPE_CHECK_EDITED_ENTITY_LOADED_STATE,
                 BL_CustomGrid_Model_Grid_Editor_Callback::POSITION_MAIN,
                 BL_CustomGrid_Model_Grid_Editor_Callback::PRIORITY_EDITOR_INTERNAL_LOW
             ),
-            $this->getCallbackFromCallable(
+            $callbackManager->getCallbackFromCallable(
                 array($this, 'afterSaveContextEditedEntity'),
                 self::WORKER_TYPE_ENTITY_UPDATER,
                 BL_CustomGrid_Model_Grid_Editor_Entity_Updater::ACTION_TYPE_SAVE_CONTEXT_EDITED_ENTITY,

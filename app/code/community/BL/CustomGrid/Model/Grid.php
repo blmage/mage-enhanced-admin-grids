@@ -1768,45 +1768,6 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     }
     
     /**
-     * Return whether the current user has edit permissions over the grid columns
-     *
-     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
-     * @return bool
-     */
-    public function hasUserEditPermissions(Mage_Adminhtml_Block_Widget_Grid $gridBlock)
-    {
-        return ($typeModel = $this->getTypeModel())
-            ? $typeModel->checkUserEditPermissions($this->getBlockType(), $this, $gridBlock)
-            : $this->checkUserActionPermission(BL_CustomGrid_Model_Grid_Sentry::ACTION_EDIT_COLUMNS_VALUES);
-    }
-    
-    /**
-     * Return additional parameters needed for edit, corresponding to given grid block
-     *
-     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
-     * @return array
-     */
-    public function getAdditionalEditParams(Mage_Adminhtml_Block_Widget_Grid $gridBlock)
-    {
-        return ($typeModel = $this->getTypeModel())
-            ? $typeModel->getAdditionalEditParams($this->getBlockType(), $gridBlock)
-            : array();
-    }
-    
-    /**
-     * Return grid collection row identifiers
-     *
-     * @param Varien_Object $row Grid row
-     * @return array
-     */
-    public function getCollectionRowIdentifiers(Varien_Object $row)
-    {
-        return ($typeModel = $this->getTypeModel())
-            ? $typeModel->getEntityRowIdentifiers($this->getBlockType(), $row)
-            : array();
-    }
-    
-    /**
      * Update default parameters behaviours
      *
      * @param array $behaviours New behaviours

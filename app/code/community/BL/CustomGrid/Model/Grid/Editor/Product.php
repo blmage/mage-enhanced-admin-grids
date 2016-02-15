@@ -29,48 +29,48 @@ class BL_CustomGrid_Model_Grid_Editor_Product extends BL_CustomGrid_Model_Grid_E
         );
     }
     
-    protected function _getBaseCallbacks()
+    public function getDefaultBaseCallbacks(BL_CustomGrid_Model_Grid_Editor_Callback_Manager $callbackManager)
     {
         return array(
-            $this->getCallbackFromCallable(
+            $callbackManager->getCallbackFromCallable(
                 array($this, 'prepareEditableAttributeConfig'),
                 self::WORKER_TYPE_VALUE_CONFIG_BUILDER,
                 BL_CustomGrid_Model_Grid_Editor_Value_Config_Builder::ACTION_TYPE_BUILD_EDITABLE_ATTRIBUTE_CONFIG,
                 BL_CustomGrid_Model_Grid_Editor_Callback::POSITION_MAIN,
                 BL_CustomGrid_Model_Grid_Editor_Callback::PRIORITY_EDITOR_INTERNAL_LOW
             ),
-            $this->_getInternalMainCallbackFromCallable(
+            $callbackManager->getInternalMainCallbackFromCallable(
                 array($this, 'loadEditedProduct'),
                 self::WORKER_TYPE_ENTITY_LOADER,
                 BL_CustomGrid_Model_Grid_Editor_Entity_Loader::ACTION_TYPE_LOAD_EDITED_ENTITY,
                 true
             ),
-            $this->_getInternalMainCallbackFromCallable(
+            $callbackManager->getInternalMainCallbackFromCallable(
                 array($this, 'checkContextValueEditability'),
                 self::WORKER_TYPE_ENTITY_UPDATER,
                 BL_CustomGrid_Model_Grid_Editor_Entity_Updater::ACTION_TYPE_CHECK_CONTEXT_VALUE_EDITABILITY
             ),
-            $this->_getInternalMainCallbackFromCallable(
+            $callbackManager->getInternalMainCallbackFromCallable(
                 array($this, 'getContextUserEditedValue'),
                 self::WORKER_TYPE_ENTITY_UPDATER,
                 BL_CustomGrid_Model_Grid_Editor_Entity_Updater::ACTION_TYPE_GET_CONTEXT_USER_EDITED_VALUE
             ),
-            $this->_getInternalMainCallbackFromCallable(
+            $callbackManager->getInternalMainCallbackFromCallable(
                 array($this, 'filterUserEditedValue'),
                 self::WORKER_TYPE_ENTITY_UPDATER,
                 BL_CustomGrid_Model_Grid_Editor_Entity_Updater::ACTION_TYPE_FILTER_USER_EDITED_VALUE
             ),
-            $this->_getInternalMainCallbackFromCallable(
+            $callbackManager->getInternalMainCallbackFromCallable(
                 array($this, 'applyUserEditedValueToEditedProduct'),
                 self::WORKER_TYPE_ENTITY_UPDATER,
                 BL_CustomGrid_Model_Grid_Editor_Entity_Updater::ACTION_TYPE_APPLY_USER_EDITED_VALUE_TO_EDITED_ENTITY
             ),
-            $this->_getInternalMainCallbackFromCallable(
+            $callbackManager->getInternalMainCallbackFromCallable(
                 array($this, 'saveContextEditedProduct'),
                 self::WORKER_TYPE_ENTITY_UPDATER,
                 BL_CustomGrid_Model_Grid_Editor_Entity_Updater::ACTION_TYPE_SAVE_CONTEXT_EDITED_ENTITY
             ),
-            $this->_getInternalMainCallbackFromCallable(
+            $callbackManager->getInternalMainCallbackFromCallable(
                 array($this, 'getRenderableContextEditedValue'),
                 self::WORKER_TYPE_VALUE_RENDERER,
                 BL_CustomGrid_Model_Grid_Editor_Value_Renderer::ACTION_TYPE_GET_RENDERABLE_CONTEXT_EDITED_VALUE

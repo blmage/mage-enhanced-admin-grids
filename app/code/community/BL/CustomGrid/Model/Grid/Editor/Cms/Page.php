@@ -27,15 +27,15 @@ class BL_CustomGrid_Model_Grid_Editor_Cms_Page extends BL_CustomGrid_Model_Grid_
         );
     }
     
-    protected function _getBaseCallbacks()
+    public function getDefaultBaseCallbacks(BL_CustomGrid_Model_Grid_Editor_Callback_Manager $callbackManager)
     {
         return array(
-            $this->_getInternalMainCallbackFromCallable(
+            $callbackManager->getInternalMainCallbackFromCallable(
                 array($this, 'applyUserEditedValueToEditedEntity'),
                 self::WORKER_TYPE_ENTITY_UPDATER,
                 BL_CustomGrid_Model_Grid_Editor_Entity_Updater::ACTION_TYPE_APPLY_USER_EDITED_VALUE_TO_EDITED_ENTITY
             ),
-            $this->_getInternalMainCallbackFromCallable(
+            $callbackManager->getInternalMainCallbackFromCallable(
                 array($this, 'getRenderableContextEditedValue'),
                 self::WORKER_TYPE_VALUE_RENDERER,
                 BL_CustomGrid_Model_Grid_Editor_Value_Renderer::ACTION_TYPE_GET_RENDERABLE_CONTEXT_EDITED_VALUE

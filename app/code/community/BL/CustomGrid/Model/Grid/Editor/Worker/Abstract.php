@@ -81,6 +81,7 @@ abstract class BL_CustomGrid_Model_Grid_Editor_Worker_Abstract extends BL_Custom
         $position = BL_CustomGrid_Model_Grid_Editor_Callback::POSITION_MAIN
     ) {
         return $this->getEditor()
+            ->getCallbackManager()
             ->getCallbackFromCallable(
                 $callable,
                 $this->getType(),
@@ -132,6 +133,7 @@ abstract class BL_CustomGrid_Model_Grid_Editor_Worker_Abstract extends BL_Custom
             }
             
             $callbacks = $this->getEditor()
+                ->getCallbackManager()
                 ->getWorkerActionSortedCallbacks($this->getType(), $actionType, $context, $defaultCallbacks);
             
             if ($cacheable) {

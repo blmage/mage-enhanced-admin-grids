@@ -27,10 +27,10 @@ class BL_CustomGrid_Model_Grid_Editor_Catalog_Search extends BL_CustomGrid_Model
         );
     }
     
-    protected function _getBaseCallbacks()
+    public function getDefaultBaseCallbacks(BL_CustomGrid_Model_Grid_Editor_Callback_Manager $callbackManager)
     {
         return array(
-            $this->getCallbackFromCallable(
+            $callbackManager->getCallbackFromCallable(
                 array($this, 'beforeSaveContextEditedEntity'),
                 self::WORKER_TYPE_ENTITY_UPDATER,
                 BL_CustomGrid_Model_Grid_Editor_Entity_Updater::ACTION_TYPE_SAVE_CONTEXT_EDITED_ENTITY,

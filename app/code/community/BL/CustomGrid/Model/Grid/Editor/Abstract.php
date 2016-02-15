@@ -20,6 +20,7 @@ abstract class BL_CustomGrid_Model_Grid_Editor_Abstract extends BL_CustomGrid_Ob
     const EDITABLE_TYPE_ATTRIBUTE_FIELD = 'attribute_field';
     const EDITABLE_TYPE_CUSTOM_COLUMN   = 'custom_column';
     
+    const WORKER_TYPE_CALLBACK_MANAGER     = 'callback_manager';
     const WORKER_TYPE_VALUE_CONFIG_BUILDER = 'value_config_builder';
     const WORKER_TYPE_KICKSTARTER          = 'kickstarter';
     const WORKER_TYPE_ENTITY_LOADER        = 'entity_loader';
@@ -71,6 +72,16 @@ abstract class BL_CustomGrid_Model_Grid_Editor_Abstract extends BL_CustomGrid_Ob
     }
     
     /**
+     * Return the callback manager model, usable to manage the editor callbacks
+     * 
+     * @return BL_CustomGrid_Model_Grid_Editor_Callback_Manager
+     */
+    public function getCallbackManager()
+    {
+        return $this->_getWorker(self::WORKER_TYPE_CALLBACK_MANAGER);
+    }
+    
+    /**
      * Return the config builder model, usable to build editable values configs
      * 
      * @return BL_CustomGrid_Model_Grid_Editor_Value_Config_Builder
@@ -81,7 +92,7 @@ abstract class BL_CustomGrid_Model_Grid_Editor_Abstract extends BL_CustomGrid_Ob
     }
     
     /**
-     * Return the kickstarter model, usable to parse edit requests and to initialize everything necessary
+     * Return the kickstarter model, usable to parse edit requests and to initialize the corresponding editor contexts
      * 
      * @return BL_CustomGrid_Model_Grid_Editor_Kickstarter
      */
@@ -133,6 +144,7 @@ abstract class BL_CustomGrid_Model_Grid_Editor_Abstract extends BL_CustomGrid_Ob
     /**
      * Return the value renderer model, usable to render properly formatted new values
      * 
+     * @return BL_CustomGrid_Model_Grid_Editor_Value_Renderer
      */
     public function getValueRenderer()
     {
@@ -221,228 +233,28 @@ abstract class BL_CustomGrid_Model_Grid_Editor_Abstract extends BL_CustomGrid_Ob
     }
     
     /**
-     * Return whether the given value is an instance of BL_CustomGrid_Model_Grid_Editor_Callback
+     * Return the default base callbacks used by this editor model
      * 
-     * @param mixed $value Checked value
-     * @return bool
-     */
-    protected function _isCallbackObject($value)
-    {
-        return ($value instanceof BL_CustomGrid_Model_Grid_Editor_Callback);
-    }
-    
-    /**
-     * Arrange the given callbacks array by worker and action types, then by position,
-     * and return the result
-     * 
-     * @param BL_CustomGrid_Model_Grid_Editor_Callback[] $callbacks Callbacks array to arrange
-     * @return array
-     */
-    protected function _arrangeCallbacksArray(array $callbacks)
-    {
-        $arrangedCallbacks = array();
-        $callbacks = array_filter($callbacks, array($this, '_isCallbackObject'));
-        
-        foreach ($callbacks as $callback) {
-            $workerType = $callback->getWorkerType();
-            $actionType = $callback->getActionType();
-            $position   = $callback->getPosition();
-            $arrangedCallbacks[$workerType][$actionType][$position][] = $callback;
-        }
-        
-        return $arrangedCallbacks;
-    }
-    
-    /**
-     * Wrap the the given callable into a callback model configured with the given values
-     * 
-     * @param callable $callable Base callable
-     * @param string $workerType Worker type
-     * @param string $actionType Action type
-     * @param string $position Callback position
-     * @param int $priority Callback priority (lower are executed first)
-     * @param bool $shouldStopAfter Whether to stop the execution of the next callbacks of the same kind after this one
-     * @return BL_CustomGrid_Model_Grid_Editor_Callback
-     */
-    public function getCallbackFromCallable(
-        $callable,
-        $workerType,
-        $actionType,
-        $position,
-        $priority,
-        $shouldStopAfter = false
-    ) {
-        return new BL_CustomGrid_Model_Grid_Editor_Callback(
-            array(
-                'callable'    => $callable,
-                'worker_type' => $workerType,
-                'action_type' => $actionType,
-                'position'    => $position,
-                'priority'    => (int) $priority,
-                'should_stop_after' => (bool) $shouldStopAfter,
-            )
-        );
-    }
-    
-    /**
-     * Wrap the the given callable into a callback model configured with the given values,
-     * that will be given priority over the default callback during the main phase of the given action type
-     * 
-     * @param callable $callable Base callable
-     * @param string $workerType Worker type
-     * @param string $actionType Action type
-     * @param bool $shouldStopAfter Whether to stop the execution of the next callbacks of the same kind after this one
-     * @return BL_CustomGrid_Model_Grid_Editor_Callback
-     */
-    protected function _getInternalMainCallbackFromCallable(
-        $callable,
-        $workerType,
-        $actionType,
-        $shouldStopAfter = false
-    ) {
-        return $this->getCallbackFromCallable(
-            $callable,
-            $workerType,
-            $actionType,
-            BL_CustomGrid_Model_Grid_Editor_Callback::POSITION_MAIN,
-            BL_CustomGrid_Model_Grid_Editor_Callback::PRIORITY_EDITOR_INTERNAL_HIGH,
-            $shouldStopAfter
-        );
-    }
-    
-    /**
-     * Return the base callbacks used by this editor model
-     * 
+     * @param BL_CustomGrid_Model_Grid_Editor_Callback_Manager $callbackManager Callback manager
      * @return BL_CustomGrid_Model_Grid_Editor_Callback[]
      */
-    protected function _getBaseCallbacks()
+    public function getDefaultBaseCallbacks(BL_CustomGrid_Model_Grid_Editor_Callback_Manager $callbackManager)
     {
         return array();
     }
     
     /**
-     * Return the usable base callbacks, arranged and optionally filtered by worker and action types
-     * 
-     * @param string $workerType Worker type
-     * @param string $actionType Action type
-     * @return array
-     */
-    public function getBaseCallbacks($workerType = null, $actionType = null)
-    {
-        if (!$this->hasData('base_callbacks')) {
-            $callbacks = $this->_getBaseCallbacks();
-            $response  = new BL_CustomGrid_Object(array('callbacks' => array()));
-            
-            Mage::dispatchEvent(
-                'blcg_grid_editor_base_callbacks',
-                array(
-                    'response'     => $response,
-                    'type_model'   => $this->getGridTypeModel(),
-                    'editor_model' => $this,
-                )
-            );
-            
-            $this->setData(
-                'base_callbacks',
-                $this->_arrangeCallbacksArray(array_merge($callbacks, (array) $response->getData('callbacks')))
-            );
-        }
-        
-        $dataKey = 'base_callbacks';
-        
-        if (!is_null($workerType)) {
-            $dataKey .= '/' . $workerType . (!is_null($actionType) ? '/' . $actionType : '');
-        }
-        
-        return $this->getDataSetDefault($dataKey, array());
-    }
-    
-    /**
-     * Return the additional callbacks used by this editor model for the given editor context
+     * Return the default additional callbacks used by this editor model for the given editor context
      * 
      * @param BL_CustomGrid_Model_Grid_Editor_Context $context Editor context
+     * @param BL_CustomGrid_Model_Grid_Editor_Callback_Manager $callbackManager Callback manager
      * @return BL_CustomGrid_Model_Grid_Editor_Callback[]
      */
-    protected function _getContextAdditionalCallbacks(BL_CustomGrid_Model_Grid_Editor_Context $context)
-    {
-        return array();
-    }
-    
-    /**
-     * Return all the usable additional callbacks for the given editor context,
-     * arranged and optionally filtered by worker and action types
-     * 
-     * @param BL_CustomGrid_Model_Grid_Editor_Context $context Editor context
-     * @param string $workerType Worker type
-     * @param string $actionType Action type
-     * @return array
-     */
-    public function getContextAdditionalCallbacks(
+    public function getContextDefaultAdditionalCallbacks(
         BL_CustomGrid_Model_Grid_Editor_Context $context,
-        $workerType = null,
-        $actionType = null
+        BL_CustomGrid_Model_Grid_Editor_Callback_Manager $callbackManager
     ) {
-        $dataKey = 'context_additional_callbacks/' . $context->getKey();
-        
-        if (!$this->hasData($dataKey)) {
-            $callbacks = $this->_getContextAdditionalCallbacks($context);
-            $response  = new BL_CustomGrid_Object(array('callbacks' => array()));
-            
-            Mage::dispatchEvent(
-                'blcg_grid_editor_additional_context_callbacks',
-                array(
-                    'response'       => $response,
-                    'type_model'     => $this->getGridTypeModel(),
-                    'editor_model'   => $this,
-                    'editor_context' => $context,
-                )
-            );
-            
-            $this->setData(
-                $dataKey,
-                $this->_arrangeCallbacksArray(array_merge($callbacks, (array) $response->getData('callbacks')))
-            );
-        }
-        
-        if (!is_null($workerType)) {
-            $dataKey .= '/' . $workerType . (!is_null($actionType) ? '/' . $actionType : '');
-        }
-        
-        return $this->getDataSetDefault($dataKey, array());
-    }
-    
-    /**
-     * Return the sorted callbacks for the given worker and action types, arranged by position (before / main / after).
-     * The given additional callbacks will be registered and sorted along with the external callbacks defined for the
-     * same positions.
-     * 
-     * @param string $workerType Worker type
-     * @param string $actionType Action type
-     * @param BL_CustomGrid_Model_Grid_Editor_Context $context Editor context (if any)
-     * @param BL_CustomGrid_Model_Grid_Editor_Callback[] $additionalCallbacks Additional (internal) callbacks
-     * @return array
-     */
-    public function getWorkerActionSortedCallbacks(
-        $workerType,
-        $actionType,
-        BL_CustomGrid_Model_Grid_Editor_Context $context = null,
-        array $additionalCallbacks = array()
-    ) {
-        $callbacks = array_merge_recursive(
-            $this->getBaseCallbacks($workerType, $actionType),
-            (!is_null($context) ? $this->getContextAdditionalCallbacks($context, $workerType, $actionType) : array()),
-            $additionalCallbacks
-        );
-        
-        foreach ($callbacks as $position => $positionCallbacks) {
-            if (empty($positionCallbacks)) {
-                unset($callbacks[$position]);
-            } else {
-                uasort($callbacks[$position], 'BL_CustomGrid_Model_Grid_Editor_Callback::sortCallbacks');
-            }
-        }
-        
-        return $callbacks;
+        return array();
     }
     
     /**
@@ -879,6 +691,47 @@ abstract class BL_CustomGrid_Model_Grid_Editor_Abstract extends BL_CustomGrid_Ob
     }
     
     /**
+     * Check the given worker action result, throw a relevant exception if necessary
+     * 
+     * @param mixed $result Worker action result
+     * @param string $defaultErrorMessage Default error message
+     * @throws Mage_Core_Exception
+     */
+    protected function _checkWorkerActionResult($result, $defaultErrorMessage)
+    {
+        if ($result !== true) {
+            Mage::throwException(is_string($result) ? $result : $defaultErrorMessage);
+        }
+    }
+    
+    /**
+     * Initialize the editor action from the given request for the given grid model,
+     * then return the corresponding editor context
+     * 
+     * @param Mage_Core_Controller_Request_Http $request Edit request
+     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @return BL_CustomGrid_Model_Grid_Editor_Context
+     */
+    protected function _initializeEditorAction(
+        Mage_Core_Controller_Request_Http $request,
+        BL_CustomGrid_Model_Grid $gridModel
+    ) {
+        $context = $this->getKickstarter()->getEditorContextFromRequest($request, $gridModel);
+    
+        $this->_checkWorkerActionResult(
+            $this->getSentry()->isEditAllowedForContext($context),
+            $this->getBaseHelper()->__('You are not allowed to edit this value')
+        );
+    
+        $this->_checkWorkerActionResult(
+            $this->getEntityUpdater()->isContextValueEditable($context),
+            $this->getBaseHelper()->__('This value is not editable')
+        );
+        
+        return $context;
+    }
+    
+    /**
      * Return the form block corresponding to the given edit request made on the given grid model
      *
      * @param Mage_Core_Controller_Request_Http $request Edit request
@@ -887,20 +740,8 @@ abstract class BL_CustomGrid_Model_Grid_Editor_Abstract extends BL_CustomGrid_Ob
      */
     public function getValueFormBlock(Mage_Core_Controller_Request_Http $request, BL_CustomGrid_Model_Grid $gridModel)
     {
-        $context = $this->getKickstarter()->getEditorContextFromRequest($request, $gridModel);
+        $context = $this->_initializeEditorAction($request, $gridModel);
         
-        if (($result = $this->getSentry()->isEditAllowedForContext($context)) !== true) {
-            $errorMessage = is_string($result)
-                ? $result
-                : $this->getBaseHelper()->__('You are not allowed to edit this value');
-            Mage::throwException($errorMessage);
-        }
-        if (($result = $this->getEntityUpdater()->isContextValueEditable($context)) !== true) {
-            $errorMessage = is_string($result)
-                ? $result
-                : $this->getBaseHelper()->__('This value is not editable');
-            Mage::throwException($errorMessage);
-        }
         if (!$valueFormBlock = $this->getValueFormRenderer()->getContextValueFormBlock($context)) {
             Mage::throwException($this->getBaseHelper()->__('The value form block could not be retrieved'));
         }
@@ -932,21 +773,7 @@ abstract class BL_CustomGrid_Model_Grid_Editor_Abstract extends BL_CustomGrid_Ob
      */
     public function updateEditedValue(Mage_Core_Controller_Request_Http $request, BL_CustomGrid_Model_Grid $gridModel)
     {
-        $context = $this->getKickstarter()->getEditorContextFromRequest($request, $gridModel);
-        
-        if (($result = $this->getSentry()->isEditAllowedForContext($context)) !== true) {
-            $errorMessage = is_string($result)
-                ? $result
-                : $this->getBaseHelper()->__('You are not allowed to edit this value');
-            Mage::throwException($errorMessage);
-        }
-        if (($result = $this->getEntityUpdater()->isContextValueEditable($context)) !== true) {
-            $errorMessage = is_string($result)
-                ? $result
-                : $this->getBaseHelper()->__('This value is not editable');
-            Mage::throwException($errorMessage);
-        }
-        
+        $context = $this->_initializeEditorAction($request, $gridModel);
         $this->getEntityUpdater()->updateContextEditedValue($context);
         return $this->getValueRenderer()->getRenderedContextEditedValue($context);
     }
