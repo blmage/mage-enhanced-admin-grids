@@ -279,7 +279,7 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
             $select->setPart(Zend_Db_Select::WHERE, $newWherePart);
         } else {
             $select->setPart(Zend_Db_Select::WHERE, $previousWherePart);
-            Mage::throwException(Mage::helper('customgrid')->__('Could not inject the multiple conditions'));
+            Mage::throwException('Could not inject the multiple conditions into the select object');
         }
         
         return $this;
@@ -346,7 +346,7 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
                 $select->setPart(Zend_Db_Select::WHERE, $newWherePart);
             } else {
                 $select->setPart(Zend_Db_Select::WHERE, $previousWherePart);
-                Mage::throwException(Mage::helper('customgrid')->__('Could not inject regex'));
+                Mage::throwException('Could not inject the regex into the select object');
             }
         }
         
@@ -367,7 +367,7 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
         
         foreach ($fields as $index => $field) {
             if (is_string($index)) {
-                $filtersMap[$index] = $tableAlias . '.' . $field;;
+                $filtersMap[$index] = $tableAlias . '.' . $field;
             } else {
                 $filtersMap[$field] = $tableAlias . '.' . $field;
             }

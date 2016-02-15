@@ -789,7 +789,9 @@ class BL_CustomGrid_Blcg_GridController extends BL_CustomGrid_Controller_Grid_Ac
             case 'massDelete':
             case 'massDisable':
             case 'massEnable':
-                return $this->_getAdminSession()->isAllowed('customgrid/administration/view_grids_list');
+                /** @var $session Mage_Admin_Model_Session */
+                $session = Mage::getSingleton('admin/session');
+                return $session->isAllowed('customgrid/administration/view_grids_list');
         }
         return true;
     }

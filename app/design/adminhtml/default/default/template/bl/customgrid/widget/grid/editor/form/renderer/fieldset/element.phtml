@@ -45,7 +45,7 @@ $_note    = $_element->getNote();
 $_trId    = $_element->getHtmlContainerId();
 $_class   = $_element->getFieldsetHtmlClass();
 ?>
-<?php if ($this->getEditedInGrid()): ?>
+<?php if ($this->getIsEditedInGrid()): ?>
     <?php if (!$_element->getNoDisplay()): ?>
         <?php if ($_element->getType()=='hidden'): ?>
             <?php echo trim($_element->getElementHtml()) ?>

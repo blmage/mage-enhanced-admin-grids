@@ -40,14 +40,14 @@
 ?>
 <?php /** @var $this BL_CustomGrid_Block_Widget_Grid_Editor_Form_Renderer_Element */ ?>
 <?php $_element = $this->getElement() ?>
-<?php if (!$this->getEditedInGrid()): ?>
+<?php if (!$this->getIsEditedInGrid()): ?>
     <?php if($_element->getNoSpan() !== true): ?>
         <span class="field-row">
     <?php endif ?>
     <?php echo $_element->getLabelHtml() ?>
 <?php endif ?>
 <?php echo $_element->getElementHtml() ?>
-<?php if (!$this->getEditedInGrid()): ?>
+<?php if (!$this->getIsEditedInGrid()): ?>
     <?php if($_element->getNoSpan() !== true): ?>
         </span>
     <?php endif ?>

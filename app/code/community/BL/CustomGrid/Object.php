@@ -81,6 +81,22 @@ class BL_CustomGrid_Object extends Varien_Object
     }
     
     /**
+     * Complement the original data with the given data
+     *
+     * @param array $data Data to only add if missing (on a per-value basis)
+     * @return BL_CustomGrid_Object
+     */
+    public function complementData(array $data)
+    {
+        foreach ($data as $key => $value) {
+            if (!$this->hasData($key)) {
+                $this->setData($key, $value);
+            }
+        }
+        return $this;
+    }
+    
+    /**
      * Merge the given data into the original data
      * 
      * @param array $data Data to merge
@@ -186,6 +202,7 @@ class BL_CustomGrid_Object extends Varien_Object
      * 
      * @param string $key Data key
      * @param BL_CustomGrid_Object $object Object with which to compare the given value
+     * @param bool $withCase Whether string values should be compared case-sensitively
      * @return int 1 if the value from this object is greater, -1 if it is lesser, 0 if both values are equal
      */
     public function compareStringDataTo($key, BL_CustomGrid_Object $object, $withCase = true)

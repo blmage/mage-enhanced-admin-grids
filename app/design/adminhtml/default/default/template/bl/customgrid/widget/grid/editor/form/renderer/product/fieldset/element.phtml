@@ -41,7 +41,7 @@
 <?php /** @var $this BL_CustomGrid_Block_Widget_Grid_Editor_Form_Renderer_Product_Fieldset_Element */ ?>
 <?php $_element = $this->getElement() ?>
 <?php $this->checkFieldDisable() ?>
-<?php if (!$this->getEditedInGrid()): ?>
+<?php if (!$this->getIsEditedInGrid()): ?>
     <?php if ($_element->getType()=='hidden'): ?>
         <tr>
             <td class="hidden" colspan="100"><?php echo trim($_element->getElementHtml()) ?></td>

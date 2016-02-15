@@ -1454,7 +1454,8 @@ blcg.Grid.ProfilesBar.prototype = {
             baseClassName: 'blcg-base',
             disabledClassName: 'blcg-disabled',
             hiddenClassName: 'blcg-no-display',
-            maxDisplayedCount: 8
+            maxDisplayedCountRatio: 140,
+            defaultMaxDisplayedCount: 8
         }, config || {});
         
         this.barId = barId;
@@ -1468,11 +1469,12 @@ blcg.Grid.ProfilesBar.prototype = {
         this.sortedIds = $A(sortedIds); // Hash.each() may not keep initial order
         this.profiles  = $H(profiles);
         this.actions   = $H(actions);
-        this.baseProfileId    = null;
-        this.currentProfile   = null;
-        this.currentProfileId = null;
-        this.isActionRunning  = false;
-        this.isInitializing   = true;
+        this.baseProfileId     = null;
+        this.currentProfile    = null;
+        this.currentProfileId  = null;
+        this.isActionRunning   = false;
+        this.maxDisplayedCount = this.config.defaultMaxDisplayedCount;
+        this.isInitializing    = true;
         
         this.sortedIds.each(function(profileId) {
             var profile = this.getProfile(profileId);
@@ -1492,6 +1494,8 @@ blcg.Grid.ProfilesBar.prototype = {
         
         this.isInitializing = true;
         this.currentDisplayIndex = 0;
+        this.userScrollDirection = 'left';
+        this.userScrollOutmostIndex = 0;
         this.refreshProfilesCount();
         
         if (this.currentProfile) {
@@ -1541,6 +1545,8 @@ blcg.Grid.ProfilesBar.prototype = {
         this.isInitializing = false;
         this.previousArrow.observe('click', function(e) { this.scrollToPrevious(); }.bind(this));
         this.nextArrow.observe('click', function(e) { this.scrollToNext(); }.bind(this));
+        
+        new PeriodicalExecuter(this.refreshMaxDisplayedCount.bind(this), 1);
     },
     
     refreshProfilesCount: function()
@@ -1552,10 +1558,10 @@ blcg.Grid.ProfilesBar.prototype = {
         }.bind(this));
         
         this.profilesCount = this.profiles.size();
-        var listClassCount = Math.min(this.profilesCount, this.config.maxDisplayedCount);
+        var listClassCount = Math.min(this.profilesCount, this.maxDisplayedCount);
         this.profilesList.addClassName('' + this.config.listCountBaseClassName + listClassCount);
         
-        if (listClassCount == this.config.maxDisplayedCount) {
+        if (listClassCount == this.maxDisplayedCount) {
             this.profilesList.addClassName(this.config.listFullClassName);
         } else {
             this.profilesList.removeClassName(this.config.listFullClassName);
@@ -1564,7 +1570,7 @@ blcg.Grid.ProfilesBar.prototype = {
     
     refreshListArrows: function()
     {
-        if (this.profilesCount < this.config.maxDisplayedCount) {
+        if (this.profilesCount < this.maxDisplayedCount) {
             this.previousArrow.addClassName(this.config.hiddenClassName);
             this.nextArrow.addClassName(this.config.hiddenClassName);
         } else {
@@ -1576,8 +1582,8 @@ blcg.Grid.ProfilesBar.prototype = {
             } else {
                 this.previousArrow.removeClassName(this.config.disabledClassName);
             }
-            if (this.profilesCount >= this.config.maxDisplayedCount) {
-                if (this.currentDisplayIndex + this.config.maxDisplayedCount < this.profilesCount) {
+            if (this.profilesCount >= this.maxDisplayedCount) {
+                if (this.currentDisplayIndex + this.maxDisplayedCount < this.profilesCount) {
                     this.nextArrow.removeClassName(this.config.disabledClassName);
                 } else {
                     this.nextArrow.addClassName(this.config.disabledClassName);
@@ -1590,7 +1596,7 @@ blcg.Grid.ProfilesBar.prototype = {
     {
         this.currentDisplayIndex = index;
         var hideableSelector = 'li:nth-child(-n+' + index + ')';
-        hideableSelector += ',li:nth-child(n+' + (index + this.config.maxDisplayedCount + 1) + ')';
+        hideableSelector += ',li:nth-child(n+' + (index + this.maxDisplayedCount + 1) + ')';
         this.profilesList.select('li').invoke('removeClassName', 'blcg-no-display');
         this.profilesList.select(hideableSelector).invoke('addClassName', 'blcg-no-display');
         this.refreshListArrows();
@@ -1599,23 +1605,32 @@ blcg.Grid.ProfilesBar.prototype = {
     scrollToPrevious: function()
     {
         this.currentDisplayIndex = Math.max(0, this.currentDisplayIndex - 1);
+        this.userScrollDirection = 'previous';
+        this.userScrollOutmostIndex = this.currentDisplayIndex;
         this.scrollToIndex(this.currentDisplayIndex);
     },
     
     scrollToNext: function()
     {
         this.currentDisplayIndex = Math.min(
-            this.profilesCount - this.config.maxDisplayedCount,
+            this.profilesCount - this.maxDisplayedCount,
             this.currentDisplayIndex + 1
         );
+        
+        this.userScrollDirection = 'next';
+        this.userScrollOutmostIndex = Math.min(
+            this.currentDisplayIndex + this.maxDisplayedCount - 1,
+            this.profilesCount - 1
+        );
+        
         this.scrollToIndex(this.currentDisplayIndex);
     },
     
     scrollToProfile: function(profileId)
     {
         var profileIndex   = this.getProfileIndex(profileId),
-            leftMostIndex  = Math.min(profileIndex, this.profilesCount - this.config.maxDisplayedCount)
-            rightMostIndex = Math.max(0, profileIndex - this.config.maxDisplayedCount + 1);
+            leftMostIndex  = Math.min(profileIndex, this.profilesCount - this.maxDisplayedCount)
+            rightMostIndex = Math.max(0, profileIndex - this.maxDisplayedCount + 1);
         
         if (Math.abs(this.currentDisplayIndex - leftMostIndex) > Math.abs(this.currentDisplayIndex - rightMostIndex)) {
             this.currentDisplayIndex = rightMostIndex;
@@ -1626,16 +1641,35 @@ blcg.Grid.ProfilesBar.prototype = {
         this.scrollToIndex(this.currentDisplayIndex);
     },
     
+    refreshMaxDisplayedCount: function()
+    {
+        var listWidth = this.profilesList.getWidth();
+        var maxDisplayedCount = Math.floor(listWidth / this.config.maxDisplayedCountRatio);
+        
+        if (this.maxDisplayedCount !== maxDisplayedCount) {
+            this.maxDisplayedCount = maxDisplayedCount;
+            this.refreshProfilesCount();
+            this.refreshScroll();
+        }
+    },
+    
     refreshScroll: function()
     {
         this.currentDisplayIndex = Math.max(
             0,
             Math.min(
-                this.profilesCount - this.config.maxDisplayedCount,
-                this.currentDisplayIndex
+                this.profilesCount - this.maxDisplayedCount,
+                Math.max(this.currentDisplayIndex, this.getUserScrollDisplayIndex())
             )
         );
         this.scrollToIndex(this.currentDisplayIndex);
+    },
+    
+    getUserScrollDisplayIndex: function()
+    {
+        return (this.userScrollDirection === 'previous')
+            ? this.userScrollOutmostIndex
+            : this.userScrollOutmostIndex - this.maxDisplayedCount + 1;
     },
     
     getProfileIndex: function(profileId)
@@ -2657,6 +2691,7 @@ blcg.Grid.Editor.prototype = {
         
         this.editWindow = null;
         this.isRequestRunning = false;
+        this.editedCellClickHandler = null;
         
         if (!this.table
             || (this.cells.length == 0) 
@@ -2954,13 +2989,13 @@ blcg.Grid.Editor.prototype = {
             this.cancelEdit();
             this.editedCell = cell;
             var cellConfig  = this.cells[this.getElementIndex(cell)];
-            var editUrl     = cellConfig.editUrl;
+            var formUrl     = cellConfig.formUrl;
             var editParams  = this.getCellParamsHash(this.editedCell);
             
             if (cellConfig.inGrid) {
                 this.isRequestRunning = true;
                 
-                new Ajax.Request(blcg.Tools.getAjaxUrl(editUrl), {
+                new Ajax.Request(blcg.Tools.getAjaxUrl(formUrl), {
                     method: 'post',
                     parameters: editParams,
                     
@@ -2989,6 +3024,16 @@ blcg.Grid.Editor.prototype = {
                                 
                                 this.fillCellOverlay(cell);
                                 this.positionCellOverlay(cell, null, this.compareCells(cell, this.shortHoveredCell));
+                                
+                                this.editedCellClickHandler = cell.observe('click', function(e) {
+                                    var element = e.findElement();
+                                    
+                                    if (!element.match('input[type="checkbox"]')) {
+                                        // Prevent the base row click callback from being applied to elements that are not
+                                        // skipped, such as optgroups or textareas
+                                        e.stop();
+                                    }
+                                });
                                 
                                 cell.select(this.config.requiredMarkerSelector).each(function(element) {
                                     element.hide();
@@ -3041,8 +3086,8 @@ blcg.Grid.Editor.prototype = {
                     minHeight: 'height'
                 });
                 
-                editUrl += (editUrl.match(new RegExp('\\?')) ? '&' : '?') + editParams.toQueryString();
-                this.editWindow = blcg.Tools.openIframeDialog(editUrl, windowConfig.toObject(), true);
+                formUrl += (formUrl.match(new RegExp('\\?')) ? '&' : '?') + editParams.toQueryString();
+                this.editWindow = blcg.Tools.openIframeDialog(formUrl, windowConfig.toObject(), true);
             }
         }
     },
@@ -3103,6 +3148,11 @@ blcg.Grid.Editor.prototype = {
                                 cell.innerHTML = response.content;
                                 blcg.Tools.executeNodeJS(cell);
                                 
+                                if (this.editedCellClickHandler) {
+                                    cell.stopObserving('click', this.editedCellClickHandler);
+                                    this.editedCellClickHandler = null;
+                                }
+                                
                                 this.previousValue = null;
                                 this.hasPreviousValue = false;
                                 this.editedCell = null;
@@ -3120,7 +3170,8 @@ blcg.Grid.Editor.prototype = {
                     
                     onFailure: function(transport) {
                         this.isRequestRunning = false;
-                        this.cancelEdit(false, blcg.Tools.translate('An error occurred while editing the value'));
+                        this.cancelEdit();
+                        alert(blcg.Tools.translate('An error occurred while editing the value'));
                     }.bind(this)
                 });
             } else {
@@ -3147,6 +3198,12 @@ blcg.Grid.Editor.prototype = {
             this.editedCell.removeClassName(this.config.requiredCellClassName);
             this.fillCellOverlay(this.editedCell);
             this.positionCellOverlay(this.editedCell);
+            
+            if (this.editedCellClickHandler) {
+                this.editedCell.stopObserving('click', this.editedCellClickHandler);
+                this.editedCellClickHandler = null;
+            }
+            
             this.editedCell = null;
             
             if (!cellConfig.inGrid && !fromDialog) {

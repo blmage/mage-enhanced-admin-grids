@@ -40,7 +40,7 @@
 ?>
 <?php /** @var $this BL_CustomGrid_Block_Widget_Grid_Editor_Form_Renderer_Fieldset */ ?>
 <?php $_element = $this->getElement() ?>
-<?php if (!$this->getEditedInGrid()): ?>
+<?php if (!$this->getIsEditedInGrid()): ?>
     <?php if ($_element->getFieldsetContainerId()): ?>
         <div id="<?php echo $_element->getFieldsetContainerId() ?>">
     <?php endif ?>
@@ -61,19 +61,19 @@
         <?php if ($_element->hasHtmlContent()): ?>
             <?php echo $_element->getHtmlContent() ?>
         <?php else: ?>
-            <?php if (!$this->getEditedInGrid()): ?>
+            <?php if (!$this->getIsEditedInGrid()): ?>
                 <table cellspacing="0" class="<?php echo $_element->hasTableClass() ? $_element->getTableClass() : 'form-list'?>">
                     <tbody>
             <?php endif ?>
             <?php echo $_element->getChildrenHtml() ?>
-            <?php if (!$this->getEditedInGrid()): ?>
+            <?php if (!$this->getIsEditedInGrid()): ?>
                     </tbody>
                 </table>
             <?php endif ?>
         <?php endif ?>
     </div>
     <?php echo $_element->getSubFieldsetHtml() ?>
-<?php if (!$this->getEditedInGrid()): ?>
+<?php if (!$this->getIsEditedInGrid()): ?>
     <?php if (!$_element->getNoContainer()): ?>
         </div>
     <?php endif ?>

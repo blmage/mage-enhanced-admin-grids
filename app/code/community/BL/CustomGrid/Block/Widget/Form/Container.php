@@ -59,7 +59,7 @@ function saveAndContinueEdit(url) {
     /**
      * Remove the buttons corresponding to the given IDs
      * 
-     * @param string $buttonsIds IDs of the buttons to remove
+     * @param array $buttonsIds IDs of the buttons to remove
      * @return BL_CustomGrid_Block_Widget_Form_Container
      */
     protected function _removeButtons(array $buttonsIds)
@@ -74,6 +74,7 @@ function saveAndContinueEdit(url) {
      * Return whether a button with the given ID exists
      * 
      * @param mixed $buttonId
+     * @return bool
      */
     protected function _hasButton($buttonId)
     {

@@ -20,13 +20,11 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Attribute_Default extends BL_C
         $form = $this->_initializeForm();
         $form->setDataObject($this->getEditedEntity());
         
-        $config    = $this->getEditConfig();
-        $attribute = $this->getEditedAttribute();
-        $entity    = $this->getEditedEntity();
-        $required  = '';
+        $editedAttribute = $this->getEditedAttribute();
+        $requiredHtml = '';
         
-        if ($attribute->getIsRequired()) {
-            $required = ' (<span class="blcg-editor-required-marker">' . $this->__('Required') . '</span>)';
+        if ($editedAttribute->getIsRequired()) {
+            $requiredHtml = ' (<span class="blcg-editor-required-marker">' . $this->__('Required') . '</span>)';
         }
         
         $fieldset = $form->addFieldset(
@@ -35,15 +33,15 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Attribute_Default extends BL_C
                 'legend' => $this->__(
                     '%s : %s',
                     $this->getEditedEntityName(),
-                    $attribute->getFrontendLabel() . $required
+                    $editedAttribute->getFrontendLabel() . $requiredHtml
                 ),
                 'class'  => 'fieldset-wide blcg-editor-fieldset',
             )
         );
         
-        $this->_setFieldset(array($attribute), $fieldset);
-        $form->addValues($entity->getData());
-        $form->setFieldNameSuffix($config->getValuesKey());
+        $this->_setFieldset(array($editedAttribute), $fieldset);
+        $form->addValues($this->getEditedEntity()->getData());
+        $form->setFieldNameSuffix($this->getValueConfig()->getData('request/values_key'));
         $this->setForm($form);
         
         return $this;

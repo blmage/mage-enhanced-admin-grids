@@ -83,7 +83,7 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
     /**
      * Save the current profile, the columns and the roles config from the given grid model being saved
      * 
-     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @param Mage_Core_Model_Abstract $gridModel Grid model
      * @return BL_CustomGrid_Model_Mysql4_Grid
      */
     protected function _afterSave(Mage_Core_Model_Abstract $gridModel)
@@ -97,7 +97,7 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
     /**
      * Reset the base profile ID before deletion, to prevent a circular dependency problem
      *
-     * @param BL_CustomGrid_Model_Grid $gridModel
+     * @param Mage_Core_Model_Abstract $gridModel
      * @return BL_CustomGrid_Model_Mysql4_Grid
      */
     protected function _beforeDelete(Mage_Core_Model_Abstract $gridModel)
@@ -116,7 +116,7 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
     /**
      * Save the current profile for the given grid (base profile for a new grid / current profile otherwise)
      * 
-     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @param Mage_Core_Model_Abstract $gridModel Grid model
      * @return BL_CustomGrid_Model_Mysql4_Grid
      */
     protected function _saveProfile(Mage_Core_Model_Abstract $gridModel)
@@ -162,7 +162,7 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
     /**
      * Save the columns from the given grid model
      * 
-     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @param Mage_Core_Model_Abstract $gridModel Grid model
      * @return BL_CustomGrid_Model_Mysql4_Grid
      */
     protected function _saveColumns(Mage_Core_Model_Abstract $gridModel)
@@ -214,7 +214,7 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
     /**
      * Save the roles config from the given grid model
      * 
-     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
+     * @param Mage_Core_Model_Abstract $gridModel Grid model
      * @return BL_CustomGrid_Model_Mysql4_Grid
      */
     protected function _saveRolesConfig(Mage_Core_Model_Abstract $gridModel)
@@ -337,9 +337,10 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
     }
     
     /**
-     * Return the grid columns belonging to the given grid model ID(s)
+     * Return the grid columns belonging to the given grid model and grid profile
      * 
-     * @param int|array $gridId Grid model ID(s)
+     * @param int $gridId Grid model ID
+     * @param int $profileId Grid profile ID
      * @return array
      */
     public function getGridColumns($gridId, $profileId)
@@ -531,6 +532,7 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
      * @param int $fromProfileId ID of the profile to copy
      * @param array $values Alternative values ("name" and "is_restricted" / "assigned_to")
      * @return int ID of the new profile
+     * @throws Exception
      */
     public function copyProfileToNew($gridId, $fromProfileId, array $values)
     {
@@ -593,6 +595,7 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
      * @param int $toProfileId ID of the profile into which to copy the values
      * @param array $copiedValues Types of copied values
      * @return BL_CustomGrid_Model_Mysql4_Grid
+     * @throws Exception
      */
     public function copyProfileToExisting($gridId, $fromProfileId, $toProfileId, array $copiedValues)
     {
@@ -654,6 +657,7 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
      * @param array $values New profile values (set "is_retricted" to also update assignations)
      * @param bool $useTransaction Whether a transaction should be used
      * @return BL_CustomGrid_Model_Mysql4_Grid
+     * @throws Exception
      */
     public function updateProfile($gridId, $profileId, array $values, $useTransaction = true)
     {
@@ -756,6 +760,7 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
      * @param int $profileId Default profile ID
      * @param array $values Values for which the given profile should be set as default ("global" / "roles" / "users")
      * @return BL_CustomGrid_Model_Mysql4_Grid
+     * @throws Exception
      */
     public function chooseProfileAsDefault($gridId, $profileId, array $values)
     {

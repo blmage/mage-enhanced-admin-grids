@@ -19,6 +19,7 @@ class BL_CustomGrid_Model_Reflection_Accessible_Sales_Order extends Mage_Sales_M
      * Return the items value from the given order
      * 
      * @param Mage_Sales_Model_Order $order Order from which to get items
+     * @return Mage_Sales_Model_Mysql4_Order_Item_Collection
      */
     public function blcgGetItemsValue(Mage_Sales_Model_Order $order)
     {

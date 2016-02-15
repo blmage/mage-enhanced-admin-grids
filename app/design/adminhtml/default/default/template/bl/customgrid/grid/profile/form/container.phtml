@@ -50,10 +50,10 @@ blcgGridProfileForm.submit = function(url) {
             }
         }
     } else {
-        alert('<?php echo $this->jsQuoteEscape($this->__('Cannot find profiles JS object')) ?>');
+        alert('Cannot find the JS object of the profiles bar');
     }
     <?php else: ?>
-    alert('<?php echo $this->jsQuoteEscape($this->__('Cannot find profiles JS object')) ?>');
+    alert('Cannot find the JS object of the profiles bar');
     <?php endif ?>
     return false;
 }.bind(blcgGridProfileForm);

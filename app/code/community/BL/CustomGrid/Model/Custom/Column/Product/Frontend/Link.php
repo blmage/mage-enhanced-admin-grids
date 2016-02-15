@@ -79,7 +79,7 @@ class BL_CustomGrid_Model_Custom_Column_Product_Frontend_Link extends BL_CustomG
     /**
      * Add request paths from URL rewrites to the given grid collection
      * 
-     * @param array $params Customization params values
+     * @param array $params Customization parameters values
      * @param array $storeId Store ID from which to retrieve request paths
      * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock
      * @param Varien_Data_Collection_Db $collection Grid collection
@@ -105,7 +105,7 @@ class BL_CustomGrid_Model_Custom_Column_Product_Frontend_Link extends BL_CustomG
         for ($i=0; $i<$slicesCount; $i++) {
             /** @var $rewritesCollection Mage_Core_Model_Mysql4_Url_Rewrite_Collection */
             $rewritesCollection = Mage::getResourceModel('core/url_rewrite_collection');
-            list($adapter, $qi) = $this->_getCollectionAdapter($rewritesCollection, true);
+            list(, $qi) = $this->_getCollectionAdapter($rewritesCollection, true);
             
             $rewritesCollection->addStoreFilter($storeId)
                 ->addFieldToFilter('category_id', array('null' => true))
@@ -133,7 +133,7 @@ class BL_CustomGrid_Model_Custom_Column_Product_Frontend_Link extends BL_CustomG
      * (the ID of the only store on single store mode, otherwise the ID of the given chosen store)
      * 
      * @param Mage_Core_Model_Store $store Column store
-     * @param array $params Customization params values
+     * @param array $params Customization parameters values
      * @return int
      */
     protected function _getUsableStoreId(Mage_Core_Model_Store $store, array $params)

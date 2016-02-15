@@ -23,7 +23,7 @@ abstract class BL_CustomGrid_Model_Column_Renderer_Attribute_Abstract extends BL
     /**
      * Return whether this renderer can be used to render columns based on the given attribute
      * 
-     * @param Mage_Eav_Model_Entity_Attribute $attribute Attribute object
+     * @param Mage_Eav_Model_Entity_Attribute $attribute Attribute model
      * @param BL_CustomGrid_Model_Grid $gridModel Grid model
      * @return bool
      */
@@ -35,7 +35,7 @@ abstract class BL_CustomGrid_Model_Column_Renderer_Attribute_Abstract extends BL
     /**
      * Return suitable values to create a grid column block based on this renderer and the given attribute
      * 
-     * @param Mage_Eav_Model_Entity_Attribute $attribute Attribute object
+     * @param Mage_Eav_Model_Entity_Attribute $attribute Attribute model
      * @param Mage_Core_Model_Store $store Grid store
      * @param BL_CustomGrid_Model_Grid $gridModel Grid model
      * @return array

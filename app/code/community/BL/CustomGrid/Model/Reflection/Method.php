@@ -114,22 +114,19 @@ class BL_CustomGrid_Model_Reflection_Method extends ReflectionMethod
      * @param mixed $object Object on which to call the method (null if static method)
      * @param array $args Call arguments
      * @return mixed
+     * @throws ReflectionException
      */
     protected function _invokeAccessibleWrapper($object, array $args)
     {
-        /** @var $helper BL_CustomGrid_Helper_Data */
-        $helper = Mage::helper('customgrid');
         $callback = array($this->_accessibleObject, $this->_accessibleMethodWrapperName);
         $fullMethodName = $this->_baseClassName . '::' . $this->_baseMethodName;
         
         if (empty($this->_accessibleObject) || empty($this->_accessibleMethodWrapperName)) {
             throw new ReflectionException(
-                $helper->__('Missing informations to invoke a reflected method : "%s"', $fullMethodName)
+                'Missing informations to invoke a reflected method : "' . $fullMethodName . '"'
             );
         } elseif (!is_callable($callback)) {
-            throw new ReflectionException(
-                $helper->__('Could not invoke a reflected method : "%s"', $fullMethodName)
-            );
+            throw new ReflectionException('Could not invoke a reflected method : "' . $fullMethodName . '"');
         }
         
         if (!is_null($object)) {

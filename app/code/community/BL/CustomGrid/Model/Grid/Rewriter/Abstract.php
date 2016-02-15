@@ -66,11 +66,11 @@ abstract class BL_CustomGrid_Model_Grid_Rewriter_Abstract extends BL_CustomGrid_
         
         try {
             if (!class_exists($originalClassName, true)) {
-                Mage::throwException($helper->__('The original class "%s" does not exist', $originalClassName));
+                Mage::throwException('The original class does not exist : "' . $originalClassName . '"');
             }
             if (class_exists($blcgClassName, false)) {
                 if (get_parent_class($blcgClassName) !== $originalClassName) {
-                    Mage::throwException($helper->__('The rewriting class "%s" already exists', $blcgClassName));
+                    Mage::throwException('The rewriting class already exists : "' . $blcgClassName . '"');
                 } else {
                     // The existing rewriting class already does what we want to do, so it's actually fine
                     $rewriteSuccess = true;
@@ -81,8 +81,7 @@ abstract class BL_CustomGrid_Model_Grid_Rewriter_Abstract extends BL_CustomGrid_
                 $this->_rewriteGrid($blcgClassName, $originalClassName, $blockType);
                 
                 if (!class_exists($blcgClassName, true)) {
-                    $message = 'The generated rewriting class "%s" can not be found';
-                    Mage::throwException($helper->__($message, $blcgClassName));
+                    Mage::throwException('The generated rewriting class can not be found : "' . $blcgClassName . '"');
                 }
             }
             

@@ -140,7 +140,7 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Select extends Mage_Adminhtm
      * If it is not possible to do otherwise, the condition(s) may directly be applied to the given collection,
      * but in all cases a valid collection condition will be returned
      * 
-     * @param string $values Selected values
+     * @param array $values Selected values
      * @param Varien_Data_Collection_Db $collection Grid collection
      * @param string $filterIndex Column filter index
      * @param bool $isNegative Whether negative filter is enabled

@@ -33,7 +33,7 @@ class BL_CustomGrid_Helper_Reflection extends Mage_Core_Helper_Abstract
         
         if ((count($valueParts) != 2) || (strpos($valueParts[0], '/') === false)) {
             if (!$graceful) {
-                Mage::throwException($this->__('Invalid reflected value requested : "%s"', $value));
+                Mage::throwException('Invalid reflected value requested : "' . $value . '"');
             }
             return null;
         }
@@ -55,7 +55,7 @@ class BL_CustomGrid_Helper_Reflection extends Mage_Core_Helper_Abstract
         
         if (!is_object($reflectionValue)) {
             if (!$graceful) {
-                Mage::throwException($this->__('Could not get reflected value for "%s"', $value));
+                Mage::throwException('Could not get the reflected value for "' . $value . '"');
             }
             $reflectionValue = null;
         }

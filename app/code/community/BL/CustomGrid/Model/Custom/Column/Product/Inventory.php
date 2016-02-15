@@ -93,7 +93,7 @@ class BL_CustomGrid_Model_Custom_Column_Product_Inventory extends BL_CustomGrid_
     public function getUseConfigFieldName()
     {
         return (!$fieldName = $this->getConfigParam('use_config_field_name'))
-            ? 'use_config_' . $this->getTableFieldName(true)
+            ? 'use_config_' . $this->getTableFieldName()
             : $fieldName;
     }
     

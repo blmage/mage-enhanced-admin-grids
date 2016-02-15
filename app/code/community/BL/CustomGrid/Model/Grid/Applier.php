@@ -13,17 +13,19 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_Grid_Applier extends BL_CustomGrid_Model_Grid_Worker
+class BL_CustomGrid_Model_Grid_Applier extends BL_CustomGrid_Model_Grid_Worker_Abstract
 {
-    /**
-     * Session keys
-     */
     const SESSION_BASE_KEY_GRID_FILTERS_TOKEN = '_blcg_session_key_token_';
     
     /**
-     * Parameter name to use to hold grid token value (used for filters verification)
+     * Name of the parameter usable to hold the value of the grid token in requests (used for filters verification)
      */
     const GRID_TOKEN_PARAM_NAME  = '_blcg_token_';
+    
+    public function getType()
+    {
+        return BL_CustomGrid_Model_Grid::WORKER_TYPE_APPLIER;
+    }
     
     /**
      * Return the store model usable for the given column
@@ -497,8 +499,8 @@ class BL_CustomGrid_Model_Grid_Applier extends BL_CustomGrid_Model_Grid_Worker
                 'current'  => $column->getRendererType(),
             );
             $customizationParams = array(
-                'previous' => $typeConfig->decodeParameters($sessionFilter['customization_params'], true),
-                'current'  => $typeConfig->decodeParameters($column->getCustomizationParams(), true),
+                'previous' => $typeConfig->decodeParameters($sessionFilter['customization_params']),
+                'current'  => $typeConfig->decodeParameters($column->getCustomizationParams()),
             );
             
             if (($previousIndex != $columnIndex)
@@ -641,13 +643,13 @@ class BL_CustomGrid_Model_Grid_Applier extends BL_CustomGrid_Model_Grid_Worker
          * (eg. with Mage::getUrl('module/controller/action', array('_current' => true)))
          */
         
-        /*
-        Add our token to current request and session
-        Use ":" in hash to force Varien_Db_Adapter_Pdo_Mysql::query() using a bind param instead of full request path,
-        (as it uses this condition : strpos($sql, ':') !== false),
-        when querying core_url_rewrite table, else the query could be too long, 
-        making Zend_Db_Statement::_stripQuoted() sometimes crash on one of its call to preg_replace()
-        */
+        /**
+         * Add our token to current request and session
+         * Use ":" in hash to force Varien_Db_Adapter_Pdo_Mysql::query() using a bind parameter instead of full request path,
+         * (as it uses this condition : strpos($sql, ':') !== false),
+         * when querying core_url_rewrite table, else the query could be too long, 
+         * making Zend_Db_Statement::_stripQuoted() sometimes crash on one of its call to preg_replace()
+         */
         $tokenValue = Mage::helper('core')->uniqHash('blcg:');
         $gridBlock->getRequest()->setParam(self::GRID_TOKEN_PARAM_NAME, $tokenValue);
         $session->setData($tokenSessionKey, $tokenValue);
@@ -736,8 +738,8 @@ class BL_CustomGrid_Model_Grid_Applier extends BL_CustomGrid_Model_Grid_Worker
                                 'current'  => $column->getRendererType(),
                             );
                             $customizationParams = array(
-                                'previous' => $typeConfig->decodeParameters($previousCustomizationParams, true),
-                                'current'  => $typeConfig->decodeParameters($column->getCustomizationParams(), true),
+                                'previous' => $typeConfig->decodeParameters($previousCustomizationParams),
+                                'current'  => $typeConfig->decodeParameters($column->getCustomizationParams()),
                             );
                             
                             if (($previousIndex != $columnIndex)

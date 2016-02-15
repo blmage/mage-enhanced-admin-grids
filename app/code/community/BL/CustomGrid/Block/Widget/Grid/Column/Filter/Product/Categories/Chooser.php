@@ -75,6 +75,7 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Filter_Product_Categories_Chooser e
      * Return the path IDs of the selected categories
      * 
      * @param mixed $rootId
+     * @return array
      */
     public function getSelectedCategoriesPathIds($rootId = false)
     {

@@ -86,9 +86,7 @@ class BL_CustomGrid_Model_Grid_Column extends BL_CustomGrid_Object
         if (($gridModel = $this->_getData('grid_model')) instanceof BL_CustomGrid_Model_Grid) {
             return $gridModel;
         } elseif (!$graceful) {
-            /** @var $helper BL_CustomGrid_Helper_Data */
-            $helper = Mage::helper('customgrid');
-            Mage::throwException($helper->__('Invalid grid model'));
+            Mage::throwException('Invalid grid model');
         }
         return null;
     }
@@ -140,7 +138,7 @@ class BL_CustomGrid_Model_Grid_Column extends BL_CustomGrid_Object
      */
     public function isEditable()
     {
-        return ($this->_getData('edit_config') instanceof BL_CustomGrid_Object);
+        return ($this->_getData('editor_config') instanceof BL_CustomGrid_Model_Grid_Editor_Value_Config);
     }
     
     /**
@@ -158,7 +156,7 @@ class BL_CustomGrid_Model_Grid_Column extends BL_CustomGrid_Object
         }
         if (!$customColumn instanceof BL_CustomGrid_Model_Custom_Column_Abstract) {
             if (!$graceful) {
-                Mage::throwException(Mage::helper('customgrid')->__('Invalid custom column model'));
+                Mage::throwException('Invalid custom column model');
             }
             $customColumn = null;
         }
@@ -429,14 +427,9 @@ class BL_CustomGrid_Model_Grid_Column extends BL_CustomGrid_Object
     {
         $gridModel->checkUserActionPermission(BL_CustomGrid_Model_Grid_Sentry::ACTION_CUSTOMIZE_COLUMNS, false);
         
-        if ($typeModel = $gridModel->getTypeModel()) {
-            $typeCode = $typeModel->getCode();
-        } else {
-            return $gridModel;
-        }
-        
-        $helper  = $gridModel->getHelper();
-        $columns = $gridModel->getColumns();
+        $helper   = $gridModel->getHelper();
+        $columns  = $gridModel->getColumns();
+        $typeCode = $gridModel->getTypeModel()->getCode();
         $originalBlockIds = $gridModel->getColumnBlockIdsByOrigin(self::ORIGIN_CUSTOM);
         
         $availableCustomColumns = $gridModel->getAvailableCustomColumns();

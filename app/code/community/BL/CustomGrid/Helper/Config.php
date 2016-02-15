@@ -58,7 +58,7 @@ class BL_CustomGrid_Helper_Config extends Mage_Core_Helper_Abstract
     protected $_configCache = array();
     
     /**
-     * Return base helper
+     * Return the base helper
      *
      * @return BL_CustomGrid_Helper_Data
      */
@@ -119,6 +119,8 @@ class BL_CustomGrid_Helper_Config extends Mage_Core_Helper_Abstract
      * Match the given block type and its rewriting class name against the given exception
      *
      * @param array $exception Parsed exception
+     * @param string $blockType Grid block type
+     * @param string $rewritingClassName Rewriting class name
      * @return bool
      */
     protected function _matchGridBlockAgainstException($exception, $blockType, $rewritingClassName)

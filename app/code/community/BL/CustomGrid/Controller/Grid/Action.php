@@ -147,6 +147,8 @@ class BL_CustomGrid_Controller_Grid_Action extends Mage_Adminhtml_Controller_Act
     /**
      * Initialize and register the grid profile from the current request
      * 
+     * @param bool $temporary Whether the grid profile should not be set as the active grid profile
+     * @param bool $baseIfNone Whether the base profile should be used if no profile is set on the current request
      * @return BL_CustomGrid_Model_Grid_Profile
      */
     protected function _initGridProfile($temporary = true, $baseIfNone = false)

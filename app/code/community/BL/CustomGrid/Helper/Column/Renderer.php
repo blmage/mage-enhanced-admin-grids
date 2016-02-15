@@ -52,6 +52,7 @@ class BL_CustomGrid_Helper_Column_Renderer extends Mage_Core_Helper_Abstract
      * Return number related values
      * 
      * @param BL_CustomGrid_Model_Column_Renderer_Abstract $renderer Column renderer
+     * @return array
      */
     public function getNumberValues(BL_CustomGrid_Model_Column_Renderer_Abstract $renderer)
     {

@@ -24,7 +24,7 @@ class BL_CustomGrid_Model_Custom_Column_Applier extends BL_CustomGrid_Object
     const VERIFICATION_MESSAGES_FLAGS_SESSION_KEY = 'blcg_cc_vm_flags';
     
     /**
-     * Return base helper
+     * Return the base helper
      * 
      * @return BL_CustomGrid_Helper_Data
      */
@@ -53,7 +53,7 @@ class BL_CustomGrid_Model_Custom_Column_Applier extends BL_CustomGrid_Object
     {
         if ((!$customColumn = $this->_getData('custom_column'))
             || (!$customColumn instanceof BL_CustomGrid_Model_Custom_Column_Abstract)) {
-            Mage::throwException($this->_getBaseHelper()->__('Invalid custom column'));
+            Mage::throwException('Invalid custom column');
         }
         return $customColumn;
     }
@@ -230,7 +230,10 @@ class BL_CustomGrid_Model_Custom_Column_Applier extends BL_CustomGrid_Object
         BL_CustomGrid_Model_Grid $gridModel
     ) {
         $blockType = $gridModel->getBlockType();
-        $dataKey = $elementType . '_verifications_cache/' . $blockType;
+        $dataKey   = $elementType . '_verifications_cache/' . $blockType;
+        
+        /** @var $session BL_CustomGrid_Model_Session */
+        $session = Mage::getSingleton('customgrid/session');
         
         if (!$this->hasData($dataKey)) {
             $behaviour = $this->_getUnverifiedElementBehaviour($elementType);
@@ -248,12 +251,12 @@ class BL_CustomGrid_Model_Custom_Column_Applier extends BL_CustomGrid_Object
                     
                     if ($this->_canDisplayVerificationMessage('warning', $elementType, $blockType)
                         && ($warningMessage = $this->_getGridElementWarningMessage($elementType, $blockType))) {
-                        Mage::getSingleton('customgrid/session')->addWarning($warningMessage);
+                        $session->addWarning($warningMessage);
                     }
                 } else {
                     if ($this->_canDisplayVerificationMessage('error', $elementType, $blockType)
                         && ($errorMessage = $this->_getGridElementErrorMessage($elementType, $blockType))) {
-                        Mage::getSingleton('customgrid/session')->addError($errorMessage);
+                        $session->addError($errorMessage);
                     }
                 }
             }
@@ -295,7 +298,7 @@ class BL_CustomGrid_Model_Custom_Column_Applier extends BL_CustomGrid_Object
      * @param BL_CustomGrid_Model_Grid $gridModel Grid model
      * @param string $columnBlockId Grid column block ID
      * @param string $columnIndex Grid column index
-     * @param array $params Customization params values
+     * @param array $params Customization parameters values
      * @param Mage_Core_Model_Store $store Column store
      * @return BL_CustomGrid_Model_Custom_Column_Applier
      */
@@ -336,7 +339,7 @@ class BL_CustomGrid_Model_Custom_Column_Applier extends BL_CustomGrid_Object
      * @param BL_CustomGrid_Model_Grid $gridModel Grid model
      * @param string $columnBlockId Grid column block ID
      * @param string $columnIndex Grid column index
-     * @param array $params Customization params values
+     * @param array $params Customization parameters values
      * @param Mage_Core_Model_Store $store Column store
      * @param BL_CustomGrid_Object|null $renderer Column collection renderer (if any)
      * @return array

@@ -19,7 +19,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Simple_Abstract extends BL_Cust
      * Add the column base field to the given grid collection
      * 
      * @param string $columnIndex Grid column index
-     * @param array $params Customization params values
+     * @param array $params Customization parameters values
      * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
      * @param Varien_Data_Collection_Db $collection Grid collection
      * @return BL_CustomGrid_Model_Custom_Column_Simple_Abstract
@@ -39,7 +39,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Simple_Abstract extends BL_Cust
      * @param BL_CustomGrid_Model_Grid $gridModel Grid model
      * @param string $columnBlockId Grid column block ID
      * @param string $columnIndex Grid column index
-     * @param array $params Customization params values
+     * @param array $params Customization parameters values
      * @return bool
      */
     protected function _shouldForceFieldSort(
@@ -108,7 +108,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Simple_Abstract extends BL_Cust
      * @param string $columnIndex Grid column index
      * @param string $fieldName Field name
      * @param string $tableAlias Field table alias
-     * @param array $params Customization params
+     * @param array $params Customization parameters values
      * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
      * @param Varien_Data_Collection_Db $collection Grid collection
      * @return BL_CustomGrid_Model_Custom_Column_Simple_Abstract

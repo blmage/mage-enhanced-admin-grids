@@ -13,11 +13,8 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_Grid_Sentry extends BL_CustomGrid_Model_Grid_Worker
+class BL_CustomGrid_Model_Grid_Sentry extends BL_CustomGrid_Model_Grid_Worker_Abstract
 {
-    /**
-     * Grid actions (used to set and check permissions)
-     */
     const ACTION_CUSTOMIZE_COLUMNS                  = 'customize';
     const ACTION_USE_CUSTOMIZED_COLUMNS             = 'use_customized';
     const ACTION_VIEW_GRID_INFOS                    = 'view_infos';
@@ -91,17 +88,20 @@ class BL_CustomGrid_Model_Grid_Sentry extends BL_CustomGrid_Model_Grid_Worker
         self::ACTION_DELETE_PROFILES                    => 'customgrid/profiles/delete',
     );
     
-    /**
-     * Grid actions permissions flags
-     */
     const ACTION_PERMISSION_USE_CONFIG = '0';
     const ACTION_PERMISSION_YES        = '1';
     const ACTION_PERMISSION_NO         = '2';
+    
+    public function getType()
+    {
+        return BL_CustomGrid_Model_Grid::WORKER_TYPE_SENTRY;
+    }
     
     /**
      * Throw a permission-related exception
      * 
      * @param string|null $message Custom exception message
+     * @throws BL_CustomGrid_Grid_Permission_Exception
      */
     public function throwPermissionException($message = null)
     {
@@ -119,7 +119,7 @@ class BL_CustomGrid_Model_Grid_Sentry extends BL_CustomGrid_Model_Grid_Worker
      * 
      * @param string|array $actions Actions codes
      * @param bool|array|null $aclPermissions Corresponding ACL permissions values
-     * return array Array containing the two prepared values
+     * @return array Array containing the two prepared values
      */
     protected function _prepareUserPermissionsCheckValues($actions, $aclPermissions)
     {

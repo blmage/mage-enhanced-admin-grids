@@ -15,10 +15,20 @@
 
 class BL_CustomGrid_Model_Custom_Column_Config
 {
+    /**
+     * Keys of the raw fields definable in the XML configuration (pre-flipped for convenience)
+     * 
+     * @var array
+     */
     static protected $_xmlRawFieldsKeys = array(
         'locked_renderer' => true,
     );
     
+    /**
+     * Keys of the boolean fields definable in the XML configuration (pre-flipped for convenience)
+     * 
+     * @var array
+     */
     static protected $_xmlBooleanFieldsKeys = array(
         'allow_store'         => true,
         'allow_renderers'     => true,
@@ -26,6 +36,11 @@ class BL_CustomGrid_Model_Custom_Column_Config
         'allow_editor'        => true,
     );
     
+    /**
+     * Keys of the translatable fields definable in the XML configuration (pre-flipped for convenience)
+     * 
+     * @var array
+     */
     static protected $_xmlTranslatableFieldsKeys = array(
         'name'           => true,
         'description'    => true,
@@ -34,16 +49,34 @@ class BL_CustomGrid_Model_Custom_Column_Config
         'renderer_label' => true,
     );
     
+    /**
+     * Cast the given value to boolean
+     * 
+     * @param mixed $value Castable value
+     * @return bool
+     */
     protected function _getBooleanValue($value)
     {
         return (bool) $value;
     }
     
+    /**
+     * Extract and return the raw fields values from the given XML values
+     * 
+     * @param array $xmlValues XML values
+     * @return array
+     */
     protected function _getRawFieldsFromXmlValues(array $xmlValues)
     {
         return array_intersect_key($xmlValues, self::$_xmlRawFieldsKeys);
     }
     
+    /**
+     * Extract and return the boolean fields values from the given XML values
+     * 
+     * @param array $xmlValues XML values
+     * @return array
+     */
     protected function _getBooleanFieldsFromXmlValues(array $xmlValues)
     {
         return array_map(
@@ -52,6 +85,13 @@ class BL_CustomGrid_Model_Custom_Column_Config
         );
     }
     
+    /**
+     * Extract and return the translatable fields values from the given XML values
+     * 
+     * @param array $xmlValues XML values
+     * @param Mage_Core_Helper_Abstract $helper Helper usable for translation
+     * @return array
+     */
     protected function _getTranslatableFieldsFromXmlValues(array $xmlValues, Mage_Core_Helper_Abstract $helper)
     {
         return array_map(
@@ -60,6 +100,12 @@ class BL_CustomGrid_Model_Custom_Column_Config
         );
     }
     
+    /**
+     * Extract and return the availability fields values from the given XMLv alues
+     * 
+     * @param array $xmlValues XML values
+     * @return array
+     */
     protected function _getAvailabilityFieldsFromXmlValues(array $xmlValues)
     {
         $availabilityFields = array();

@@ -435,7 +435,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Sales_Items_Abstract extends BL
      * @param Varien_Db_Select $select Database select
      * @param mixed $itemAlias Alias of the items table
      * @param Varien_Data_Collection_Db $collection Grid collection
-     * @param mixed $qi quoteIdentifier() callback
+     * @param callable $qi quoteIdentifier() callback
      * @return BL_CustomGrid_Model_Custom_Column_Sales_Items_Abstract
      */
     protected function _addExcludeChildFilterToSelect(

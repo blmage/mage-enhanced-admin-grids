@@ -13,7 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Store extends BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Abstract
+class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Field_Store extends BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Abstract
 {
     /**
      * Return the system store model
@@ -53,10 +53,10 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Store extends BL_Cu
     
     protected function _getRenderedValue()
     {
-        $editConfig = $this->getEditConfig();
+        $valueConfig = $this->getValueConfig();
         $renderableValue = $this->getRenderableValue();
-        $withoutAllStore = (bool) $editConfig->getData('renderer/without_all_store');
-        $withoutEmptyStore = (bool) $editConfig->getData('renderer/without_empty_store');
+        $withoutAllStore = (bool) $valueConfig->getData('renderer/without_all_store');
+        $withoutEmptyStore = (bool) $valueConfig->getData('renderer/without_empty_store');
         
         if (empty($renderableValue) && (is_array($renderableValue) || $withoutEmptyStore)) { 
             return '';
@@ -64,7 +64,7 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Store extends BL_Cu
         
         $renderableValue = (array) $renderableValue;
         
-        if (in_array(0, $renderableValue) && (count($renderableValue) == 1)) {
+        if (in_array(0, $renderableValue) && (count($renderableValue) === 1)) {
             if ($withoutAllStore) {
                 return '';
             } else {
@@ -73,7 +73,7 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Static_Store extends BL_Cu
         }
         
         $storesStructure = $this->_getStoreModel()->getStoresStructure(false, $renderableValue);
-        $spacesCount = (int) $editConfig->getDataSetDefault('renderer/spaces_count', 3);
+        $spacesCount = (int) $valueConfig->getDataSetDefault('renderer/spaces_count', 3);
         return $this->_renderStoresStructure($storesStructure, $spacesCount);
     }
 }

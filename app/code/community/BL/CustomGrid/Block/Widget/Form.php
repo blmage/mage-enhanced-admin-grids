@@ -60,6 +60,7 @@ class BL_CustomGrid_Block_Widget_Form extends Mage_Adminhtml_Block_Widget_Form
      * Return the HTML code corresponding to an "Use config" checkbox applied to the given form element
      * 
      * @param Varien_Data_Form_Element_Abstract $element Form element
+     * @param string|null $checkboxLabel Checkbox label
      * @return string
      */
     public function getUseConfigCheckboxHtml(Varien_Data_Form_Element_Abstract $element, $checkboxLabel = null)
@@ -92,6 +93,7 @@ class BL_CustomGrid_Block_Widget_Form extends Mage_Adminhtml_Block_Widget_Form
      * 
      * @param Varien_Data_Form_Element_Abstract $element Form element
      * @param bool $checked Whether the checkbox should initially be checked
+     * @param string|null $checkboxLabel Checkbox label
      * @return BL_CustomGrid_Block_Widget_Form
      */
     public function applyUseConfigCheckboxToElement(

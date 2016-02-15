@@ -18,14 +18,13 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Attribute_Product extends BL_C
     protected function _prepareLayout()
     {
         $returnValue = parent::_prepareLayout();
-        $inGrid   = $this->getEditedInGrid();
-        $required = $this->getIsRequiredValueEdit();
         
         /** @var $elementRenderer BL_CustomGrid_Block_Widget_Grid_Editor_Form_Renderer_Product_Fieldset_Element */
         $elementRenderer = $this->getLayout()
             ->createBlock('customgrid/widget_grid_editor_form_renderer_product_fieldset_element');
         
-        $elementRenderer->setEditedInGrid($inGrid)->setIsRequiredValueEdit($required);
+        $elementRenderer->setIsEditedInGrid($this->getIsEditedInGrid());
+        $elementRenderer->setIsRequiredValueEdit($this->getIsRequiredValueEdit());
         Varien_Data_Form::setFieldsetElementRenderer($elementRenderer);
         
         return $returnValue;
@@ -34,8 +33,6 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Attribute_Product extends BL_C
     protected function _prepareForm()
     {
         $returnValue = parent::_prepareForm();
-        $inGrid   = $this->getEditedInGrid();
-        $required = $this->getIsRequiredValueEdit();
         
         if ($form = $this->getForm()) {
             if ($urlKey = $form->getElement('url_key')) {
@@ -43,7 +40,8 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Attribute_Product extends BL_C
                 $renderer = $this->getLayout()
                     ->createBlock('customgrid/widget_grid_editor_form_renderer_product_attribute_urlkey');
                 
-                $renderer->setEditedInGrid($inGrid)->setIsRequiredValueEdit($required);
+                $renderer->setEditedInGrid($this->getIsEditedInGrid());
+                $renderer->setIsRequiredValueEdit($this->getIsRequiredValueEdit());
                 $urlKey->setRenderer($renderer);
             }
             if ($tierPrice = $form->getElement('tier_price')) {
@@ -84,7 +82,7 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Attribute_Product extends BL_C
             $result['weight'] = $config->getBlockClassName('adminhtml/catalog_product_helper_form_weight');
         }
         
-        $response = new BL_CustomGrid_Object();
+        $response = new Varien_Object();
         $response->setTypes(array());
         Mage::dispatchEvent('adminhtml_catalog_product_edit_element_types', array('response' => $response));
         

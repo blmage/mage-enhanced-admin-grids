@@ -160,7 +160,7 @@ class BL_CustomGrid_Block_Grid_Edit_Tab_Settings extends BL_CustomGrid_Block_Gri
     }
     
     /**
-     * Add customization params-related fields to the given form, return the corresponding fieldset
+     * Add customization parameters-related fields to the given form, return the corresponding fieldset
      * 
      * @param Varien_Data_Form $form Form
      * @return Varien_Data_Form_Element_Fieldset
@@ -212,7 +212,7 @@ class BL_CustomGrid_Block_Grid_Edit_Tab_Settings extends BL_CustomGrid_Block_Gri
     }
     
     /**
-     * Add default params-related fields to the given form, return the corresponding fieldset
+     * Add default parameters-related fields to the given form, return the corresponding fieldset
      * 
      * @param Varien_Data_Form $form Form
      * @return Varien_Data_Form_Element_Fieldset

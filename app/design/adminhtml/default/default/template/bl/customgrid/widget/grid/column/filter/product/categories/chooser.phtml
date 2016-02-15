@@ -178,7 +178,7 @@ function blcgApplyCategories()
     if (typeof(parent.<?php echo $_jsObjectName ?>) != 'undefined') {
         parent.<?php echo $_jsObjectName ?>.applyChoice($('blcg_filtered_categories').value);
     } else {
-        alert('<?php echo $this->jsQuoteEscape($this->__('Cannot apply choice : JS object cannot be found')) ?>');
+        alert('<?php echo $this->jsQuoteEscape($this->__('Cannot apply choice : the JS object cannot be found')) ?>');
     }
 }
 <?php endif ?>

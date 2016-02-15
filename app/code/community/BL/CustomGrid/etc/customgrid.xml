@@ -49,15 +49,15 @@
             <sort_order>30000</sort_order>
         </cms_page>
         
+        <cms_poll model="customgrid/grid_type_cms_poll" module="customgrid">
+            <name>Polls</name>
+            <sort_order>50000</sort_order>
+        </cms_poll>
+        
         <cms_widget model="customgrid/grid_type_cms_widget" module="customgrid">
             <name>CMS Widgets</name>
             <sort_order>40000</sort_order>
         </cms_widget>
-        
-        <poll model="customgrid/grid_type_poll" module="customgrid">
-            <name>Polls</name>
-            <sort_order>50000</sort_order>
-        </poll>
         
         <product model="customgrid/grid_type_product" module="customgrid">
             <name>Products</name>
@@ -474,7 +474,7 @@
             <name>Credit Memos</name>
             <sort_order>230000</sort_order>
         </sales_creditmemo>
-
+        
         <system_store model="customgrid/grid_type_system_store" module="customgrid">
             <name>Manage Stores</name>
             <sort_order>300000</sort_order>
@@ -490,7 +490,12 @@
             </custom_columns>
         </system_store>
         
-        <other model="customgrid/grid_type_other" module="customgrid">
+        <email_template model="customgrid/grid_type_email_template" module="customgrid">
+            <name>Email Templates</name>
+            <sort_order>400000</sort_order>
+        </email_template>
+        
+        <other model="customgrid/grid_type_default" module="customgrid">
             <name>Other</name>
             <sort_order>1000000000</sort_order>
         </other>

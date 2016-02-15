@@ -24,8 +24,8 @@ abstract class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Abstract extends Mage
     protected function _prepareLayout()
     {
         $returnValue = parent::_prepareLayout();
-        $inGrid   = $this->getEditedInGrid();
-        $required = $this->getIsRequiredValueEdit();
+        $isInGrid    = $this->getIsEditedInGrid();
+        $isRequired  = $this->getIsRequiredValueEdit();
         
         /** @var $elementRenderer BL_CustomGrid_Widget_Grid_Editor_Form_Renderer_Element */
         $elementRenderer  = $this->getLayout()
@@ -39,9 +39,9 @@ abstract class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Abstract extends Mage
         $fieldsetElementRenderer = $this->getLayout()
             ->createBlock('customgrid/widget_grid_editor_form_renderer_fieldset_element');
         
-        $elementRenderer->setEditedInGrid($inGrid)->setIsRequiredValueEdit($required);
-        $fieldsetRenderer->setEditedInGrid($inGrid)->setIsRequiredValueEdit($required);
-        $fieldsetElementRenderer->setEditedInGrid($inGrid)->setIsRequiredValueEdit($required);
+        $elementRenderer->setIsEditedInGrid($isInGrid)->setIsRequiredValueEdit($isRequired);
+        $fieldsetRenderer->setIsEditedInGrid($isInGrid)->setIsRequiredValueEdit($isRequired);
+        $fieldsetElementRenderer->setIsEditedInGrid($isInGrid)->setIsRequiredValueEdit($isRequired);
         
         Varien_Data_Form::setElementRenderer($elementRenderer);
         Varien_Data_Form::setFieldsetRenderer($fieldsetRenderer);
@@ -54,7 +54,7 @@ abstract class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Abstract extends Mage
     {
         $html = parent::_toHtml();
         
-        if ($this->getEditedInGrid()) {
+        if ($this->getIsEditedInGrid()) {
             $html .= '<input name="form_key" type="hidden" value="' . $this->getFormKey() . '" />';
         }
         
@@ -84,48 +84,61 @@ abstract class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Abstract extends Mage
     }
     
     /**
-     * Return whether the edited value is required
+     * Return the editor context
      * 
-     * @return bool
+     * @return BL_CustomGrid_Model_Grid_Editor_Context
      */
-    abstract public function getIsRequiredValueEdit();
-    
-    /**
-     * Return the current edit config
-     * 
-     * @return BL_CustomGrid_Model_Grid_Edit_Config
-     */
-    public function getEditConfig()
+    public function getEditorContext()
     {
-        if (!($config = $this->_getData('edit_config')) instanceof BL_CustomGrid_Model_Grid_Edit_Config) {
-            Mage::throwException($this->__('Invalid edit config'));
+        if (!($editorContext = $this->_getData('editor_context')) instanceof BL_CustomGrid_Model_Grid_Editor_Context) {
+            Mage::throwException('Invalid editor context');
         }
-        return $config;
+        return $editorContext;
     }
     
     /**
-     * Return the current edited attribute
+     * Return the edited value config
+     * 
+     * @return BL_CustomGrid_Model_Grid_Editor_Value_Config
+     */
+    public function getValueConfig()
+    {
+        if (!($valueConfig = $this->_getData('value_config')) instanceof BL_CustomGrid_Model_Grid_Editor_Value_Config) {
+            Mage::throwException('Invalid edited value config');
+        }
+        return $valueConfig;
+    }
+    
+    /**
+     * Return the attribute on which is based the edited value
      * 
      * @return Mage_Eav_Model_Entity_Attribute
      */
     public function getEditedAttribute()
     {
         if (!($attribute = $this->_getData('edited_attribute')) instanceof Mage_Eav_Model_Entity_Attribute) {
-            Mage::throwException($this->__('Invalid edited attribute'));
+            Mage::throwException('Invalid edited attribute');
         }
         return $attribute;
     }
     
     /**
-     * Return the current edited entity
+     * Return the edited entity
      * 
      * @return Varien_Object
      */
     public function getEditedEntity()
     {
         if (!($entity = $this->_getData('edited_entity')) instanceof Varien_Object) {
-            Mage::throwException($this->__('Invalid edited entity'));
+            Mage::throwException('Invalid edited entity');
         }
         return $entity;
     }
+    
+    /**
+     * Return whether the edited value is required
+     * 
+     * @return bool
+     */
+    abstract public function getIsRequiredValueEdit();
 }

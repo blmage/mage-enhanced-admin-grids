@@ -49,6 +49,6 @@ class BL_CustomGrid_Model_Grid_Worker extends BL_CustomGrid_Object
      */
     public function getGridProfile()
     {
-        return $this->getGridModel()->getProfile();;
+        return $this->getGridModel()->getProfile();
     }
 }

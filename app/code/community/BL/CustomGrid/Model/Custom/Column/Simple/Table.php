@@ -79,7 +79,7 @@ class BL_CustomGrid_Model_Custom_Column_Simple_Table extends BL_CustomGrid_Model
      * Return the additional join conditions to use, between the main table and the joined table
      * 
      * @param string $columnIndex Grid column index
-     * @param array $params Customization params values
+     * @param array $params Customization parameters values
      * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
      * @param Varien_Data_Collection_Db $collection Grid collection
      * @param mixed $mainAlias Main table alias
@@ -101,7 +101,7 @@ class BL_CustomGrid_Model_Custom_Column_Simple_Table extends BL_CustomGrid_Model
      * Return the flag key usable to arrange the generated alias for the given table name, in the given context
      * 
      * @param string $columnIndex Grid column index
-     * @param array $params Customization params values
+     * @param array $params Customization parameters values
      * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
      * @param Varien_Data_Collection_Db $collection Grid collection
      * @param string $tableName Table name
@@ -121,7 +121,7 @@ class BL_CustomGrid_Model_Custom_Column_Simple_Table extends BL_CustomGrid_Model
      * Return the alias used for the joined table on the given grid collection (and join it first if necessary)
      * 
      * @param string $columnIndex Grid column index
-     * @param array $params Customization params values
+     * @param array $params Customization parameters values
      * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
      * @param Varien_Data_Collection_Db $collection Grid collection
      * @return string

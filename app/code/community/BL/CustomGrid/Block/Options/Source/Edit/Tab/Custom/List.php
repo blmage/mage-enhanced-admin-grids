@@ -51,6 +51,7 @@ class BL_CustomGrid_Block_Options_Source_Edit_Tab_Custom_List extends BL_CustomG
      * 
      * @param array $valueA One value
      * @param array $valueB Another value
+     * @return int
      */
     protected function _sortValues($valueA, $valueB)
     {

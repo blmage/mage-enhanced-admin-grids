@@ -44,7 +44,7 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
     }
     
     /**
-     * Return base helper
+     * Return the base helper
      * 
      * @return BL_CustomGrid_Helper_Data
      */

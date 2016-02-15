@@ -18,6 +18,7 @@ class BL_CustomGrid_Blcg_Options_SourceController extends BL_CustomGrid_Controll
     /**
      * Initialize and register the options source from the current request
      * 
+     * @param bool $requireId Whether an existing options source must be initialized
      * @return BL_CustomGrid_Model_Options_Source|false
      */
     protected function _initOptionsSource($requireId = false)
@@ -216,6 +217,8 @@ class BL_CustomGrid_Blcg_Options_SourceController extends BL_CustomGrid_Controll
     
     protected function _isAllowed()
     {
-        return $this->_getAdminSession()->isAllowed('system/customgrid/options_source');
+        /** @var $session Mage_Admin_Model_Session */
+        $session = Mage::getSingleton('admin/session');
+        return $session->isAllowed('system/customgrid/options_source');
     }
 }

@@ -582,7 +582,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
     }
     
     /**
-     * Return the HTML content of the default params form button
+     * Return the HTML content of the default parameters form button
      * 
      * @return string
      */
@@ -840,7 +840,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
      */
     public function getColumnsListHtml()
     {
-        return ($this->getColumnsListButtonHtml($this->getGridModel()) != '')
+        return ($this->getColumnsListButtonHtml() != '')
             ? $this->getColumnsListBlock()->toHtml()
             : '';
     }
@@ -868,7 +868,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
      */
     public function getRssLinksHtml()
     {
-        return ($this->getRssLinksListButtonHtml($this->getGridModel()) != '')
+        return ($this->getRssLinksListButtonHtml() != '')
             ? $this->getRssLinksBlock()->toHtml()
             : '';
     }

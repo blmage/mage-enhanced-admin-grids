@@ -59,7 +59,7 @@ class BL_CustomGrid_Model_Grid_Rewriter_Config extends BL_CustomGrid_Object
      * 
      * @param string $code Rewriter code
      * @return BL_CustomGrid_Model_Grid_Rewriter_Abstract|false
-    */
+     */
     public function getRewriter($code)
     {
         $rewriterConfig = Mage::getStoreConfig('customgrid_rewriters/' . $code);

@@ -71,7 +71,7 @@ class BL_CustomGrid_Model_Grid_Rewriter_File extends BL_CustomGrid_Model_Grid_Re
         $content .= $this->_getRewriteCode($blcgClassName, $originalClassName, $blockType) . "\n";
         
         if (!$ioFile->write($fileName, $content)) {
-            Mage::throwException(Mage::helper('customgrid')->__('Could not write to the file'));
+            Mage::throwException('Could not write to the file');
         }
         
         return $this;

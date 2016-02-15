@@ -13,8 +13,13 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_Grid_Exporter extends BL_CustomGrid_Model_Grid_Worker
+class BL_CustomGrid_Model_Grid_Exporter extends BL_CustomGrid_Model_Grid_Worker_Abstract
 {
+    public function getType()
+    {
+        return BL_CustomGrid_Model_Grid::WORKER_TYPE_EXPORTER;
+    }
+    
     /**
      * Return whether the current grid model's results can be exported
      *
@@ -22,8 +27,9 @@ class BL_CustomGrid_Model_Grid_Exporter extends BL_CustomGrid_Model_Grid_Worker
      */
     public function canExport()
     {
-        return ($typeModel = $this->getGridModel()->getTypeModel())
-            && $typeModel->canExport($this->getGridModel()->getBlockType());
+        return $this->getGridModel()
+            ->getTypeModel()
+            ->canExport($this->getGridModel()->getBlockType());
     }
     
     /**
@@ -33,9 +39,9 @@ class BL_CustomGrid_Model_Grid_Exporter extends BL_CustomGrid_Model_Grid_Worker
      */
     public function getExportTypes()
     {
-        return ($typeModel = $this->getGridModel()->getTypeModel())
-            ? $typeModel->getExportTypes($this->getGridModel()->getBlockType())
-            : array();
+        return $this->getGridModel()
+            ->getTypeModel()
+            ->getExportTypes($this->getGridModel()->getBlockType());
     }
     
     /**
@@ -68,7 +74,7 @@ class BL_CustomGrid_Model_Grid_Exporter extends BL_CustomGrid_Model_Grid_Worker
                     $gridModel->getHelper()->__('You are not allowed to export this grid results')
                 );
         }
-        if (!$this->canExport($gridModel)) {
+        if (!$this->canExport()) {
             Mage::throwException($gridModel->getHelper()->__('This grid results can not be exported'));
         }
         
@@ -130,7 +136,8 @@ class BL_CustomGrid_Model_Grid_Exporter extends BL_CustomGrid_Model_Grid_Worker
      */
     public function isExportRequest(Mage_Core_Controller_Request_Http $request)
     {
-        return ($typeModel = $this->getGridModel()->getTypeModel())
-            && $typeModel->isExportRequest($this->getGridModel()->getBlockType(), $request);
+        return $this->getGridModel()
+            ->getTypeModel()
+            ->isExportRequest($this->getGridModel()->getBlockType(), $request);
     }
 }

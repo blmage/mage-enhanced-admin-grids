@@ -33,7 +33,7 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
     const SESSION_BASE_KEY_REMOVED_FILTERS = '_blcg_removed_filters_';
     
     /**
-     * Return base helper
+     * Return the base helper
      *
      * @return BL_CustomGrid_Helper_Data
      */
@@ -63,7 +63,7 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
         if (($gridModel = $this->_getData('grid_model')) instanceof BL_CustomGrid_Model_Grid) {
             return $gridModel;
         } elseif (!$graceful) {
-            Mage::throwException($this->_getHelper()->__('Invalid grid model'));
+            Mage::throwException('Invalid grid model');
         }
         return null;
     }
@@ -176,6 +176,7 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
      * Set array data in the adminhtml session, for the given base key
      * 
      * @param string $sessionBaseKey Base key
+     * @param array $data New session data
      * @return BL_CustomGrid_Model_Grid_Profile
      */
     protected function _setSessionArrayData($sessionBaseKey, array $data)
@@ -213,6 +214,7 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
     /**
      * Set the new remembered session values
      * 
+     * @param array $sessionValues Remembered session values
      * @return BL_CustomGrid_Model_Grid_Profile
      */
     public function setRememberedSessionValues(array $sessionValues)
@@ -576,12 +578,8 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
         $values = array_intersect_key($values, array_flip($editableKeys));
         $this->_checkProfileNewValues($profileId, $values);
         
-        $rememberedSessionParams = isset($values['remembered_session_params'])
-            ? $values['remembered_session_params']
-            : array();
-        
-        if (is_array($rememberedSessionParams)) {
-            $sessionParams = array_intersect($rememberedSessionParams, $gridModel->getGridParamsKeys(true));
+        if (!isset($values['remembered_session_params']) || is_array($values['remembered_session_params'])) {
+            $sessionParams = array_intersect($values['remembered_session_params'], $gridModel->getGridParamsKeys(true));
             
             if (in_array(BL_CustomGrid_Model_Grid::GRID_PARAM_NONE, $sessionParams)) {
                 $sessionParams = array(BL_CustomGrid_Model_Grid::GRID_PARAM_NONE);

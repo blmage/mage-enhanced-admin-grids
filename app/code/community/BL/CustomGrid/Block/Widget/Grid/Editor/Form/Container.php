@@ -64,7 +64,7 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Container extends BL_CustomGri
     {
         if (!$this->hasData('editor_js_object_name')) {
             if (($jsObjectName = $this->_getJsObjectName('editor_js_object_name'))
-                && $this->getRequest()->getParam('is_external', false)) {
+                && !$this->getIsEditedInGrid()) {
                 $this->setData('editor_js_object_name', 'parent.' . $jsObjectName);
             }
         }

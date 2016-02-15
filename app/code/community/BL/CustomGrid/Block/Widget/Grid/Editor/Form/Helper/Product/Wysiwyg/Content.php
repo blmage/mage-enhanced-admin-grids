@@ -28,14 +28,15 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Helper_Product_Wysiwyg_Content
         /** @var $helper BL_CustomGrid_Helper_Editor */
         $helper = $this->helper('customgrid/editor');
         
-        $config = array();
-        $config['document_base_url'] = $this->_getData('store_media_url');
-        $config['store_id']          = $this->_getData('store_id');
-        $config['add_variables']     = false;
-        $config['add_widgets']       = false;
-        $config['add_directives']    = true;
-        $config['use_container']     = true;
-        $config['container_class']   = 'hor-scroll';
+        $config = array(
+            'document_base_url' => $this->_getData('store_media_url'),
+            'store_id'          => $this->_getData('store_id'),
+            'add_variables'     => false,
+            'add_widgets'       => false,
+            'add_directives'    => true,
+            'use_container'     => true,
+            'container_class'   => 'hor-scroll',
+        );
         
         $form->addField(
             $this->_getData('editor_element_id'),

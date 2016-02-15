@@ -25,7 +25,7 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Helper_Product_Wysiwyg extends
             /** @var $layout Mage_Core_Model_Layout */
             $layout     = Mage::getSingleton('core/layout');
             $htmlId     = $this->getHtmlId();
-            $disabled   = ($this->getDisabled() || $this->getReadonly());
+            $isDisabled = ($this->getDisabled() || $this->getReadonly());
             $wysiwygUrl = $helper->getUrl('adminhtml/blcg_grid_editor_product/wysiwyg');
             
             /** @var $editorButton Mage_Adminhtml_Block_Widget_Button */
@@ -35,8 +35,8 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Helper_Product_Wysiwyg extends
                 array(
                     'label'    => Mage::helper('catalog')->__('WYSIWYG Editor'),
                     'type'     => 'button',
-                    'disabled' => $disabled,
-                    'class'    => ($disabled ? 'disabled' : ''),
+                    'disabled' => $isDisabled,
+                    'class'    => ($isDisabled ? 'disabled' : ''),
                     'onclick'  => 'catalogWysiwygEditor.open(\'' . $wysiwygUrl . '\', \'' . $htmlId . '\')',
                 )
             );
