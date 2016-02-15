@@ -103,7 +103,7 @@ class BL_CustomGrid_Model_Grid_Editor_Value_Renderer extends BL_CustomGrid_Model
         $valueRendererBlock = $previousReturnedValue;
         $valueRendererData  = array(
             'edited_entity'     => $context->getEditedEntity(),
-            'edited_attribute'  => $valueConfig->getAttribute(),
+            'edited_attribute'  => $valueConfig->getData('global/attribute'),
             'editor_context'    => $context,
             'value_config'      => $valueConfig,
         );
