@@ -39,8 +39,10 @@ Special thanks to : [paales](https://github.com/paales) for the current design a
     - [ ] remove `CDATA` sections
     - [ ] refactor and optimize code when possible
     - [ ] review the code style (follow some best practices)
-    - [ ] write comments (use [JSDoc](http://usejsdoc.org/index.html))
+    - [ ] ~~write comments (use [JSDoc](http://usejsdoc.org/index.html))~~
     - [ ] implement an object manager, to remove as much clutter as possible from the global scope, and automatically cleanup unneeded/overridable objects (especially for Ajax grids)
+- [ ] move the columns list form to dedicated window, as for the other forms (avoid cluttering any external wrapping form with a lot of parameters)
+- [ ] rework the profiles bar so that the number of displayed profiles is adapted to the available width
 - [ ] rework the "Access All" profiles permission (make all the profiles be available from everywhere, except in the bar)
 - [ ] rework the sales items columns (implement the advanced text filter, improve their extensibility, and allow to display a customizable value when exported)
 
