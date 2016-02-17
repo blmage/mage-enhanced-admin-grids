@@ -197,6 +197,30 @@ abstract class BL_CustomGrid_Model_Grid_Editor_Abstract extends BL_CustomGrid_Ob
     }
     
     /**
+     * Dispatch the given event with the given response object and some common event data
+     * 
+     * @param string $eventName Event name
+     * @param BL_CustomGrid_Object $response Response object
+     * @param string|null $blockType Grid block type, if known
+     * @return $this
+     */
+    protected function _dispatchEventWithResponse($eventName, BL_CustomGrid_Object $response, $blockType = null)
+    {
+        $eventData = array(
+            'response'     => $response,
+            'type_model'   => $this->getGridTypeModel(),
+            'editor_model' => $this,
+        );
+        
+        if (!is_null($blockType)) {
+            $eventData['block_type'] = $blockType;
+        }
+        
+        Mage::dispatchEvent($eventName, $eventData);
+        return $this;
+    }
+    
+    /**
      * Return the base config values
      * 
      * @return array
@@ -216,16 +240,7 @@ abstract class BL_CustomGrid_Model_Grid_Editor_Abstract extends BL_CustomGrid_Ob
         if (!$this->hasData('base_config')) {
             $baseConfig = new BL_CustomGrid_Object($this->_getBaseConfigData());
             $response   = new BL_CustomGrid_Object(array('config' => array()));
-            
-            Mage::dispatchEvent(
-                'blcg_grid_editor_base_config',
-                array(
-                    'response'     => $response,
-                    'type_model'   => $this->getGridTypeModel(),
-                    'editor_model' => $this,
-                )
-            );
-            
+            $this->_dispatchEventWithResponse('blcg_grid_editor_base_config', $response);
             $baseConfig->mergeData((array) $response->getData('config'));
             $this->setData('base_config', $baseConfig);
         }
@@ -277,17 +292,7 @@ abstract class BL_CustomGrid_Model_Grid_Editor_Abstract extends BL_CustomGrid_Ob
     protected function _getEditableFields($blockType)
     {
         $response = new BL_CustomGrid_Object(array('fields' => array()));
-        
-        Mage::dispatchEvent(
-            'blcg_grid_editor_additional_editable_fields',
-            array(
-                'response'     => $response,
-                'type_model'   => $this->getGridTypeModel(),
-                'editor_model' => $this,
-                'block_type'   => $blockType,
-            )
-        );
-        
+        $this->_dispatchEventWithResponse('blcg_grid_editor_additional_editable_fields', $response, $blockType);
         return array_merge($this->_getBaseEditableFields($blockType), $response->getFields());
     }
     
@@ -326,16 +331,7 @@ abstract class BL_CustomGrid_Model_Grid_Editor_Abstract extends BL_CustomGrid_Ob
     protected function _getEditableAttributes($blockType)
     {
         $response = new BL_CustomGrid_Object(array('attributes' => array()));
-        
-        Mage::dispatchEvent(
-            'blcg_grid_editor_additional_editable_attributes',
-            array(
-                'response'     => $response,
-                'type_model'   => $this->getGridTypeModel(),
-                'editor_model' => $this,
-                'block_type'   => $blockType,
-            )
-        );
+        $this->_dispatchEventWithResponse('blcg_grid_editor_additional_editable_attributes', $response, $blockType);
         
         $attributes = array_merge(
             $this->getGridTypeModel()->getAvailableAttributes($blockType),
@@ -377,14 +373,10 @@ abstract class BL_CustomGrid_Model_Grid_Editor_Abstract extends BL_CustomGrid_Ob
     {
         $response = new BL_CustomGrid_Object(array('attribute_fields' => array()));
         
-        Mage::dispatchEvent(
+        $this->_dispatchEventWithResponse(
             'blcg_grid_editor_additional_editable_attribute_fields',
-            array(
-                'response'     => $response,
-                'type_model'   => $this->getGridTypeModel(),
-                'editor_model' => $this,
-                'block_type'   => $blockType,
-            )
+            $response,
+            $blockType
         );
         
         return array_merge($this->_getBaseEditableAttributeFields($blockType), $response->getAttributeFields());
@@ -437,34 +429,22 @@ abstract class BL_CustomGrid_Model_Grid_Editor_Abstract extends BL_CustomGrid_Ob
             $attributesResponse = new BL_CustomGrid_Object(array('attributes' => $attributes));
             $attributeFieldsResponse = new BL_CustomGrid_Object(array('attribute_fields' => $attributeFields));
             
-            Mage::dispatchEvent(
+            $this->_dispatchEventWithResponse(
                 'blcg_grid_editor_prepare_editable_fields',
-                array(
-                    'response'     => $fieldsResponse,
-                    'type_model'   => $gridTypeModel,
-                    'editor_model' => $this,
-                    'block_type'   => $blockType,
-                )
+                $fieldsResponse,
+                $blockType
             );
             
-            Mage::dispatchEvent(
+            $this->_dispatchEventWithResponse(
                 'blcg_grid_editor_prepare_editable_attributes',
-                array(
-                    'response'     => $attributesResponse,
-                    'type_model'   => $gridTypeModel,
-                    'editor_model' => $this,
-                    'block_type'   => $blockType,
-                )
+                $attributesResponse,
+                $blockType
             );
             
-            Mage::dispatchEvent(
+            $this->_dispatchEventWithResponse(
                 'blcg_grid_editor_prepare_editable_attribute_fields',
-                array(
-                    'response'     => $attributeFieldsResponse,
-                    'type_model'   => $gridTypeModel,
-                    'editor_model' => $this,
-                    'block_type'   => $blockType,
-                )
+                $attributeFieldsResponse,
+                $blockType
             );
             
             $editableValuesConfigs = array(
@@ -591,7 +571,6 @@ abstract class BL_CustomGrid_Model_Grid_Editor_Abstract extends BL_CustomGrid_Ob
         $configBuilder = $this->getValueConfigBuilder();
         
         foreach ($columns as $columnBlockId => $column) {
-            $valueConfig = null;
             $hasStoreId  = false;
             
             if ($column->isAttribute()) {
