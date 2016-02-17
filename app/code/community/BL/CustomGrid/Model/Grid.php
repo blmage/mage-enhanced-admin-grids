@@ -95,23 +95,6 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     }
     
     /**
-     * Return the class code of the usable worker model from the given type
-     * 
-     * @param string $type Worker type
-     * @return string
-     */
-    protected function _getWorkerModelClassCode($type)
-    {
-        $dataKey = 'worker_model_class_code/' . $type;
-        
-        if (!$this->hasData($dataKey)) {
-            $this->setData($dataKey, 'customgrid/grid_' . $type);
-        }
-        
-        return $this->getData($dataKey);
-    }
-    
-    /**
      * Return the worker model of the given type
      * 
      * @param string $type Worker type
@@ -119,20 +102,9 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
      */
     protected function _getWorker($type)
     {
-        if (!$this->hasData($type)) {
-            $worker = Mage::getModel('customgrid/grid_' . $type);
-            
-            if (!$worker instanceof BL_CustomGrid_Model_Grid_Worker_Abstract) {
-                Mage::throwException(
-                    'Grid workers must be instances of BL_CustomGrid_Model_Grid_Worker_Abstract ("' . $type . '")'
-                );
-            }
-            
-            /** @var $worker BL_CustomGrid_Model_Grid_Worker_Abstract */
-            $worker->setGridModel($this);
-            $this->setData($type, $worker);
-        }
-        return $this->_getData($type);
+        /** @var BL_CustomGrid_Helper_Worker $helper */
+        $helper = Mage::helper('customgrid/worker');
+        return $helper->getModelWorker($this, $type);
     }
     
     /**

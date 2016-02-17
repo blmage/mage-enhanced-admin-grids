@@ -30,23 +30,6 @@ abstract class BL_CustomGrid_Model_Grid_Editor_Abstract extends BL_CustomGrid_Ob
     const WORKER_TYPE_VALUE_RENDERER       = 'value_renderer';
     
     /**
-     * Return the class code of the usable worker model from the given type
-     * 
-     * @param string $type Worker type
-     * @return string
-     */
-    protected function _getWorkerModelClassCode($type)
-    {
-        $dataKey = 'worker_model_class_code/' . $type;
-        
-        if (!$this->hasData($dataKey)) {
-            $this->setData($dataKey, 'customgrid/grid_editor_' . $type);
-        }
-        
-        return $this->getData($dataKey);
-    }
-    
-    /**
      * Return the worker model of the given type
      * 
      * @param string $type Worker type
@@ -54,21 +37,9 @@ abstract class BL_CustomGrid_Model_Grid_Editor_Abstract extends BL_CustomGrid_Ob
      */
     protected function _getWorker($type)
     {
-        if (!$this->hasData($type)) {
-            $worker = Mage::getModel($this->_getWorkerModelClassCode($type));
-            
-            if (!$worker instanceof BL_CustomGrid_Model_Grid_Editor_Worker_Abstract) {
-                Mage::throwException(
-                    'Editor workers must be instances of BL_CustomGrid_Model_Grid_Editor_Worker_Abstract'
-                    . '("' . $type . '")'
-                );
-            }
-            
-            /** @var BL_CustomGrid_Model_Grid_Editor_Worker_Abstract $worker */
-            $worker->setEditor($this);
-            $this->setData($type, $worker);
-        }
-        return $this->_getData($type);
+        /** @var BL_CustomGrid_Helper_Worker $helper */
+        $helper = Mage::helper('customgrid/worker');
+        return $helper->getModelWorker($this, $type);
     }
     
     /**
@@ -393,7 +364,6 @@ abstract class BL_CustomGrid_Model_Grid_Editor_Abstract extends BL_CustomGrid_Ob
     {
         if (!$this->hasData('editable_values_configs')
             || !is_array($editableValuesConfigs = $this->getData('editable_values_configs/' . $blockType))) {
-            $gridTypeModel = $this->getGridTypeModel();
             $configBuilder = $this->getValueConfigBuilder();
             
             // Build all base configs
