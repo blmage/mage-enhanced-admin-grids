@@ -580,67 +580,7 @@ abstract class BL_CustomGrid_Model_Grid_Editor_Abstract extends BL_CustomGrid_Ob
     }
     
     /**
-     * Return whether the given value is editable
-     * 
-     * @param string $blockType Grid block type
-     * @param string $valueId Value ID
-     * @param string $origin Value origin
-     * @return bool
-     */
-    public function isEditableValue($blockType, $valueId, $origin)
-    {
-        return !is_null($this->getEditableValueConfig($blockType, $valueId, $origin));
-    }
-    
-    /**
-     * Return whether the edited value from the given context is actually editable
-     * 
-     * @param BL_CustomGrid_Model_Grid_Editor_Context $context Checked editor context
-     * @return bool
-     */
-    public function isEditableContext(BL_CustomGrid_Model_Grid_Editor_Context $context)
-    {
-        return $this->isEditableValue($context->getBlockType(), $context->getValueId(), $context->getValueOrigin());
-    }
-    
-    /**
-     * Return whether the given field is editable
-     * 
-     * @param string $blockType Grid block type
-     * @param string $fieldId Field ID
-     * @return bool
-     */
-    public function isEditableField($blockType, $fieldId)
-    {
-        return $this->isEditableValue($blockType, $fieldId, self::EDITABLE_TYPE_FIELD);
-    }
-    
-    /**
-     * Return whether the given attribute is editable
-     * 
-     * @param string $blockType Grid block type
-     * @param string $attributeCode Attribute code
-     * @return bool
-     */
-    public function isEditableAttribute($blockType, $attributeCode)
-    {
-        return $this->isEditableValue($blockType, $attributeCode, self::EDITABLE_TYPE_ATTRIBUTE);
-    }
-    
-    /**
-     * Return whether the given attribute field is editable
-     * 
-     * @param string $blockType Grid block type
-     * @param string $fieldId Field ID
-     * @return bool
-     */
-    public function isEditableAttributeField($blockType, $fieldId)
-    {
-        return $this->isEditableValue($blockType, $fieldId, self::EDITABLE_TYPE_ATTRIBUTE_FIELD);
-    }
-    
-    /**
-     * Apply editable values configs to the given grid columns
+     * Apply the editable values configs to the given grid columns
      * 
      * @param string $blockType Grid block type
      * @param BL_CustomGrid_Model_Grid_Column[] $columns Grid columns
@@ -648,6 +588,8 @@ abstract class BL_CustomGrid_Model_Grid_Editor_Abstract extends BL_CustomGrid_Ob
      */
     public function applyConfigsToColumns($blockType, array $columns)
     {
+        $configBuilder = $this->getValueConfigBuilder();
+        
         foreach ($columns as $columnBlockId => $column) {
             $valueConfig = null;
             $hasStoreId  = false;
@@ -655,10 +597,12 @@ abstract class BL_CustomGrid_Model_Grid_Editor_Abstract extends BL_CustomGrid_Ob
             if ($column->isAttribute()) {
                 $valueConfig = $this->getEditableAttributeConfig($blockType, $column->getIndex());
                 $hasStoreId  = $column->hasStoreId();
-            } elseif (!$column->isCustom()) {
-                if (!$valueConfig = $this->getEditableFieldConfig($blockType, $columnBlockId)) {
-                    $valueConfig = $this->getEditableAttributeFieldConfig($blockType, $columnBlockId);
-                }
+            } elseif ($column->isCustom()) {
+                $valueConfig = $column->getCustomColumnModel(false)
+                    ->getGridColumnEditorConfig($column, $configBuilder);
+                $hasStoreId  = $column->hasStoreId();
+            } elseif (!$valueConfig = $this->getEditableFieldConfig($blockType, $columnBlockId)) {
+                $valueConfig = $this->getEditableAttributeFieldConfig($blockType, $columnBlockId);
             }
             
             if ($valueConfig instanceof BL_CustomGrid_Model_Grid_Editor_Value_Config) {
@@ -675,6 +619,7 @@ abstract class BL_CustomGrid_Model_Grid_Editor_Abstract extends BL_CustomGrid_Ob
                 $column->setEditorConfig(false);
             }
         }
+        
         return $this;
     }
     
@@ -751,6 +696,7 @@ abstract class BL_CustomGrid_Model_Grid_Editor_Abstract extends BL_CustomGrid_Ob
         if (!$isInGrid) {
             /** @var BL_CustomGrid_Model_Observer $observer */
             $observer = Mage::getSingleton('customgrid/observer');
+            
             /**
              * Use our observer to add layout handles just before layout load :
              * it will ensure that the "default" handle (and even most of others, if not all)

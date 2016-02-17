@@ -132,7 +132,8 @@ class BL_CustomGrid_Model_Grid_Editor_Sentry extends BL_CustomGrid_Model_Grid_Ed
         return $this->_runCallbackedAction(
             self::ACTION_TYPE_CHECK_CONTEXT_COLUMN_EDIT_ALLOWED,
             array('context' => $context),
-            array($this, '_checkContextColumnEditAllowed')
+            array($this, '_checkContextColumnEditAllowed'),
+            $context
         );
     }
     
@@ -163,7 +164,8 @@ class BL_CustomGrid_Model_Grid_Editor_Sentry extends BL_CustomGrid_Model_Grid_Ed
         return $this->_runCallbackedAction(
             self::ACTION_TYPE_CHECK_CONTEXT_ADDITIONAL_USER_EDIT_PERMISSIONS,
             array('context' => $context),
-            array($this, '_checkContextAdditionalUserEditPermissions')
+            array($this, '_checkContextAdditionalUserEditPermissions'),
+            $context
         );
     }
     

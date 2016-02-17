@@ -14,12 +14,13 @@
  */
 
 /**
- * @method BL_CustomGrid_Model_Custom_Column_Abstract setId(string $id) Set custom column ID
- * @method BL_CustomGrid_Model_Custom_Column_Abstract setModule(string $module) Set origin module
- * @method BL_CustomGrid_Model_Custom_Column_Abstract setGroup(string $group) Set custom column group
+ * @method string getId() Return the ID of this custom column
+ * @method BL_CustomGrid_Model_Custom_Column_Abstract setId(string $id) Set the custom column ID
+ * @method BL_CustomGrid_Model_Custom_Column_Abstract setModule(string $module) Set the origin module
+ * @method BL_CustomGrid_Model_Custom_Column_Abstract setGroup(string $group) Set the custom column group
  * @method BL_CustomGrid_Model_Custom_Column_Abstract setAllowCustomization(bool $flag) Set whether this column is customizable
- * @method BL_CustomGrid_Model_Custom_Column_Abstract setAllowRenderers(bool $flag) Set whether this column allows to choose a renderer
- * @method BL_CustomGrid_Model_Custom_Column_Abstract setAllowStore(bool $flag) Set whether this column allows to choose a base store view
+ * @method BL_CustomGrid_Model_Custom_Column_Abstract setAllowRenderers(bool $flag) Set whether a renderer can be applied to the corresponding grid columns
+ * @method BL_CustomGrid_Model_Custom_Column_Abstract setAllowStore(bool $flag) Set whether a base store view can be applied to the corresponding grid columns
  * @method BL_CustomGrid_Model_Custom_Column_Abstract setCurrentBlockValues(array $currentBlockValues)
  */
 
@@ -787,6 +788,76 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract extends BL_CustomGrid_
         $columnIndex,
         array $params,
         Mage_Core_Model_Store $store
+    ) {
+        return array();
+    }
+    
+    /**
+     * Build the editor config for the given grid column based on the given config data
+     * 
+     * @param BL_CustomGrid_Model_Grid_Column $gridColumn Grid column
+     * @param BL_CustomGrid_Model_Grid_Editor_Value_Config_Builder $configBuilder Editor config builder
+     * @param array $baseConfig Base config data
+     * @return BL_CustomGrid_Model_Grid_Editor_Value_Config
+     */
+    protected function _buildGridColumnEditableFieldConfig(
+        BL_CustomGrid_Model_Grid_Column $gridColumn,
+        BL_CustomGrid_Model_Grid_Editor_Value_Config_Builder $configBuilder,
+        array $baseConfig
+    ) {
+        return $configBuilder->buildEditableCustomColumnFieldConfig(
+            $gridColumn->getGridModel()->getBlockType(),
+            $gridColumn->getBlockId(),
+            substr($gridColumn->getIndex(), strrpos($gridColumn->getIndex(), '/') + 1),
+            $baseConfig
+        );
+    }
+    
+    /**
+     * Build the editor config for the given grid column based on the given attribute
+     *
+     * @param BL_CustomGrid_Model_Grid_Column $gridColumn Grid column
+     * @param BL_CustomGrid_Model_Grid_Editor_Value_Config_Builder $configBuilder Editor config builder
+     * @param Mage_Eav_Model_Entity_Attribute $attribute Attribute model
+     * @return BL_CustomGrid_Model_Grid_Editor_Value_Config
+     */
+    protected function _buildGridColumnEditableAttributeConfig(
+        BL_CustomGrid_Model_Grid_Column $gridColumn,
+        BL_CustomGrid_Model_Grid_Editor_Value_Config_Builder $configBuilder,
+        Mage_Eav_Model_Entity_Attribute $attribute
+    ) {
+        return $configBuilder->buildEditableCustomColumnAttributeConfig(
+            $gridColumn->getGridModel()->getBlockType(),
+            $gridColumn->getBlockId(),
+            substr($gridColumn->getIndex(), strrpos($gridColumn->getIndex(), '/') + 1),
+            $attribute
+        );
+    }
+    
+    /**
+     * Return the editor config for the given grid column
+     * 
+     * @param BL_CustomGrid_Model_Grid_Column $gridColumn Grid column
+     * @param BL_CustomGrid_Model_Grid_Editor_Value_Config_Builder $configBuilder Editor config builder
+     * @return BL_CustomGrid_Model_Grid_Editor_Value_Config|false
+     */
+    public function getGridColumnEditorConfig(
+        BL_CustomGrid_Model_Grid_Column $gridColumn,
+        BL_CustomGrid_Model_Grid_Editor_Value_Config_Builder $configBuilder
+    ) {
+        return false;
+    }
+    
+    /**
+     * Return the additional editor callbacks to register for the given editor context
+     * 
+     * @param BL_CustomGrid_Model_Grid_Editor_Context $context Editor context
+     * @param BL_CustomGrid_Model_Grid_Editor_Callback_Manager $callbackManager Editor callback manager
+     * @return array
+     */
+    public function getEditorContextAdditionalCallbacks(
+        BL_CustomGrid_Model_Grid_Editor_Context $context,
+        BL_CustomGrid_Model_Grid_Editor_Callback_Manager $callbackManager
     ) {
         return array();
     }

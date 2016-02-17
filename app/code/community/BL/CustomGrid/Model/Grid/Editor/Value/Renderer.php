@@ -77,7 +77,8 @@ class BL_CustomGrid_Model_Grid_Editor_Value_Renderer extends BL_CustomGrid_Model
         $this->_runCallbackedAction(
             self::ACTION_TYPE_GET_RENDERABLE_CONTEXT_EDITED_VALUE,
             array('context' => $context, 'transport' => $transport),
-            array($this, '_getRenderableContextEditedValue')
+            array($this, '_getRenderableContextEditedValue'),
+            $context
         );
         
         if (!$transport->hasData('value')) {
@@ -142,7 +143,8 @@ class BL_CustomGrid_Model_Grid_Editor_Value_Renderer extends BL_CustomGrid_Model
         return $this->_runCallbackedAction(
             self::ACTION_TYPE_GET_CONTEXT_VALUE_RENDERER_BLOCK,
             array('context' => $context),
-            array($this, '_getContextValueRendererBlock')
+            array($this, '_getContextValueRendererBlock'),
+            $context
         );
     }
     

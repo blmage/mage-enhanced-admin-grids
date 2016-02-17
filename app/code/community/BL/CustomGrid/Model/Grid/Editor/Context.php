@@ -98,7 +98,7 @@ class BL_CustomGrid_Model_Grid_Editor_Context extends BL_CustomGrid_Object
      */
     public function isAttributeValueContext()
     {
-        return $this->getValueOrigin() == BL_CustomGrid_Model_Grid_Editor_Abstract::EDITABLE_TYPE_ATTRIBUTE;
+        return ($this->getValueOrigin() == BL_CustomGrid_Model_Grid_Editor_Abstract::EDITABLE_TYPE_ATTRIBUTE);
     }
     
     /**
@@ -108,7 +108,17 @@ class BL_CustomGrid_Model_Grid_Editor_Context extends BL_CustomGrid_Object
      */
     public function isFieldValueContext()
     {
-        return $this->getValueOrigin() == BL_CustomGrid_Model_Grid_Editor_Abstract::EDITABLE_TYPE_FIELD;
+        return ($this->getValueOrigin() == BL_CustomGrid_Model_Grid_Editor_Abstract::EDITABLE_TYPE_FIELD);
+    }
+    
+    /**
+     * Return whether the context edited value is a custom column value
+     *
+     * @return bool
+     */
+    public function isCustomColumnValueContext()
+    {
+        return ($this->getValueOrigin() == BL_CustomGrid_Model_Grid_Editor_Abstract::EDITABLE_TYPE_CUSTOM_COLUMN);
     }
     
     /**

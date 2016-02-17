@@ -1298,23 +1298,21 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     {
         $columns = $this->_getColumns();
         
-        if (($withEditorConfigs || $withCustomColumns)) {
-            if ($withEditorConfigs) {
-                $this->getTypeModel()
-                    ->getEditor()
-                    ->applyConfigsToColumns($this->getBlockType(), $columns);
-            }
+        if ($withEditorConfigs || $withCustomColumns) {
+            // Custom columns are now required to build the editor configs
+            $columnBlockIds = $this->getColumnBlockIdsByOrigin(BL_CustomGrid_Model_Grid_Column::ORIGIN_CUSTOM);
+            $customColumns  = $this->getAvailableCustomColumns(false, true);
             
-            if ($withCustomColumns) {
-                $columnBlockIds = $this->getColumnBlockIdsByOrigin(BL_CustomGrid_Model_Grid_Column::ORIGIN_CUSTOM);
-                $customColumns  = $this->getAvailableCustomColumns(false, true);
-                
-                foreach ($columnBlockIds as $blockId) {
-                    if (isset($customColumns[$columns[$blockId]->getIndex()])) {
-                        $columns[$blockId]->setCustomColumnModel($customColumns[$columns[$blockId]->getIndex()]);
-                    }
+            foreach ($columnBlockIds as $blockId) {
+                if (isset($customColumns[$columns[$blockId]->getIndex()])) {
+                    $columns[$blockId]->setCustomColumnModel($customColumns[$columns[$blockId]->getIndex()]);
                 }
             }
+        }
+        if ($withEditorConfigs) {
+            $this->getTypeModel()
+                ->getEditor()
+                ->applyConfigsToColumns($this->getBlockType(), $columns);
         }
         
         return $columns;
@@ -1748,19 +1746,15 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
         $editor = $this->getTypeModel()->getEditor();
         $editableValues = $editor->getEditableAttributesConfigs($this->getBlockType());
         $hasEditableColumns = false;
-            
+    
         if (!empty($editableValues)) {
             $hasEditableColumns = true;
         } else {
-            $editableValues = array_merge(
-                $editor->getEditableFieldsConfigs($this->getBlockType()),
-                $editor->getEditableAttributeFieldsConfigs($this->getBlockType())
-            );
-            
-            if (!empty($editableValues)) {
-                $columns = $this->getSortedColumns(true, true, false, false);
-                $editableValues = array_intersect_key($columns, $editableValues);
-                $hasEditableColumns = !empty($editableValues);
+            foreach ($this->getSortedColumns(true, true, false, true, false, true, true) as $column) {
+                if ($column->isEditable()) {
+                    $hasEditableColumns = true;
+                    break;
+                }
             }
         }
         

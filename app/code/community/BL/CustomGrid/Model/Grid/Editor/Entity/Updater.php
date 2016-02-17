@@ -51,7 +51,8 @@ class BL_CustomGrid_Model_Grid_Editor_Entity_Updater extends BL_CustomGrid_Model
         return $this->_runCallbackedAction(
             self::ACTION_TYPE_CHECK_CONTEXT_VALUE_EDITABILITY,
             array('context' => $context),
-            array($this, '_checkContextValueEditability')
+            array($this, '_checkContextValueEditability'),
+            $context
         );
     }
     
@@ -88,7 +89,8 @@ class BL_CustomGrid_Model_Grid_Editor_Entity_Updater extends BL_CustomGrid_Model
         $this->_runCallbackedAction(
             self::ACTION_TYPE_GET_CONTEXT_USER_EDITED_VALUE,
             array('transport' => $transport, 'context' => $context),
-            array($this, '_getContextUserEditedValue')
+            array($this, '_getContextUserEditedValue'),
+            $context
         );
         
         if (!$transport->hasData('value')) {
@@ -153,7 +155,8 @@ class BL_CustomGrid_Model_Grid_Editor_Entity_Updater extends BL_CustomGrid_Model
                     'filterParams' => $filterParams,
                     'context'      => $context,
                 ),
-                array($this, '_filterUserEditedValue')
+                array($this, '_filterUserEditedValue'),
+                $context
             );
         }
         
@@ -215,7 +218,8 @@ class BL_CustomGrid_Model_Grid_Editor_Entity_Updater extends BL_CustomGrid_Model
                 'userValue' => $userValue,
                 'context' => $context,
             ),
-            array($this, '_applyUserEditedValueToEditedEntity')
+            array($this, '_applyUserEditedValueToEditedEntity'),
+            $context
         );
     }
     
@@ -251,7 +255,7 @@ class BL_CustomGrid_Model_Grid_Editor_Entity_Updater extends BL_CustomGrid_Model
      * 
      * @param mixed $editedEntity Edited entity
      * @param BL_CustomGrid_Model_Grid_Editor_Context $context Editor context
-     * @return bool|string Whether the edited enttiy was succesfully saved
+     * @return bool|string Whether the edited entity was succesfully saved
      */
     public function saveContextEditedEntity($editedEntity, BL_CustomGrid_Model_Grid_Editor_Context $context)
     {
@@ -261,7 +265,8 @@ class BL_CustomGrid_Model_Grid_Editor_Entity_Updater extends BL_CustomGrid_Model
                 'editedEntity' => $editedEntity,
                 'context' => $context,
             ),
-            array($this, '_saveContextEditedEntity')
+            array($this, '_saveContextEditedEntity'),
+            $context
         );
     }
     

@@ -77,6 +77,32 @@ class BL_CustomGrid_Model_Grid_Editor_Value_Config_Builder extends BL_CustomGrid
     }
     
     /**
+     * Return the form URL for the given value of the given origin
+     *
+     * @param string $blockType Grid block type
+     * @param string $valueOrigin Value origin
+     * @param string $valueKey Value key
+     * @return string
+     */
+    protected function _getEditorFormUrl($blockType, $valueOrigin, $valueKey)
+    {
+        return $this->_getEditorActionUrl($blockType, $valueOrigin, $valueKey, 'adminhtml/blcg_grid_editor/form');
+    }
+    
+    /**
+     * Return the save URL for the given value of the given origin
+     *
+     * @param string $blockType Grid block type
+     * @param string $valueOrigin Value origin
+     * @param string $valueKey Value key
+     * @return string
+     */
+    protected function _getEditorSaveUrl($blockType, $valueOrigin, $valueKey)
+    {
+        return $this->_getEditorActionUrl($blockType, $valueOrigin, $valueKey, 'adminhtml/blcg_grid_editor/save');
+    }
+    
+    /**
      * Prepare some common configuration values on the given editable field config
      * 
      * @param string $blockType Grid block type
@@ -165,19 +191,17 @@ class BL_CustomGrid_Model_Grid_Editor_Value_Config_Builder extends BL_CustomGrid
         );
         
         if (!isset($config['global']['form_url'])) {
-            $config['global']['form_url'] = $this->_getEditorActionUrl(
+            $config['global']['form_url'] = $this->_getEditorFormUrl(
                 $blockType,
                 BL_CustomGrid_Model_Grid_Editor_Abstract::EDITABLE_TYPE_FIELD,
-                $fieldId,
-                'adminhtml/blcg_grid_editor/form'
+                $fieldId
             );
         }
         if (!isset($config['global']['save_url'])) {
-            $config['global']['save_url'] = $this->_getEditorActionUrl(
+            $config['global']['save_url'] = $this->_getEditorSaveUrl(
                 $blockType,
                 BL_CustomGrid_Model_Grid_Editor_Abstract::EDITABLE_TYPE_FIELD,
-                $fieldId,
-                'adminhtml/blcg_grid_editor/save'
+                $fieldId
             );
         }
         
@@ -186,11 +210,11 @@ class BL_CustomGrid_Model_Grid_Editor_Value_Config_Builder extends BL_CustomGrid
     }
     
     /**
-     * Build a complete config object from the given base config for the given editable field
+     * Build a complete config object from the given base config data for the given editable field
      * 
      * @param string $blockType Grid block type
      * @param string $fieldId Field ID
-     * @param array $config Base field config
+     * @param array $config Base config data
      * @return BL_CustomGrid_Model_Grid_Editor_Value_Config
      */
     public function buildEditableFieldConfig($blockType, $fieldId, array $config)
@@ -252,6 +276,7 @@ class BL_CustomGrid_Model_Grid_Editor_Value_Config_Builder extends BL_CustomGrid
      * @param string $blockType Grid block type
      * @param string $attributeCode Attribute code
      * @param Mage_Eav_Model_Entity_Attribute $attribute Attribute model
+     * @param array $baseConfig Base config data
      * @param mixed $previousReturnedValue Value returned by the previous callback
      * @return array
      */
@@ -259,9 +284,10 @@ class BL_CustomGrid_Model_Grid_Editor_Value_Config_Builder extends BL_CustomGrid
         $blockType,
         $attributeCode,
         Mage_Eav_Model_Entity_Attribute $attribute,
+        array $baseConfig,
         $previousReturnedValue
     ) {
-        $config  = (is_array($previousReturnedValue) ? $previousReturnedValue : array());
+        $config  = (is_array($previousReturnedValue) ? $previousReturnedValue : $baseConfig);
         $config += self::$_configDataSkeleton;
         $attributeCode = $attribute->getAttributeCode();
         
@@ -311,20 +337,18 @@ class BL_CustomGrid_Model_Grid_Editor_Value_Config_Builder extends BL_CustomGrid
         
         
         if (!isset($config['global']['form_url'])) {
-           $config['global']['form_url'] = $this->_getEditorActionUrl(
+           $config['global']['form_url'] = $this->_getEditorFormUrl(
                 $blockType,
                 BL_CustomGrid_Model_Grid_Editor_Abstract::EDITABLE_TYPE_ATTRIBUTE,
-                $attributeCode,
-                'adminhtml/blcg_grid_editor/form'
+                $attributeCode
             );
         }
         
         if (!isset($config['global']['save_url'])) {
-            $config['global']['save_url'] = $this->_getEditorActionUrl(
+            $config['global']['save_url'] = $this->_getEditorSaveUrl(
                 $blockType,
                 BL_CustomGrid_Model_Grid_Editor_Abstract::EDITABLE_TYPE_ATTRIBUTE,
-                $attributeCode,
-                'adminhtml/blcg_grid_editor/save'
+                $attributeCode
             );
         }
         
@@ -333,22 +357,29 @@ class BL_CustomGrid_Model_Grid_Editor_Value_Config_Builder extends BL_CustomGrid
     }
     
     /**
-     * Build a complete config object from the given base config for the given editable attribute
+     * Build a complete config object from the given base config data for the given editable attribute
      * 
      * @param string $blockType Grid block type
      * @param string $attributeCode Attribute code
      * @param Mage_Eav_Model_Entity_Attribute $attribute Attribute model
+     * @param array $baseConfig Base config data
      * @return BL_CustomGrid_Model_Grid_Editor_Value_Config
      */
     public function buildEditableAttributeConfig(
         $blockType,
         $attributeCode,
-        Mage_Eav_Model_Entity_Attribute $attribute
+        Mage_Eav_Model_Entity_Attribute $attribute,
+        array $baseConfig = array()
     ) {
         return new BL_CustomGrid_Model_Grid_Editor_Value_Config(
             (array) $this->_runCallbackedAction(
                 self::ACTION_TYPE_BUILD_EDITABLE_ATTRIBUTE_CONFIG,
-                array('blockType' => $blockType, 'attributeCode' => $attributeCode, 'attribute' => $attribute),
+                array(
+                    'blockType'     => $blockType,
+                    'attributeCode' => $attributeCode,
+                    'attribute'     => $attribute,
+                    'baseConfig'    => $baseConfig,
+                ),
                 array($this, '_buildEditableAttributeConfig'),
                 null,
                 array(),
@@ -358,13 +389,13 @@ class BL_CustomGrid_Model_Grid_Editor_Value_Config_Builder extends BL_CustomGrid
     }
     
     /**
-     * Build a complete config object from the given base config for the given editable attribute field.
+     * Build a complete config object from the given base config data for the given editable attribute field.
      * Will return null if the provided base config is invalid
      * (eg, if the corresponding attribute does not exist or is not editable)
      * 
      * @param string $blockType Grid block type
      * @param string $fieldId Field ID
-     * @param array $config Field config
+     * @param array $config Field config data
      * @param BL_CustomGrid_Model_Grid_Editor_Value_Config[] $attributesConfigs Editable attributes configs
      * @return BL_CustomGrid_Model_Grid_Editor_Value_Config|null
      */
@@ -398,5 +429,103 @@ class BL_CustomGrid_Model_Grid_Editor_Value_Config_Builder extends BL_CustomGrid
         }
         
         return $fieldConfig;
+    }
+    
+    /**
+     * Prepare the given base config data from an editable custom column, so that it is fully suited
+     * 
+     * @param array $baseConfig base config data
+     * @param string $blockType Grid block type
+     * @param string $columnBlockId Column block ID
+     * @param string $baseValueId Base value ID
+     * @param string $baseValueOrigin Base value origin (field or attribute)
+     * @return array
+     */
+    protected function _prepareEditableCustomColumnBaseConfig(
+        array $baseConfig,
+        $blockType,
+        $columnBlockId,
+        $baseValueId,
+        $baseValueOrigin
+    ) {
+        if (!isset($baseConfig['global'])) {
+            $baseConfig['global'] = array();
+        }
+        
+        $baseConfig['global']['base_value_id'] = $baseValueId;
+        $baseConfig['global']['base_value_origin'] = $baseValueOrigin;
+        
+        if (!isset($baseConfig['global']['form_url'])) {
+            $baseConfig['global']['form_url'] = $this->_getEditorFormUrl(
+                $blockType,
+                BL_CustomGrid_Model_Grid_Editor_Abstract::EDITABLE_TYPE_CUSTOM_COLUMN,
+                $columnBlockId
+            );
+        }
+        if (!isset($baseConfig['global']['save_url'])) {
+            $baseConfig['global']['save_url'] = $this->_getEditorSaveUrl(
+                $blockType,
+                BL_CustomGrid_Model_Grid_Editor_Abstract::EDITABLE_TYPE_CUSTOM_COLUMN,
+                $columnBlockId
+            );
+        }
+        
+        return $baseConfig;
+    }
+    
+    /**
+     * Build a complete config object for an editable custom column from the given base config
+     *
+     * @param string $blockType Grid block type
+     * @param string $fieldId Field ID
+     * @param array $config Base field config
+     * @return BL_CustomGrid_Model_Grid_Editor_Value_Config
+     */
+    public function buildEditableCustomColumnFieldConfig(
+        $blockType,
+        $columnBlockId,
+        $fieldId,
+        array $config
+    ) {
+        return $this->buildEditableFieldConfig(
+            $blockType,
+            $fieldId,
+            $this->_prepareEditableCustomColumnBaseConfig(
+                $config,
+                $blockType,
+                $columnBlockId,
+                $fieldId,
+                BL_CustomGrid_Model_Grid_Editor_Abstract::EDITABLE_TYPE_FIELD
+            )
+        );
+    }
+    
+    /**
+     * Build a complete config object for an editable custom column from the given attribute
+     *
+     * @param string $blockType Grid block type
+     * @param string $columnBlockId Column block ID
+     * @param string $attributeCode Attribute code
+     * @param Mage_Eav_Model_Entity_Attribute $attribute Attribute model
+     * @return BL_CustomGrid_Model_Grid_Editor_Value_Config
+     */
+    public function buildEditableCustomColumnAttributeConfig(
+        $blockType,
+        $columnBlockId,
+        $attributeCode,
+        Mage_Eav_Model_Entity_Attribute $attribute
+    ) {
+        return $this->buildEditableAttributeConfig(
+            $blockType,
+            $attributeCode,
+            $attribute,
+            $this->_prepareEditableCustomColumnBaseConfig(
+                array(),
+                $blockType,
+                $columnBlockId,
+                $attributeCode,
+                BL_CustomGrid_Model_Grid_Editor_Abstract::EDITABLE_TYPE_ATTRIBUTE
+            )
+        );
     }
 }

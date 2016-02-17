@@ -20,6 +20,11 @@ class BL_CustomGrid_Model_Grid_Type_Order extends BL_CustomGrid_Model_Grid_Type_
         return array('adminhtml/sales_order_grid');
     }
     
+    protected function _getEditorModelClassCode()
+    {
+        return 'customgrid/grid_editor_order';
+    }
+    
     protected function _isOrdersGrid()
     {
         return true;

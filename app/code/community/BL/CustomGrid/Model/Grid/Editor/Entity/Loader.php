@@ -135,7 +135,8 @@ class BL_CustomGrid_Model_Grid_Editor_Entity_Loader extends BL_CustomGrid_Model_
         return $this->_runCallbackedAction(
             self::ACTION_TYPE_GET_CONTEXT_EDITED_ENTITY_IDENTIFIERS,
             array('context' => $context),
-            array($this, '_getContextEditedEntityIdentifiers')
+            array($this, '_getContextEditedEntityIdentifiers'),
+            $context
         );
     }
     
@@ -171,7 +172,8 @@ class BL_CustomGrid_Model_Grid_Editor_Entity_Loader extends BL_CustomGrid_Model_
         return $this->_runCallbackedAction(
             self::ACTION_TYPE_LOAD_EDITED_ENTITY,
             array('entityId' => $entityId, 'context' => $context),
-            array($this, '_loadEditedEntity')
+            array($this, '_loadEditedEntity'),
+            $context
         );
     }
     
@@ -209,7 +211,8 @@ class BL_CustomGrid_Model_Grid_Editor_Entity_Loader extends BL_CustomGrid_Model_
         return $this->_runCallbackedAction(
             self::ACTION_TYPE_CHECK_EDITED_ENTITY_LOADED_STATE,
             array('editedEntity' => $editedEntity, 'entityId' => $entityId, 'context' => $context),
-            array($this, '_checkEditedEntityLoadedState')
+            array($this, '_checkEditedEntityLoadedState'),
+            $context
         );
     }
     
@@ -250,7 +253,8 @@ class BL_CustomGrid_Model_Grid_Editor_Entity_Loader extends BL_CustomGrid_Model_
         $this->_runCallbackedAction(
             self::ACTION_TYPE_REGISTER_EDITED_ENTITY,
             array('editedEntity' => $editedEntity, 'context' => $context),
-            array($this, '_registerEditedEntity')
+            array($this, '_registerEditedEntity'),
+            $context
         );
         return $this;
     }
@@ -279,7 +283,8 @@ class BL_CustomGrid_Model_Grid_Editor_Entity_Loader extends BL_CustomGrid_Model_
         return $this->_runCallbackedAction(
             self::ACTION_TYPE_RELOAD_CONTEXT_EDITED_ENTITY,
             array('editedEntity' => $editedEntity, 'context' => $context),
-            array($this, '_reloadEditedEntity')
+            array($this, '_reloadEditedEntity'),
+            $context
          );
     }
     

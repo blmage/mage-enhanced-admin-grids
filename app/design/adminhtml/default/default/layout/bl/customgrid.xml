@@ -175,14 +175,14 @@
         </reference>
     </blcg_grid_editor_handle_product>
     
-    <adminhtml_blcg_grid_editor_edit>
+    <adminhtml_blcg_grid_editor_form>
         <update handle="popup" />
         <remove name="footer" />
         <remove name="blcg.messages" />
         <reference name="content">
             <block type="customgrid/widget_grid_editor_form_container" name="blcg.grid_editor.form_container" />
         </reference>
-    </adminhtml_blcg_grid_editor_edit>
+    </adminhtml_blcg_grid_editor_form>
     
     <adminhtml_blcg_grid_column_filter_categories>
         <update handle="popup" />

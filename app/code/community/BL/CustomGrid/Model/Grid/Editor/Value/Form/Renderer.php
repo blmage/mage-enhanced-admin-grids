@@ -99,7 +99,8 @@ class BL_CustomGrid_Model_Grid_Editor_Value_Form_Renderer extends BL_CustomGrid_
         return $this->_runCallbackedAction(
             self::ACTION_TYPE_GET_CONTEXT_VALUE_FORM_BLOCK,
             array('context' => $context),
-            array($this, '_getContextValueFormBlock')
+            array($this, '_getContextValueFormBlock'),
+            $context
         );
     }
     

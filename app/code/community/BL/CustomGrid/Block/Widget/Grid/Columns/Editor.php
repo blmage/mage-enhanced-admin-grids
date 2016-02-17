@@ -162,7 +162,7 @@ class BL_CustomGrid_Block_Widget_Grid_Columns_Editor extends Mage_Adminhtml_Bloc
         foreach ($columns as $columnBlockId => $column) {
             if ($column->isOnlyFilterable()) {
                 unset($columns[$columnBlockId]);
-            } elseif (!$column->isEditable() || !$column->isEditAllowed()) {
+            } elseif (!$column->isEditable() || !$column->getIsEditAllowed()) {
                 $columns[$columnBlockId] = false;
             }
         }
@@ -231,7 +231,7 @@ class BL_CustomGrid_Block_Widget_Grid_Columns_Editor extends Mage_Adminhtml_Bloc
     }
     
     /**
-     * Return the global parameters for editing as JSO
+     * Return the global edit parameters as JSON
      * 
      * @return string
      */
@@ -248,7 +248,7 @@ class BL_CustomGrid_Block_Widget_Grid_Columns_Editor extends Mage_Adminhtml_Bloc
     }
     
     /**
-     * Return the additional parameters for editing as JSON
+     * Return the additional edit parameters as JSON
      * 
      * @return string
      */

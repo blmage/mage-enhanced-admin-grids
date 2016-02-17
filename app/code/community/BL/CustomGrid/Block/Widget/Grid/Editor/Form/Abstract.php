@@ -136,6 +136,28 @@ abstract class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Abstract extends Mage
     }
     
     /**
+     * Return a base fieldset legend from the given field label
+     * 
+     * @param string $fieldLabel Edited field label
+     * @param bool $isRequiredField Whether the edited field requires a value
+     * @return string
+     */
+    public function getBaseFieldsetLegend($fieldLabel, $isRequiredField)
+    {
+        $fieldsetLegend = $this->__(
+            '%s : %s',
+            $this->getDataSetDefault('edited_entity_name', $this->__('Edited entity')),
+            $fieldLabel
+        );
+    
+        if ($isRequiredField) {
+            $fieldsetLegend .= ' (<span class="blcg-editor-required-marker">' . $this->__('Required') . '</span>)';
+        }
+        
+        return $fieldsetLegend;
+    }
+    
+    /**
      * Return whether the edited value is required
      * 
      * @return bool

@@ -173,7 +173,8 @@ class BL_CustomGrid_Model_Grid_Editor_Kickstarter extends BL_CustomGrid_Model_Gr
         return $this->_runCallbackedAction(
             self::ACTION_TYPE_CHECK_EDITOR_CONTEXT_VALIDITY,
             array('context' => $context),
-            array($this, '_checkEditorContextValidity')
+            array($this, '_checkEditorContextValidity'),
+            $context
         );
     }
     
@@ -193,7 +194,22 @@ class BL_CustomGrid_Model_Grid_Editor_Kickstarter extends BL_CustomGrid_Model_Gr
         
         if (!$context instanceof BL_CustomGrid_Model_Grid_Editor_Context) {
             Mage::throwException('Invalid editor context');
-        } elseif (!$valueConfig = $this->getEditor()->getContextEditableValueConfig($context)) {
+        }
+        if ($context->getValueOrigin() == BL_CustomGrid_Model_Grid_Editor_Abstract::EDITABLE_TYPE_CUSTOM_COLUMN) {
+            $gridColumns = $context->getGridModel()->getColumns(true, true);
+            $columnBlockId = $context->getValueId();
+            
+            if (isset($gridColumns[$columnBlockId]) && $gridColumns[$columnBlockId]->isCustom()) {
+                /** @var BL_CustomGrid_Model_Grid_Editor_Value_Config $valueConfig */
+                $valueConfig = $gridColumns[$columnBlockId]->getEditorConfig();
+                $context->setData('grid_column', $gridColumns[$columnBlockId]);
+                $context->setData('value_id', $valueConfig->getData('global/base_value_id'));
+                $context->setData('value_origin', $valueConfig->getData('global/base_value_origin'));
+            }
+        } else {
+            $valueConfig = $this->getEditor()->getContextEditableValueConfig($context);
+        }
+        if (!$valueConfig) {
             Mage::throwException($this->_getBaseHelper()->__('This value is not editable'));
         }
         

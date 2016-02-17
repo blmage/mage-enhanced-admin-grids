@@ -23,20 +23,10 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Field_Default extends BL_Custo
         $fieldValues  = $valueConfig->getData('form_field');
         $fieldValues += $this->_getAdditionalFieldValues($fieldValues['type'], $valueConfig);
         
-        $fieldsetLegend = $this->__(
-            '%s : %s',
-            $this->getDataSetDefault('edited_entity_name', $this->__('Edited entity')),
-            $fieldValues['label']
-        );
-        
-        if ($fieldValues['required']) {
-            $fieldsetLegend .= ' (<span class="blcg-editor-required-marker">' . $this->__('Required') . '</span>)';
-        }
-        
         $fieldset = $form->addFieldset(
             'base_fieldset',
             array(
-                'legend' => $fieldsetLegend,
+                'legend' => $this->getBaseFieldsetLegend($fieldValues['label'], $fieldValues['required']),
                 'class'  => 'fieldset-wide blcg-editor-fieldset',
             )
         );

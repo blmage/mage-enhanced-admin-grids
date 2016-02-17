@@ -167,8 +167,14 @@ class BL_CustomGrid_Model_Grid_Editor_Callback_Manager extends BL_CustomGrid_Mod
         
         if (!$this->hasData($dataKey)) {
             $editor = $this->getEditor();
-            $callbacks = $editor->getContextDefaultAdditionalCallbacks($context, $this);
-            $response  = new BL_CustomGrid_Object(array('callbacks' => array()));
+            $editorCallbacks = $editor->getContextDefaultAdditionalCallbacks($context, $this);
+            $columnCallbacks = array();
+            
+            if ($customColumn = $context->getGridColumn()->getCustomColumnModel()) {
+                $columnCallbacks = $customColumn->getEditorContextAdditionalCallbacks($context, $this);
+            }
+            
+            $response = new BL_CustomGrid_Object(array('callbacks' => array()));
             
             Mage::dispatchEvent(
                 'blcg_grid_editor_additional_context_callbacks',
@@ -182,7 +188,13 @@ class BL_CustomGrid_Model_Grid_Editor_Callback_Manager extends BL_CustomGrid_Mod
             
             $this->setData(
                 $dataKey,
-                $this->_arrangeCallbacksArray(array_merge($callbacks, (array) $response->getData('callbacks')))
+                $this->_arrangeCallbacksArray(
+                    array_merge(
+                        $editorCallbacks,
+                        $columnCallbacks,
+                        (array) $response->getData('callbacks')
+                    )
+                )
             );
         }
         
