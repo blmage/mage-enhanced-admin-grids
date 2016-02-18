@@ -62,7 +62,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Order_Address_Abstract extends 
         $tableAlias
     ) {
         /** @var $adapter Zend_Db_Adapter_Abstract */
-        list($adapter, $qi) = $this->_getCollectionAdapter($collection, true);
+        list($adapter, $qi) = $this->getCollectionHandler()->getCollectionAdapter($collection, true);
         return array($adapter->quoteInto($qi($tableAlias . '.address_type') . ' = ?', $this->getAddressType()));
     }
     
@@ -73,7 +73,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Order_Address_Abstract extends 
         $addressType  = $this->getAddressType();
         $addressField = $this->getTableFieldName();
         
-        if ($this->_getBaseHelper()->isMageVersionLesserThan(1, 5)
+        if ($this->getBaseHelper()->isMageVersionLesserThan(1, 5)
             || in_array($addressField, array('country_id', 'region'))) {
             return false;
         }

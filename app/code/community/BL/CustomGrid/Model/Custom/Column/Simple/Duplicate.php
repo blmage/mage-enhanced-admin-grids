@@ -29,7 +29,7 @@ class BL_CustomGrid_Model_Custom_Column_Simple_Duplicate extends BL_CustomGrid_M
     {
         return $this->getConfigParam(
             'duplicated_field_table_alias',
-            $this->_getCollectionHelper()->getCollectionMainTableAlias($collection)
+            $this->getCollectionHandler()->getCollectionMainTableAlias($collection)
         );
     }
     

@@ -210,7 +210,7 @@ class BL_CustomGrid_Model_Grid_Editor_Kickstarter extends BL_CustomGrid_Model_Gr
             $valueConfig = $this->getEditor()->getContextEditableValueConfig($context);
         }
         if (!$valueConfig) {
-            Mage::throwException($this->_getBaseHelper()->__('This value is not editable'));
+            Mage::throwException($this->getBaseHelper()->__('This value is not editable'));
         }
         
         $context->setData('value_config', $valueConfig);
@@ -224,7 +224,7 @@ class BL_CustomGrid_Model_Grid_Editor_Kickstarter extends BL_CustomGrid_Model_Gr
         if (($result = $this->checkEditorContextValidity($context)) !== true) {
             $errorMessage = is_string($result)
                 ? $result
-                : $this->_getBaseHelper()
+                : $this->getBaseHelper()
                     ->__('The context has significantly changed. Refresh the grid before retrying to edit the value.');
             Mage::throwException($errorMessage);
         }

@@ -169,7 +169,7 @@ class BL_CustomGrid_Model_Grid_Editor_Value_Renderer extends BL_CustomGrid_Model
         $renderableValue = $this->getRenderableContextEditedValue($context);
         
         if (!$rendererBlock = $this->getContextValueRendererBlock($context)) {
-            $renderedValue = $this->_getBaseHelper()->__('<em>Updated</em>');
+            $renderedValue = $this->getBaseHelper()->__('<em>Updated</em>');
         } else {
             $rendererBlock->setRenderableValue($renderableValue);
             $renderedValue = $rendererBlock->toHtml();

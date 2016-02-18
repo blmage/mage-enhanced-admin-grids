@@ -214,7 +214,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Sales_Items_Abstract extends BL
     
     protected function _prepareConfig()
     {
-        $helper = $this->_getBaseHelper();
+        $helper = $this->getBaseHelper();
         
         if ($this->_canFilterOnSku()) {
             $this->addCustomizationParam(
@@ -445,7 +445,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Sales_Items_Abstract extends BL
         $qi
     ) {
         if (!$this->_isOrderItemsList()) {
-            $oiAlias = $this->_getUniqueTableAlias('oi');
+            $oiAlias = $this->getCollectionHandler()->getUniqueTableAlias('oi');
             
             $select->joinInner(
                 array($oiAlias => $collection->getTable('sales/order_item')),
@@ -464,11 +464,13 @@ abstract class BL_CustomGrid_Model_Custom_Column_Sales_Items_Abstract extends BL
         Varien_Data_Collection_Db $collection,
         Mage_Adminhtml_Block_Widget_Grid_Column $columnBlock
     ) {
-        /** @var $adapter Zend_Db_Adapter_Abstract */
-        list($adapter, $qi) = $this->_getCollectionAdapter($collection, true);
-        $mainAlias = $this->_getCollectionMainTableAlias($collection);
-        $itemAlias = $this->_getUniqueTableAlias();
+        $collectionHandler = $this->getCollectionHandler();
+        $mainAlias = $collectionHandler->getCollectionMainTableAlias($collection);
+        $itemAlias = $collectionHandler->getUniqueTableAlias();
         $params    = $columnBlock->getBlcgFilterParams();
+        
+        /** @var $adapter Zend_Db_Adapter_Abstract */
+        list($adapter, $qi) = $collectionHandler->getCollectionAdapter($collection, true);
         
         if (is_array($condition = $columnBlock->getFilter()->getCondition()) && isset($condition['like'])) {
             $condition = $condition['like'];

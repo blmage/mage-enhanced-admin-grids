@@ -22,7 +22,7 @@ class BL_CustomGrid_Model_Custom_Column_Product_Categories extends BL_CustomGrid
     
     protected function _prepareConfig()
     {
-        $helper = $this->_getBaseHelper();
+        $helper = $this->getBaseHelper();
         
         $descriptions = array(
             'separator' => 'Indicate here the string that will be used to separate category paths. '
@@ -182,10 +182,12 @@ class BL_CustomGrid_Model_Custom_Column_Product_Categories extends BL_CustomGrid
         $forFilter = false,
         $categoryIds = null
     ) {
+        $collectionHandler = $this->getCollectionHandler();
+        $mainAlias = $collectionHandler-_getCollectionMainTableAlias($collection);
+        $productAlias = $collectionHandler->getUniqueTableAlias($forFilter ? '_filter' : '_select');
+        
         /** @var $adapter Zend_Db_Adapter_Abstract */
-        list($adapter, $qi) = $this->_getCollectionAdapter($collection, true);
-        $mainAlias = $this->_getCollectionMainTableAlias($collection);
-        $productAlias = $this->_getUniqueTableAlias($forFilter ? '_filter' : '_select');
+        list($adapter, $qi) = $collectionHandler->getCollectionAdapter($collection, true);
         $mainField = ($forFilter ? 'COUNT(*)' : 'GROUP_CONCAT(' . $qi($productAlias . '.category_id') . ')');
         
         $select = $adapter->select()
@@ -309,7 +311,7 @@ class BL_CustomGrid_Model_Custom_Column_Product_Categories extends BL_CustomGrid
     
     public function getCustomFilterOperators($asOptionArray = false)
     {
-        $helper = $this->_getBaseHelper();
+        $helper = $this->getBaseHelper();
         
         if (!$this->hasData('custom_filter_operators')) {
             $this->setData(

@@ -69,7 +69,7 @@ class BL_CustomGrid_Model_Custom_Column_Action extends BL_CustomGrid_Model_Custo
         
         if (isset($editSettings['actions'])) {
             $values['actions'] = $editSettings['actions'];
-            $values['actions']['edit']['caption'] = $this->_getBaseHelper()->__('Edit');
+            $values['actions']['edit']['caption'] = $this->getBaseHelper()->__('Edit');
             $values['actions']['edit']['url'] = array('base' => '*/*/edit');
         }
         

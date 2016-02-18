@@ -33,6 +33,12 @@ class BL_CustomGrid_Helper_Worker extends Mage_Core_Helper_Abstract
             'holder_class' => 'BL_CustomGrid_Model_Grid_Editor_Abstract',
             'holder_key'   => 'editor',
         ),
+        'BL_CustomGrid_Model_Custom_Column_Abstract' => array(
+            'base_class'   => 'BL_CustomGrid_Model_Custom_Column_Worker_Abstract',
+            'base_default_class_code' => 'customgrid/custom_column_',
+            'holder_class' => 'BL_CustomGrid_Model_Custom_Column_Abstract',
+            'holder_key'   => 'custom_column',
+        ),
     );
     
     /**

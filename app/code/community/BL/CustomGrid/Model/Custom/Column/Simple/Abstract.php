@@ -51,7 +51,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Simple_Abstract extends BL_Cust
         array $params
     ) {
         return ($gridBlock->blcg_getSort(false) === $columnBlockId)
-            && $this->_getGridHelper()->isEavEntityGrid($gridBlock, $gridModel);
+            && $this->getGridHelper()->isEavEntityGrid($gridBlock, $gridModel);
     }
     
     /**
@@ -122,8 +122,9 @@ abstract class BL_CustomGrid_Model_Custom_Column_Simple_Abstract extends BL_Cust
         Mage_Adminhtml_Block_Widget_Grid $gridBlock,
         Varien_Data_Collection_Db $collection
     ) {
-        $helper = $this->_getCollectionHelper();
-        list(, $qi) = $this->_getCollectionAdapter($collection, true);
+        $collectionHandler = $this->getCollectionHandler();
+        $helper = $collectionHandler->getHelper();
+        list(, $qi) = $collectionHandler->getCollectionAdapter($collection, true);
         $select->columns(array($columnIndex => $tableAlias . '.' . $fieldName), $tableAlias);
         $helper->addFilterToCollectionMap($collection, $qi($tableAlias . '.' . $fieldName), $columnIndex);
         return $this;

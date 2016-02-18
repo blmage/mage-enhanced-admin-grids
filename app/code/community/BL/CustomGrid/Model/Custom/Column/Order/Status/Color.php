@@ -17,7 +17,7 @@ class BL_CustomGrid_Model_Custom_Column_Order_Status_Color extends BL_CustomGrid
 {
     protected function _prepareConfig()
     {
-        $helper = $this->_getBaseHelper();
+        $helper = $this->getBaseHelper();
         $sortOrder = 20;
         
         $this->addCustomizationParam(
@@ -93,7 +93,7 @@ class BL_CustomGrid_Model_Custom_Column_Order_Status_Color extends BL_CustomGrid
             'filter'    => 'customgrid/widget_grid_column_filter_select',
             'renderer'  => 'customgrid/widget_grid_column_renderer_order_status_color',
             'only_cell' => $this->_extractBoolParam($params, 'only_cell'),
-            'options'   => $this->_getBaseHelper()->getOptionArrayFromOptionHash($this->getOrderStatuses()),
+            'options'   => $this->getBaseHelper()->getOptionArrayFromOptionHash($this->getOrderStatuses()),
             'options_colors'  => $colors,
             'imploded_values' => false,
         );

@@ -117,7 +117,7 @@ class BL_CustomGrid_Model_Grid_Type_Sitemap extends BL_CustomGrid_Model_Grid_Typ
         $entity,
         &$value
     ) {
-        if ($this->_getBaseHelper()->isMageVersionGreaterThan(1, 5, 0)
+        if ($this->getBaseHelper()->isMageVersionGreaterThan(1, 5, 0)
             && in_array($config->getValueId(), array('sitemap_filename', 'sitemap_path'))) {
             $fileName = $this->_getEditedSitemapFileName($config, $entity, $value);
             $path = $this->_getEditedSitemapPath($config, $entity, $value);

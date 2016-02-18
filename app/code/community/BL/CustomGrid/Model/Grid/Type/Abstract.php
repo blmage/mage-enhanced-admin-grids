@@ -20,7 +20,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      *
      * @return BL_CustomGrid_Helper_Data
      */
-    protected function _getBaseHelper()
+    public function getBaseHelper()
     {
         return Mage::helper('customgrid');
     }
@@ -30,7 +30,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
      *
      * @return BL_CustomGrid_Helper_Grid
      */
-    protected function _getGridHelper()
+    public function getGridHelper()
     {
         return Mage::helper('customgrid/grid');
     }
@@ -149,7 +149,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
         
         if ($blockType == $gridModel->getBlockType()) {
             if ($gridModel->getHasVaryingBlockId()) {
-                $helper = $this->_getGridHelper();
+                $helper = $this->getGridHelper();
                 
                 if ($helper->isVaryingGridBlockId($blockId)) {
                     $result = $helper->checkVaryingGridBlockIdsEquality($blockId, $gridModel->getBlockId());
@@ -311,13 +311,13 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
             'csv' => new BL_CustomGrid_Object(
                 array(
                     'route' => 'adminhtml/blcg_grid/exportCsv',
-                    'label' => $this->_getBaseHelper()->__('CSV'),
+                    'label' => $this->getBaseHelper()->__('CSV'),
                 )
             ),
             'xml' => new BL_CustomGrid_Object(
                 array(
                     'route' => 'adminhtml/blcg_grid/exportExcel', 
-                    'label' => $this->_getBaseHelper()->__('Excel'),
+                    'label' => $this->getBaseHelper()->__('Excel'),
                 )
             ),
         );

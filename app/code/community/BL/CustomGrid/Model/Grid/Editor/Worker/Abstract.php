@@ -27,7 +27,7 @@ abstract class BL_CustomGrid_Model_Grid_Editor_Worker_Abstract extends BL_Custom
      *
      * @return BL_CustomGrid_Helper_Data
      */
-    protected function _getBaseHelper()
+    public function getBaseHelper()
     {
         return Mage::helper('customgrid');
     }
@@ -45,7 +45,7 @@ abstract class BL_CustomGrid_Model_Grid_Editor_Worker_Abstract extends BL_Custom
     /**
      * Set the current grid editor model
      * 
-     * @param BL_CustomGrid_Model_Grid_Editor_Abstract $editor Grid editor models to set as current
+     * @param BL_CustomGrid_Model_Grid_Editor_Abstract $editor Grid editor model to set as current
      * @return BL_CustomGrid_Model_Grid_Editor_Worker_Abstract
      */
     public function setEditor(BL_CustomGrid_Model_Grid_Editor_Abstract $editor)

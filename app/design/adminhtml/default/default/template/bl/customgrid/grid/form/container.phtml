@@ -50,7 +50,7 @@ blcgGridForm.submit = function(url) {
             onSuccess: function(transport) {
                 var response= blcg.Tools.handleAjaxOnSuccessResponse(
                     null,
-                    blcg.Tools.translate('An error occured while saving the values'),
+                    blcg.Tools.translate('An error occurred while saving the values'),
                     transport
                 );
                 
@@ -62,7 +62,7 @@ blcgGridForm.submit = function(url) {
             },
             
             onFailure: function(transport) {
-                alert(blcg.Tools.translate('An error occured while saving the values'));
+                alert(blcg.Tools.translate('An error occurred while saving the values'));
             }.bind(this)
         });
         <?php else: ?>

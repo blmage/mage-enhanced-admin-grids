@@ -40,7 +40,7 @@ class BL_CustomGrid_Model_Grid_Type_Newsletter extends BL_CustomGrid_Model_Grid_
         $blockType = $gridBlock->getType();
         
         if (!$firstTime && isset(self::$_collectionClassCodes[$blockType])) {
-            $this->_getBaseHelper()->unregisterResourceSingleton(self::$_collectionClassCodes[$blockType]);
+            $this->getBaseHelper()->unregisterResourceSingleton(self::$_collectionClassCodes[$blockType]);
         }
         
         return $this;

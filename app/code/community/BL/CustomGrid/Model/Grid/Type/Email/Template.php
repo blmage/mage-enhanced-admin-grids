@@ -22,7 +22,7 @@ class BL_CustomGrid_Model_Grid_Type_Email_Template extends BL_CustomGrid_Model_G
     
     public function beforeGridPrepareCollection(Mage_Adminhtml_Block_Widget_Grid $gridBlock, $firstTime = true)
     {
-        $this->_getBaseHelper()->unregisterResourceSingleton('core/email_template_collection');
+        $this->getBaseHelper()->unregisterResourceSingleton('core/email_template_collection');
         return $this;
     }
 }

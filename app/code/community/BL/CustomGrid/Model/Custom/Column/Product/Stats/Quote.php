@@ -20,7 +20,7 @@ class BL_CustomGrid_Model_Custom_Column_Product_Stats_Quote extends BL_CustomGri
     
     protected function _prepareConfig()
     {
-        $helper = $this->_getBaseHelper();
+        $helper = $this->getBaseHelper();
         
         if (!Mage::app()->isSingleStoreMode()) {
             /** @var $storeSource Mage_Adminhtml_Model_System_Config_Source_Store */
@@ -88,12 +88,13 @@ class BL_CustomGrid_Model_Custom_Column_Product_Stats_Quote extends BL_CustomGri
     
     protected function _getCountSelect(Varien_Data_Collection_Db $collection, array $params, $countMode)
     {
+        $collectionHandler = $this->getCollectionHandler();
+        $mainAlias  = $collectionHandler->getCollectionMainTableAlias($collection);
+        $quoteAlias = $collectionHandler->getUniqueTableAlias('_quote_' . $countMode);
+        $itemAlias  = $collectionHandler->getUniqueTableAlias('_item_'  . $countMode);
+        
         /** @var $adapter Zend_Db_Adapter_Abstract */
-        list($adapter, $qi) = $this->_getCollectionAdapter($collection, true);
-        $helper = $this->_getCollectionHelper();
-        $mainAlias  = $helper->getCollectionMainTableAlias($collection);
-        $quoteAlias = $this->_getUniqueTableAlias('_quote_' . $countMode);
-        $itemAlias  = $this->_getUniqueTableAlias('_item_'  . $countMode);
+        list($adapter, $qi) = $collectionHandler->getCollectionAdapter($collection, true);
         
         $countExpression = ($countMode == self::COUNT_MODE_PRODUCTS)
             ? 'SUM(' . $qi($itemAlias . '.qty') . ')'
@@ -155,7 +156,7 @@ class BL_CustomGrid_Model_Custom_Column_Product_Stats_Quote extends BL_CustomGri
         $condition = $columnBlock->getFilter()->getCondition();
        
         if ($fieldName && $condition && is_array($params)) {
-            $adapter    = $this->_getCollectionAdapter($collection);
+            $adapter    = $this->getCollectionHandler()->getCollectionAdapter($collection);
             $countMode  = $this->getConfigParam('count_mode');
             $countQuery = 'IFNULL((' . $this->_getCountSelect($collection, $params, $countMode) . '), 0)';
             

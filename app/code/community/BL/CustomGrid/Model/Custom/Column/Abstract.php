@@ -26,20 +26,6 @@
 
 abstract class BL_CustomGrid_Model_Custom_Column_Abstract extends BL_CustomGrid_Object
 {
-    /**
-     * Generated collection flags
-     * 
-     * @var string[]
-     */
-    static protected $_uniqueFlags = array();
-    
-    /**
-     * Generated collection aliases
-     * 
-     * @var string[]
-     */
-    static protected $_uniqueAliases = array();
-    
     // Grid collection events on which to apply callbacks
     const GC_EVENT_BEFORE_PREPARE     = 'before_prepare';
     const GC_EVENT_AFTER_PREPARE      = 'after_prepare';
@@ -50,6 +36,9 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract extends BL_CustomGrid_
     const GC_EVENT_BEFORE_EXPORT_LOAD = 'before_export_load';
     const GC_EVENT_AFTER_EXPORT_LOAD  = 'after_export_load';
     
+    const WORKER_TYPE_APPLIER = 'applier';
+    const WORKER_TYPE_COLLECTION_HANDLER = 'collection_handler';
+    
     protected function _construct()
     {
         parent::_construct();
@@ -57,19 +46,36 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract extends BL_CustomGrid_
     }
     
     /**
-     * Return the applier model usable to apply this custom column to a grid block
-     * 
+     * Return the worker model of the given type
+     *
+     * @param string $type Worker type
+     * @return BL_CustomGrid_Model_Custom_Column_Worker_Abstract
+     */
+    protected function _getWorker($type)
+    {
+        /** @var BL_CustomGrid_Helper_Worker $helper */
+        $helper = Mage::helper('customgrid/worker');
+        return $helper->getModelWorker($this, $type);
+    }
+    
+    /**
+     * Return the applier model, usable to apply this custom column to a given grid block
+     *
      * @return BL_CustomGrid_Model_Custom_Column_Applier
      */
     public function getApplier()
     {
-        if (!$this->hasData('applier')) {
-            /** @var $applier BL_CustomGrid_Model_Custom_Column_Applier */
-            $applier = Mage::getModel('customgrid/custom_column_applier');
-            $applier->setCustomColumn($this);
-            $this->setData('applier', $applier);
-        }
-        return $this->_getData('applier');
+        return $this->_getWorker(self::WORKER_TYPE_APPLIER);
+    }
+    
+    /**
+     * Return the collection handler model
+     *
+     * @return BL_CustomGrid_Model_Custom_Column_Collection_Handler
+     */
+    public function getCollectionHandler()
+    {
+        return $this->_getWorker(self::WORKER_TYPE_COLLECTION_HANDLER);
     }
     
     /**
@@ -77,19 +83,9 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract extends BL_CustomGrid_
      * 
      * @return BL_CustomGrid_Helper_Data
      */
-    protected function _getBaseHelper()
+    public function getBaseHelper()
     {
         return Mage::helper('customgrid');
-    }
-    
-    /**
-     * Return config helper
-     * 
-     * @return BL_CustomGrid_Helper_Grid
-     */
-    protected function _getConfigHelper()
-    {
-        return Mage::helper('customgrid/config');
     }
     
     /**
@@ -97,45 +93,9 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract extends BL_CustomGrid_
      * 
      * @return BL_CustomGrid_Helper_Grid
      */
-    protected function _getGridHelper()
+    public function getGridHelper()
     {
         return Mage::helper('customgrid/grid');
-    }
-    
-    /**
-     * Return grid collection helper
-     * 
-     * @return BL_CustomGrid_Helper_Collection
-     */
-    protected function _getCollectionHelper()
-    {
-        return Mage::helper('customgrid/collection');
-    }
-    
-    /**
-     * Return the alias used for the main table in the given collection
-     * 
-     * @param Varien_Data_Collection_Db $collection Database collection
-     * @return string
-     */
-    protected function _getCollectionMainTableAlias(Varien_Data_Collection_Db $collection)
-    {
-        return $this->_getCollectionHelper()->getCollectionMainTableAlias($collection);
-    }
-    
-    /**
-     * Return the adapter model used by the given collection
-     * If requested, also return a shortcut callback to the adapter's quoteIdentifier() method
-     * 
-     * @param Varien_Data_Collection_Db $collection Database collection
-     * @param bool $withQiCallback Whether a callback to the adapter's quoteIdentifier() method should also be returned
-     * @return mixed Adapter model or an array with the adapter model and the callback
-     */
-    protected function _getCollectionAdapter(Varien_Data_Collection_Db $collection, $withQiCallback = false)
-    {
-        $helper  = $this->_getCollectionHelper();
-        $adapter = $helper->getCollectionAdapter($collection);
-        return (!$withQiCallback ? $adapter : array($adapter, $helper->getQuoteIdentifierCallback($adapter)));
     }
     
     /**
@@ -421,7 +381,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract extends BL_CustomGrid_
         if (!$this->getData('customization_window_config/title')) {
             $this->setData(
                 'customization_window_config/title',
-                $this->_getBaseHelper()->__('Customization : %s', $name)
+                $this->getBaseHelper()->__('Customization : %s', $name)
             );
         }
         
@@ -545,146 +505,6 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract extends BL_CustomGrid_
         return isset($params[$key])
             ? ((!$notEmpty || (strval($params[$key]) !== '')) ? strval($params[$key]) : $default)
             : $default;
-    }
-    
-    /**
-     * Generate a string that is unique across all custom columns, basing on the values that already exist
-     * 
-     * @param string $suffix String suffix
-     * @param string[] $existing Already existing strings
-     * @return string
-     */
-    protected function _generateUniqueString($suffix, array $existing)
-    {
-        $class = get_class($this);
-        $alias = '_' . strtolower(preg_replace('#[^A-Z]#', '', $class) . $suffix);
-        $base  = $alias;
-        $index = 1;
-        
-        while (in_array($alias, $existing)) {
-            $alias = $base . '_' . $index++;
-        }
-        
-        return $alias;
-    }
-    
-    /**
-     * Generate an unique string, suitable for collection flags (for consistency and safe uniqueness)
-     * 
-     * @param string $suffix String suffix
-     * @return string
-     */
-    protected function _getUniqueCollectionFlag($suffix = '')
-    {
-        $flag = $this->_generateUniqueString($suffix . '_applied', self::$_uniqueFlags);
-        self::$_uniqueFlags[] = $flag;
-        return $flag;
-    }
-    
-    /**
-     * Generate an unique string, suitable for table aliases (for consistency and safe uniqueness)
-     * 
-     * @param string $suffix String suffix
-     * @return string
-     */
-    protected function _getUniqueTableAlias($suffix = '')
-    {
-        $alias = $this->_generateUniqueString($suffix, self::$_uniqueAliases);
-        self::$_uniqueAliases[] = $alias;
-        return $alias;
-    }
-    
-    /**
-     * Prepare the filters map for the given grid collection
-     * Used to prevent ambiguous filters and other problems of the same kind
-     * 
-     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
-     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
-     * @param Varien_Data_Collection_Db $collection Grid collection
-     * @param array $filters Current filters
-     * @return BL_CustomGrid_Model_Custom_Column_Abstract
-     */
-    public function prepareGridCollectionFiltersMap(
-        BL_CustomGrid_Model_Grid $gridModel,
-        Mage_Adminhtml_Block_Widget_Grid $gridBlock,
-        Varien_Data_Collection_Db $collection,
-        array $filters
-    ) {
-        $this->_getCollectionHelper()->prepareGridCollectionFiltersMap($collection, $gridBlock, $gridModel, $filters);
-        return $this;
-    }
-    
-    /**
-     * Restore the original filters map for the given grid collection, after it was previously prepared
-     * Used to prevent undesired side effects from the filters map preparation
-     * 
-     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
-     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
-     * @param Varien_Data_Collection_Db $collection Grid collection
-     * @param array $filters Current filters
-     * @return BL_CustomGrid_Model_Custom_Column_Abstract
-     */
-    public function restoreGridCollectionFiltersMap(
-        BL_CustomGrid_Model_Grid $gridModel,
-        Mage_Adminhtml_Block_Widget_Grid $gridBlock,
-        Varien_Data_Collection_Db $collection,
-        array $filters
-    ) {
-        $this->_getCollectionHelper()->restoreGridCollectionFiltersMap($collection, $gridBlock, $gridModel, $filters);
-        return $this;
-    }
-    
-    /**
-     * Prepare the given grid collection to prevent any potential problem that could occur within it
-     * after the custom column will have been applied to it (such as ambiguous filters)
-     * 
-     * @param Varien_Data_Collection_Db $collection Grid collection
-     * @param Mage_Adminhtml_Block_Widget_Grid $gridBlock Grid block
-     * @param BL_CustomGrid_Model_Grid $gridModel Grid model
-     * @param string $columnBlockId Grid column block ID
-     * @param string $columnIndex Grid column index
-     * @param array $params Customization parameters values
-     * @param Mage_Core_Model_Store $store Column store
-     * @return BL_CustomGrid_Model_Custom_Column_Abstract
-     */
-    public function prepareGridCollection(
-        Varien_Data_Collection_Db $collection,
-        Mage_Adminhtml_Block_Widget_Grid $gridBlock,
-        BL_CustomGrid_Model_Grid $gridModel,
-        $columnBlockId,
-        $columnIndex,
-        array $params,
-        Mage_Core_Model_Store $store
-    ) {
-        if (!$gridBlock->getData('_blcg_added_collection_prepare_callbacks')) {
-            $gridBlock->blcg_addCollectionCallback(
-                self::GC_EVENT_BEFORE_SET_FILTERS,
-                array($this, 'prepareGridCollectionFiltersMap'),
-                array($gridModel),
-                true
-            );
-            
-            if ($this->_getBaseHelper()->isMageVersionGreaterThan(1, 6)
-                && $this->_getGridHelper()->isEavEntityGrid($gridBlock, $gridModel)) {
-                /**
-                 * Fix for Mage_Eav_Model_Entity_Collection_Abstract::_renderOrders() on 1.7+,
-                 * which fails to handle qualified field names, as it forces the use of addAttributeToSort() :
-                 * when this method is applied on mapped fields,
-                 * the fact that they are qualified makes them unrecognizable as attributes or static fields
-                 * Note that this does not affect filters applied on custom columns derived from
-                 * BL_CustomGrid_Model_Custom_Column_Simple_Abstract, as it forces field orders on EAV entity grids
-                 */
-                $gridBlock->blcg_addCollectionCallback(
-                    self::GC_EVENT_AFTER_SET_FILTERS,
-                    array($this, 'restoreGridCollectionFiltersMap'),
-                    array($gridModel),
-                    true
-                );
-            }
-            
-            $gridBlock->setData('_blcg_added_collection_prepare_callbacks', true);
-        }
-        return $this;
     }
     
     /**

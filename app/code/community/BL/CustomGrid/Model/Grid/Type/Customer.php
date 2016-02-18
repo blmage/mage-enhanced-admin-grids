@@ -53,8 +53,8 @@ class BL_CustomGrid_Model_Grid_Type_Customer extends BL_CustomGrid_Model_Grid_Ty
     protected function _getAddressTypes()
     {
         return array(
-            'billing'  => $this->_getBaseHelper()->__('Billing Address'),
-            'shipping' => $this->_getBaseHelper()->__('Shipping Address'),
+            'billing'  => $this->getBaseHelper()->__('Billing Address'),
+            'shipping' => $this->getBaseHelper()->__('Shipping Address'),
         );
     }
     

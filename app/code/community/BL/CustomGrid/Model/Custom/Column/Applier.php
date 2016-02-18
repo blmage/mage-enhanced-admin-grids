@@ -13,7 +13,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class BL_CustomGrid_Model_Custom_Column_Applier extends BL_CustomGrid_Object
+class BL_CustomGrid_Model_Custom_Column_Applier extends BL_CustomGrid_Model_Custom_Column_Worker_Abstract
 {
     // Possible behaviours to use when grid block / collection can not be verified
     const UNVERIFIED_BEHAVIOUR_NONE    = 'none';
@@ -23,39 +23,19 @@ class BL_CustomGrid_Model_Custom_Column_Applier extends BL_CustomGrid_Object
     // Key where to store the verification messages flags in session
     const VERIFICATION_MESSAGES_FLAGS_SESSION_KEY = 'blcg_cc_vm_flags';
     
+    public function getType()
+    {
+        return BL_CustomGrid_Model_Custom_Column_Abstract::WORKER_TYPE_APPLIER;
+    }
+    
     /**
      * Return the base helper
      * 
      * @return BL_CustomGrid_Helper_Data
      */
-    protected function _getBaseHelper()
+    public function getBaseHelper()
     {
         return Mage::helper('customgrid');
-    }
-    
-    /**
-     * Set the current custom column
-     * 
-     * @param BL_CustomGrid_Model_Custom_Column_Abstract $customColumn Custom column to set as current
-     * @return BL_CustomGrid_Model_Custom_Column_Applier
-     */
-    public function setCustomColumn(BL_CustomGrid_Model_Custom_Column_Abstract $customColumn)
-    {
-        return $this->setData('custom_column', $customColumn);
-    }
-    
-    /**
-     * Return the current custom column
-     * 
-     * @return BL_CustomGrid_Model_Custom_Column_Abstract
-     */
-    public function getCustomColumn()
-    {
-        if ((!$customColumn = $this->_getData('custom_column'))
-            || (!$customColumn instanceof BL_CustomGrid_Model_Custom_Column_Abstract)) {
-            Mage::throwException('Invalid custom column');
-        }
-        return $customColumn;
     }
     
     /**
@@ -180,7 +160,7 @@ class BL_CustomGrid_Model_Custom_Column_Applier extends BL_CustomGrid_Object
                 . 'not be working (partially or fully)';
         }
         
-        return ($message ? $this->_getBaseHelper()->__($message, $blockType) : '');
+        return ($message ? $this->getBaseHelper()->__($message, $blockType) : '');
     }
     
     /**
@@ -203,7 +183,7 @@ class BL_CustomGrid_Model_Custom_Column_Applier extends BL_CustomGrid_Object
                 . 'columns will not be applied';
         }
         
-        return ($message ? $this->_getBaseHelper()->__($message, $blockType) : '');
+        return ($message ? $this->getBaseHelper()->__($message, $blockType) : '');
     }
     
     /**
@@ -285,7 +265,7 @@ class BL_CustomGrid_Model_Custom_Column_Applier extends BL_CustomGrid_Object
         $session = Mage::getSingleton('customgrid/session');
         
         $name = $this->getCustomColumn()->getName();
-        $message = $this->_getBaseHelper()->__('The "%s" custom column could not be applied : "%s"', $name, $message);
+        $message = $this->getBaseHelper()->__('The "%s" custom column could not be applied : "%s"', $name, $message);
         $session->addError($message);
         
         return $this;
@@ -310,7 +290,9 @@ class BL_CustomGrid_Model_Custom_Column_Applier extends BL_CustomGrid_Object
         array $params,
         Mage_Core_Model_Store $store
     ) {
-        $this->getCustomColumn()
+        $customColumn = $this->getCustomColumn();
+        
+        $customColumn->getCollectionHandler()
             ->prepareGridCollection(
                 $gridBlock->getCollection(),
                 $gridBlock,
@@ -319,16 +301,18 @@ class BL_CustomGrid_Model_Custom_Column_Applier extends BL_CustomGrid_Object
                 $columnIndex,
                 $params,
                 $store
-            )
-            ->applyToGridCollection(
-                $gridBlock->getCollection(),
-                $gridBlock,
-                $gridModel,
-                $columnBlockId,
-                $columnIndex,
-                $params,
-                $store
             );
+        
+        $customColumn->applyToGridCollection(
+            $gridBlock->getCollection(),
+            $gridBlock,
+            $gridModel,
+            $columnBlockId,
+            $columnIndex,
+            $params,
+            $store
+        );
+        
         return $this;
     }
     
@@ -403,10 +387,10 @@ class BL_CustomGrid_Model_Custom_Column_Applier extends BL_CustomGrid_Object
     ) {
         try {
             if (!$this->_verifyGridElement('block', $gridBlock->getCollection(), $gridBlock, $gridModel)) {
-                Mage::throwException($this->_getBaseHelper()->__('The grid block is not valid'));
+                Mage::throwException($this->getBaseHelper()->__('The grid block is not valid'));
             }
             if (!$this->_verifyGridElement('collection', $gridBlock->getCollection(), $gridBlock, $gridModel)) {
-                Mage::throwException($this->_getBaseHelper()->__('The grid collection is not valid'));
+                Mage::throwException($this->getBaseHelper()->__('The grid collection is not valid'));
             }
             
             $this->_applyCustomColumnToGridBlock(

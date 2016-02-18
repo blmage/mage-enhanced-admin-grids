@@ -17,7 +17,7 @@ class BL_CustomGrid_Model_Custom_Column_Product_Frontend_Link extends BL_CustomG
 {
     protected function _prepareConfig()
     {
-        $helper = $this->_getBaseHelper();
+        $helper = $this->getBaseHelper();
         
         $descriptions = array(
             'link_title' => 'If no value is set, the URL will be used',
@@ -105,7 +105,7 @@ class BL_CustomGrid_Model_Custom_Column_Product_Frontend_Link extends BL_CustomG
         for ($i=0; $i<$slicesCount; $i++) {
             /** @var $rewritesCollection Mage_Core_Model_Mysql4_Url_Rewrite_Collection */
             $rewritesCollection = Mage::getResourceModel('core/url_rewrite_collection');
-            list(, $qi) = $this->_getCollectionAdapter($rewritesCollection, true);
+            list(, $qi) = $this->getCollectionHandler()->getCollectionAdapter($rewritesCollection, true);
             
             $rewritesCollection->addStoreFilter($storeId)
                 ->addFieldToFilter('category_id', array('null' => true))
@@ -141,7 +141,7 @@ class BL_CustomGrid_Model_Custom_Column_Product_Frontend_Link extends BL_CustomG
         if (Mage::app()->isSingleStoreMode()
             || ((!$storeId = $store->getId())
                 && (!$storeId = $this->_extractIntParam($params, 'default_store_id', 0)))) {
-            $storeId = $this->_getBaseHelper()->getDefaultNonAdminStoreId();
+            $storeId = $this->getBaseHelper()->getDefaultNonAdminStoreId();
         }
         return $storeId;
     }

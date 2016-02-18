@@ -23,8 +23,8 @@ abstract class BL_CustomGrid_Model_Grid_Type_Sales_Abstract extends BL_CustomGri
     protected function _getAddressTypes()
     {
         return array(
-            'billing'  => $this->_getBaseHelper()->__('Billing Address'),
-            'shipping' => $this->_getBaseHelper()->__('Shipping Address'),
+            'billing'  => $this->getBaseHelper()->__('Billing Address'),
+            'shipping' => $this->getBaseHelper()->__('Shipping Address'),
         );
     }
     
@@ -35,7 +35,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Sales_Abstract extends BL_CustomGri
      */
     protected function _getAddressFields()
     {
-        $helper = $this->_getBaseHelper();
+        $helper = $this->getBaseHelper();
         
         return array(
             'prefix'     => $helper->__('Prefix'),
@@ -187,14 +187,14 @@ abstract class BL_CustomGrid_Model_Grid_Type_Sales_Abstract extends BL_CustomGri
         $customColumn = Mage::getModel($this->_getItemsCustomColumnModel($customizable));
         return $customColumn->setId($columnId)
             ->setModule('customgrid')
-            ->setName($this->_getBaseHelper()->__($customizable ? 'Customizable' : 'Default'))
-            ->setGroup($this->_getBaseHelper()->__('Items'))
+            ->setName($this->getBaseHelper()->__($customizable ? 'Customizable' : 'Default'))
+            ->setGroup($this->getBaseHelper()->__('Items'))
             ->setAllowCustomization(true);
     }
     
     protected function _getAdditionalCustomColumns()
     {
-        $helper  = $this->_getBaseHelper();
+        $helper  = $this->getBaseHelper();
         
         $customColumns = array(
             'shipping_method' => $this->_getOrderBaseCustomColumn(

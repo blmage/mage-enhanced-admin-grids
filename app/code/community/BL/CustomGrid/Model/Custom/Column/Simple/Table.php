@@ -132,21 +132,22 @@ class BL_CustomGrid_Model_Custom_Column_Simple_Table extends BL_CustomGrid_Model
         Mage_Adminhtml_Block_Widget_Grid $gridBlock,
         Varien_Data_Collection_Db $collection
     ) {
+        $collectionHandler = $this->getCollectionHandler();
         $tableName  = $this->getTableName();
         $tableHash  = $this->getTableHash($tableName);
         $flagKey    = $this->_getAppliedFlagKey($columnIndex, $params, $gridBlock, $collection, $tableName);
-        list(, $qi) = $this->_getCollectionAdapter($collection, true);
+        list(, $qi) = $collectionHandler->getCollectionAdapter($collection, true);
         
         if (!isset(self::$_tablesAppliedFlags[$flagKey])) {
-            self::$_tablesAppliedFlags[$flagKey] = $this->_getUniqueCollectionFlag('_' . $tableHash);
+            self::$_tablesAppliedFlags[$flagKey] = $collectionHandler->getUniqueCollectionFlag('_' . $tableHash);
         }
         
         $appliedFlag = self::$_tablesAppliedFlags[$flagKey];
         
         if (!$tableAlias = $collection->getFlag($appliedFlag)) {
             $select = $collection->getSelect();
-            $mainAlias  = $this->_getCollectionHelper()->getCollectionMainTableAlias($collection);
-            $tableAlias = $this->_getUniqueTableAlias('_' . $tableHash);
+            $mainAlias  = $collectionHandler->getCollectionMainTableAlias($collection);
+            $tableAlias = $collectionHandler->getUniqueTableAlias('_' . $tableHash);
             $mainFieldName  = $this->getJoinConditionMainFieldName();
             $tableFieldName = $this->getJoinConditionTableFieldName();
             

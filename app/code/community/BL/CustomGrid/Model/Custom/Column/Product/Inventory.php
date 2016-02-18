@@ -17,7 +17,7 @@ class BL_CustomGrid_Model_Custom_Column_Product_Inventory extends BL_CustomGrid_
 {
     protected function _prepareConfig()
     {
-        $helper = $this->_getBaseHelper();
+        $helper = $this->getBaseHelper();
         
         $notes = array(
             'use_config_filter' => 'Choose "<strong>Yes</strong>" to filter on products that use system configuration '
@@ -118,7 +118,7 @@ class BL_CustomGrid_Model_Custom_Column_Product_Inventory extends BL_CustomGrid_
         $tableAlias
     ) {
         /** @var $adapter Zend_Db_Adapter_Abstract */
-        list($adapter, $qi) = $this->_getCollectionAdapter($collection, true);
+        list($adapter, $qi) = $this->getCollectionHandler()->getCollectionAdapter($collection, true);
         return array($adapter->quoteInto($qi($tableAlias . '.stock_id') . ' = ?', 1));
     }
     
@@ -131,8 +131,9 @@ class BL_CustomGrid_Model_Custom_Column_Product_Inventory extends BL_CustomGrid_
         Mage_Adminhtml_Block_Widget_Grid $gridBlock,
         Varien_Data_Collection_Db $collection
     ) {
-        $helper = $this->_getCollectionHelper();
-        list(, $qi) = $this->_getCollectionAdapter($collection, true);
+        $collectionHandler = $this->getCollectionHandler();
+        $helper = $collectionHandler->getHelper();
+        list(, $qi) = $collectionHandler->getCollectionAdapter($collection, true);
         
         $select->columns(array($columnIndex => $tableAlias . '.' . $fieldName), $tableAlias);
         $helper->addFilterToCollectionMap($collection, $qi($tableAlias . '.' . $fieldName), $columnIndex);
@@ -157,7 +158,7 @@ class BL_CustomGrid_Model_Custom_Column_Product_Inventory extends BL_CustomGrid_
         
         if ($fieldName && is_array($condition) && $tableAlias) {
             /** @var $adapter Zend_Db_Adapter_Abstract */
-            list($adapter, $qi) = $this->_getCollectionAdapter($collection, true);
+            list($adapter, $qi) = $this->getCollectionHandler()->getCollectionAdapter($collection, true);
             
             if (is_array($filterParams) && $this->_extractBoolParam($filterParams, 'use_config_filter', false)) {
                 if (isset($condition['eq'])) {
@@ -193,8 +194,7 @@ class BL_CustomGrid_Model_Custom_Column_Product_Inventory extends BL_CustomGrid_
                             );
                     }
                 } elseif (isset($condition['eq'])) {
-                    $collection->getSelect()
-                        ->where($conditionBase . ' = ' . $adapter->quote($condition['eq']));
+                    $collection->getSelect()->where($conditionBase . ' = ' . $adapter->quote($condition['eq']));
                 }
             }
         }
@@ -220,7 +220,7 @@ class BL_CustomGrid_Model_Custom_Column_Product_Inventory extends BL_CustomGrid_
     
     protected function _getConditionalBlockValues(array $params)
     {
-        $helper = $this->_getBaseHelper();
+        $helper = $this->getBaseHelper();
         $values = array();
         $fieldType = $this->getFieldType();
         

@@ -172,7 +172,7 @@ class BL_CustomGrid_Model_Grid_Editor_Value_Config_Builder extends BL_CustomGrid
                 'draggable'    => true,
                 'resizable'    => true,
                 'recenterAuto' => false,
-                'title'        => $this->_getBaseHelper()->__('Edit Value'),
+                'title'        => $this->getBaseHelper()->__('Edit Value'),
             );
         } else {
             unset($config['window']);
@@ -317,7 +317,7 @@ class BL_CustomGrid_Model_Grid_Editor_Value_Config_Builder extends BL_CustomGrid
                 'draggable'    => true,
                 'resizable'    => true,
                 'recenterAuto' => false,
-                'title'        => $this->_getBaseHelper()->__('Edit Value'),
+                'title'        => $this->getBaseHelper()->__('Edit Value'),
             );
         } else {
             unset($config['window']);

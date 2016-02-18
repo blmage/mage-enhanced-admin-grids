@@ -82,7 +82,7 @@ abstract class BL_CustomGrid_Model_Custom_Column_Shipment_Items_Abstract extends
                 
                 /** @var $session BL_CustomGrid_Model_Session */
                 $session = Mage::getSingleton('customgrid/session');
-                $session->addError($this->_getBaseHelper()->__('An error occurred while initializing items'));
+                $session->addError($this->getBaseHelper()->__('An error occurred while initializing items'));
             }
         }
         return $this;
