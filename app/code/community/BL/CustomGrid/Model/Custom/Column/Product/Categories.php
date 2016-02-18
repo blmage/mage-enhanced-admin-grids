@@ -183,7 +183,7 @@ class BL_CustomGrid_Model_Custom_Column_Product_Categories extends BL_CustomGrid
         $categoryIds = null
     ) {
         $collectionHandler = $this->getCollectionHandler();
-        $mainAlias = $collectionHandler-_getCollectionMainTableAlias($collection);
+        $mainAlias = $collectionHandler->getCollectionMainTableAlias($collection);
         $productAlias = $collectionHandler->getUniqueTableAlias($forFilter ? '_filter' : '_select');
         
         /** @var $adapter Zend_Db_Adapter_Abstract */
