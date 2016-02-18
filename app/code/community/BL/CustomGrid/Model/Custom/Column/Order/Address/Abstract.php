@@ -100,21 +100,27 @@ abstract class BL_CustomGrid_Model_Custom_Column_Order_Address_Abstract extends 
         BL_CustomGrid_Model_Grid_Editor_Callback_Manager $callbackManager
     ) {
         return array(
-            $callbackManager->getInternalMainCallbackFromCallable(
+            $callbackManager->getCallbackFromCallable(
                 array($this, 'applyUserEditedValueToEditedOrderAddress'),
                 BL_CustomGrid_Model_Grid_Editor_Abstract::WORKER_TYPE_ENTITY_UPDATER,
                 BL_CustomGrid_Model_Grid_Editor_Entity_Updater::ACTION_TYPE_APPLY_USER_EDITED_VALUE_TO_EDITED_ENTITY,
+                BL_CustomGrid_Model_Grid_Editor_Callback::POSITION_MAIN,
+                BL_CustomGrid_Model_Grid_Editor_Callback::PRIORITY_EXTERNAL_HIGHER,
                 true
             ),
-            $callbackManager->getInternalMainCallbackFromCallable(
+            $callbackManager->getCallbackFromCallable(
                 array($this, 'saveContextEditedOrderAddress'),
                 BL_CustomGrid_Model_Grid_Editor_Abstract::WORKER_TYPE_ENTITY_UPDATER,
-                BL_CustomGrid_Model_Grid_Editor_Entity_Updater::ACTION_TYPE_SAVE_CONTEXT_EDITED_ENTITY
+                BL_CustomGrid_Model_Grid_Editor_Entity_Updater::ACTION_TYPE_SAVE_CONTEXT_EDITED_ENTITY,
+                BL_CustomGrid_Model_Grid_Editor_Callback::POSITION_MAIN,
+                BL_CustomGrid_Model_Grid_Editor_Callback::PRIORITY_EXTERNAL_HIGHER
             ),
-            $callbackManager->getInternalMainCallbackFromCallable(
+            $callbackManager->getCallbackFromCallable(
                 array($this, 'getRenderableContextEditedValue'),
                 BL_CustomGrid_Model_Grid_Editor_Abstract::WORKER_TYPE_VALUE_RENDERER,
-                BL_CustomGrid_Model_Grid_Editor_Value_Renderer::ACTION_TYPE_GET_RENDERABLE_CONTEXT_EDITED_VALUE
+                BL_CustomGrid_Model_Grid_Editor_Value_Renderer::ACTION_TYPE_GET_RENDERABLE_CONTEXT_EDITED_VALUE,
+                BL_CustomGrid_Model_Grid_Editor_Callback::POSITION_MAIN,
+                BL_CustomGrid_Model_Grid_Editor_Callback::PRIORITY_EXTERNAL_HIGHER
             ),
         );
     }

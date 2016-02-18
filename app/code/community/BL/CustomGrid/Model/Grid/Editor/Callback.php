@@ -28,13 +28,19 @@ class BL_CustomGrid_Model_Grid_Editor_Callback extends BL_CustomGrid_Object
     /**
      * Priority used by the internal callbacks defined by the worker models
      */
-    const PRIORITY_WORKER_INTERNAL = 200000;
+    const PRIORITY_WORKER_INTERNAL = 300000;
     
     /**
      * Convenient priorities for callbacks defined by the editor models
      */
-    const PRIORITY_EDITOR_INTERNAL_HIGH = 100000;
-    const PRIORITY_EDITOR_INTERNAL_LOW  = 300000;
+    const PRIORITY_EDITOR_INTERNAL_HIGH = 200000;
+    const PRIORITY_EDITOR_INTERNAL_LOW  = 400000;
+    
+    /**
+     * Convenient priorities for callbacks defined by external entities
+     */
+    const PRIORITY_EXTERNAL_HIGHER = 100000;
+    const PRIORITY_EXTERNAL_LOWER  = 500000;
     
     /**
      * Cache holding the specifications of the callable parameters retrieved by Reflection
