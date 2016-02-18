@@ -137,8 +137,7 @@ class BL_CustomGrid_Model_Grid_Editor_Kickstarter extends BL_CustomGrid_Model_Gr
         return $this->_runCallbackedAction(
             self::ACTION_TYPE_EXTRACT_REQUEST_EDIT_PARAMS,
             array('request' => $request, 'context' => $context),
-            array($this, '_extractRequestEditParams'),
-            $context
+            array($this, '_extractRequestEditParams')
         );
     }
     
