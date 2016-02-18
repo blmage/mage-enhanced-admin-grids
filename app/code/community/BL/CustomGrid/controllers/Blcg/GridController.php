@@ -28,7 +28,7 @@ class BL_CustomGrid_Blcg_GridController extends BL_CustomGrid_Controller_Grid_Ac
     /**
      * Load layout and initialize active menu, title and breadcrumbs for a common system page action
      * 
-     * @return BL_CustomGrid_GridController
+     * @return BL_CustomGrid_Blcg_GridController
      */
     protected function _initSystemPageAction()
     {
@@ -47,38 +47,19 @@ class BL_CustomGrid_Blcg_GridController extends BL_CustomGrid_Controller_Grid_Ac
      * @param array $formData Form data
      * @param string|array $permissions Required user permission(s)
      * @param bool $anyPermission Whether all the given permissions are required, or just one of them
-     * @return BL_CustomGrid_GridController
+     * @return BL_CustomGrid_Blcg_GridController
      */
     protected function _prepareWindowFormLayout($formType, array $formData, $permissions = null, $anyPermission = true)
     {
-        $handles = array('blcg_empty');
-        $error = false;
+        $this->_initWindowFormLayout(
+            'adminhtml_blcg_grid_form_window_action',
+            'adminhtml_blcg_grid_form_window_error',
+            'blcg.grid.form_error',
+            $permissions,
+            $anyPermission
+        );
         
-        try {
-            $gridModel = $this->_initGridModel();
-            $this->_initGridProfile();
-            
-            if (!is_null($permissions)) {
-                if (!$gridModel->checkUserPermissions($permissions, null, $anyPermission)) {
-                    Mage::throwException($this->__('You are not allowed to use this action'));
-                }
-            }
-            
-            $handles[] = 'adminhtml_blcg_grid_form_window_action'; 
-            
-        } catch (Mage_Core_Exception $e) {
-            $handles[] = 'adminhtml_blcg_grid_form_window_error';
-            $error = $e->getMessage();
-        }
-        
-        $this->loadLayout($handles);
-        
-        if (is_string($error)) {
-            if ($errorBlock = $this->getLayout()->getBlock('blcg.grid.form_error')) {
-                /** @var $errorBlock Mage_Adminhtml_Block_Template */
-                $errorBlock->setErrorText($error);
-            }
-        } elseif ($containerBlock = $this->getLayout()->getBlock('blcg.grid.form_container')) {
+        if ($containerBlock = $this->getLayout()->getBlock('blcg.grid.form_container')) {
             /** @var $containerBlock BL_CustomGrid_Block_Grid_Form_Container */
             $containerBlock->setFormData($formData)->setFormType($formType);
         }

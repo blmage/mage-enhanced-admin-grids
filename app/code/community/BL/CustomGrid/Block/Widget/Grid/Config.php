@@ -15,6 +15,78 @@
 
 class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
 {
+    /**
+     * Profiles actions base config data
+     * 
+     * @var array
+     */
+    static protected $_profilesActionsBaseConfig = array(
+        'go_to' => array(
+            'label'   => 'Go To',
+            'mode'    => 'direct',
+            'confirm' => false,
+            'applyUrlAction' => 'goTo',
+            'appliesToBase'    => true,
+            'appliesToCurrent' => false,
+            'leftClickable'    => true,
+        ),
+        'default' => array(
+            'label'   => 'Choose As Default',
+            'mode'    => 'window',
+            'confirm' => false,
+            'applyUrlAction'  => 'default',
+            'windowUrlAction' => 'defaultForm',
+            'windowConfig'      => array('height' => 600),
+            'appliesToBase'     => true,
+            'appliesToCurrent'  => true,
+        ),
+        'copy_new' => array(
+            'label'     => 'Copy To New Profile',
+            'mode'      => 'window',
+            'confirm'   => false,
+            'applyUrlAction'   => 'copyToNew',
+            'windowUrlAction'  => 'copyToNewForm',
+            'appliesToBase'    => true,
+            'appliesToCurrent' => true,
+        ),
+        'copy_existing' => array(
+            'label'   => 'Copy To Existing Profile',
+            'mode'    => 'window',
+            'confirm' => false,
+            'applyUrlAction'   => 'copyToExisting',
+            'windowUrlAction'  => 'copyToExistingForm',
+            'appliesToBase'    => true,
+            'appliesToCurrent' => true,
+        ),
+        'edit' => array(
+            'label'   => 'Edit',
+            'mode'    => 'window',
+            'confirm' => false,
+            'applyUrlAction'   => 'edit',
+            'windowUrlAction'  => 'editForm',
+            'windowConfig'     => array('height' => 490),
+            'appliesToBase'    => true,
+            'appliesToCurrent' => true,
+        ),
+        'assign' => array(
+            'label'   => 'Assign',
+            'mode'    => 'window',
+            'confirm' => false,
+            'applyUrlAction'   => 'assign',
+            'windowUrlAction'  => 'assignForm',
+            'appliesToBase'    => true,
+            'appliesToCurrent' => true,
+        ),
+        'delete' => array(
+            'label'   => 'Delete',
+            'mode'    => 'direct',
+            'confirm' => 'Are you sure you want to delete this profile?',
+            'applyUrlAction'   => 'delete',
+            'appliesToBase'    => false,
+            'appliesToCurrent' => true,
+        ),
+    );
+    
     protected function _construct()
     {
         parent::_construct();
@@ -223,6 +295,26 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
     }
     
     /**
+     * Initialize the profiles JSON config data
+     * 
+     * @return BL_CustomGrid_Block_Widget_Grid_Config
+     */
+    protected function _initProfilesJsonConfigData()
+    {
+        $profiles = $this->getProfiles();
+        $coreHelper = $this->_getCoreHelper();
+        
+        $this->addData(
+            array(
+                'profiles_json_config' => $coreHelper->jsonEncode((object) $profiles),
+                'sorted_profiles_ids_json' => $coreHelper->jsonEncode(array_keys($profiles)),
+            )
+        );
+        
+        return $this;
+    }
+    
+    /**
      * Return the JSON config for the available profiles
      * 
      * @return string
@@ -230,7 +322,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
     public function getProfilesJsonConfig()
     {
         if (!$this->hasData('profiles_json_config')) {
-            $this->setData('profiles_json_config', $this->_getCoreHelper()->jsonEncode((object) $this->getProfiles()));
+            $this->_initProfilesJsonConfigData();
         }
         return $this->_getData('profiles_json_config');
     }
@@ -243,10 +335,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
     public function getSortedProfilesIdsJson()
     {
         if (!$this->hasData('sorted_profiles_ids_json')) {
-            $this->setData(
-                'sorted_profiles_ids_json',
-                $this->_getCoreHelper()->jsonEncode(array_keys($this->getProfiles()))
-            );
+            $this->_initProfilesJsonConfigData();
         }
         return $this->_getData('sorted_profiles_ids_json');
     }
@@ -332,101 +421,69 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
     }
     
     /**
+     * Prepare the given action config data so that it is fully suitable
+     * 
+     * @param array $actionConfig Base action config data
+     * @param array $urlParams Base URL parameters
+     * @return array
+     */
+    protected function _prepareProfileActionConfig(array $actionConfig, array $urlParams)
+    {
+        $actionConfig['label'] = $this->__($actionConfig['label']);
+        
+        if (is_string($actionConfig['confirm'])) {
+            $actionConfig['confirm'] = $this->__($actionConfig['confirm']);
+        }
+        
+        $actionConfig['url'] = $this->getUrl(
+            'adminhtml/blcg_grid_profile/' . $actionConfig['applyUrlAction'],
+            $urlParams
+        );
+        
+        unset($actionConfig['applyUrlAction']);
+        
+        if ($actionConfig['mode'] == 'window') {
+            $actionConfig['windowUrl'] = $this->getUrl(
+                'adminhtml/blcg_grid_profile/' . $actionConfig['windowUrlAction'],
+                $urlParams
+            );
+            
+            unset($actionConfig['windowUrlAction']);
+        }
+        
+        return $actionConfig;
+    }
+    
+    /**
      * Return the config for the available profiles actions
      * 
      * @return array
      */
     protected function _getProfilesActionsConfig()
     {
-        $gridModel = $this->getGridModel();
-        $actions   = array();
-        $actionsRoute  = 'adminhtml/blcg_grid_profile/';
-        $actionsParams = array(
-            'grid_id' => $gridModel->getId(),
-            'profile_id' => $this->getProfileIdPlaceholder(),
-            'profiles_js_object_name' => $this->getProfilesJsObjectName(),
+        $actions = array();
+        $availableActionsCodes = array_keys(
+            array_filter(
+                array(
+                    'go_to'         => true,
+                    'default'       => $this->_isProfilesDefaultActionAvailable(),
+                    'copy_new'      => $this->_isProfilesCopyToNewActionAvailable(),
+                    'copy_existing' => $this->_isProfilesCopyToExistingActionAvailable(),
+                    'edit'          => $this->_isProfilesEditActionAvailable(),
+                    'assign'        => $this->_isProfilesAssignActionAvailable(),
+                    'delete'        => $this->_isProfilesDeleteActionAvailable(),
+                )
+            )
         );
         
-        $actions['go_to'] = array(
-            'label'   => $this->__('Go To'),
-            'url'     => $this->getUrl($actionsRoute . 'goTo', $actionsParams),
-            'mode'    => 'direct',
-            'confirm' => false,
-            'appliesToBase'    => true,
-            'appliesToCurrent' => false,
-            'leftClickable'    => true,
-        );
-        
-        if ($this->_isProfilesDefaultActionAvailable()) {
-            $actions['default'] = array(
-                'label'     => $this->__('Choose As Default'),
-                'mode'      => 'window',
-                'confirm'   => false,
-                'url'       => $this->getUrl($actionsRoute . 'default', $actionsParams),
-                'windowUrl'    => $this->getUrl($actionsRoute . 'defaultForm', $actionsParams),
-                'windowConfig' => array('height' => 600),
-                'appliesToBase'    => true,
-                'appliesToCurrent' => true,
-            );
-        }
-        
-        if ($this->_isProfilesCopyToNewActionAvailable()) {
-            $actions['copy_new'] = array(
-                'label'     => $this->__('Copy To New Profile'),
-                'mode'      => 'window',
-                'confirm'   => false,
-                'url'       => $this->getUrl($actionsRoute . 'copyToNew', $actionsParams),
-                'windowUrl' => $this->getUrl($actionsRoute . 'copyToNewForm', $actionsParams),
-                'appliesToBase'    => true,
-                'appliesToCurrent' => true,
-            );
-        }
-        
-        if ($this->_isProfilesCopyToExistingActionAvailable()) {
-            $actions['copy_existing'] = array(
-                'label'     => $this->__('Copy To Existing Profile'),
-                'mode'      => 'window',
-                'confirm'   => false,
-                'url'       => $this->getUrl($actionsRoute . 'copyToExisting', $actionsParams),
-                'windowUrl' => $this->getUrl($actionsRoute . 'copyToExistingForm', $actionsParams),
-                'appliesToBase'    => true,
-                'appliesToCurrent' => true,
-            );
-        }
-        
-        if ($this->_isProfilesEditActionAvailable()) {
-            $actions['edit'] = array(
-                'label'        => $this->__('Edit'),
-                'mode'         => 'window',
-                'confirm'      => false,
-                'url'          => $this->getUrl($actionsRoute . 'edit', $actionsParams),
-                'windowUrl'    => $this->getUrl($actionsRoute . 'editForm', $actionsParams),
-                'windowConfig' => array('height' => 490),
-                'appliesToBase'    => true,
-                'appliesToCurrent' => true,
-            );
-        }
-        
-        if ($this->_isProfilesAssignActionAvailable()) {
-            $actions['assign'] = array(
-                'label'     => $this->__('Assign'),
-                'mode'      => 'window',
-                'confirm'   => false,
-                'url'       => $this->getUrl($actionsRoute . 'assign', $actionsParams),
-                'windowUrl' => $this->getUrl($actionsRoute . 'assignForm', $actionsParams),
-                'appliesToBase'    => true,
-                'appliesToCurrent' => true,
-            );
-        }
-        
-        if ($this->_isProfilesDeleteActionAvailable()) {
-            $actions['delete'] = array(
-                'label'   => $this->__('Delete'),
-                'url'     => $this->getUrl($actionsRoute . 'delete', $actionsParams),
-                'mode'    => 'direct',
-                'confirm' => $this->__('Are you sure you want to delete this profile?'),
-                'appliesToBase'    => false,
-                'appliesToCurrent' => true,
+        foreach ($availableActionsCodes as $actionCode) {
+            $actions[$actionCode] = $this->_prepareProfileActionConfig(
+                self::$_profilesActionsBaseConfig[$actionCode],
+                array(
+                    'grid_id' => $this->getGridModel()->getId(),
+                    'profile_id' => $this->getProfileIdPlaceholder(),
+                    'profiles_js_object_name' => $this->getProfilesJsObjectName(),
+                )
             );
         }
         

@@ -27,39 +27,24 @@ class BL_CustomGrid_Blcg_Grid_ProfileController extends BL_CustomGrid_Controller
      * @param string $actionCode Profile action
      * @param string|array $permissions Required user permission(s)
      * @param bool $anyPermission Whether all the given permissions are required, or just one of them
-     * @return BL_CustomGrid_Grid_ProfileController
+     * @return BL_CustomGrid_Blcg_Grid_ProfileController
      */
     protected function _prepareFormLayout($actionCode, $permissions = null, $anyPermission = true)
     {
-        $handles = array('blcg_empty');
-        $error = false;
-        
-        try {
-            $gridModel = $this->_initGridModel();
-            $gridProfile = $this->_initGridProfile();
-            
-            if (!is_null($permissions)) {
-                if (!$gridModel->checkUserPermissions($permissions, null, $anyPermission)) {
-                    Mage::throwException($this->__('You are not allowed to use this action'));
-                }
-            }
-            
-            $handles[] = 'adminhtml_blcg_grid_profile_form_window_action'; 
-            
-        } catch (Mage_Core_Exception $e) {
-            $handles[] = 'adminhtml_blcg_grid_profile_form_window_error';
-            $error = $e->getMessage();
-        }
-        
-        $this->loadLayout($handles);
-        
-        if ($error !== false) {
-            if ($errorBlock = $this->getLayout()->getBlock('blcg.grid_profile.form_error')) {
-                /** @var $errorBlock Mage_Adminhtml_Block_Template */
-                $errorBlock->setErrorText($error);
-            }
-        } elseif ($containerBlock = $this->getLayout()->getBlock('blcg.grid_profile.form_container')) {
-            /** @var $containerBlock BL_CustomGrid_Block_Grid_Profile_Form_Container */
+        $this->_initWindowFormLayout(
+            'adminhtml_blcg_grid_profile_form_window_action',
+            'adminhtml_blcg_grid_profile_form_window_error',
+            'blcg.grid_profile.form_error',
+            $permissions,
+            $anyPermission
+        );
+    
+        if (($gridProfile = Mage::registry('blcg_grid_profile'))
+            && ($containerBlock = $this->getLayout()->getBlock('blcg.grid_profile.form_container'))) {
+            /**
+             * @var BL_CustomGrid_Model_Grid_Profile $gridProfile
+             * @var BL_CustomGrid_Block_Grid_Profile_Form_Container $containerBlock
+             */
             $containerBlock->setProfileId($gridProfile->getId())->setActionCode($actionCode);
         }
         

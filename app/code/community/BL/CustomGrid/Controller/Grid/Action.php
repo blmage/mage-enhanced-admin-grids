@@ -193,4 +193,54 @@ class BL_CustomGrid_Controller_Grid_Action extends Mage_Adminhtml_Controller_Act
         }
         return $this;
     }
+    
+    /**
+     * Initialize the current grid model and profile, check the given permissions,
+     * then prepare the layout for a window form
+     * 
+     * @param string $formHandle Form page layout handle
+     * @param string $errorHandle Error page layout handle
+     * @param string $errorBlockName Error message block name
+     * @param string|array $permissions Required user permission(s)
+     * @param bool $anyPermission Whether all the given permissions are required, or just one of them
+     * @return BL_CustomGrid_Controller_Grid_Action
+     */
+    protected function _initWindowFormLayout(
+        $formHandle,
+        $errorHandle,
+        $errorBlockName,
+        $permissions = null,
+        $anyPermission = true
+    ) {
+        $handles = array('blcg_empty');
+        $error = false;
+    
+        try {
+            $gridModel = $this->_initGridModel();
+            $this->_initGridProfile();
+        
+            if (!is_null($permissions)) {
+                if (!$gridModel->checkUserPermissions($permissions, null, $anyPermission)) {
+                    Mage::throwException($this->__('You are not allowed to use this action'));
+                }
+            }
+        
+            $handles[] = $formHandle;
+        
+        } catch (Mage_Core_Exception $e) {
+            $handles[] = $errorHandle;
+            $error = $e->getMessage();
+        }
+    
+        $this->loadLayout($handles);
+        
+        if ($error !== false) {
+            if ($errorBlock = $this->getLayout()->getBlock($errorBlockName)) {
+                /** @var $errorBlock Mage_Adminhtml_Block_Template */
+                $errorBlock->setErrorText($error);
+            }
+        }
+        
+        return $this;
+    }
 }
