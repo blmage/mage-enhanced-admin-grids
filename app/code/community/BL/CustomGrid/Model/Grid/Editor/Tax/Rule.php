@@ -84,6 +84,7 @@ class BL_CustomGrid_Model_Grid_Editor_Tax_Rule extends BL_CustomGrid_Model_Grid_
             'customer_tax_classes' => array(
                 'global' => array(
                     'entity_value_callback' => array($this, 'getContextTaxRuleFieldValue'),
+                    'entity_value_key' => 'tax_customer_class',
                 ),
                 'form_field' => array(
                     'type'     => 'multiselect',
@@ -96,6 +97,7 @@ class BL_CustomGrid_Model_Grid_Editor_Tax_Rule extends BL_CustomGrid_Model_Grid_
             'product_tax_classes' => array(
                 'global' => array(
                     'entity_value_callback' => array($this, 'getContextTaxRuleFieldValue'),
+                    'entity_value_key' => 'tax_product_class',
                 ),
                 'form_field' => array(
                     'type'     => 'multiselect',
@@ -108,6 +110,7 @@ class BL_CustomGrid_Model_Grid_Editor_Tax_Rule extends BL_CustomGrid_Model_Grid_
             'tax_rates' => array(
                 'global' => array(
                     'entity_value_callback' => array($this, 'getContextTaxRuleFieldValue'),
+                    'entity_value_key' => 'tax_rate',
                 ),
                 'form_field' => array(
                     'type'     => 'multiselect',
@@ -222,6 +225,7 @@ class BL_CustomGrid_Model_Grid_Editor_Tax_Rule extends BL_CustomGrid_Model_Grid_
     {
         $editedEntity->addData(
             array(
+                'blcg_original_code' => $editedEntity->getCode(),
                 'tax_customer_class' => array_unique($editedEntity->getCustomerTaxClasses()),
                 'tax_product_class'  => array_unique($editedEntity->getProductTaxClasses()),
                 'tax_rate'           => array_unique($editedEntity->getRates()),
@@ -243,7 +247,7 @@ class BL_CustomGrid_Model_Grid_Editor_Tax_Rule extends BL_CustomGrid_Model_Grid_
                     $editedEntity->getTaxCustomerClass(),
                     $editedEntity->getTaxProductClass()
                 ),
-                array($editedEntity->getCode())
+                array($editedEntity->getData('blcg_original_code'))
             );
             
             if (count($existingRules) > 0) {
@@ -254,7 +258,7 @@ class BL_CustomGrid_Model_Grid_Editor_Tax_Rule extends BL_CustomGrid_Model_Grid_
                 Mage::throwException(
                     $taxHelper->__(
                         'Rules (%s) already exist for the specified Tax Rate, Customer Tax Class '
-                        . ' and Product Tax Class combinations',
+                        . 'and Product Tax Class combinations',
                         $ruleCodes
                     )
                 );
