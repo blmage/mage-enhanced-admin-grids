@@ -203,7 +203,7 @@ class BL_CustomGrid_Model_Grid_Editor_Product extends BL_CustomGrid_Model_Grid_E
     /**
      * Return the specified inventory data from the given product
      *
-     * @param Mage_Catalog_Model_Product $product Product
+     * @param Mage_Catalog_Model_Product $product Edited product
      * @param string $field Inventory field name
      * @param bool $useConfigDefault Whether the field uses config values by default
      * @return mixed
@@ -219,20 +219,16 @@ class BL_CustomGrid_Model_Grid_Editor_Product extends BL_CustomGrid_Model_Grid_E
         }
         return Mage::getStoreConfig(Mage_CatalogInventory_Model_Stock_Item::XML_PATH_ITEM . $field);
     }
-
+    
     /**
-     * Return whether the given field is editable for the given product under the given editor context
+     * Return whether the given field is editable for the given product
      * 
-     * @param Mage_Catalog_Model_Product $product
+     * @param Mage_Catalog_Model_Product $product Checked product
      * @param string $fieldId Edited field ID
-     * @param BL_CustomGrid_Model_Grid_Editor_Context $context Editor context
      * @return bool|string
      */
-    protected function _checkContextProductFieldEditability(
-        Mage_Catalog_Model_Product $product,
-        $fieldId,
-        BL_CustomGrid_Model_Grid_Editor_Context $context
-    ) {
+    protected function _checkContextProductFieldEditability(Mage_Catalog_Model_Product $product, $fieldId)
+    {
         $result = true;
         
         if ($fieldId == 'qty') {
@@ -253,20 +249,40 @@ class BL_CustomGrid_Model_Grid_Editor_Product extends BL_CustomGrid_Model_Grid_E
         
         return $result;
     }
-
+    
     /**
-     * Return whether the given attribute is editable for the given product under the given editor context
+     * Return whether the given attribute is locked on the given product
+     * 
+     * @param Mage_Catalog_Model_Product $product Edited product
+     * @param $attributeCode Attribute code
+     * @return bool
+     */
+    protected function _isProductAttributeLocked(Mage_Catalog_Model_Product $product, $attributeCode)
+    {
+        return ($product->hasLockedAttributes() && in_array($attributeCode, $product->getLockedAttributes()));
+    }
+    
+    /**
+     * Return whether the given product has a valid store ID
+     * 
+     * @param Mage_Catalog_Model_Product $product Checked product
+     * @return bool
+     */
+    protected function _hasProductValidStoreId(Mage_Catalog_Model_Product $product)
+    {
+        return ($product->getStoreId() != $this->_getDefaultStoreId())
+            && !in_array($product->getStoreId(), $product->getStoreIds());
+    }
+    
+    /**
+     * Return whether the given attribute is editable for the given product
      *
-     * @param Mage_Catalog_Model_Product $product
-     * @param string $attributeCode Edited attribute code
-     * @param BL_CustomGrid_Model_Grid_Editor_Context $context Editor context
+     * @param Mage_Catalog_Model_Product $product Checked product
+     * @param string $attributeCode Checked attribute code
      * @return bool|string
      */
-    protected function _checkContextProductAttributeEditability(
-        Mage_Catalog_Model_Product $product,
-        $attributeCode,
-        BL_CustomGrid_Model_Grid_Editor_Context $context
-    ) {
+    protected function _checkContextProductAttributeEditability(Mage_Catalog_Model_Product $product, $attributeCode)
+    {
         $helper = $this->getBaseHelper();
         $result = false;
         $productAttributes = $product->getAttributes();
@@ -280,11 +296,9 @@ class BL_CustomGrid_Model_Grid_Editor_Product extends BL_CustomGrid_Model_Grid_E
         }
         
         if ($result) {
-            if ($product->hasLockedAttributes()
-                && in_array($attributeCode, $product->getLockedAttributes())) {
+            if ($this->_isProductAttributeLocked($product, $attributeCode)) {
                 $result = $helper->__('This attribute is locked');
-            } elseif (($product->getStoreId() != $this->_getDefaultStoreId())
-                && !in_array($product->getStoreId(), $product->getStoreIds())) {
+            } elseif ($this->_hasProductValidStoreId($product)) {
                 $result = $helper->__('The product is not associated to the corresponding website');
             } else if (($product->getTypeId() == Mage_Catalog_Model_Product_Type::TYPE_BUNDLE)
                 && in_array($attributeCode, array('sku', 'weight', 'price', 'special_price', 'tier_price'))) {
@@ -317,9 +331,9 @@ class BL_CustomGrid_Model_Grid_Editor_Product extends BL_CustomGrid_Model_Grid_E
             $valueId = $context->getValueId();
             
             if ($valueOrigin == BL_CustomGrid_Model_Grid_Editor_Abstract::EDITABLE_TYPE_FIELD) {
-                $result = $this->_checkContextProductFieldEditability($product, $valueId, $context);
+                $result = $this->_checkContextProductFieldEditability($product, $valueId);
             } elseif ($valueOrigin == BL_CustomGrid_Model_Grid_Editor_Abstract::EDITABLE_TYPE_ATTRIBUTE) {
-                $result = $this->_checkContextProductAttributeEditability($product, $valueId, $context);
+                $result = $this->_checkContextProductAttributeEditability($product, $valueId);
             }
         }
         

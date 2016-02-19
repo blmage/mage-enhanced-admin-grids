@@ -61,6 +61,19 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Product_Inventory extends 
         return $data;
     }
     
+    /**
+     * Return the renderable value corresponding to the given options-based raw value
+     * 
+     * @param mixed $value Raw value
+     * @return mixed
+     */
+    protected function _getOptionsRenderableValue($value)
+    {
+        return (is_array($hash = $this->getColumn()->getOptionHash()) && isset($hash[$value]))
+            ? $hash[$value]
+            : $value;
+    }
+    
     protected function _getValue(Varien_Object $row)
     {
         $fieldType = $this->getColumn()->getFieldType();
@@ -69,14 +82,13 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Product_Inventory extends 
         if (!$useConfig) {
             $data = $row->getData($this->getColumn()->getIndex());
         }
+        
         if ($fieldType == 'boolean') {
             $data = $this->__($data ? 'Yes' : 'No');
         } elseif ($fieldType == 'decimal') {
             $data *= 1;
-        } elseif (($fieldType == 'options')
-            && is_array($hash = $this->getColumn()->getOptionHash())
-            && isset($hash[$data])) {
-            $data = $hash[$data];
+        } elseif ($fieldType == 'options') {
+            $data = $this->_getOptionsRenderableValue($data);
         }
         
         $data = strval($data);

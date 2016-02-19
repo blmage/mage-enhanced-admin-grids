@@ -28,7 +28,7 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
     /**
      * Session base keys
      */
-    const SESSION_BASE_KEY_SESSION_VALUES = '_blcg_profile_session_values_';
+    const SESSION_BASE_KEY_SESSION_VALUES  = '_blcg_profile_session_values_';
     const SESSION_BASE_KEY_APPLIED_FILTERS = '_blcg_applied_filters_';
     const SESSION_BASE_KEY_REMOVED_FILTERS = '_blcg_removed_filters_';
     
@@ -288,6 +288,79 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
     }
     
     /**
+     * @see BL_CustomGrid_Model_Grid_Profile::_getDefaultForValues()
+     * @param int $ownValueId Value ID for the current user
+     * @param int $isOwnValueChosen Whether the current user value is chosen
+     * @param string $chooseForOwnAction Specific action key for "Choose Default Profile (Own)" action
+     * @param string $defaultForValueGetterName Name of the getter method from the grid model usable to retrieve
+     *                                          the profile ID that is currently set as default for a given value ID
+     * @return array
+     * @throws BL_CustomGrid_Grid_Permission_Exception
+     */
+    protected function _getDefaultForOwnValues(
+        $ownValueId,
+        $isOwnValueChosen,
+        $chooseForOwnAction,
+        $defaultForValueGetterName
+    ) {
+        $gridModel = $this->getGridModel();
+        $defaultForValues = array();
+        
+        if ($gridModel->checkUserActionPermission($chooseForOwnAction)) {
+            if ($isOwnValueChosen) {
+                $defaultForValues[] = $ownValueId;
+            }
+        } elseif ($isOwnValueChosen) {
+            $gridModel->getSentry()->throwPermissionException();
+        } elseif (call_user_func(array($gridModel, $defaultForValueGetterName)) === $this->getId()) {
+            $defaultForValues[] = $ownValueId;
+        }
+        
+        return $defaultForValues;
+    }
+    
+    /**
+     * @see BL_CustomGrid_Model_Grid_Profile::_getDefaultForValues()
+     * @param int $ownValueId Value ID for the current user
+     * @param int[] $otherChosenIds Other chosen values IDs
+     * @param string $chooseForOthersAction Specific action key for "Choose Default Profile (Others)" action
+     * @param string $defaultForValueGetterName Name of the getter method from the grid model usable to retrieve
+     *                                          the profile ID that is currently set as default for a given value ID
+     * @param string $valueModelCode Class code of the Magento model corresponding to the handled values
+     * @return array
+     * @throws BL_CustomGrid_Grid_Permission_Exception
+     */
+    protected function _getDefaultForOthersValues(
+        $ownValueId,
+        array $otherChosenIds,
+        $chooseForOthersAction,
+        $defaultForValueGetterName,
+        $valueModelCode
+    ) {
+        $gridModel = $this->getGridModel();
+        $defaultForValues = array();
+        
+        if ($gridModel->checkUserActionPermission($chooseForOthersAction)) {
+            $defaultForValues = $otherChosenIds;
+        } elseif (!empty($otherChosenIds)) {
+            $gridModel->getSentry()->throwPermissionException();
+        } else {
+            $valuesIds = Mage::getModel($valueModelCode)
+                ->getCollection()
+                ->getAllIds();
+        
+            foreach ($valuesIds as $valueId) {
+                if (($valueId != $ownValueId)
+                    && (call_user_func(array($gridModel, $defaultForValueGetterName), $valueId) === $this->getId())) {
+                    $defaultForValues[] = $valueId;
+                }
+            }
+        }
+        
+        return $defaultForValues;
+    }
+    
+    /**
      * Check, complete and return the given array of values IDs (roles or users)
      * for which this profile will be set as default
      *
@@ -295,7 +368,7 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
      * @param int $ownValueId Corresponding value ID for the current user
      * @param string $chooseForOwnAction Specific action key for "Choose Default Profile (Own)" action
      * @param string $chooseForOthersAction Specific action key for "Choose Default Profile (Others)" action
-     * @param string $defaultForValueGetterName Name of the getter from the grid model usable to retrieve
+     * @param string $defaultForValueGetterName Name of the getter method from the grid model usable to retrieve
      *                                          the profile ID that is currently set as default for a given value ID
      * @param string $valueModelCode Class code of the Magento model corresponding to the handled values
      * @return int[]
@@ -308,40 +381,24 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
         $defaultForValueGetterName,
         $valueModelCode
     ) {
-        $profileId = $this->getId();
-        $gridModel = $this->getGridModel();
-        
-        $defaultForValues = array();
         $values = array_filter($values);
-        $ownChosen = in_array($ownValueId, $values);
         $otherChosenIds = array_diff($values, array($ownValueId));
-            
-        if ($gridModel->checkUserActionPermission($chooseForOwnAction)) {
-            if ($ownChosen) {
-                $defaultForValues[] = $ownValueId;
-            }
-        } elseif ($ownChosen) {
-            $gridModel->getSentry()->throwPermissionException();
-        } elseif (call_user_func(array($gridModel, $defaultForValueGetterName)) === $profileId) {
-            $defaultForValues[] = $ownValueId;
-        }
         
-        if ($gridModel->checkUserActionPermission($chooseForOthersAction)) {
-            $defaultForValues = array_merge($defaultForValues, $otherChosenIds);
-        } elseif (!empty($otherChosenIds)) {
-            $gridModel->getSentry()->throwPermissionException();
-        } else {
-            $valuesIds = Mage::getModel($valueModelCode)->getCollection()->getAllIds();
-            
-            foreach ($valuesIds as $valueId) {
-                if (($valueId != $ownValueId)
-                    && (call_user_func(array($gridModel, $defaultForValueGetterName), $valueId) === $profileId)) {
-                    $defaultForValues[] = $valueId;
-                }
-            }
-        }
-        
-        return $defaultForValues;
+        return array_merge(
+            $this->_getDefaultForOwnValues(
+                $ownValueId,
+                in_array($ownValueId, $values),
+                $chooseForOwnAction,
+                $defaultForValueGetterName
+            ),
+            $this->_getDefaultForOthersValues(
+                $ownValueId,
+                $otherChosenIds,
+                $chooseForOthersAction,
+                $defaultForValueGetterName,
+                $valueModelCode
+            )
+        );
     }
     
     /**

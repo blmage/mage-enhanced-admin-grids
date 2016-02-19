@@ -170,16 +170,13 @@ abstract class BL_CustomGrid_Model_Custom_Column_Abstract extends BL_CustomGrid_
      */
     protected function _setConfigArrayValue($key, $value, $merge = false)
     {
-        if (!is_array($value)) {
-            $value = array($value);
-        }
         if ($merge) {
             if (!is_array($currentValue = $this->_getData($key))) {
                 $currentValue = array();
             }
-            $value = array_merge($currentValue, $value);
+            $value = array_merge($currentValue, (array) $value);
         }
-        return $this->setData($key, $value);
+        return $this->setData($key, (array) $value);
     }
     
     /**
