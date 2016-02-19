@@ -15,11 +15,27 @@
 
 class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Store extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
+    /**
+     * Return the system store model 
+     * 
+     * @return Mage_Adminhtml_Model_System_Store
+     */
     protected function _getStoreModel()
     {
         return Mage::getSingleton('adminhtml/system_store');
     }
     
+    /**
+     * Render the given flattened website / store / store view value
+     * 
+     * @param string $flatValue Flattened value composed of the three store scopes
+     * @param string $space Spacing string
+     * @param string $break Scope separator string
+     * @param bool $skipWebsite Whether the website should not be rendered
+     * @param bool $skipStore Whether the store should not be rendered
+     * @param bool $skipStoreView Whether the store view should not be rendered
+     * @return string
+     */
     protected function _renderFlatValue($flatValue, $space, $break, $skipWebsite, $skipStore, $skipStoreView)
     {
         $result = '';
@@ -45,13 +61,24 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Store extends Mage_Adminht
         $scopeIndex = 0;
         
         foreach ($scopes as $scope) {
-            $result .= str_repeat($space, 3*$scopeIndex++) . $scope . $break;
+            $result .= str_repeat($space, 3 * $scopeIndex++) . $scope . $break;
         }
         
         $result .= $this->helper('adminhtml')->__(' [deleted]');
         return $result;
     }
     
+    /**
+     * Render the given stores structure
+     * 
+     * @param array $storesStructure Stores structure
+     * @param string $space Spacing string
+     * @param string $break Scope separator string
+     * @param bool $skipWebsite Whether the website should not be rendered
+     * @param bool $skipStore Whether the store should not be rendered
+     * @param bool $skipStoreView Whether the store view should not be rendered
+     * @return string
+     */
     protected function _renderStoresStructure(
         array $storesStructure,
         $space,
@@ -88,10 +115,27 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Store extends Mage_Adminht
         return $result;
     }
     
+    /**
+     * @param array $stores Store values
+     * @return bool
+     */
+    protected function _isAllStoreViewsValue(array $stores)
+    {
+        return (in_array(0, $stores) && (count($stores) == 1));
+    }
+    
+    /**
+     * Render the given grid row value
+     * 
+     * @param Varien_Object $row Grid row
+     * @param $space Spacing character
+     * @param $break Breaking character
+     * @return string
+     */
     protected function _renderRow(Varien_Object $row, $space, $break)
     {
         $result = '';
-        $originalStores = $row->getData($this->getColumn()->getIndex());
+        $originalStores = (array) $row->getData($this->getColumn()->getIndex());
         $skipWebsite    = (bool) $this->getColumn()->getSkipWebsite();
         $skipStore      = (bool) $this->getColumn()->getSkipStore();
         $skipStoreView  = (bool) $this->getColumn()->getSkipStoreView();
@@ -100,13 +144,13 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Store extends Mage_Adminht
         
         if (is_null($originalStores) && ($flatValue = $row->getData($flatValueKey))) {
             return $this->_renderFlatValue($flatValue, $space, $break, $skipWebsite, $skipStore, $skipStoreView);
-        } elseif (!is_array($originalStores)) {
-            $originalStores = array($originalStores);
         }
         if (empty($originalStores)) {
             return '';
-        } elseif (in_array(0, $originalStores) && (count($originalStores) == 1) && !$skipAllViews) {
-            $result .= $this->helper('adminhtml')->__('All Store Views');
+        } elseif ($this->_isAllStoreViewsValue($originalStores) && !$skipAllViews) {
+            /** @var Mage_Adminhtml_Helper_Data $helper */
+            $helper  = $this->helper('adminhtml');
+            $result .= $helper->__('All Store Views');
         }
         
         $result .= $this->_renderStoresStructure(

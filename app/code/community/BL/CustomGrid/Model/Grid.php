@@ -706,6 +706,53 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     }
     
     /**
+     * Reapply the previously remembered session values from the given profile
+     * 
+     * @param BL_CustomGrid_Model_Grid_Profile $profile Grid profile
+     * @return BL_CustomGrid_Model_Grid
+     */
+    protected function _reapplyProfileRememberedValues(BL_CustomGrid_Model_Grid_Profile $profile)
+    {
+        $session = $this->getAdminhtmlSession();
+        $rememberedValues = $profile->getRememberedSessionValues();
+        
+        foreach ($this->getBlockVarNames() as $gridParam => $varName) {
+            if ($sessionKey = $this->getBlockParamSessionKey($varName)) {
+                if (isset($rememberedValues[$gridParam])) {
+                    $session->setData($sessionKey, $rememberedValues[$gridParam]);
+                } else {
+                    $session->unsetData($sessionKey);
+                }
+            }
+        }
+        
+        return $this;
+    }
+    
+    /**
+     * Return the rememberable session values from the given profile 
+     * 
+     * @param BL_CustomGrid_Model_Grid_Profile $profile Grid profile
+     * @return array
+     */
+    protected function _getProfileRememberableValues(BL_CustomGrid_Model_Grid_Profile $profile)
+    {
+        $session = $this->getAdminhtmlSession();
+        $rememberableParams = $profile->getRememberedSessionParams();
+        $rememberableValues = array();
+        
+        foreach ($this->getBlockVarNames() as $gridParam => $varName) {
+            if ($sessionKey = $this->getBlockParamSessionKey($varName)) {
+                if (in_array($gridParam, $rememberableParams) && $session->hasData($sessionKey)) {
+                    $rememberableValues[$gridParam] = $session->getData($sessionKey);
+                }
+            }
+        }
+        
+        return $rememberableValues;
+    }
+    
+    /**
      * Handle a permanent profile change, by restoring and/or remembering the necessary session values
      * 
      * @param BL_CustomGrid_Model_Grid_Profile $newProfile New permanent profile
@@ -716,32 +763,13 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
         BL_CustomGrid_Model_Grid_Profile $newProfile,
         BL_CustomGrid_Model_Grid_Profile $previousProfile = null
     ) {
-        $session = $this->getAdminhtmlSession();
-        $rememberedValues   = $newProfile->getRememberedSessionValues();
-        $rememberableValues = array();
-        $rememberableParams = ($previousProfile ? $previousProfile->getRememberedSessionParams() : array());
-        $isFilterRememberable = false;
-        
-        foreach ($this->getBlockVarNames() as $gridParam => $varName) {
-            $isRememberedValue = isset($rememberedValues[$gridParam]);
-            
-            if ($sessionKey = $this->getBlockParamSessionKey($varName)) {
-                if (in_array($gridParam, $rememberableParams) && $session->hasData($sessionKey)) {
-                    $rememberableValues[$gridParam] = $session->getData($sessionKey);
-                    $isFilterRememberable = ($varName == self::GRID_PARAM_FILTER);
-                }
-                if ($isRememberedValue) {
-                    $session->setData($sessionKey, $rememberedValues[$gridParam]);
-                } else {
-                    $session->unsetData($sessionKey);
-                }
-            }
-        }
+        $this->_reapplyProfileRememberedValues($newProfile);
         
         if ($previousProfile) {
-            $previousProfile->setRememberableSessionValues($rememberableValues);
+            $rememberableValues = $this->_getProfileRememberableValues($previousProfile);
+            $previousProfile->setRememberedSessionValues($rememberableValues);
             
-            if ($isFilterRememberable) {
+            if (isset($rememberableValues[self::GRID_PARAM_FILTER])) {
                 // Ensure that the next filters verification won't mess with the default filters
                 // when switching back to the previous profile
                 $previousProfile->setSessionAppliedFilters(array());
@@ -892,9 +920,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     public function getProfileId()
     {
         if (!$this->hasData('profile_id')) {
-            if (!$this->getId()) {
-                return null;
-            } else {
+            if ($this->getId()) {
                 $profiles  = $this->getProfiles(true);
                 $profileId = key($profiles);
                 $sessionProfileId = $this->getSessionProfileId();

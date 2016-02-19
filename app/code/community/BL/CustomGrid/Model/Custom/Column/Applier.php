@@ -187,6 +187,42 @@ class BL_CustomGrid_Model_Custom_Column_Applier extends BL_CustomGrid_Model_Cust
     }
     
     /**
+     * Handle the given result of a verification made on a grid element and a grid block of the given types,
+     * according to the given behaviour, and return whether custom columns can still be applied
+     * 
+     * @param bool $result Verification result
+     * @param string $elementType Grid element type
+     * @param string $blockType Grid block type
+     * @param string $behaviour Usable behaviour
+     * @return bool
+     */
+    protected function _handleElementVerificationResult($result, $elementType, $blockType, $behaviour)
+    {
+        /** @var $session BL_CustomGrid_Model_Session */
+        $session = Mage::getSingleton('customgrid/session');
+        
+        if ($result) {
+            $this->_resetVerificationMessagesFlags($elementType, $blockType);
+        } else {
+            if ($behaviour == self::UNVERIFIED_BEHAVIOUR_WARNING) {
+                $result = true;
+            
+                if ($this->_canDisplayVerificationMessage('warning', $elementType, $blockType)
+                    && ($warningMessage = $this->_getGridElementWarningMessage($elementType, $blockType))) {
+                    $session->addWarning($warningMessage);
+                }
+            } else {
+                if ($this->_canDisplayVerificationMessage('error', $elementType, $blockType)
+                    && ($errorMessage = $this->_getGridElementErrorMessage($elementType, $blockType))) {
+                    $session->addError($errorMessage);
+                }
+            }
+        }
+        
+        return $result;
+    }
+    
+    /**
      * Verify the sanity of the given grid element, and return whether custom columns can be applied to it
      * (the most safely possible). By default, it checks :
      * 
@@ -212,9 +248,6 @@ class BL_CustomGrid_Model_Custom_Column_Applier extends BL_CustomGrid_Model_Cust
         $blockType = $gridModel->getBlockType();
         $dataKey   = $elementType . '_verifications_cache/' . $blockType;
         
-        /** @var $session BL_CustomGrid_Model_Session */
-        $session = Mage::getSingleton('customgrid/session');
-        
         if (!$this->hasData($dataKey)) {
             $behaviour = $this->_getUnverifiedElementBehaviour($elementType);
             
@@ -223,25 +256,11 @@ class BL_CustomGrid_Model_Custom_Column_Applier extends BL_CustomGrid_Model_Cust
             } else {
                 $result = $this->_getGridElementVerificationResult($elementType, $collection, $gridBlock, $gridModel);
             }
-            if ($result) {
-                $this->_resetVerificationMessagesFlags($elementType, $blockType);
-            } else {
-                if ($behaviour == self::UNVERIFIED_BEHAVIOUR_WARNING) {
-                    $result = true;
-                    
-                    if ($this->_canDisplayVerificationMessage('warning', $elementType, $blockType)
-                        && ($warningMessage = $this->_getGridElementWarningMessage($elementType, $blockType))) {
-                        $session->addWarning($warningMessage);
-                    }
-                } else {
-                    if ($this->_canDisplayVerificationMessage('error', $elementType, $blockType)
-                        && ($errorMessage = $this->_getGridElementErrorMessage($elementType, $blockType))) {
-                        $session->addError($errorMessage);
-                    }
-                }
-            }
             
-            $this->setData($dataKey, $result);
+            $this->setData(
+                $dataKey,
+                $this->_handleElementVerificationResult($result, $elementType, $blockType, $behaviour)
+            );
         }
         
         return $this->getData($dataKey);

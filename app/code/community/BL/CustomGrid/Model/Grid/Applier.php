@@ -932,6 +932,30 @@ class BL_CustomGrid_Model_Grid_Applier extends BL_CustomGrid_Model_Grid_Worker_A
     }
     
     /**
+     * Return the renderer type of the given grid column
+     * 
+     * @param BL_CustomGrid_Model_Grid_Column $gridColumn Grid column
+     * @param string[] $attributesRenderers Attributes renderer types
+     * @return string|null
+     */
+    protected function _getGridColumnRendererType(
+        BL_CustomGrid_Model_Grid_Column $gridColumn,
+        array $attributesRenderers
+    ) {
+        $rendererType = null;
+        
+        if ($gridColumn->isCollection()) {
+            $rendererType = $gridColumn->getRendererType();
+        } elseif ($gridColumn->isAttribute()) {
+            $rendererType = $attributesRenderers[$gridColumn->getIndex()];
+        } elseif ($gridColumn->isCustom()) {
+            $rendererType = $gridColumn->getRendererType();
+        }
+        
+        return $rendererType;
+    }
+    
+    /**
      * Prepare the given default filter value by first checking it, then (if necessary) adding some useful informations
      * to it that will later be helpful in determining the validity of each corresponding filter
      * 
@@ -951,16 +975,7 @@ class BL_CustomGrid_Model_Grid_Applier extends BL_CustomGrid_Model_Grid_Worker_A
             foreach ($filters as $columnBlockId => $filterData) {
                 if (isset($columns[$columnBlockId])) {
                     $column = $columns[$columnBlockId];
-                    
-                    if ($column->isCollection()) {
-                        $rendererType = $column->getRendererType();
-                    } elseif ($column->isAttribute()) {
-                        $rendererType = $attributesRenderers[$column->getIndex()];
-                    } elseif ($column->isCustom()) {
-                        $rendererType = $column->getRendererType();
-                    } else {
-                        $rendererType = null;
-                    }
+                    $rendererType = $this->_getGridColumnRendererType($column, $attributesRenderers);
                     
                     $filters[$columnBlockId] = array(
                         'value'  => $filterData,

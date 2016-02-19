@@ -202,7 +202,7 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
     }
     
     /**
-     * Get the previously remembered session values
+     * Return the previously remembered session values
      * 
      * @return array
      */

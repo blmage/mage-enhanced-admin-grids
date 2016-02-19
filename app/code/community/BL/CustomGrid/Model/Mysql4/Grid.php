@@ -650,6 +650,20 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
     }
     
     /**
+     * Return whether the given profile values contain valid assignation values
+     * 
+     * @param array $profileValues Profile values
+     * @return bool
+     */
+    protected function _isAssignableProfileValues(array $profileValues)
+    {
+        return isset($values['is_restricted'])
+            && $values['is_restricted']
+            && isset($values['assigned_to'])
+            && is_array($values['assigned_to']);
+    }
+    
+    /**
      * Update the given profile values, and possibly assignations
      * 
      * @param int $gridId Grid model ID
@@ -668,10 +682,8 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
         }
         
         try {
-            if (isset($values['is_restricted'])) {
-                if ($values['is_restricted'] && isset($values['assigned_to']) && is_array($values['assigned_to'])) {
-                    $this->_assignProfile($profileId, $values['assigned_to']);
-                }
+            if ($this->_isAssignableProfileValues($values)) {
+                $this->_assignProfile($profileId, $values['assigned_to']);
             }
             
             $profilesTable = $this->_getProfilesTable();
