@@ -657,10 +657,10 @@ class BL_CustomGrid_Model_Mysql4_Grid extends Mage_Core_Model_Mysql4_Abstract
      */
     protected function _isAssignableProfileValues(array $profileValues)
     {
-        return isset($values['is_restricted'])
-            && $values['is_restricted']
-            && isset($values['assigned_to'])
-            && is_array($values['assigned_to']);
+        return isset($profileValues['is_restricted'])
+            && $profileValues['is_restricted']
+            && isset($profileValues['assigned_to'])
+            && is_array($profileValues['assigned_to']);
     }
     
     /**
