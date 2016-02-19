@@ -555,23 +555,18 @@ class BL_CustomGrid_Helper_Collection extends Mage_Core_Helper_Abstract
         Mage_Adminhtml_Block_Widget_Grid $gridBlock,
         array $filters
     ) {
+        /** @var BL_CustomGrid_Helper_Grid $gridHelper */
+        $gridHelper = Mage::helper('customgrid/grid');
         $unmappedFields = array();
         
         if (is_array($filtersMap = $this->_getCollectionFiltersMap($collection))) {
             // Search for "potentially dangerous" unmapped fields in applied filters
             $filtersMap = (isset($filtersMap['fields']) ? $filtersMap['fields'] : array());
+            $filtersIndexes = $gridHelper->getGridBlockActiveFiltersIndexes($gridBlock, $filters);
             
-            foreach ($gridBlock->getColumns() as $columnBlockId => $columnBlock) {
-                if (isset($filters[$columnBlockId])
-                    && (!empty($filters[$columnBlockId]) || strlen($filters[$columnBlockId]) > 0)
-                    && $columnBlock->getFilter()) {
-                    $field = $columnBlock->getFilterIndex()
-                        ? $columnBlock->getFilterIndex()
-                        : $columnBlock->getIndex();
-                    
-                    if ($this->_isUnmappedFilterFied($field, $filtersMap)) {
-                        $unmappedFields[] = $field;
-                    }
+            foreach ($filtersIndexes as $filterIndex) {
+                if ($this->_isUnmappedFilterFied($filterIndex, $filtersMap)) {
+                    $unmappedFields[] = $filterIndex;
                 }
             }
         }

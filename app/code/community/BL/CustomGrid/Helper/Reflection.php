@@ -19,22 +19,39 @@ class BL_CustomGrid_Helper_Reflection extends Mage_Core_Helper_Abstract
     const VALUE_TYPE_PROPERTY = 'property';
     
     /**
+     * Return whether the given value is reflectable
+     * 
+     * @param string $value Full value name
+     * @param array $valueParts Value parts
+     * @param bool $graceful Whether to not throw an exception if the value is not reflectable
+     * @return bool
+     * @throws Mage_Core_Exception
+     */
+    protected function _checkValueReflectability($value, array $valueParts, $graceful)
+    {
+        if ((count($valueParts) != 2) || (strpos($valueParts[0], '/') === false)) {
+            if (!$graceful) {
+                Mage::throwException('Invalid reflected value requested : "' . $value . '"');
+            }
+            return false;
+        }
+        return true;
+    }
+    
+    /**
      * Return the reflected counterpart for the given value, already set as accessible for convenience
      * 
      * @param mixed $value Full value name, including class code
      * @param mixed $valueType Value type (method or property)
      * @param mixed $classType Class type (block or model)
-     * @param bool $graceful Whether to throw an exception if the reflected value could not be retrieved
+     * @param bool $graceful Whether to not throw an exception if the reflected value could not be retrieved
      * @return BL_CustomGrid_Model_Reflection_Method|BL_CustomGrid_Model_Reflection_Property|null
      */
     public function getReflectionValue($value, $valueType, $classType, $graceful = false)
     {
         $valueParts = explode('::', $value);
         
-        if ((count($valueParts) != 2) || (strpos($valueParts[0], '/') === false)) {
-            if (!$graceful) {
-                Mage::throwException('Invalid reflected value requested : "' . $value . '"');
-            }
+        if (!$this->_checkValueReflectability($value, $valueParts, $graceful)) {
             return null;
         }
         

@@ -177,10 +177,19 @@ class BL_CustomGrid_Model_Custom_Column_Product_Categories extends BL_CustomGrid
         return true;
     }
     
+    /**
+     * Return a select query object, suitable for being used on the given collection as a sub-query,
+     * that fetches a category IDs list or count for each product retrieved by the given collection 
+     * 
+     * @param Varien_Data_Collection_Db $collection Products collection
+     * @param bool $forFilter Whether the query will be used for filtering purposes (fetch IDs count instead of list)
+     * @param array|null $filteredCategoryIds Category IDs on which to filter, if any
+     * @return Zend_Db_Select
+     */
     protected function _getCategoryIdsSelect(
         Varien_Data_Collection_Db $collection,
         $forFilter = false,
-        $categoryIds = null
+        $filteredCategoryIds = null
     ) {
         $collectionHandler = $this->getCollectionHandler();
         $mainAlias = $collectionHandler->getCollectionMainTableAlias($collection);
@@ -200,8 +209,8 @@ class BL_CustomGrid_Model_Custom_Column_Product_Categories extends BL_CustomGrid
         if (!$forFilter) {
             $select->group($productAlias . '.product_id');
         }
-        if (is_array($categoryIds)) {
-            $select->where($qi($productAlias . '.category_id') . ' IN (?)', $categoryIds);
+        if (is_array($filteredCategoryIds)) {
+            $select->where($qi($productAlias . '.category_id') . ' IN (?)', $filteredCategoryIds);
         }
         
         return $select;
@@ -218,6 +227,57 @@ class BL_CustomGrid_Model_Custom_Column_Product_Categories extends BL_CustomGrid
         return $this;
     }
     
+    /**
+     * Apply the given value as a boolean filter on the given collection
+     * 
+     * @param Varien_Data_Collection_Db $collection Products collection
+     * @param mixed $filterValue Filter value
+     * @return $this
+     */
+    protected function _applyBooleanFilterToCollection(Varien_Data_Collection_Db $collection, $filterValue)
+    {
+        if (!is_null($filterValue)) {
+            $countQuery = '(' . $this->_getCategoryIdsSelect($collection, true) . ')';
+            $collection->getSelect()->where(new Zend_Db_Expr($countQuery) . ' ' . ($filterValue ? '>' : '=') . ' 0');
+        }
+        return $this;
+    }
+    
+    /**
+     * Apply the given value as a count filter on the given collection
+     *
+     * @param Varien_Data_Collection_Db $collection Products collection
+     * @param mixed $filterValue Filter value
+     * @param array $params Filter parameters
+     * @return $this
+     */
+    protected function _applyCountFilterToCollection(
+        Varien_Data_Collection_Db $collection,
+        $filterValue,
+        array $params
+    ) {
+        $categoryIds = array_filter(array_unique(explode(',', $filterValue)));
+        $filterMode  = $this->_extractStringParam($params, 'filter_mode', self::FILTER_MODE_ONE_CHOOSEN, true);
+        $operator = '>=';
+        $number   = '1';
+    
+        if ($filterMode == self::FILTER_MODE_ALL_CHOOSEN) {
+            $number = count($categoryIds);
+        } elseif ($filterMode == self::FILTER_MODE_NONE_CHOOSEN) {
+            $operator = '=';
+            $number   = '0';
+        } elseif ($filterMode == self::FILTER_MODE_CUSTOM) {
+            if (!is_int($number = $this->_extractIntParam($params, 'custom_filter_number', null, true))
+                || !($operator = $this->_extractStringParam($params, 'custom_filter_operator', null, true))) {
+                return $this;
+            }
+        }
+    
+        $countQuery = '(' . $this->_getCategoryIdsSelect($collection, true, $categoryIds) . ')';
+        $collection->getSelect()->where(new Zend_Db_Expr($countQuery) . ' ' . $operator . ' ' . $number);
+        return $this;
+    }
+    
     public function addFilterToGridCollection(
         Varien_Data_Collection_Db $collection,
         Mage_Adminhtml_Block_Widget_Grid_Column $columnBlock
@@ -226,30 +286,9 @@ class BL_CustomGrid_Model_Custom_Column_Product_Categories extends BL_CustomGrid
         
         if (is_array($params)) {
             if ($this->_extractBoolParam($params, 'boolean_filter')) {
-                if (!is_null($filter = $columnBlock->getFilter()->getValue())) {
-                    $countQuery = '(' . $this->_getCategoryIdsSelect($collection, true) . ')';
-                    $collection->getSelect()->where(new Zend_Db_Expr($countQuery) . ' ' . ($filter ? '>' : '=') . ' 0');
-                }
+                $this->_applyBooleanFilterToCollection($collection, $columnBlock->getFilter()->getValue());
             } else {
-                $categoryIds = array_filter(array_unique(explode(',', $columnBlock->getFilter()->getValue())));
-                $filterMode  = $this->_extractStringParam($params, 'filter_mode', self::FILTER_MODE_ONE_CHOOSEN, true);
-                $operator = '>=';
-                $number   = '1';
-                
-                if ($filterMode == self::FILTER_MODE_ALL_CHOOSEN) {
-                    $number = count($categoryIds);
-                } elseif ($filterMode == self::FILTER_MODE_NONE_CHOOSEN) {
-                    $operator = '=';
-                    $number   = '0';
-                } elseif ($filterMode == self::FILTER_MODE_CUSTOM) {
-                    if (!is_int($number = $this->_extractIntParam($params, 'custom_filter_number', null, true))
-                        || !($operator = $this->_extractStringParam($params, 'custom_filter_operator', null, true))) {
-                        return $this;
-                    }
-                }
-                
-                $countQuery = '(' . $this->_getCategoryIdsSelect($collection, true, $categoryIds) . ')';
-                $collection->getSelect()->where(new Zend_Db_Expr($countQuery) . ' ' . $operator . ' ' . $number);
+                $this->_applyCountFilterToCollection($collection, $columnBlock->getFilter()->getValue(), $params);
             }
         }
         
@@ -309,6 +348,12 @@ class BL_CustomGrid_Model_Custom_Column_Product_Categories extends BL_CustomGrid
         );
     }
     
+    /**
+     * Return the custom filter operators as an option hash or array
+     * 
+     * @param bool $asOptionArray Whether to return the operators an option array (otherwise as an option hash)
+     * @return array
+     */
     public function getCustomFilterOperators($asOptionArray = false)
     {
         $helper = $this->getBaseHelper();

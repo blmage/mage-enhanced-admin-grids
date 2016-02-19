@@ -215,6 +215,29 @@ class BL_CustomGrid_Object extends Varien_Object
     /**
      * Sort the values contained in the array corresponding to the given data key
      * (does nothing if the value is not an array)
+     *
+     * @see sort() and ksort()
+     * @param string $key Data key
+     * @param int $flags Sorting type flags
+     * @param bool $byKey Whether the value should be sorted by key
+     * @return BL_CustomGrid_Object
+     */
+    protected function _sortData($key, $flags = SORT_REGULAR, $byKey = false)
+    {
+        if (is_array($data = $this->getData($key))) {
+            if ($byKey) {
+                ksort($data, $flags);
+            } else {
+                sort($data, $flags);
+            }
+            $this->setData($key, $data);
+        }
+        return $this;
+    }
+    
+    /**
+     * Sort the values contained in the array corresponding to the given data key
+     * (does nothing if the value is not an array)
      * 
      * @see sort()
      * @param string $key Data key
@@ -223,11 +246,7 @@ class BL_CustomGrid_Object extends Varien_Object
      */
     public function sortData($key, $flags = SORT_REGULAR)
     {
-        if (is_array($data = $this->getData($key))) {
-            sort($data, $flags);
-            $this->setData($key, $data);
-        }
-        return $this;
+        return $this->_sortData($key, $flags);
     }
     
     /**
@@ -241,11 +260,7 @@ class BL_CustomGrid_Object extends Varien_Object
      */
     public function ksortData($key, $flags = SORT_REGULAR)
     {
-        if (is_array($data = $this->getData($key))) {
-            ksort($data, $flags);
-            $this->setData($key, $data);
-        }
-        return $this;
+        return $this->_sortData($key, $flags, true);
     }
     
     /**

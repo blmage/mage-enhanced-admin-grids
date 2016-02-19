@@ -375,6 +375,20 @@ class BL_CustomGrid_Model_Grid_Editor_Product extends BL_CustomGrid_Model_Grid_E
     }
     
     /**
+     * Return whether the given product, in its given state, is store-scoped for the given attribute
+     * 
+     * @param Mage_Catalog_Model_Product $product Checked product
+     * @param Mage_Eav_Model_Entity_Attribute $attribute Attribute model
+     * @return bool
+     */
+    protected function _isProductStoreScopedForAttribute(
+        Mage_Catalog_Model_Product $product,
+        Mage_Eav_Model_Entity_Attribute $attribute
+    ) {
+        return (!$attribute->isScopeGlobal() && $product->getStoreId());
+    }
+    
+    /**
      * Return whether the given product, in its given state,
      * uses for the given attribute the corresponding default value
      *
@@ -382,11 +396,11 @@ class BL_CustomGrid_Model_Grid_Editor_Product extends BL_CustomGrid_Model_Grid_E
      * @param Mage_Eav_Model_Entity_Attribute $attribute Attribute model
      * @return bool
      */
-    protected function _isProductAttributeDefaultValued(
+    protected function _isProductDefaultValuedForAttribute(
         Mage_Catalog_Model_Product $product,
         Mage_Eav_Model_Entity_Attribute $attribute
     ) {
-        if (!$attribute->isScopeGlobal() && $product->getStoreId()) {
+        if ($this->_isProductStoreScopedForAttribute($product, $attribute)) {
             $attributeCode = $attribute->getAttributeCode();
             $defaultValue  = $product->getAttributeDefaultValue($attributeCode);
             
@@ -432,7 +446,7 @@ class BL_CustomGrid_Model_Grid_Editor_Product extends BL_CustomGrid_Model_Grid_E
             if ($attributeCode == $editedAttributeCode) {
                 continue;
             }
-            if ($this->_isProductAttributeDefaultValued($product, $attribute)) {
+            if ($this->_isProductDefaultValuedForAttribute($product, $attribute)) {
                 $product->setData($attributeCode, false);
             }
         }

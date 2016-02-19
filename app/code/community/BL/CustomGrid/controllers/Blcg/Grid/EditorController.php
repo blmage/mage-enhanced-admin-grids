@@ -15,6 +15,33 @@
 
 class BL_CustomGrid_Blcg_Grid_EditorController extends BL_CustomGrid_Controller_Grid_Action
 {
+    /**
+     * Load and render the form layout with the given form block and error message
+     * 
+     * @param mixed $formBlock Intialized form block
+     * @param mixed $errorMessage Error message, if any
+     */
+    protected function _prepareFormLayout($formBlock, $errorMessage)
+    {
+        $this->loadLayout();
+    
+        if ($containerBlock = $this->getLayout()->getBlock('blcg.grid_editor.form_container')) {
+            /** @var $containerBlock BL_CustomGrid_Block_Widget_Grid_Editor_Form_Container */
+            if ($formBlock instanceof Mage_Core_Block_Abstract) {
+                $containerBlock->setIsEditedInGrid((bool) $formBlock->getIsEditedInGrid());
+            }
+            if (!is_null($errorMessage)) {
+                $containerBlock->setErrorMessage($errorMessage);
+            } elseif ($formBlock instanceof Mage_Core_Block_Abstract) {
+                $containerBlock->setChildForm($formBlock);
+            } else {
+                $containerBlock->setErrorMessage($this->__('This value is not editable'));
+            }
+        }
+    
+        $this->renderLayout();
+    }
+    
     public function formAction()
     {
         /** @var BL_CustomGrid_Helper_Data $helper */
@@ -35,23 +62,7 @@ class BL_CustomGrid_Blcg_Grid_EditorController extends BL_CustomGrid_Controller_
         
         if (!$helper->isAjaxRequest()
             || ($formBlock instanceof Mage_Core_Block_Abstract)) {
-            $this->loadLayout();
-            
-            if ($containerBlock = $this->getLayout()->getBlock('blcg.grid_editor.form_container')) {
-                /** @var $containerBlock BL_CustomGrid_Block_Widget_Grid_Editor_Form_Container */
-                if ($formBlock instanceof Mage_Core_Block_Abstract) {
-                    $containerBlock->setIsEditedInGrid((bool) $formBlock->getIsEditedInGrid());
-                }
-                if (!is_null($errorMessage)) {
-                    $containerBlock->setErrorMessage($errorMessage);
-                } elseif ($formBlock instanceof Mage_Core_Block_Abstract) {
-                    $containerBlock->setChildForm($formBlock);
-                } else {
-                    $containerBlock->setErrorMessage($this->__('This value is not editable'));
-                }
-            }
-            
-            $this->renderLayout();
+            $this->_prepareFormLayout($formBlock, $errorMessage);
         } elseif (!is_null($errorMessage)) {
             $this->_setActionErrorJsonResponse($errorMessage);
         } else {

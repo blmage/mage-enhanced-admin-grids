@@ -87,6 +87,46 @@ class BL_CustomGrid_Model_Options_Source extends Mage_Core_Model_Abstract
     }
     
     /**
+     * Parse the given value coming from a Magento option array into an option usable in an option array
+     *
+     * @param mixed $value Option array value
+     * @return array|null
+     */
+    protected function _parseMageOptionArrayValue($value)
+    {
+        $option = null;
+        
+        if (is_array($value) && isset($value['value']) && isset($value['label'])) {
+            $option = array(
+                'value' => $value['value'],
+                'label' => $value['label'],
+            );
+        }
+        
+        return $option;
+    }
+    
+    /**
+     * Parse the given value coming from a Magento Varien_Object collection into an option usable in an option array
+     *
+     * @param mixed $value Varien_Object collection value
+     * @return array|null
+     */
+    protected function _parseMageVarienObjectValue($value)
+    {
+        $option = null;
+        
+        if (is_object($value) && ($value instanceof Varien_Object)) {
+            $option = array(
+                'value' => $value->getData($this->_getData('value_key')),
+                'label' => $value->getData($this->_getData('label_key')),
+            );
+        }
+        
+        return $option;
+    }
+    
+    /**
      * Parse the given value coming from a Magento model method into an option usable in an option array
      * 
      * @param string $methodReturnType Return type of the method from which the value is coming from
@@ -99,24 +139,14 @@ class BL_CustomGrid_Model_Options_Source extends Mage_Core_Model_Abstract
         $option = null;
         
         if ($methodReturnType == self::RETURN_TYPE_OPTION_ARRAY) {
-            if (is_array($value) && isset($value['value']) && isset($value['label'])) {
-                $option = array(
-                    'value' => $value['value'],
-                    'label' => $value['label'],
-                );
-            }
+            $option = $this->_parseMageOptionArrayValue($value);
         } elseif ($methodReturnType == self::RETURN_TYPE_OPTION_HASH) {
             $option = array(
                 'value' => $key,
                 'label' => $value,
             );
         } elseif ($methodReturnType == self::RETURN_TYPE_VARIEN_OBJECT_COLLECTION) {
-            if (is_object($value) && ($value instanceof Varien_Object)) {
-                $option = array(
-                    'value' => $value->getData($this->_getData('value_key')),
-                    'label' => $value->getData($this->_getData('label_key')),
-                );
-            }
+            $option = $this->_parseMageVarienObjectValue($value);
         }
         
         return $option;
