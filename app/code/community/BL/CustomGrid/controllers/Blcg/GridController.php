@@ -633,21 +633,6 @@ class BL_CustomGrid_Blcg_GridController extends BL_CustomGrid_Controller_Grid_Ac
     }
     
     /**
-     * Validate that one or more grids were selected for a mass-action, otherwise force a redirect to the grids list
-     * 
-     * @return bool
-     */
-    protected function _validateMassActionGrids()
-    {
-        if (!is_array($this->getRequest()->getParam('grid', null))) {
-            $this->_getSession()->addError($this->__('Please select grids to update'));
-            $this->_redirect('*/*/', array('_current' => true));
-            return false;
-        }
-        return true;
-    }
-    
-    /**
      * Apply a mass-action action with the given callback that will be used for each selected grid ID
      * 
      * @param callback $callback Callback to use for each grid ID
@@ -662,7 +647,7 @@ class BL_CustomGrid_Blcg_GridController extends BL_CustomGrid_Controller_Grid_Ac
         $successfulMessage,
         $permissionErrorsMessage
     ) {
-        if (!$this->_validateMassActionGrids()) {
+        if (!$this->_validateMassActionValues('grid')) {
             return;
         }
         

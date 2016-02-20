@@ -243,4 +243,22 @@ class BL_CustomGrid_Controller_Grid_Action extends Mage_Adminhtml_Controller_Act
         
         return $this;
     }
+
+    /**
+     * Validate that one or more values were selected for a mass-action,
+     * otherwise force a redirect to the index action
+     *
+     * @param string $requestKey Values request key
+     * @return bool
+     */
+    protected function _validateMassActionValues($requestKey)
+    {
+        if (!is_array($this->getRequest()->getParam($requestKey, null))) {
+            $this->_getSession()->addError($this->__('Please select values to update'));
+            $this->_redirect('*/*/', array('_current' => true));
+            return false;
+        }
+        return true;
+    }
+
 }

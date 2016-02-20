@@ -24,26 +24,6 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
     const GRID_FILTER_RESET_REQUEST_VALUE = '_blcg_reset';
     
     /**
-     * Return base configuration object
-     *
-     * @return Mage_Core_Model_Config
-     */
-    protected function _getMageConfig()
-    {
-        return Mage::app()->getConfig();
-    }
-    
-    /**
-     * Return current request object
-     *
-     * @return Mage_Core_Controller_Request_Http
-     */
-    protected function _getRequest()
-    {
-        return Mage::app()->getRequest();
-    }
-    
-    /**
      * Return the base helper
      * 
      * @return BL_CustomGrid_Helper_Data
@@ -51,66 +31,6 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
     protected function _getHelper()
     {
         return Mage::helper('customgrid');
-    }
-    
-    /**
-     * Return block class name for given config group and class
-     *
-     * @param string $configGroup Config block group
-     * @param string $configClass Config block class
-     * @return string
-     */
-    public function getBlockClassName($configGroup, $configClass)
-    {
-        // Same behaviour as Mage_Core_Model_Config, but avoids class names cache
-        $configNode = $this->_getMageConfig()->getNode('global/blocks/' . $configGroup);
-        
-        if (!empty($configNode)) {
-            $className = $configNode->getClassName();
-        }
-        if (empty($className)) {
-            $className = 'mage_' . $configGroup . '_block';
-        }
-        if (!empty($configClass)) {
-            $className .= '_' . $configClass;
-        }
-        
-        return uc_words($className);
-    }
-    
-    /**
-     * Return block group, block class and rewriting class name for given block type
-     *
-     * @param string $blockType Block type
-     * @return array
-     */
-    public function getBlockTypeInfos($blockType)
-    {
-        $dataKey = 'block_type_infos/' . $blockType;
-        
-        if (!$this->hasData($dataKey)) {
-            $typeParts   = explode('/', $blockType);
-            $configGroup = $typeParts[0];
-            $configClass = (!empty($typeParts[1]) ? $typeParts[1] : null);
-            $configPath  = 'global/blocks/' . $configGroup . '/rewrite/' . $configClass;
-            $rewriteNode = $this->_getMageConfig()->getNode($configPath);
-            $rewritingClassName = '';
-            
-            if (!empty($rewriteNode)) {
-                $rewriteValues = $rewriteNode->asCanonicalArray();
-                
-                if (is_array($rewriteValues) && !empty($rewriteValues)) {
-                    // Different rewrites in different modules lead to only one rewrite in config
-                    $rewritingClassName = array_shift($rewriteValues);
-                } elseif (is_string($rewriteValues)) {
-                    $rewritingClassName = $rewriteValues;
-                }
-            }
-            
-            $this->setData($dataKey, array($configGroup, $configClass, $rewritingClassName));
-        }
-        
-        return $this->getData($dataKey);
     }
     
     /**
@@ -123,9 +43,7 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
         if (!$this->hasData('grid_models_collection')) {
             if (($moduleName = $this->_getData('module_name'))
                 && ($controllerName = $this->_getData('controller_name'))) {
-                /**
-                 * @var $collection BL_CustomGrid_Model_Mysql4_Grid_Collection
-                 */
+                /** @var $collection BL_CustomGrid_Model_Mysql4_Grid_Collection */
                 $collection = Mage::getResourceModel('customgrid/grid_collection');
                 
                 $collection->addFieldToFilter('module_name', $moduleName)
@@ -211,7 +129,7 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
         if (!$this->hasData($dataKey)) {
             $blockType = $gridModel->getBlockType();
             $modelRewritingClass = $gridModel->getRewritingClassName();
-            list(,, $blockRewritingClass) = $this->getBlockTypeInfos($blockType);
+            list(,, $blockRewritingClass) = $this->_getHelper()->getBlockTypeInfos($blockType);
             
             $this->setData(
                 $dataKey,
@@ -284,7 +202,7 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
         $isSuccess = true;
         
         if (!$this->isRewritedBlockType($blockType)) {
-            list($configGroup, $configClass, $rewritingClassName) = $this->getBlockTypeInfos($blockType);
+            list($configGroup, $configClass, $rewritingClassName) = $this->_getHelper()->getBlockTypeInfos($blockType);
             $blcgClassName = false;
             
             /** @var $rewritersConfig BL_CustomGrid_Model_Grid_Rewriter_Config */
@@ -293,7 +211,7 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
             $rewriteErrors = array();
             
             if (!$originalClassName = $rewritingClassName) {
-                $originalClassName = $this->getBlockClassName($configGroup, $configClass);
+                $originalClassName = $this->_getHelper()->getBlockClassName($configGroup, $configClass);
             }
             
             foreach ($rewriters as $rewriter) {
@@ -332,8 +250,8 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
                     . '</global>'
                     . '</config>'
                 );
-                
-                $this->_getMageConfig()->extend($rewriteXml, true);
+
+                Mage::app()->getConfig()->extend($rewriteXml, true);
                 $this->addRewritedBlockType($blockType);
                 
             } else {
@@ -353,7 +271,7 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
      */
     protected function _rewriteExportedGridBlock()
     {
-        $request = $this->_getRequest();
+        $request = Mage::app()->getRequest();
         
         if ((!$gridId = $request->getParam('grid_id', null))
             /** @var $gridModel BL_CustomGrid_Model_Grid */
@@ -388,7 +306,7 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
      */
     public function onControllerActionPreDispatch(Varien_Event_Observer $observer)
     {
-        $request = $this->_getRequest();
+        $request = Mage::app()->getRequest();
         $this->setData('module_name', $request->getModuleName());
         $this->setData('controller_name', $request->getControllerName());
         $gridModelsCollection = $this->getGridModelsCollection();
@@ -423,9 +341,7 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
     public function beforeControllerActionLayoutLoad(Varien_Event_Observer $observer)
     {
         if ($layout = $observer->getLayout()) {
-            /**
-             * @var $layout Mage_Core_Model_Layout
-             */
+            /** @var $layout Mage_Core_Model_Layout */
             $layoutHandles = $this->getDataSetDefault('additional_layout_handles', array());
             
             if ($this->_getHelper()->isMageVersionLesserThan(1, 7)) {
@@ -528,6 +444,7 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
         }
         
         // Apply custom template
+        
         if ($helper->isMageVersionGreaterThan(1, 5)) {
             $gridBlock->setTemplate('bl/customgrid/widget/grid/16.phtml');
         } elseif ($helper->isMageVersion15()) {
@@ -554,7 +471,7 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
             $configHelper = Mage::helper('customgrid/config');
             
             if (!$rewritingClassName = $this->getData('original_rewrites/' . $blockType)) {
-                list(,, $rewritingClassName) = $this->getBlockTypeInfos($blockType);
+                list(,, $rewritingClassName) = $this->_getHelper()->getBlockTypeInfos($blockType);
             }
             if ($configHelper->isExcludedGridBlock($blockType, $rewritingClassName)) {
                 return;
@@ -633,7 +550,7 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
         $blockId   = $gridBlock->getId();
         
         if ($gridModel = $this->getGridModel($blockType, $blockId)) {
-            $request = $this->_getRequest();
+            $request = Mage::app()->getRequest();
             
             if ($request->getParam($gridBlock->getVarNameFilter()) == self::GRID_FILTER_RESET_REQUEST_VALUE) {
                 $request->setParam($gridBlock->getVarNameFilter(), null);

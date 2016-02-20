@@ -174,19 +174,9 @@ class BL_CustomGrid_Blcg_Options_SourceController extends BL_CustomGrid_Controll
         $this->_redirect('*/*/');
     }
     
-    protected function _validateSources()
-    {
-        if (!is_array($this->getRequest()->getParam('options_source', null))) {
-            $this->_getSession()->addError($this->__('Please select options sources to update'));
-            $this->_redirect('*/*/index', array('_current' => true));
-            return false;
-        }
-        return true;
-    }
-    
     public function massDeleteAction()
     {
-        if (!$this->_validateSources()) {
+        if (!$this->_validateMassActionValues('options_source')) {
             return;
         }
         

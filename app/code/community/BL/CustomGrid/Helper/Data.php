@@ -16,6 +16,13 @@
 class BL_CustomGrid_Helper_Data extends Mage_Core_Helper_Abstract
 {
     /**
+     * Gathered informations (block group, block class and rewriting class name) about block types
+     * 
+     * @var array
+     */
+    protected $_blockTypeInfos = array();
+    
+    /**
      * Return the base helper of the given module, or this helper if the other is not accessible
      * 
      * @param string $module Helper module
@@ -298,6 +305,65 @@ class BL_CustomGrid_Helper_Data extends Mage_Core_Helper_Abstract
     public function isAjaxRequest()
     {
         return $this->_getRequest()->isAjax();
+    }
+    
+    /**
+     * Return the block class name corresponding to the given config group and class
+     *
+     * @param string $configGroup Config block group
+     * @param string $configClass Config block class
+     * @return string
+     */
+    public function getBlockClassName($configGroup, $configClass)
+    {
+        // Same behaviour as Mage_Core_Model_Config, but avoids class names cache
+        $configNode = Mage::app()->getConfig()->getNode('global/blocks/' . $configGroup);
+        
+        if (!empty($configNode)) {
+            $className = $configNode->getClassName();
+        }
+        if (empty($className)) {
+            $className = 'mage_' . $configGroup . '_block';
+        }
+        if (!empty($configClass)) {
+            $className .= '_' . $configClass;
+        }
+        
+        return uc_words($className);
+    }
+    
+    /**
+     * Return the block group, block class and rewriting class name for the given block type
+     *
+     * @param string $blockType Block type
+     * @return array 0 => Config block group
+     *               1 => Config block class
+     *               2 => Rewriting class name
+     */
+    public function getBlockTypeInfos($blockType)
+    {
+        if (!isset($this->_blockTypeInfos[$blockType])) {
+            $typeParts   = explode('/', $blockType);
+            $configGroup = $typeParts[0];
+            $configClass = (!empty($typeParts[1]) ? $typeParts[1] : null);
+            $configPath  = 'global/blocks/' . $configGroup . '/rewrite/' . $configClass;
+            $rewriteNode = Mage::app()->getConfig()->getNode($configPath);
+            $rewritingClassName = '';
+            
+            if (!empty($rewriteNode)) {
+                $rewriteValues = $rewriteNode->asCanonicalArray();
+                
+                if (is_array($rewriteValues) && !empty($rewriteValues)) {
+                    // Different rewrites in different modules lead to only one rewrite in the config
+                    $rewritingClassName = array_shift($rewriteValues);
+                } elseif (is_string($rewriteValues)) {
+                    $rewritingClassName = $rewriteValues;
+                }
+            }
+    
+            $this->_blockTypeInfos[$blockType] = array($configGroup, $configClass, $rewritingClassName);
+        }
+        return $this->_blockTypeInfos[$blockType];
     }
     
     /**
