@@ -913,6 +913,23 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     }
     
     /**
+     * Check the session previous profile against the current profile,
+     * and notify the user of any automatic change if necessary
+     * 
+     * @param int $sessionProfileId Session (previous) profile ID
+     * @param int $currentProfileId Current profile ID
+     * @return Bl_CustomGrid_Model_Grid
+     */
+    protected function _handleSessionPreviousProfileChange($sessionProfileId, $currentProfileId)
+    {
+        if (is_int($sessionProfileId) && ($sessionProfileId !== $currentProfileId)) {
+            $this->getBlcgSession()
+                ->addNotice($this->getHelper()->__('The previous profile is not available anymore'));
+        }
+        return $this;
+    }
+    
+    /**
      * Return the current profile ID
      *
      * @return int
@@ -943,11 +960,8 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
                 if (is_null($profileId)) {
                     Mage::throwException($this->getHelper()->__('There is not any available profile'));
                 }
-                if (is_int($sessionProfileId) && ($sessionProfileId !== $profileId)) {
-                    $this->getBlcgSession()
-                        ->addNotice($this->getHelper()->__('The previous profile is not available anymore'));
-                }
                 
+                $this->_handleSessionPreviousProfileChange($sessionProfileId, $profileId);
                 $this->setProfileId($profileId, false, false);
             }
         }
@@ -1598,11 +1612,42 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     }
     
     /**
+     * Return the given custom columns, arranged by group
+     * 
+     * @param array $customColumns Custom columns to group
+     * @param bool $includeTypeCode Whether column codes should include the grid type code
+     * @param array|null $filteredCodes Column codes on which to filter (if not all columns should be returned)
+     * @return array
+     */
+    protected function _getGroupedCustomColumns(array $customColumns, $includeTypeCode, $filteredCodes = null)
+    {
+        $typeCode = $this->getTypeModel()->getCode();
+        $groupedColumns = array();
+        
+        foreach ($customColumns as $code => $customColumn) {
+            if (!isset($groupedColumns[$customColumn->getGroupId()])) {
+                $groupedColumns[$customColumn->getGroupId()] = array();
+            }
+            if (is_array($filteredCodes) && in_array($code, $filteredCodes)) {
+                $customColumn->setSelected(true);
+            }
+            if ($includeTypeCode) {
+                $this->_addTypeToCustomColumnCode($code, $typeCode);
+                $groupedColumns[$code] = $customColumn;
+            }
+            
+            $groupedColumns[$customColumn->getGroupId()][$code] = $customColumn;
+        }
+        
+        return $groupedColumns;
+    }
+    
+    /**
      * Return available custom columns
      *
      * @param bool $grouped Whether columns should be arranged by group
      * @param bool $includeTypeCode Whether column codes should include the grid type code
-     * @return BL_CustomGrid_Model_Custom_Column_Abstract[]
+     * @return array
      */
     public function getAvailableCustomColumns($grouped = false, $includeTypeCode = false)
     {
@@ -1614,20 +1659,7 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
         
         if (is_array($customColumns)) {
             if ($grouped) {
-                foreach ($customColumns as $code => $customColumn) {
-                    if (!isset($availableColumns[$customColumn->getGroupId()])) {
-                        $availableColumns[$customColumn->getGroupId()] = array();
-                    }
-                    if (in_array($code, $usedCodes)) {
-                        $customColumn->setSelected(true);
-                    }
-                    if ($includeTypeCode) {
-                        $this->_addTypeToCustomColumnCode($code, $typeCode);
-                        $availableColumns[$code] = $customColumn;
-                    }
-                    
-                    $availableColumns[$customColumn->getGroupId()][$code] = $customColumn;
-                }
+                $availableColumns = $this->_getGroupedCustomColumns($customColumns, $usedCodes, $includeTypeCode);
             } elseif ($includeTypeCode) {
                 foreach ($customColumns as $code => $customColumn) {
                     $this->_addTypeToCustomColumnCode($code, $typeCode);

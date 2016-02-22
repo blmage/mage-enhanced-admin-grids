@@ -360,7 +360,7 @@ class BL_CustomGrid_Helper_Data extends Mage_Core_Helper_Abstract
                     $rewritingClassName = $rewriteValues;
                 }
             }
-    
+            
             $this->_blockTypeInfos[$blockType] = array($configGroup, $configClass, $rewritingClassName);
         }
         return $this->_blockTypeInfos[$blockType];

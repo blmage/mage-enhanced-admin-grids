@@ -243,7 +243,7 @@ class BL_CustomGrid_Controller_Grid_Action extends Mage_Adminhtml_Controller_Act
         
         return $this;
     }
-
+    
     /**
      * Validate that one or more values were selected for a mass-action,
      * otherwise force a redirect to the index action
@@ -260,5 +260,4 @@ class BL_CustomGrid_Controller_Grid_Action extends Mage_Adminhtml_Controller_Act
         }
         return true;
     }
-
 }

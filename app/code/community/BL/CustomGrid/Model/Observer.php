@@ -202,7 +202,7 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
         $isSuccess = true;
         
         if (!$this->isRewritedBlockType($blockType)) {
-            list($configGroup, $configClass, $rewritingClassName) = $this->_getHelper()->getBlockTypeInfos($blockType);
+            list(,, $rewritingClassName) = $this->_getHelper()->getBlockTypeInfos($blockType);
             $blcgClassName = false;
             
             /** @var $rewritersConfig BL_CustomGrid_Model_Grid_Rewriter_Config */
@@ -210,14 +210,10 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
             $rewriters = $rewritersConfig->getEnabledRewriters(true);
             $rewriteErrors = array();
             
-            if (!$originalClassName = $rewritingClassName) {
-                $originalClassName = $this->_getHelper()->getBlockClassName($configGroup, $configClass);
-            }
-            
             foreach ($rewriters as $rewriter) {
                 /** @var $rewriter BL_CustomGrid_Model_Grid_Rewriter_Abstract */
                 try {
-                    $blcgClassName = $rewriter->rewriteGrid($originalClassName, $blockType);
+                    $blcgClassName = $rewriter->rewriteGrid($blockType);
                 } catch (Exception $e) {
                     $blcgClassName = false;
                     $rewriteErrors[] = array('exception' => $e, 'rewriter' => $rewriter);
@@ -234,26 +230,7 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
                     $this->setData('original_rewrites/' . $blockType, $rewritingClassName);
                 }
                 
-                // Register rewrite in config (this will also replace previous rewrite if existing)
-                $rewriteXml = new Varien_Simplexml_Config();
-                
-                $rewriteXml->loadString(
-                    '<config>'
-                    . '<global>'
-                    . '<blocks>'
-                    . '<' . $configGroup . '>'
-                    . '<rewrite>'
-                    . '<' . $configClass . '>' . $blcgClassName . '</' . $configClass . '>'
-                    . '</rewrite>'
-                    . '</' . $configGroup . '>'
-                    . '</blocks>'
-                    . '</global>'
-                    . '</config>'
-                );
-
-                Mage::app()->getConfig()->extend($rewriteXml, true);
                 $this->addRewritedBlockType($blockType);
-                
             } else {
                 $this->_handleGridBlockRewriteErrors($rewriteErrors, false);
                 $isSuccess = false;

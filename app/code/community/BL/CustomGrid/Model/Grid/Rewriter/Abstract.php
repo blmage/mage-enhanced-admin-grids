@@ -53,14 +53,19 @@ abstract class BL_CustomGrid_Model_Grid_Rewriter_Abstract extends BL_CustomGrid_
     /**
      * Rewrite the grid block corresponding to the given class name
      * 
-     * @param string $originalClassName Original class name
      * @param string $blockType Grid block type
      * @return string|false The name of the rewriting class if the rewrite succeeded, false otherwise
      */
-    final public function rewriteGrid($originalClassName, $blockType)
+    final public function rewriteGrid($blockType)
     {
         /** @var $helper BL_CustomGrid_Helper_Data */
         $helper = Mage::helper('customgrid');
+        list($configGroup, $configClass, $rewritingClassName) = $helper->getBlockTypeInfos($blockType);
+        
+        if (!$originalClassName = $rewritingClassName) {
+            $originalClassName = $helper->getBlockClassName($configGroup, $configClass);
+        }
+        
         $blcgClassName  = $this->_getBlcgClassName($originalClassName, $blockType);
         $rewriteSuccess = false;
         
@@ -85,6 +90,24 @@ abstract class BL_CustomGrid_Model_Grid_Rewriter_Abstract extends BL_CustomGrid_
                 }
             }
             
+            // Register rewrite in config (this will also replace previous rewrite if existing)
+            $rewriteXml = new Varien_Simplexml_Config();
+            
+            $rewriteXml->loadString(
+                '<config>'
+                . '<global>'
+                . '<blocks>'
+                . '<' . $configGroup . '>'
+                . '<rewrite>'
+                . '<' . $configClass . '>' . $blcgClassName . '</' . $configClass . '>'
+                . '</rewrite>'
+                . '</' . $configGroup . '>'
+                . '</blocks>'
+                . '</global>'
+                . '</config>'
+            );
+            
+            Mage::app()->getConfig()->extend($rewriteXml, true);
             $rewriteSuccess = true;
             
         } catch (Exception $e) {
