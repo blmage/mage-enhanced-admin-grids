@@ -17,48 +17,51 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Product_Inventory extends 
 {
     /**
      * Return whether the given row uses config values for the current column,
-     * and the corresponding data if appropriate
+     * and the corresponding value if appropriate
      * 
      * @param Varien_Object $row Grid row
      * @return array
      */
-    protected function _getUseConfigData(Varien_Object $row)
+    protected function _getUseConfigValue(Varien_Object $row)
     {
-        $data = null;
+        $value = null;
         $useConfig = false;
         
         if ($this->getColumn()->getCanUseConfig()) {
             if ($row->getData($this->getColumn()->getUseConfigIndex())) {
                 $useConfig = true;
+                $fieldName = $this->getColumn()->getFieldName();
                 
-                if ($this->getColumn()->getFieldName() == 'min_sale_qty') {
-                    /** @var $helper Mage_CatalogInventory_Helper_Minsaleqty */
-                    $helper = $this->helper('cataloginventory/minsaleqty');
-                    $data   = $helper->getConfigValue(Mage_Customer_Model_Group::CUST_GROUP_ALL);
+                if ($fieldName == 'min_sale_qty') {
+                    /** @var Mage_CatalogInventory_Helper_Minsaleqty $helper */
+                    $helper = Mage::helper('cataloginventory/minsaleqty');
+                    $value  = $helper->getConfigValue(Mage_Customer_Model_Group::CUST_GROUP_ALL);
                 } else {
-                    $data = Mage::getStoreConfig($this->getColumn()->getSystemConfigPath());
+                    /** @var BL_CustomGrid_Helper_Catalog_Inventory $helper */
+                    $helper = Mage::helper('customgrid/catalog_inventory');
+                    $value  = $helper->getDefaultConfigInventoryValue($fieldName);
                 }
             }
         }
         
-        return array($useConfig, $data);
+        return array($useConfig, $value);
     }
     
     /**
-     * Render the given data that uses config values
+     * Render the given row value, assumed to be inherited from the system configuration
      * 
-     * @param mixed $data Data from config
+     * @param mixed $value Base value
      * @return string
      */
-    protected function _renderUseConfigData($data)
+    protected function _renderUseConfigValue($value)
     {
         if (($text = $this->getColumn()->getUseConfigPrefix()) !== '') {
-            $data = $text . ' ' . $data;
+            $value = $text . ' ' . $value;
         }
         if (($text = $this->getColumn()->getUseConfigSuffix()) !== '') {
-            $data .= ' ' . $text;
+            $value = $value . ' ' . $text;
         }
-        return $data;
+        return $value;
     }
     
     /**
@@ -77,26 +80,26 @@ class BL_CustomGrid_Block_Widget_Grid_Column_Renderer_Product_Inventory extends 
     protected function _getValue(Varien_Object $row)
     {
         $fieldType = $this->getColumn()->getFieldType();
-        list($useConfig, $data) = $this->_getUseConfigData($row);
+        list($useConfig, $value) = $this->_getUseConfigValue($row);
         
         if (!$useConfig) {
-            $data = $row->getData($this->getColumn()->getIndex());
+            $value = $row->getData($this->getColumn()->getIndex());
         }
         
         if ($fieldType == 'boolean') {
-            $data = $this->__($data ? 'Yes' : 'No');
+            $value = $this->__($value ? 'Yes' : 'No');
         } elseif ($fieldType == 'decimal') {
-            $data *= 1;
+            $value *= 1;
         } elseif ($fieldType == 'options') {
-            $data = $this->_getOptionsRenderableValue($data);
+            $value = $this->_getOptionsRenderableValue($value);
         }
-        
-        $data = strval($data);
+    
+        $value = strval($value);
         
         if ($useConfig) {
-            $data = $this->_renderUseConfigData($data);
+            $value = $this->_renderUseConfigValue($value);
         }
         
-        return $data;
+        return $value;
     }
 }

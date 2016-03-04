@@ -1616,10 +1616,9 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
      * 
      * @param array $customColumns Custom columns to group
      * @param bool $includeTypeCode Whether column codes should include the grid type code
-     * @param array|null $filteredCodes Column codes on which to filter (if not all columns should be returned)
      * @return array
      */
-    protected function _getGroupedCustomColumns(array $customColumns, $includeTypeCode, $filteredCodes = null)
+    protected function _getGroupedCustomColumns(array $customColumns, $includeTypeCode)
     {
         $typeCode = $this->getTypeModel()->getCode();
         $groupedColumns = array();
@@ -1627,9 +1626,6 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
         foreach ($customColumns as $code => $customColumn) {
             if (!isset($groupedColumns[$customColumn->getGroupId()])) {
                 $groupedColumns[$customColumn->getGroupId()] = array();
-            }
-            if (is_array($filteredCodes) && in_array($code, $filteredCodes)) {
-                $customColumn->setSelected(true);
             }
             if ($includeTypeCode) {
                 $this->_addTypeToCustomColumnCode($code, $typeCode);
@@ -1653,13 +1649,12 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
     {
         $typeModel = $this->getTypeModel();
         $typeCode  = $typeModel->getCode();
-        $availableColumns = array();
         $customColumns = $typeModel->getCustomColumns($this->getBlockType(), $this->getRewritingClassName());
-        $usedCodes = $this->getUsedCustomColumnsCodes();
+        $availableColumns = array();
         
         if (is_array($customColumns)) {
             if ($grouped) {
-                $availableColumns = $this->_getGroupedCustomColumns($customColumns, $usedCodes, $includeTypeCode);
+                $availableColumns = $this->_getGroupedCustomColumns($customColumns, $includeTypeCode);
             } elseif ($includeTypeCode) {
                 foreach ($customColumns as $code => $customColumn) {
                     $this->_addTypeToCustomColumnCode($code, $typeCode);

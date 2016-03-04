@@ -15,6 +15,20 @@
 
 class BL_CustomGrid_Model_Custom_Column_Product_Inventory extends BL_CustomGrid_Model_Custom_Column_Simple_Table
 {
+    /**
+     * Validation class names for the different inventory fields
+     *
+     * @var array
+     */
+    protected $_fieldValidationClassNames = array(
+        'min_qty'          => 'validate-number',
+        'min_sale_qty'     => 'validate-digits',
+        'max_sale_qty'     => 'validate-number',
+        'notify_stock_qty' => 'validate-number',
+        'qty'              => 'validate-number',
+        'qty_increments'   => 'validate-digits',
+    );
+    
     protected function _prepareConfig()
     {
         $helper = $this->getBaseHelper();
@@ -32,7 +46,7 @@ class BL_CustomGrid_Model_Custom_Column_Product_Inventory extends BL_CustomGrid_
             $this->addCustomizationParam(
                 'use_config_filter',
                 array(
-                    'label'        => $helper->__('Filter on "Use Config"'),
+                    'label'        => $helper->__('Filter on "Use Config Settings"'),
                     'description'  => $helper->__($notes['use_config_filter']),
                     'type'         => 'select',
                     'source_model' => 'adminhtml/system_config_source_yesno',
@@ -85,25 +99,41 @@ class BL_CustomGrid_Model_Custom_Column_Product_Inventory extends BL_CustomGrid_
         return 'product_id';
     }
     
-    public function getIsUseConfigField()
+    /**
+     * Return the inventory helper
+     *
+     * @return BL_CustomGrid_Helper_Catalog_Inventory
+     */
+    public function getInventoryHelper()
     {
-        return (bool) $this->getConfigParam('is_use_config_field');
+        return Mage::helper('customgrid/catalog_inventory');
     }
     
+    /**
+     * Return the name of the "Use Config Settings" field corresponding to the current inventory field
+     * 
+     * @return string|false
+     */
     public function getUseConfigFieldName()
     {
-        return (!$fieldName = $this->getConfigParam('use_config_field_name'))
-            ? 'use_config_' . $this->getTableFieldName()
-            : $fieldName;
+        return $this->getInventoryHelper()->getBaseFieldUseConfigFieldName($this->getTableFieldName());
     }
     
-    public function getUseConfigSystemPath()
+    /**
+     * Return whether the current inventory field can use configuration values
+     * 
+     * @return bool
+     */
+    public function getIsUseConfigField()
     {
-        return (!$path = $this->getConfigParam('system_config_path'))
-            ? 'cataloginventory/item_options/' . $this->getTableFieldName()
-            : $path;
+        return ($this->getUseConfigFieldName() !== false);
     }
     
+    /**
+     * Return the type of the current inventory field ("boolean", "decimal" or "options")
+     * 
+     * @return string
+     */
     public function getFieldType()
     {
         return $this->getConfigParam('field_type');
@@ -117,7 +147,7 @@ class BL_CustomGrid_Model_Custom_Column_Product_Inventory extends BL_CustomGrid_
         $mainAlias,
         $tableAlias
     ) {
-        /** @var $adapter Zend_Db_Adapter_Abstract */
+        /** @var Zend_Db_Adapter_Abstract $adapter */
         list($adapter, $qi) = $this->getCollectionHandler()->getCollectionAdapter($collection, true);
         return array($adapter->quoteInto($qi($tableAlias . '.stock_id') . ' = ?', 1));
     }
@@ -138,63 +168,136 @@ class BL_CustomGrid_Model_Custom_Column_Product_Inventory extends BL_CustomGrid_
         $select->columns(array($columnIndex => $tableAlias . '.' . $fieldName), $tableAlias);
         $helper->addFilterToCollectionMap($collection, $qi($tableAlias . '.' . $fieldName), $columnIndex);
         
-        if ($this->getIsUseConfigField()) {
-            $fieldName = $this->getUseConfigFieldName();
+        if ($useConfigFieldName = $this->getUseConfigFieldName()) {
             $columnIndex .= '_cpi_uc';
-            $select->columns(array($columnIndex => $tableAlias . '.' . $fieldName), $tableAlias);
-            $helper->addFilterToCollectionMap($collection, $qi($tableAlias . '.' . $fieldName), $columnIndex);
+            $select->columns(array($columnIndex => $tableAlias . '.' . $useConfigFieldName), $tableAlias);
+            $helper->addFilterToCollectionMap($collection, $qi($tableAlias . '.' . $useConfigFieldName), $columnIndex);
         }
         
         return $this;
     }
     
-    public function addFilterToGridCollection($collection, Mage_Adminhtml_Block_Widget_Grid_Column $columnBlock)
+    /**
+     * Add a filter based on the "Use Config Settings" field state to the given grid collection
+     * 
+     * @param Varien_Data_Collection_Db $collection Grid collection
+     * @param string $tableAlias Inventory table alias
+     * @param array $condition Condition values
+     */
+    protected function _addUseConfigFilterToGridCollection(
+        Varien_Data_Collection_Db $collection,
+        $tableAlias,
+        array $condition
+    ) {
+        if (isset($condition['eq']) && ($useConfigFieldName = $this->getUseConfigFieldName())) {
+            /** @var Zend_Db_Adapter_Abstract $adapter */
+            list($adapter, $qi) = $this->getCollectionHandler()->getCollectionAdapter($collection, true);
+            
+            $collection->getSelect()
+                ->where(
+                    $qi($tableAlias . '.' . $useConfigFieldName)
+                    . ' = '
+                    . $adapter->quote((bool) $condition['eq'])
+                );
+        }
+    }
+    
+    /**
+     * Return the base expression on which to apply filters based on actual values
+     *
+     * @param Varien_Data_Collection_Db $collection Grid collection
+     * @param string $tableAlias Inventory table alias
+     * @return Zend_Db_Expr
+     */
+    protected function _getValueFilterConditionBase(Varien_Data_Collection_Db $collection, $tableAlias)
     {
+        /** @var Zend_Db_Adapter_Abstract $adapter */
+        list($adapter, $qi) = $this->getCollectionHandler()->getCollectionAdapter($collection, true);
+        $tableFieldName = $this->getTableFieldName();
+        
+        if ($useConfigFieldName = $this->getUseConfigFieldName()) {
+            $conditionBase = new Zend_Db_Expr(
+                'IF('
+                . $qi($tableAlias . '.' . $useConfigFieldName) . ','
+                . $adapter->quote($this->getInventoryHelper()->getDefaultConfigInventoryValue($tableFieldName)) . ','
+                . $qi($tableAlias . '.' . $tableFieldName)
+                . ')'
+            );
+        } else {
+            $conditionBase = new Zend_Db_Expr($qi($tableAlias . '.' . $tableFieldName));
+        }
+        
+        return $conditionBase;
+    }
+    
+    /**
+     * Add a filter based on decimal values to the given grid collection
+     *
+     * @param Varien_Data_Collection_Db $collection Grid collection
+     * @param Zend_Db_Expr $conditionBase Base expression on which to apply the conditions
+     * @param array $condition Condition values
+     */
+    protected function _addDecimalFilterToGridCollection(
+        Varien_Data_Collection_Db $collection,
+        Zend_Db_Expr $conditionBase,
+        array $condition
+    ) {
+        $adapter = $this->getCollectionHandler()->getCollectionAdapter($collection);
+        
+        if (isset($condition['from'])) {
+            $collection->getSelect()
+                ->where($conditionBase . ' >= ' . $adapter->quote(floatval($condition['from'])));
+        }
+        if (isset($condition['to'])) {
+            $collection->getSelect()
+                ->where($conditionBase . ' <= ' . $adapter->quote(floatval($condition['to'])));
+        }
+    }
+    
+    /**
+     * Add a filter based on raw values to the given grid collection
+     *
+     * @param Varien_Data_Collection_Db $collection Grid collection
+     * @param Zend_Db_Expr $conditionBase Base expression on which to apply the conditions
+     * @param array $condition Condition values
+     */
+    protected function _addBaseFilterToGridCollection(
+        Varien_Data_Collection_Db $collection,
+        Zend_Db_Expr $conditionBase,
+        array $condition
+    ) {
+        if (isset($condition['eq'])) {
+            $adapter = $this->getCollectionHandler()->getCollectionAdapter($collection);
+            $collection->getSelect()->where($conditionBase . ' = ' . $adapter->quote($condition['eq']));
+        }
+    }
+    
+    /**
+     * Add the current filter applied on the given column block to the given grid collection
+     * 
+     * @param Varien_Data_Collection_Db $collection Grid collection
+     * @param Mage_Adminhtml_Block_Widget_Grid_Column $columnBlock Grid column block
+     * @return BL_CustomGrid_Model_Custom_Column_Product_Inventory
+     */
+    public function addFilterToGridCollection(
+        Varien_Data_Collection_Db $collection,
+        Mage_Adminhtml_Block_Widget_Grid_Column $columnBlock
+    ) {
         $columnIndex  = $columnBlock->getIndex();
-        $fieldName    = ($columnBlock->getFilterIndex() ? $columnBlock->getFilterIndex() : $columnIndex);
         $filterParams = $columnBlock->getBlcgFilterParams();
         $tableAlias   = $this->_getJoinedTableAlias($columnIndex, $filterParams, $columnBlock->getGrid(), $collection);
         $condition    = $columnBlock->getFilter()->getCondition();
         
-        if ($fieldName && is_array($condition) && $tableAlias) {
-            /** @var $adapter Zend_Db_Adapter_Abstract */
-            list($adapter, $qi) = $this->getCollectionHandler()->getCollectionAdapter($collection, true);
-            
+        if (is_array($condition) && $tableAlias) {
             if (is_array($filterParams) && $this->_extractBoolParam($filterParams, 'use_config_filter', false)) {
-                if (isset($condition['eq'])) {
-                    $collection->getSelect()
-                        ->where(
-                            $qi($tableAlias . '.' . $this->getUseConfigFieldName())
-                            . ' = '
-                            . $adapter->quote((bool) $condition['eq'])
-                        );
-                }
+                $this->_addUseConfigFilterToGridCollection($collection, $tableAlias, $condition);
             } else {
-                if ($columnBlock->getCanUseConfig()) {
-                    $conditionBase = new Zend_Db_Expr(
-                        'IF('
-                        . $qi($tableAlias . '.' . $this->getUseConfigFieldName()) . ','
-                        . $adapter->quote(Mage::getStoreConfig($this->getUseConfigSystemPath())) . ','
-                        . $qi($tableAlias . '.' . $this->getTableFieldName())
-                        . ')'
-                    );
-                } else {
-                    $conditionBase = $qi($tableAlias . '.' . $this->getTableFieldName());
-                }
+                $conditionBase = $this->_getValueFilterConditionBase($collection, $tableAlias);
                 
                 if ($this->getFieldType() == 'decimal') {
-                    if (isset($condition['from']) && isset($condition['to'])) {
-                        $collection->getSelect()
-                            ->where(
-                                $conditionBase
-                                . ' BETWEEN '
-                                . $adapter->quote(floatval($condition['from']))
-                                . ' AND '
-                                . $adapter->quote(floatval($condition['to']))
-                            );
-                    }
-                } elseif (isset($condition['eq'])) {
-                    $collection->getSelect()->where($conditionBase . ' = ' . $adapter->quote($condition['eq']));
+                    $this->_addDecimalFilterToGridCollection($collection, $conditionBase, $condition);
+                } else {
+                    $this->_addBaseFilterToGridCollection($collection, $conditionBase, $condition);
                 }
             }
         }
@@ -218,6 +321,12 @@ class BL_CustomGrid_Model_Custom_Column_Product_Inventory extends BL_CustomGrid_
         return true;
     }
     
+    /**
+     * Return the block values that depend on the current field and the given column parameters
+     * 
+     * @param array $params Column parameters
+     * @return array
+     */
     protected function _getConditionalBlockValues(array $params)
     {
         $helper = $this->getBaseHelper();
@@ -240,7 +349,7 @@ class BL_CustomGrid_Model_Custom_Column_Product_Inventory extends BL_CustomGrid_
         if ($this->_extractBoolParam($params, 'use_config_filter', false)) {
             $values['filter']  = 'customgrid/widget_grid_column_filter_select';
             $values['options'] = array(
-                array('value' => 1, 'label' => $helper->__('Use Config')),
+                array('value' => 1, 'label' => $helper->__('Config Value')),
                 array('value' => 0, 'label' => $helper->__('Own Value')),
             );
         } elseif ($fieldType == 'boolean') {
@@ -271,11 +380,60 @@ class BL_CustomGrid_Model_Custom_Column_Product_Inventory extends BL_CustomGrid_
                 'use_config_index'   => $columnIndex . '_cpi_uc',
                 'use_config_prefix'  => $this->_extractStringParam($params, 'use_config_prefix', ''),
                 'use_config_suffix'  => $this->_extractStringParam($params, 'use_config_suffix', ''),
-                'system_config_path' => $this->getUseConfigSystemPath(),
                 'blcg_filter_params' => $params,
                 'filter_condition_callback' => array($this, 'addFilterToGridCollection'),
             ),
             $this->_getConditionalBlockValues($params)
+        );
+    }
+    
+    public function getGridColumnEditorConfig(
+        BL_CustomGrid_Model_Grid_Column $gridColumn,
+        BL_CustomGrid_Model_Grid_Editor_Value_Config_Builder $configBuilder
+    ) {
+        $fieldName = $this->getTableFieldName();
+        
+        if (in_array($fieldName, array('enable_qty_increments', 'is_qty_decimal', 'manage_stock'))) {
+            // Every handled inventory field except the fields with dependent values
+            return false;
+        }
+        
+        $formFieldConfig =  array(
+            'name' => $fieldName,
+            'required' => in_array($fieldName, array('qty')),
+            'inventory_field' => $fieldName,
+        );
+        
+        if (in_array($fieldName, array('backorders', 'is_in_stock'))) {
+            $formFieldConfig['type'] = 'select';
+        
+            if ($fieldName == 'backorders') {
+                /** @var Mage_CatalogInventory_Model_Source_Backorders $backOrdersSource */
+                $backOrdersSource = Mage::getSingleton('cataloginventory/source_backorders');
+                $formFieldConfig['values'] = $backOrdersSource->toOptionArray();
+            } else {
+                /** @var Mage_CatalogInventory_Model_Source_Stock $yesNoSource */
+                $yesNoSource = Mage::getSingleton('cataloginventory/source_stock');
+                $formFieldConfig['values'] = $yesNoSource->toOptionArray();
+            }
+        } else {
+            $formFieldConfig['type'] = 'text';
+        }
+        
+        if (isset($this->_fieldValidationClassNames[$fieldName])) {
+            $formFieldConfig['class'] = $this->_fieldValidationClassNames[$fieldName];
+        }
+        
+        return $this->_buildGridColumnEditableFieldConfig(
+            $gridColumn,
+            $configBuilder,
+            array(
+                'form' => array(
+                    'block_type' => 'customgrid/widget_grid_editor_form_field_product_inventory',
+                    'is_in_grid' => true,
+                ),
+                'form_field' => $formFieldConfig,
+            )
         );
     }
 }

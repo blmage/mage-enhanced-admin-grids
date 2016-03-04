@@ -20,7 +20,7 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Field_Default extends BL_Custo
         $form = $this->_initializeForm();
         $valueConfig = $this->getValueConfig();
         
-        $fieldValues  = $valueConfig->getData('form_field');
+        $fieldValues  = $valueConfig->getFormFieldValues();
         $fieldValues += $this->_getAdditionalFieldValues($fieldValues['type'], $valueConfig);
         
         $fieldset = $form->addFieldset(
@@ -31,12 +31,24 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Field_Default extends BL_Custo
             )
         );
         
-        $field = $fieldset->addField($fieldValues['id'], $fieldValues['type'], $fieldValues);
+        $field = $this->_initFormField($fieldValues, $fieldset);
         $this->_prepareFormField($field, $fieldValues['type'], $valueConfig);
-        $form->setFieldNameSuffix($valueConfig->getData('request/values_key'));
+        $form->setFieldNameSuffix($valueConfig->getRequestValuesKey());
         $this->setForm($form);
         
         return parent::_prepareForm();
+    }
+    
+    /**
+     * Initialize the current form field from the given values and add it to the given fieldset
+     * 
+     * @param array $fieldValues Field values
+     * @param Varien_Data_Form_Element_Fieldset $fieldset Form fieldset
+     * @return Varien_Data_Form_Element_Abstract
+     */
+    protected function _initFormField(array $fieldValues, Varien_Data_Form_Element_Fieldset $fieldset)
+    {
+        return $fieldset->addField($fieldValues['id'], $fieldValues['type'], $fieldValues);
     }
     
     protected function _initFormValues()
@@ -48,12 +60,12 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Field_Default extends BL_Custo
             
             if ($valueConfig->hasData('global/entity_value_callback')) {
                 $fieldValue = $valueConfig->runConfigCallback('global/entity_value_callback', array($editorContext));
-            } elseif (($valueKey = $valueConfig->getData('global/entity_value_key'))
-                || ($valueKey = $valueConfig->getData('form_field/name'))) {
+            } elseif (($valueKey = $valueConfig->getEntityValueKey())
+                || ($valueKey = $valueConfig->getFormFieldName())) {
                 $fieldValue = $editorContext->getEditedEntity()->getData($valueKey);
             }
             
-            $form->setValues(array($valueConfig->getData('form_field/id') => $fieldValue));
+            $form->setValues(array($valueConfig->getFormFieldId() => $fieldValue));
         }
         return parent::_initFormValues();
     }

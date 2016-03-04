@@ -17,6 +17,16 @@ class BL_CustomGrid_Model_Grid_Editor_Product extends BL_CustomGrid_Model_Grid_E
 {
     const DEFAULT_VALUE_FLAG_CONTEXT_KEY = '_use_default_value_';
     
+    /**
+     * Return the inventory editor
+     * 
+     * @return BL_CustomGrid_Model_Grid_Editor_Product_Inventory
+     */
+    protected function _getInventoryEditor()
+    {
+        return $this->_getSubEditor('customgrid/grid_editor_product_inventory');
+    }
+    
     protected function _getBaseConfigData()
     {
         return array(
@@ -45,6 +55,17 @@ class BL_CustomGrid_Model_Grid_Editor_Product extends BL_CustomGrid_Model_Grid_E
                 BL_CustomGrid_Model_Grid_Editor_Entity_Loader::ACTION_TYPE_LOAD_EDITED_ENTITY,
                 true
             ),
+        );
+    }
+    
+    public function getContextDefaultAdditionalCallbacks(
+        BL_CustomGrid_Model_Grid_Editor_Context $context,
+        BL_CustomGrid_Model_Grid_Editor_Callback_Manager $callbackManager
+    ) {
+        if ($context->getValueConfig()->getData('form_field/inventory_field')) {
+            return $this->_getInventoryEditor()->getDefaultBaseCallbacks($callbackManager);
+        }
+        return array(
             $callbackManager->getInternalMainCallbackFromCallable(
                 array($this, 'checkContextValueEditability'),
                 self::WORKER_TYPE_ENTITY_UPDATER,
@@ -64,16 +85,6 @@ class BL_CustomGrid_Model_Grid_Editor_Product extends BL_CustomGrid_Model_Grid_E
                 array($this, 'applyUserEditedValueToEditedProduct'),
                 self::WORKER_TYPE_ENTITY_UPDATER,
                 BL_CustomGrid_Model_Grid_Editor_Entity_Updater::ACTION_TYPE_APPLY_USER_EDITED_VALUE_TO_EDITED_ENTITY
-            ),
-            $callbackManager->getInternalMainCallbackFromCallable(
-                array($this, 'saveContextEditedProduct'),
-                self::WORKER_TYPE_ENTITY_UPDATER,
-                BL_CustomGrid_Model_Grid_Editor_Entity_Updater::ACTION_TYPE_SAVE_CONTEXT_EDITED_ENTITY
-            ),
-            $callbackManager->getInternalMainCallbackFromCallable(
-                array($this, 'getRenderableContextEditedValue'),
-                self::WORKER_TYPE_VALUE_RENDERER,
-                BL_CustomGrid_Model_Grid_Editor_Value_Renderer::ACTION_TYPE_GET_RENDERABLE_CONTEXT_EDITED_VALUE
             ),
         );
     }
@@ -201,56 +212,6 @@ class BL_CustomGrid_Model_Grid_Editor_Product extends BL_CustomGrid_Model_Grid_E
     }
     
     /**
-     * Return the specified inventory data from the given product
-     *
-     * @param Mage_Catalog_Model_Product $product Edited product
-     * @param string $field Inventory field name
-     * @param bool $useConfigDefault Whether the field uses config values by default
-     * @return mixed
-     */
-    protected function _getProductInventoryData(Mage_Catalog_Model_Product $product, $field, $useConfigDefault = false)
-    {
-        if ($stockItem = $product->getStockItem()) {
-            /** @var Mage_CatalogInventory_Model_Stock_Item $stockItem */
-            if (!$useConfigDefault
-                || ($stockItem->getData('use_config_' . $field) == 0)) {
-                return $stockItem->getDataUsingMethod($field);
-            }
-        }
-        return Mage::getStoreConfig(Mage_CatalogInventory_Model_Stock_Item::XML_PATH_ITEM . $field);
-    }
-    
-    /**
-     * Return whether the given field is editable for the given product
-     * 
-     * @param Mage_Catalog_Model_Product $product Checked product
-     * @param string $fieldId Edited field ID
-     * @return bool|string
-     */
-    protected function _checkContextProductFieldEditability(Mage_Catalog_Model_Product $product, $fieldId)
-    {
-        $result = true;
-        
-        if ($fieldId == 'qty') {
-            $helper = $this->getBaseHelper();
-            /** @var Mage_Core_Helper_Data $coreHelper */
-            $coreHelper = Mage::helper('core');
-
-            if (!$coreHelper->isModuleEnabled('Mage_CatalogInventory')) {
-                $result = $helper->__('The "Mage_CatalogInventory" module is disabled');
-            } elseif ($product->isComposite()) {
-                $result = $helper->__('The quantity is not editable for composite products');
-            } elseif ($product->getInventoryReadonly()) {
-                $result = $helper->__('The quantity is read-only for this product');
-            } elseif (!$this->_getProductInventoryData($product, 'manage_stock', true)) {
-                $result = $helper->__('The quantity is not editable for this product');
-            }
-        }
-        
-        return $result;
-    }
-    
-    /**
      * Return whether the given attribute is locked on the given product
      * 
      * @param Mage_Catalog_Model_Product $product Edited product
@@ -324,17 +285,8 @@ class BL_CustomGrid_Model_Grid_Editor_Product extends BL_CustomGrid_Model_Grid_E
     ) {
         $result = (!is_null($previousReturnedValue) ? $previousReturnedValue : true);
         
-        if ($result === true) {
-            /** @var Mage_Catalog_Model_Product $product */
-            $product = $context->getEditedEntity();
-            $valueOrigin = $context->getValueOrigin();
-            $valueId = $context->getValueId();
-            
-            if ($valueOrigin == BL_CustomGrid_Model_Grid_Editor_Abstract::EDITABLE_TYPE_FIELD) {
-                $result = $this->_checkContextProductFieldEditability($product, $valueId);
-            } elseif ($valueOrigin == BL_CustomGrid_Model_Grid_Editor_Abstract::EDITABLE_TYPE_ATTRIBUTE) {
-                $result = $this->_checkContextProductAttributeEditability($product, $valueId);
-            }
+        if (($result === true) && $context->isAttributeValueContext()) {
+            $this->_checkContextProductAttributeEditability($context->getEditedEntity(), $context->getValueId());
         }
         
         return $result;
@@ -450,11 +402,11 @@ class BL_CustomGrid_Model_Grid_Editor_Product extends BL_CustomGrid_Model_Grid_E
         BL_CustomGrid_Model_Grid_Editor_Context $context
     ) {
         $attributes = $product->getAttributes();
-        /** @var Mage_Eav_Model_Entity_Attribute $attribute */
-        $attribute  = $context->getValueConfig()->getData('global/attribute');
+        $attribute  = $context->getValueConfig()->getAttribute();
         $editedAttributeCode = $attribute->getAttributeCode();
         
         foreach ($attributes as $attribute) {
+            /** @var Mage_Eav_Model_Entity_Attribute $attributeCode */
             $attributeCode = $attribute->getAttributeCode();
             
             if ($attributeCode == $editedAttributeCode) {
@@ -466,76 +418,6 @@ class BL_CustomGrid_Model_Grid_Editor_Product extends BL_CustomGrid_Model_Grid_E
         }
         
         return $this;
-    }
-    
-    /**
-     * Apply the given edited field value to the given edited product
-     * 
-     * @param Mage_Catalog_Model_Product $editedEntity Edited product
-     * @param mixed $value Edited value
-     * @param BL_CustomGrid_Model_Grid_Editor_Context $context Editor context
-     * @return bool
-     */
-    protected function _applyFieldValueToEditedProduct(
-        Mage_Catalog_Model_Product $editedEntity,
-        $value,
-        BL_CustomGrid_Model_Grid_Editor_Context $context
-    ) {
-        if ($context->getValueId() == 'qty') {
-            $params = $context->getRequestValuesParams();
-            $productId = $editedEntity->getId();
-        
-            /** @var Mage_CatalogInventory_Model_Stock_Item $stockItem */
-            $stockItem = Mage::getModel('cataloginventory/stock_item');
-            $stockItem->setData(array());
-            $stockItem->loadByProduct($productId)->setProductId($productId);
-        
-            if (isset($params['original_inventory_qty'])
-                && (strlen($params['original_inventory_qty']) > 0)) {
-                $stockItem->setQtyCorrection($stockItem->getQty() - $params['original_inventory_qty']);
-            }
-        
-            $stockItem->setQty($value);
-            $editedEntity->setData('_blcg_gtp_stock_item', $stockItem);
-            return true;
-        }
-        return false;
-    }
-    
-    /**
-     * Apply the given edited attribute value to the given edited product
-     *
-     * @param Mage_Catalog_Model_Product $editedEntity Edited product
-     * @param mixed $value Edited value
-     * @param BL_CustomGrid_Model_Grid_Editor_Context $context Editor context
-     * @return bool
-     */
-    protected function _applyAttributeValueToEditedProduct(
-        Mage_Catalog_Model_Product $editedEntity,
-        $value,
-        BL_CustomGrid_Model_Grid_Editor_Context $context
-    ) {
-        $params = $context->getRequestGlobalParams();
-    
-        if (Mage::app()->isSingleStoreMode()) {
-            $editedEntity->setWebsiteIds(array(Mage::app()->getStore(true)->getWebsite()->getId()));
-        }
-        if (isset($params['url_key_create_redirect'])) {
-            $editedEntity->setData('save_rewrites_history', (bool)$params['url_key_create_redirect']);
-        }
-    
-        // As we edit only one value once, force using default values for any attribute that require it
-        $this->_prepareEditedProductDefaultValues($editedEntity, $context);
-    
-        $editedEntity->setData($context->getFormFieldName(), $value);
-        $editedEntity->validate();
-    
-        if ($context->getData(self::DEFAULT_VALUE_FLAG_CONTEXT_KEY)) {
-            // Force later product reload if the default value was used, to ensure getting the good value for rendering
-            $context->getValueConfig()->setData('config/render_reload', true);
-        }
-        
-        return true;
     }
     
     /**
@@ -554,57 +436,29 @@ class BL_CustomGrid_Model_Grid_Editor_Product extends BL_CustomGrid_Model_Grid_E
         $result = false;
         
         if ($context->isAttributeValueContext()) {
-            $result = $this->_applyAttributeValueToEditedProduct($editedEntity, $userValue, $context);
-        } elseif ($context->isFieldValueContext()) {
-            $result = $this->_applyFieldValueToEditedProduct($editedEntity, $userValue, $context);
+            $params = $context->getRequestGlobalParams();
+            
+            if (Mage::app()->isSingleStoreMode()) {
+                $editedEntity->setWebsiteIds(array(Mage::app()->getStore(true)->getWebsite()->getId()));
+            }
+            if (isset($params['url_key_create_redirect'])) {
+                $editedEntity->setData('save_rewrites_history', (bool) $params['url_key_create_redirect']);
+            }
+            
+            // As we edit only one value once, force using default values for any attribute that require it
+            $this->_prepareEditedProductDefaultValues($editedEntity, $context);
+            
+            $editedEntity->setData($context->getFormFieldName(), $userValue);
+            $editedEntity->validate();
+            
+            if ($context->getData(self::DEFAULT_VALUE_FLAG_CONTEXT_KEY)) {
+                // Force later product reload if the default value was used, to ensure getting the good value for rendering
+                $context->getValueConfig()->setData('config/render_reload', true);
+            }
+            
+            $result = true;
         }
         
         return $result;
-    }
-    
-    /**
-     * Callback for @see BL_CustomGrid_Model_Grid_Editor_Entity_Updater::saveContextEditedProduct()
-     * 
-     * @param Mage_Catalog_Model_Product $editedEntity Edited product
-     * @param BL_CustomGrid_Model_Grid_Editor_Context $context Editor context
-     * @return bool
-     */
-    public function saveContextEditedProduct(
-        Mage_Catalog_Model_Product $editedEntity,
-        BL_CustomGrid_Model_Grid_Editor_Context $context
-    ) {
-        if ($context->isFieldValueContext() && ($context->getValueId() == 'qty')) {
-            if ($stockItem = $editedEntity->getData('_blcg_gtp_stock_item')) {
-                /** @var Mage_CatalogInventory_Model_Stock_Item $stockItem */
-                $stockItem->save();
-            }
-            return true;
-        }
-        return false;
-    }
-    
-    /**
-     * Callback for @see BL_CustomGrid_Model_Grid_Editor_Value_Renderer::getRenderableContextEditedValue()
-     * 
-     * @param BL_CustomGrid_Model_Grid_Editor_Context $context Editor context
-     * @param BL_CustomGrid_Object $transport Transport object used to hold the renderable value
-     */
-    public function getRenderableContextEditedValue(
-        BL_CustomGrid_Model_Grid_Editor_Context $context,
-        BL_CustomGrid_Object $transport
-    ) {
-        if ($context->isFieldValueContext() && ($context->getValueId() == 'qty')) {
-            /** @var Mage_Catalog_Model_Product $editedEntity */
-            $editedEntity = $context->getEditedEntity();
-            
-            if ($stockItem = $editedEntity->getStockItem()) {
-                // Reload the edited stock item to get the updated stock value
-                /** @var $stockItem Mage_CatalogInventory_Model_Stock_Item */
-                $stockItem->setProductId(null)->assignProduct($editedEntity);
-            }
-            
-            $value = $this->_getProductInventoryData($editedEntity, 'qty') * 1;
-            $transport->setData('value', (strval($value) !== '' ? $value : 0));
-        }
     }
 }

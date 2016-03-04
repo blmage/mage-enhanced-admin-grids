@@ -61,4 +61,90 @@ class BL_CustomGrid_Model_Grid_Editor_Value_Config extends BL_CustomGrid_Object
         
         return $value;
     }
+    
+    /**
+     * Return the value for the given key, but throw an exception if none can be found
+     * 
+     * @param string $key Value key
+     * @return mixed
+     * @throws Mage_Core_Exception
+     */
+    protected function _getRequiredValue($key)
+    {
+        if (!$this->hasData($key)) {
+            $exception = new Exception();Mage::log($exception->getTraceAsString());
+            Mage::throwException('Missing required value in editor value config : "' . $key . '"');
+        }
+        return $this->getData($key); 
+    }
+    
+    /**
+     * Return the edited attribute model
+     * 
+     * @return Mage_Eav_Model_Entity_Attribute
+     */
+    public function getAttribute()
+    {
+        return $this->_getRequiredValue('global/attribute');
+    }
+    
+    /**
+     * Return the key where to search for the edited value in the edited entities
+     * 
+     * @return string
+     */
+    public function getEntityValueKey()
+    {
+        return $this->_getRequiredValue('global/entity_value_key');
+    }
+    
+    /**
+     * Return the form field values
+     * 
+     * @return array
+     */
+    public function getFormFieldValues()
+    {
+        return (array) $this->_getRequiredValue('form_field');
+    }
+    
+    /**
+     * Return the form field ID
+     * 
+     * @return string
+     */
+    public function getFormFieldId()
+    {
+        return $this->_getRequiredValue('form_field/id');
+    }
+    
+    /**
+     * Return the form field name
+     * 
+     * @return string
+     */
+    public function getFormFieldName()
+    {
+        return $this->_getRequiredValue('form_field/name');
+    }
+    
+    /**
+     * Return the form field type
+     * 
+     * @return string
+     */
+    public function getFormFieldType()
+    {
+        return $this->_getRequiredValue('form_field/type');
+    }
+    
+    /**
+     * Return the key where to store / search for the user-defined values in editor requests
+     * 
+     * @return string
+     */
+    public function getRequestValuesKey()
+    {
+        return $this->_getRequiredValue('request/values_key');
+    }
 }

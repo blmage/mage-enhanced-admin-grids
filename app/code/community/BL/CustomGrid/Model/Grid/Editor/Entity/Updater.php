@@ -29,15 +29,12 @@ class BL_CustomGrid_Model_Grid_Editor_Entity_Updater extends BL_CustomGrid_Model
     /**
      * Default main callback for @see BL_CustomGrid_Model_Grid_Editor_Entity_Updater::isContextValueEditable()
      * 
-     * @param BL_CustomGrid_Model_Grid_Editor_Context $context Editor context
      * @param mixed $previousReturnedValue Value returned by the previous callback
      * @return bool|string
      */
-    public function _checkContextValueEditability(
-        BL_CustomGrid_Model_Grid_Editor_Context $context,
-        $previousReturnedValue
-    ) {
-        return (($previousReturnedValue !== false) && !is_string($previousReturnedValue));
+    public function _checkContextValueEditability($previousReturnedValue)
+    {
+        return (is_string($previousReturnedValue) ? $previousReturnedValue : ($previousReturnedValue !== false));
     }
     
     /**
@@ -137,11 +134,10 @@ class BL_CustomGrid_Model_Grid_Editor_Entity_Updater extends BL_CustomGrid_Model
         if ($valueConfig->getData('updater/must_filter')) {
             if (!$filterType = $valueConfig->getData('updater/filter_type')) {
                 if ($context->getValueOrigin() == BL_CustomGrid_Model_Grid_Editor_Abstract::EDITABLE_TYPE_ATTRIBUTE) {
-                    /** @var Mage_Eav_Model_Entity_Attribute $attribute */
-                    $attribute  = $valueConfig->getData('global/attribute');
+                    $attribute  = $valueConfig->getAttribute();
                     $filterType = $attribute->getFrontend()->getInputType();
                 } else {
-                    $filterType = $valueConfig->getData('form_field/type');
+                    $filterType = $valueConfig->getFormFieldType();
                 }
             }
             
@@ -185,8 +181,8 @@ class BL_CustomGrid_Model_Grid_Editor_Entity_Updater extends BL_CustomGrid_Model
             $result = false;
             $valueConfig = $context->getValueConfig();
             
-            if (!$valueKey = $valueConfig->getData('global/entity_value_key')) {
-                $valueKey = $valueConfig->getData('form_field/name');
+            if (!$valueKey = $valueConfig->getEntityValueKey()) {
+                $valueKey = $valueConfig->getFormFieldName();
             }
             
             if ($valueKey) {

@@ -99,7 +99,7 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Form_Order_Address extends BL_Custo
         }
         
         $form->setValues($this->getEditedOrderAddress()->getData());
-        $form->setFieldNameSuffix($this->getValueConfig()->getData('request/values_key'));
+        $form->setFieldNameSuffix($this->getValueConfig()->getRequestValuesKey());
         $this->setForm($form);
         
         return parent::_prepareForm();

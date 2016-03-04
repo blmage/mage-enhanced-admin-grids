@@ -1492,7 +1492,6 @@ blcg.Grid.ProfilesBar.prototype = {
             }
         }.bind(this));
         
-        this.isInitializing = true;
         this.currentDisplayIndex = 0;
         this.userScrollDirection = 'left';
         this.userScrollOutmostIndex = 0;
@@ -1546,6 +1545,7 @@ blcg.Grid.ProfilesBar.prototype = {
         this.previousArrow.observe('click', function(e) { this.scrollToPrevious(); }.bind(this));
         this.nextArrow.observe('click', function(e) { this.scrollToNext(); }.bind(this));
         
+        this.refreshMaxDisplayedCount();
         new PeriodicalExecuter(this.refreshMaxDisplayedCount.bind(this), 1);
     },
     
@@ -3028,9 +3028,10 @@ blcg.Grid.Editor.prototype = {
                                 this.editedCellClickHandler = cell.observe('click', function(e) {
                                     var element = e.findElement();
                                     
-                                    if (!element.match('input[type="checkbox"]')) {
-                                        // Prevent the base row click callback from being applied to elements that are not
-                                        // skipped, such as optgroups or textareas
+                                    if (!element.match('input[type="checkbox"]') && !element.match('label')) {
+                                        // Prevent the base row click callback from being applied to elements
+                                        // that are not skipped, such as optgroups or textareas
+                                        // In the meantime, ensure that checkboxes and labels keep their behaviour
                                         e.stop();
                                     }
                                 });

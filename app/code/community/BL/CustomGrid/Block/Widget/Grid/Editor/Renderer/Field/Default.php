@@ -584,7 +584,7 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Field_Default extends BL_C
     protected function _getRenderedValue()
     {
         $valueConfig = $this->getValueConfig();
-        $fieldType   = $valueConfig->getData('form_field/type');
+        $fieldType   = $valueConfig->getFormFieldType();
         $renderableValue = $this->getRenderableValue();
         
         if (isset(self::$_renderMethods[$fieldType])) {

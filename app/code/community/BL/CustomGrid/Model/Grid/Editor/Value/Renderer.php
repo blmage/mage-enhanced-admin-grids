@@ -48,13 +48,12 @@ class BL_CustomGrid_Model_Grid_Editor_Value_Renderer extends BL_CustomGrid_Model
             $valueConfig = $context->getValueConfig();
             
             if ($context->getValueOrigin() == BL_CustomGrid_Model_Grid_Editor_Abstract::EDITABLE_TYPE_ATTRIBUTE) {
-                /** @var Mage_Eav_Model_Entity_Attribute $attribute */
-                $attribute = $valueConfig->getData('global/attribute');
+                $attribute = $valueConfig->getAttribute();
                 $transport->setData('value', $attribute->getFrontend()->getValue($context->getEditedEntity()));
             } else {
                 $editedEntity   = $context->getEditedEntity();
                 $formFieldName  = $context->getFormFieldName();
-                $entityValueKey = $valueConfig->getData('global/entity_value_key');
+                $entityValueKey = $valueConfig->getEntityValueKey();
                 
                 $transport->setData(
                     'value',
@@ -104,10 +103,13 @@ class BL_CustomGrid_Model_Grid_Editor_Value_Renderer extends BL_CustomGrid_Model
         $valueRendererBlock = $previousReturnedValue;
         $valueRendererData  = array(
             'edited_entity'     => $context->getEditedEntity(),
-            'edited_attribute'  => $valueConfig->getData('global/attribute'),
             'editor_context'    => $context,
             'value_config'      => $valueConfig,
         );
+        
+        if ($context->isAttributeValueContext()) {
+            $valueRendererData['edited_attribute'] = $valueConfig->getAttribute();
+        }
         
         if (!$valueRendererBlock instanceof Mage_Core_Block_Abstract) {
             $rendererBlockType = $valueConfig->getData('renderer/block_type');

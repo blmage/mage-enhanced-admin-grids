@@ -30,6 +30,48 @@ abstract class BL_CustomGrid_Model_Grid_Editor_Abstract extends BL_CustomGrid_Ob
     const WORKER_TYPE_VALUE_RENDERER       = 'value_renderer';
     
     /**
+     * Worker types list
+     * 
+     * @var array
+     */
+    static protected $_workerTypes = array(
+        self::WORKER_TYPE_CALLBACK_MANAGER,
+        self::WORKER_TYPE_VALUE_CONFIG_BUILDER,
+        self::WORKER_TYPE_KICKSTARTER,
+        self::WORKER_TYPE_ENTITY_LOADER,
+        self::WORKER_TYPE_ENTITY_UPDATER,
+        self::WORKER_TYPE_SENTRY,
+        self::WORKER_TYPE_VALUE_FORM_RENDERER,
+        self::WORKER_TYPE_VALUE_RENDERER,
+    );
+    
+    /**
+     * Return an instance of the editor corresponding to the given class code,
+     * on which the specific values of the current editor (grid type model, workers) will have been copied
+     * 
+     * @param string $classCode Editor class code
+     * @return BL_CustomGrid_Model_Grid_Editor_Abstract
+     * @throws Mage_Core_Exception
+     */
+    protected function _getSubEditor($classCode)
+    {
+        $subEditor = Mage::getModel($classCode);
+        
+        if (!$subEditor || !($subEditor instanceof BL_CustomGrid_Model_Grid_Editor_Abstract)) {
+            Mage::throwException('Invalid sub editor model ("' . $classCode . '")');
+        }
+        
+        $subEditor->setGridTypeModel($this->getGridTypeModel());
+        
+        foreach (self::$_workerTypes as $workerType) {
+            $dataKey = 'worker_model_class_code_' . $workerType;
+            $subEditor->setData($dataKey, $this->_getData($dataKey));
+        }
+        
+        return $subEditor;
+    }
+    
+    /**
      * Return the worker model of the given type
      * 
      * @param string $type Worker type

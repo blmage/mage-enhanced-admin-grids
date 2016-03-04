@@ -168,6 +168,6 @@ class BL_CustomGrid_Model_Grid_Editor_Context extends BL_CustomGrid_Object
      */
     public function getFormFieldName()
     {
-        return $this->getValueConfig()->getData('form_field/name');
+        return $this->getValueConfig()->getFormFieldName();
     }
 }

@@ -46,8 +46,10 @@ class BL_CustomGrid_Block_Grid_Form_Custom_Columns extends BL_CustomGrid_Block_G
     {
         parent::_addFieldsToForm($form);
         
-        $groups = $this->getGridModel()->getCustomColumnsGroups();
-        $customColumns = $this->getGridModel()->getAvailableCustomColumns(true);
+        $gridModel = $this->getGridModel();
+        $groups = $gridModel->getCustomColumnsGroups();
+        $customColumns = $gridModel->getAvailableCustomColumns(true);
+        $usedColumnsCodes = $gridModel->getUsedCustomColumnsCodes();
         
         foreach ($groups as $groupId => $groupLabel) {
             $totalCount = 0;
@@ -61,11 +63,11 @@ class BL_CustomGrid_Block_Grid_Form_Custom_Columns extends BL_CustomGrid_Block_G
                 )
             );
             
-            foreach ($customColumns[$groupId] as $customColumn) {
+            foreach ($customColumns[$groupId] as $columnCode => $customColumn) {
                 $id = $customColumn->getId();
                 $totalCount++;
                 
-                if ($customColumn->isSelected()) {
+                if ($isSelected = in_array($columnCode, $usedColumnsCodes)) {
                     $displayedCount++;
                 }
                 
@@ -80,7 +82,7 @@ class BL_CustomGrid_Block_Grid_Form_Custom_Columns extends BL_CustomGrid_Block_G
                                 $id => $this->__('Yes'),
                                 ''  => $this->__('No'),
                             ),
-                        'value'  => ($customColumn->isSelected() ? $id : ''),
+                        'value'  => ($isSelected ? $id : ''),
                     )
                 );
             }

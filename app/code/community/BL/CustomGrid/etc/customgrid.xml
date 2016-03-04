@@ -129,7 +129,6 @@
                     <allow_customization>1</allow_customization>
                     <config_params>
                         <table_field_name>manage_stock</table_field_name>
-                        <is_use_config_field>1</is_use_config_field>
                         <field_type>boolean</field_type>
                     </config_params>
                 </stock_manage_stock>
@@ -149,7 +148,7 @@
                     <allow_customization>1</allow_customization>
                     <config_params>
                         <table_field_name>min_qty</table_field_name>
-                        <is_use_config_field>1</is_use_config_field>
+                        <field_type>decimal</field_type>
                     </config_params>
                 </stock_min_qty>
                 
@@ -159,7 +158,6 @@
                     <allow_customization>1</allow_customization>
                     <config_params>
                         <table_field_name>min_sale_qty</table_field_name>
-                        <is_use_config_field>1</is_use_config_field>
                         <field_type>decimal</field_type>
                     </config_params>
                 </stock_min_sale_qty>
@@ -170,7 +168,6 @@
                     <allow_customization>1</allow_customization>
                     <config_params>
                         <table_field_name>max_sale_qty</table_field_name>
-                        <is_use_config_field>1</is_use_config_field>
                         <field_type>decimal</field_type>
                     </config_params>
                 </stock_max_sale_qty>
@@ -190,7 +187,6 @@
                     <allow_customization>1</allow_customization>
                     <config_params>
                         <table_field_name>backorders</table_field_name>
-                        <is_use_config_field>1</is_use_config_field>
                         <field_type>options</field_type>
                         <source_model>cataloginventory/source_backorders</source_model>
                     </config_params>
@@ -202,7 +198,6 @@
                     <allow_customization>1</allow_customization>
                     <config_params>
                         <table_field_name>notify_stock_qty</table_field_name>
-                        <is_use_config_field>1</is_use_config_field>
                         <field_type>decimal</field_type>
                     </config_params>
                 </stock_notify_stock_qty>
@@ -213,44 +208,16 @@
                     <allow_customization>1</allow_customization>
                     <config_params>
                         <table_field_name>qty_increments</table_field_name>
-                        <is_use_config_field>1</is_use_config_field>
                         <field_type>decimal</field_type>
                     </config_params>
                 </stock_qty_increments>
-                
-                <stock_enable_qty_increments model="customgrid/custom_column_product_inventory" module="customgrid">
-                    <name>Enable Qty Increments</name>
-                    <group>Inventory</group>
-                    <allow_customization>1</allow_customization>
-                    <availability>
-                        <excluded_versions>
-                            <v16>1.6.*</v16>
-                            <v17>1.7.*</v17>
-                            <v18>1.8.*</v18>
-                            <v19>1.9.*</v19>
-                        </excluded_versions>
-                    </availability>
-                    <config_params>
-                        <table_field_name>enable_qty_increments</table_field_name>
-                        <is_use_config_field>1</is_use_config_field>
-                        <field_type>boolean</field_type>
-                    </config_params>
-                </stock_enable_qty_increments>
                 
                 <stock_enable_qty_inc model="customgrid/custom_column_product_inventory" module="customgrid">
                     <name>Enable Qty Increments</name>
                     <group>Inventory</group>
                     <allow_customization>1</allow_customization>
-                    <availability>
-                        <excluded_versions>
-                            <v14>1.4.*</v14>
-                            <v15>1.5.*</v15>
-                        </excluded_versions>
-                    </availability>
                     <config_params>
                         <table_field_name>enable_qty_increments</table_field_name>
-                        <is_use_config_field>1</is_use_config_field>
-                        <use_config_field_name>use_config_enable_qty_inc</use_config_field_name>
                         <field_type>boolean</field_type>
                     </config_params>
                 </stock_enable_qty_inc>
@@ -260,12 +227,13 @@
                     <group>Inventory</group>
                     <config_params>
                         <table_field_name>is_in_stock</table_field_name>
-                        <field_type>boolean</field_type>
+                        <field_type>options</field_type>
+                        <source_model>cataloginventory/source_stock</source_model>
                     </config_params>
                 </stock_is_in_stock>
             </custom_columns>
         </product>
-
+        
         <product_attribute model="customgrid/grid_type_product_attributes" module="customgrid">
             <name>Product Attributes</name>
             <sort_order>65000</sort_order>
@@ -353,7 +321,7 @@
             <name>Reviews</name>
             <sort_order>180000</sort_order>
         </product_review>
-
+        
         <product_rating model="customgrid/grid_type_product_rating" module="customgrid">
             <name>Review Ratings</name>
             <sort_order>181000</sort_order>
