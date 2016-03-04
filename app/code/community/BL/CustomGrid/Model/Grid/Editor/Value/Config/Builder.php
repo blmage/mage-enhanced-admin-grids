@@ -528,4 +528,49 @@ class BL_CustomGrid_Model_Grid_Editor_Value_Config_Builder extends BL_CustomGrid
             )
         );
     }
+    
+    /**
+     * Build complete config objects for each of the given editable values
+     * 
+     * @param array $editableFields Editable fields
+     * @param array $editableAttributes Editable attributes
+     * @param array $editableAttributeFields Editable attribute fields
+     * @param string $blockType Grid block type
+     * @return array
+     */
+    public function buildEditableValuesConfigs(
+        $blockType,
+        array $editableFields,
+        array $editableAttributes,
+        array $editableAttributeFields
+    ) {
+        foreach ($editableFields as $fieldId => $field) {
+            $editableFields[$fieldId] = $this->buildEditableFieldConfig($blockType, $fieldId, $field);
+        }
+        
+        foreach ($editableAttributes as $code => $attribute) {
+            $editableAttributes[$code] = $this->buildEditableAttributeConfig($blockType, $code, $attribute);
+        }
+        
+        foreach ($editableAttributeFields as $fieldId => $attributeField) {
+            $config = $this->buildEditableAttributeFieldConfig(
+                $blockType,
+                $fieldId,
+                $attributeField,
+                $editableAttributes
+            );
+            
+            if (!$config instanceof BL_CustomGrid_Model_Grid_Editor_Value_Config) {
+                unset($editableAttributeFields[$fieldId]);
+            } else {
+                $editableAttributeFields[$fieldId] = $config;
+            }
+        }
+        
+        return array(
+            BL_CustomGrid_Model_Grid_Editor_Abstract::EDITABLE_TYPE_FIELD => $editableFields,
+            BL_CustomGrid_Model_Grid_Editor_Abstract::EDITABLE_TYPE_ATTRIBUTE => $editableAttributes,
+            BL_CustomGrid_Model_Grid_Editor_Abstract::EDITABLE_TYPE_ATTRIBUTE_FIELD => $editableAttributeFields,
+        );
+    }
 }

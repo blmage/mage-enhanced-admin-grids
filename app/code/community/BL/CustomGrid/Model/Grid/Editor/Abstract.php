@@ -406,104 +406,28 @@ abstract class BL_CustomGrid_Model_Grid_Editor_Abstract extends BL_CustomGrid_Ob
     {
         if (!$this->hasData('editable_values_configs')
             || !is_array($editableValuesConfigs = $this->getData('editable_values_configs/' . $blockType))) {
-            $configBuilder = $this->getValueConfigBuilder();
-            
-            // Build all base configs
-            $fields = $this->_getEditableFields($blockType);
-            $attributes = $this->_getEditableAttributes($blockType);
-            $attributeFields = $this->_getEditableAttributeFields($blockType);
-            
-            foreach ($fields as $fieldId => $field) {
-                $fields[$fieldId] = $configBuilder->buildEditableFieldConfig($blockType, $fieldId, $field);
-            }
-            
-            foreach ($attributes as $code => $attribute) {
-                $attributes[$code] = $configBuilder->buildEditableAttributeConfig($blockType, $code, $attribute);
-            }
-            
-            foreach ($attributeFields as $fieldId => $attributeField) {
-                $config = $configBuilder->buildEditableAttributeFieldConfig(
+            $editableValuesConfigs = $this->getValueConfigBuilder()
+                ->buildEditableValuesConfigs(
                     $blockType,
-                    $fieldId,
-                    $attributeField,
-                    $attributes
+                    $this->_getEditableFields($blockType),
+                    $this->_getEditableAttributes($blockType),
+                    $this->_getEditableAttributeFields($blockType)
                 );
-                
-                if (!$config instanceof BL_CustomGrid_Model_Grid_Editor_Value_Config) {
-                    unset($attributeFields[$fieldId]);
-                } else {
-                    $attributeFields[$fieldId] = $config;
-                }
-            }
             
-            // Dispatch events for each kind of editable values
-            $fieldsResponse = new BL_CustomGrid_Object(array('fields' => $fields));
-            $attributesResponse = new BL_CustomGrid_Object(array('attributes' => $attributes));
-            $attributeFieldsResponse = new BL_CustomGrid_Object(array('attribute_fields' => $attributeFields));
+            $response = new BL_CustomGrid_Object(array('configs' => $editableValuesConfigs));
             
             $this->_dispatchEventWithResponse(
-                'blcg_grid_editor_prepare_editable_fields',
-                $fieldsResponse,
+                'blcg_grid_editor_prepare_editable_values_configs',
+                $response,
                 $blockType
             );
             
-            $this->_dispatchEventWithResponse(
-                'blcg_grid_editor_prepare_editable_attributes',
-                $attributesResponse,
-                $blockType
-            );
-            
-            $this->_dispatchEventWithResponse(
-                'blcg_grid_editor_prepare_editable_attribute_fields',
-                $attributeFieldsResponse,
-                $blockType
-            );
-            
-            $editableValuesConfigs = array(
-                self::EDITABLE_TYPE_FIELD => $fieldsResponse->getFields(),
-                self::EDITABLE_TYPE_ATTRIBUTE => $attributesResponse->getAttributes(),
-                self::EDITABLE_TYPE_ATTRIBUTE_FIELD => $attributeFieldsResponse->getAttributeFields(),
-            );
-            
-            $this->setData('editable_values_configs/' . $blockType, $editableValuesConfigs);
+            $this->setData('editable_values_configs/' . $blockType, $response->getConfigs());
         }
         
         return !is_null($origin)
             ? (isset($editableValuesConfigs[$origin]) ? $editableValuesConfigs[$origin] : array())
             : $editableValuesConfigs;
-    }
-    
-    /**
-     * Return the configs for all the editable fields
-     * 
-     * @param string $blockType Grid block type
-     * @return BL_CustomGrid_Model_Grid_Editor_Value_Config[]
-     */
-    public function getEditableFieldsConfigs($blockType)
-    {
-        return $this->getEditableValuesConfigs($blockType, self::EDITABLE_TYPE_FIELD);
-    }
-    
-    /**
-     * Return the configs for all the editable attributes
-     * 
-     * @param string $blockType Grid block type
-     * @return BL_CustomGrid_Model_Grid_Editor_Value_Config[]
-     */
-    public function getEditableAttributesConfigs($blockType)
-    {
-        return $this->getEditableValuesConfigs($blockType, self::EDITABLE_TYPE_ATTRIBUTE);
-    }
-    
-    /**
-     * Return the configs for all the editable attribute fields
-     * 
-     * @param string $blockType Grid block type
-     * @return BL_CustomGrid_Model_Grid_Editor_Value_Config[]
-     */
-    public function getEditableAttributeFieldsConfigs($blockType)
-    {
-        return $this->getEditableValuesConfigs($blockType, self::EDITABLE_TYPE_ATTRIBUTE_FIELD);
     }
     
     /**
@@ -536,42 +460,6 @@ abstract class BL_CustomGrid_Model_Grid_Editor_Abstract extends BL_CustomGrid_Ob
     }
     
     /**
-     * Return the config for the given field ID
-     * 
-     * @param string $blockType Grid block type
-     * @param string $fieldId Field ID
-     * @return BL_CustomGrid_Model_Grid_Editor_Value_Config|null
-     */
-    public function getEditableFieldConfig($blockType, $fieldId)
-    {
-        return $this->getEditableValueConfig($blockType, $fieldId, self::EDITABLE_TYPE_FIELD);
-    }
-    
-    /**
-     * Return the config for the given attribute code
-     * 
-     * @param string $blockType Grid block type
-     * @param string $attributeCode Attribute code
-     * @return BL_CustomGrid_Model_Grid_Editor_Value_Config|null
-     */
-    public function getEditableAttributeConfig($blockType, $attributeCode)
-    {
-        return $this->getEditableValueConfig($blockType, $attributeCode, self::EDITABLE_TYPE_ATTRIBUTE);
-    }
-    
-    /**
-     * Return the config for the given attribute field ID
-     * 
-     * @param string $blockType Grid block type
-     * @param string $fieldId Field ID
-     * @return BL_CustomGrid_Model_Grid_Editor_Value_Config|null
-     */
-    public function getEditableAttributeFieldConfig($blockType, $fieldId)
-    {
-        return $this->getEditableValueConfig($blockType, $fieldId, self::EDITABLE_TYPE_ATTRIBUTE_FIELD);
-    }
-    
-    /**
      * Apply the editable values configs to the given grid columns
      * 
      * @param string $blockType Grid block type
@@ -586,14 +474,26 @@ abstract class BL_CustomGrid_Model_Grid_Editor_Abstract extends BL_CustomGrid_Ob
             $hasStoreId  = false;
             
             if ($column->isAttribute()) {
-                $valueConfig = $this->getEditableAttributeConfig($blockType, $column->getIndex());
                 $hasStoreId  = $column->hasStoreId();
+                $valueConfig = $this->getEditableValueConfig(
+                    $blockType,
+                    $column->getIndex(),
+                    self::EDITABLE_TYPE_ATTRIBUTE
+                );
             } elseif ($column->isCustom()) {
+                $hasStoreId  = $column->hasStoreId();
                 $valueConfig = $column->getCustomColumnModel(false)
                     ->getGridColumnEditorConfig($column, $configBuilder);
-                $hasStoreId  = $column->hasStoreId();
-            } elseif (!$valueConfig = $this->getEditableFieldConfig($blockType, $columnBlockId)) {
-                $valueConfig = $this->getEditableAttributeFieldConfig($blockType, $columnBlockId);
+            } else {
+                $valueConfig = $this->getEditableValueConfig($blockType, $columnBlockId, self::EDITABLE_TYPE_FIELD);
+                
+                if (!$valueConfig) {
+                    $valueConfig = $this->getEditableValueConfig(
+                        $blockType,
+                        $columnBlockId,
+                        self::EDITABLE_TYPE_ATTRIBUTE_FIELD
+                    );
+                }
             }
             
             if ($valueConfig instanceof BL_CustomGrid_Model_Grid_Editor_Value_Config) {
@@ -653,12 +553,12 @@ abstract class BL_CustomGrid_Model_Grid_Editor_Abstract extends BL_CustomGrid_Ob
         BL_CustomGrid_Model_Grid $gridModel
     ) {
         $context = $this->getKickstarter()->getEditorContextFromRequest($request, $gridModel);
-    
+        
         $this->_checkWorkerActionResult(
             $this->getSentry()->isEditAllowedForContext($context),
             $this->getBaseHelper()->__('You are not allowed to edit this value')
         );
-    
+        
         $this->_checkWorkerActionResult(
             $this->getEntityUpdater()->isContextValueEditable($context),
             $this->getBaseHelper()->__('This value is not editable')
@@ -699,7 +599,7 @@ abstract class BL_CustomGrid_Model_Grid_Editor_Abstract extends BL_CustomGrid_Ob
         
         return ($isInGrid ? $valueFormBlock->toHtml() : $valueFormBlock);
     }
-
+    
     /**
      * Apply the value update corresponding to the given edit request made on the given grid model,
      * and return the rendered new value

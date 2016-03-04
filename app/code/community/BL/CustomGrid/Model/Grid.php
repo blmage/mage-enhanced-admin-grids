@@ -1768,11 +1768,15 @@ class BL_CustomGrid_Model_Grid extends Mage_Core_Model_Abstract
      */
     public function hasEditableColumns()
     {
-        $editor = $this->getTypeModel()->getEditor();
-        $editableValues = $editor->getEditableAttributesConfigs($this->getBlockType());
         $hasEditableColumns = false;
-    
-        if (!empty($editableValues)) {
+        $editableAttributes = $this->getTypeModel()
+            ->getEditor()
+            ->getEditableValuesConfigs(
+                $this->getBlockType(),
+                BL_CustomGrid_Model_Grid_Editor_Abstract::EDITABLE_TYPE_ATTRIBUTE
+            );
+        
+        if (!empty($editableAttributes)) {
             $hasEditableColumns = true;
         } else {
             foreach ($this->getSortedColumns(true, true, false, true, false, true, true) as $column) {
