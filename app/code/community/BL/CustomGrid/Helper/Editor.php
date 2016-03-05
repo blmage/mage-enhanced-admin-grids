@@ -101,6 +101,26 @@ class BL_CustomGrid_Helper_Editor extends Mage_Core_Helper_Abstract
     }
     
     /**
+     * Return the base config values for a store field
+     *
+     * @param bool $allowMultipleChoices Whether multiple stores can be chosen
+     * @return array
+     */
+    public function getStoreFieldBaseConfig($allowMultipleChoices)
+    {
+        return array(
+            'form_field' => array(
+                'type'     => ($allowMultipleChoices ? 'multiselect' : 'select'),
+                'values'   => $this->getStoreValuesForForm(false, $allowMultipleChoices),
+                'required' => true,
+            ),
+            'renderer' => array(
+                'block_type' => 'customgrid/widget_grid_editor_renderer_field_store',
+            ),
+        );
+    }
+    
+    /**
      * Return the stores values, ready for being used in forms
      * 
      * @param bool $empty Whether empty value should be included

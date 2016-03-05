@@ -71,16 +71,7 @@ class BL_CustomGrid_Model_Grid_Editor_Cms_Widget extends BL_CustomGrid_Model_Gri
         );
         
         if (!Mage::app()->isSingleStoreMode()) {
-            $fields['store_ids'] = array(
-                'form_field' => array(
-                    'type'     => 'multiselect',
-                    'values'   => $this->getEditorHelper()->getStoreValuesForForm(false, true),
-                    'required' => true,
-                ),
-                'renderer' => array(
-                    'block_type' => 'customgrid/widget_grid_editor_renderer_field_store',
-                ),
-            );
+            $fields['store_ids'] = $this->getEditorHelper()->getStoreFieldBaseConfig(true);
         }
         
         return $fields;
