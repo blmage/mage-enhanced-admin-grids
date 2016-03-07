@@ -27,9 +27,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config_Columns_List extends Mage_Adminhtml
     
     protected function _toHtml()
     {
-        return $this->getGridModel()
-            ? parent::_toHtml()
-            : '';
+        return ($this->getGridModel() ? parent::_toHtml() : '');
     }
     
     /**

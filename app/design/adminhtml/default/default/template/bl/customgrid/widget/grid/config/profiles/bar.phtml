@@ -1,0 +1,56 @@
+<?php
+/**
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
+ *
+ * @category   BL
+ * @package    BL_CustomGrid
+ * @copyright  Copyright (c) 2016 Benoît Leulliette <benoit.leulliette@gmail.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+?>
+<?php /** @var $this BL_CustomGrid_Block_Widget_Grid_Config_Profiles_Bar */ ?>
+<?php $_gridModel = $this->getGridModel() ?>
+<div id="<?php echo $this->getHtmlId() ?>-profiles-bar" class="blcg-grid-profiles-bar">
+    <div class="blcg-grid-profiles-list-wrapper">
+        <div class="blcg-grid-profiles-list-constrainer">
+            <div class="blcg-grid-profiles-list-sub-wrapper">
+                <button type="button" title="<?php echo $this->__('Previous') ?>" class="blcg-grid-profiles-bar-button blcg-grid-profiles-bar-button-previous blcg-no-display">
+                    <span>
+                        <span><?php echo $this->__('Previous') ?></span>
+                    </span>
+                </button>
+                <button type="button" title="<?php echo $this->__('Next') ?>" class="blcg-grid-profiles-bar-button blcg-grid-profiles-bar-button-next blcg-no-display">
+                    <span>
+                        <span><?php echo $this->__('Next') ?></span>
+                    </span>
+                </button>
+                <ul class="blcg-grid-profiles-list"></ul>
+            </div>
+        </div>
+    </div>
+    <div class="blcg-grid-profiles-bar-cell">
+        <div class="blcg-grid-profiles-list-options blcg-grid-profiles-bar-buttons"></div>
+    </div>
+    <div class="blcg-grid-profiles-bar-fixed-part">
+        <div class="blcg-grid-profiles-bar-buttons">
+            <?php echo $this->getGridConfigButtonsHtml() ?>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+//<![CDATA[
+<?php echo $this->getJsObjectName() ?> = new blcg.Grid.ProfilesBar(
+    '<?php echo $this->getHtmlId() ?>-profiles-bar',
+    <?php echo $this->getProfilesJsonConfig() ?>,
+    <?php echo $this->getSortedProfilesIdsJson() ?>,
+    <?php echo $this->getProfilesActionsJsonConfig() ?>,
+    '<?php echo $this->getGridBlockJsObjectName() ?>',
+    <?php echo $this->getProfilesBarJsonConfig() ?>
+);
+//]]>
+</script>
