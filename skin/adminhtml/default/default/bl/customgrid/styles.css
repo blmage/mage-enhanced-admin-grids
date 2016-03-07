@@ -437,6 +437,29 @@ div.blcg-collapseable a.open { background:url(images/collapse_arrow_up.png) 100%
 .entry-edit .fieldset.blcg-editor-fieldset { border-top:0; border-color:#666; }
 .blcg-popup-window .blcg_message .messages { margin:12px 0 0; }
 
+.dialog.blcg-maximized-popup-window {
+    position:fixed !important;
+    left:0 !important;
+    right:0 !important;
+    top:0 !important;
+    bottom:0 !important;
+    width:auto !important;
+    height:auto !important;
+}
+
+.dialog.blcg-maximized-popup-window table.table_window.mid {
+    width:100% !important;
+    height:100% !important;
+    height:-moz-calc(100% - 40px) !important;
+    height:-o-calc(100% - 40px) !important;
+    height:-webkit-calc(100% - 40px) !important;
+    height:calc(100% - 40px) !important;
+}
+
+.dialog.blcg-maximized-popup-window .blcg_content { overflow:hidden !important; }
+.dialog.blcg-maximized-popup-window .blcg_content iframe { width:100% !important; height:100% !important; }
+.adminhtml-blcg-grid-columnslistform { background:#fff; }
+
 /* SPECIFIC STYLES */
 
 #sales_order_grid .grid .order-tables tr.headings,

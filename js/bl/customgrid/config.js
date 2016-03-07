@@ -114,6 +114,9 @@ blcg.Tools = {
         if (windowConfig.resizable) {
             windowConfig.windowClassName += ' blcg-resizable-popup-window';
         }
+        if (windowConfig.alwaysMaximized) {
+            windowConfig.windowClassName += ' blcg-maximized-popup-window';
+        }
         if (windowUrl) {
             // Dialog.info() doesn't care about url parameter, then always uses innerHTML even when it shouldn't
             windowConfig.url = '';
@@ -471,16 +474,29 @@ blcg.Tools = {
         } catch(e) {}
         
         return text;
+    },
+    
+    adaptPopupPageWrapper: function()
+    {
+        var wrapper = $$('#html-body .wrapper')[0];
+        var popupWrapper = $$('#html-body .wrapper-popup')[0];
+        
+        if (!wrapper && popupWrapper && !popupWrapper.hasClassName('wrapper')) {
+            popupWrapper.addClassName('wrapper');
+        }
     }
 };
 
 blcg.Grid.Tools = {
-    getGridObject: function(gridObject)
+    getGridObject: function(gridObject, parentWindow)
     {
+        var holdingWindow = (parentWindow ? window.top || window : window);
+        
         if (Object.isString(gridObject)) {
-            gridObject = (gridObject in window ? window[gridObject] : null);
+            gridObject = (gridObject in holdingWindow ? holdingWindow[gridObject] : null);
         }
-        return (gridObject instanceof varienGrid ? gridObject : null);
+        
+        return (gridObject instanceof holdingWindow.varienGrid ? gridObject : null);
     },
     
     getGridReloadUrl: function(gridObject, removableParams, additionalParams)
@@ -510,10 +526,10 @@ blcg.Grid.Tools = {
         return url;
     },
     
-    reloadGrid: function(gridObject, removableParams, additionalParams)
+    reloadGrid: function(gridObject, removableParams, additionalParams, parentWindow)
     {
         
-        if (!(gridObject = blcg.Grid.Tools.getGridObject(gridObject))) {
+        if (!(gridObject = blcg.Grid.Tools.getGridObject(gridObject, parentWindow))) {
             alert(blcg.Tools.translate('Could not reload the grid. Please reload it manually to apply any change'));
             return false;
         }
@@ -1969,8 +1985,9 @@ blcg.Grid.ConfigForm.prototype = {
     }
 };
 
-blcg.Grid.ColumnsConfigForm = Class.create(blcg.Grid.Form, {
-    initialize: function($super, containerId, rowClassName, saveUrl, config)
+blcg.Grid.ColumnsListConfig = Class.create();
+blcg.Grid.ColumnsListConfig.prototype = {
+    initialize: function(containerId, rowClassName, config)
     {
         this.config = Object.extend({
             tableIdSuffix: '-table',
@@ -1989,16 +2006,8 @@ blcg.Grid.ColumnsConfigForm = Class.create(blcg.Grid.Form, {
             maxOrder: 0,
             orderPitch: 1,
             useDnd: false,
-            dndHandleClassName: 'blcg-drag-handle',
-            gridObjectName: '',
-            additionalSaveParams: {}
+            dndHandleClassName: 'blcg-drag-handle'
         }, config || {});
-        
-        $super(containerId, saveUrl, {
-            gridObjectName: this.config.gridObjectName,
-            additionalParams: this.config.additionalSaveParams,
-            submitMethod: 'post'
-        });
         
         this.config.newRowClassNames = $A(this.config.newRowClassNames);
         this.config.newRowColumns    = $A(this.config.newRowColumns);
@@ -2025,7 +2034,6 @@ blcg.Grid.ColumnsConfigForm = Class.create(blcg.Grid.Form, {
         
         this.containerId  = containerId;
         this.rowClassName = rowClassName;
-        this.saveUrl = saveUrl;
         
         this.container = $(this.containerId);
         this.table     = $(this.containerId + this.config.tableIdSuffix);
@@ -2334,18 +2342,8 @@ blcg.Grid.ColumnsConfigForm = Class.create(blcg.Grid.Form, {
         this.checkedFilterValues = $A();
         this.updateCount();
         return false;
-    },
-    
-    saveColumns: function()
-    {
-        if ((this.checkedValues.size() == 0)
-            || (this.checkedValues.size() == this.checkedFilterValues.size())) {
-            alert(blcg.Tools.translate('At least one column must be fully visible'));
-            return false;
-        }
-        return this.save();
     }
-});
+};
 
 blcg.Grid.Renderer.ConfigForm = Class.create(blcg.Grid.ConfigForm);
 

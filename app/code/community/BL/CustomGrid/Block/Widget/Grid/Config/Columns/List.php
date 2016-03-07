@@ -363,6 +363,16 @@ class BL_CustomGrid_Block_Widget_Grid_Config_Columns_List extends Mage_Adminhtml
     }
     
     /**
+     * Return the HTML ID of the columns form
+     *
+     * @return string
+     */
+    public function getFormId()
+    {
+        return $this->_getGlobalHtmlId('form');
+    }
+    
+    /**
      * Return a HTML ID based on the given column ID and suffix
      * 
      * @param string $suffix ID suffix

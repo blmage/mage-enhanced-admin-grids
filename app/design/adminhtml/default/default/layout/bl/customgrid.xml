@@ -73,6 +73,11 @@
         </reference>
     </adminhtml_blcg_grid_edit>
     
+    <adminhtml_blcg_grid_columns_list_form>
+         <update handle="popup" />
+         <remove name="footer" />
+    </adminhtml_blcg_grid_columns_list_form>
+    
     <adminhtml_blcg_column_renderer_collection_index>
         <reference name="content">
             <block type="customgrid/column_renderer_collection_config" name="blcg.column_renderer.collection.config" />

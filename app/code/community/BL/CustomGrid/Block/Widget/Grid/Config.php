@@ -207,6 +207,16 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
     }
     
     /**
+     * Return the URL of the columns list form
+     *
+     * @return string
+     */
+    public function getColumnsListFormUrl()
+    {
+        return $this->getUrl('adminhtml/blcg_grid/columnsListForm', $this->getBaseUrlParams());
+    }
+    
+    /**
      * Return the URL of the custom columns form
      * 
      * @return string
@@ -533,9 +543,10 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
      * 
      * @param string $title Window title
      * @param int $height Window height
+     * @param array $additional Additional config data
      * @return string
      */
-    protected function _getGridFormWindowJsonConfig($title = null, $height = null)
+    protected function _getGridFormWindowJsonConfig($title = null, $height = null, array $additional = array())
     {
         $config = array(
             'title' => $this->getGridModel()->getProfile()->getName() . (is_null($title) ? '' : ' - ' . $title)
@@ -545,6 +556,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
             $config['height'] = (int) $height;
         }
         
+        $config = array_merge($additional, $config);
         return $this->_getCoreHelper()->jsonEncode($config);
     }
     
@@ -591,10 +603,21 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
                 ->checkUserActionPermission(BL_CustomGrid_Model_Grid_Sentry::ACTION_CUSTOMIZE_COLUMNS);
             
             if ($hasUserPermissions) {
+                $functionName = $this->_prepareButtonScript(
+                    'CL',
+                    'blcg.Tools.openIframeDialog('
+                    . '\''. $this->getColumnsListFormUrl() . '\','
+                    . $this->_getGridFormWindowJsonConfig(
+                        $this->__('Columns List'),
+                        null,
+                        array('alwaysMaximized' => true)
+                    )
+                    . ');'
+                );
+                
                 $buttonHtml = $this->getButtonHtml(
                     $this->__('Columns List'),
-                    '$(\'' . $this->getColumnsListBlock()->getHtmlId() . '\').toggle(); '
-                    . '$(this).toggleClassName(\'blcg-on\');',
+                    $functionName . '();',
                     'blcg-grid-profiles-bar-button blcg-grid-profiles-bar-button-columns-list'
                 );
             }
@@ -867,39 +890,6 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
             );
         }
         return $this->_getData('buttons_html');
-    }
-    
-    /**
-     * Return the columns list block
-     * 
-     * @return BL_CustomGrid_Block_Widget_Grid_Config_Columns_List
-     */
-    public function getColumnsListBlock()
-    {
-        if (!$this->getChild('columns_list')) {
-            /** @var $columnsList BL_CustomGrid_Block_Widget_Grid_Config_Columns_List */
-            $columnsList = $this->getLayout()->createBlock('customgrid/widget_grid_config_columns_list');
-            
-            $columnsList->setId($this->getId())
-                ->setGridModel($this->getGridModel())
-                ->setIsNewGridModel($this->getIsNewGridModel())
-                ->setGridBlock($this->getGridBlock());
-            
-            $this->setChild('columns_list', $columnsList);
-        }
-        return $this->getChild('columns_list');
-    }
-    
-    /**
-     * Return the HTML content of the columns list block
-     * 
-     * @return string
-     */
-    public function getColumnsListHtml()
-    {
-        return ($this->getColumnsListButtonHtml() != '')
-            ? $this->getColumnsListBlock()->toHtml()
-            : '';
     }
     
     /**

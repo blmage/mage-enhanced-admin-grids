@@ -46,17 +46,24 @@ class BL_CustomGrid_Blcg_GridController extends BL_CustomGrid_Controller_Grid_Ac
      * @param string $formType Form type
      * @param array $formData Form data
      * @param string|array $permissions Required user permission(s)
-     * @param bool $anyPermission Whether all the given permissions are required, or just one of them
+     * @param bool $anyPermission Whether all the given permissions are required, or just any of them
+     * @param array $handles Layout handles
      * @return BL_CustomGrid_Blcg_GridController
      */
-    protected function _prepareWindowFormLayout($formType, array $formData, $permissions = null, $anyPermission = true)
-    {
+    protected function _prepareWindowFormLayout(
+        $formType,
+        array $formData,
+        $permissions = null,
+        $anyPermission = true,
+        array $handles = array('blcg_empty')
+    ) {
         $this->_initWindowFormLayout(
             'adminhtml_blcg_grid_form_window_action',
             'adminhtml_blcg_grid_form_window_error',
             'blcg.grid.form_error',
             $permissions,
-            $anyPermission
+            $anyPermission,
+            $handles
         );
         
         if ($containerBlock = $this->getLayout()->getBlock('blcg.grid.form_container')) {
@@ -111,6 +118,28 @@ class BL_CustomGrid_Blcg_GridController extends BL_CustomGrid_Controller_Grid_Ac
         }
     }
     
+    public function columnsListFormAction()
+    {
+        $this->_prepareWindowFormLayout(
+            'columns_list',
+            array(),
+            BL_CustomGrid_Model_Grid_Sentry::ACTION_CUSTOMIZE_COLUMNS,
+            true,
+            array('default', 'adminhtml_blcg_grid_columns_list_form')
+        );
+        
+        if (($containerBlock = $this->getLayout()->getBlock('blcg.grid.form_container'))
+            && ($formBlock = $containerBlock->getChild('form'))) {
+            /**
+             * @var $containerBlock BL_CustomGrid_Block_Grid_Form_Container
+             * @var $formBlock BL_CustomGrid_Block_Grid_Form_Columns_List
+             */
+            $formBlock->prepareFormContainer($containerBlock);
+        }
+        
+        $this->renderLayout();
+    }
+    
     public function saveColumnsAction()
     {
         $isSuccess = false;
@@ -137,9 +166,9 @@ class BL_CustomGrid_Blcg_GridController extends BL_CustomGrid_Controller_Grid_Ac
         
         if ($isSuccess) {
             $this->_getBlcgSession()->addSuccess($this->__('The columns have been successfully updated'));
-            $this->_setActionSuccessJsonResponse();
+            $this->_setActionSuccessJsonResponse(array(), false);
         } else {
-            $this->_setActionErrorJsonResponse($resultMessage);
+            $this->_setActionErrorJsonResponse($resultMessage, false);
         }
     }
     
