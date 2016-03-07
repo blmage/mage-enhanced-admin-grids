@@ -43,6 +43,16 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
     }
     
     /**
+     * Return the profiles resource model
+     * 
+     * @return BL_CustomGrid_Model_Mysql4_Grid_Profile
+     */
+    public function getResource()
+    {
+        return Mage::getResourceSingleton('customgrid/grid_profile');
+    }
+    
+    /**
      * Return the ID of this profile
      *
      * @return int
@@ -467,7 +477,7 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
             $defaultFor['global'] = (bool) $values['global'];
         }
         
-        $gridModel->getResource()->chooseProfileAsDefault($gridModel->getId(), $profileId, $defaultFor);
+        $this->getResource()->chooseProfileAsDefault($gridModel->getId(), $profileId, $defaultFor);
         $gridModel->resetUsersConfigValues();
         $gridModel->resetRolesConfigValues();
         $gridModel->resetProfilesValues();
@@ -575,7 +585,7 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
         $values['is_restricted'] = !is_null($assignedRolesIds);
         $values['assigned_to'] = $assignedRolesIds;
         
-        $newProfileId = $gridModel->getResource()->copyProfileToNew($gridModel->getId(), $profileId, $values);
+        $newProfileId = $this->getResource()->copyProfileToNew($gridModel->getId(), $profileId, $values);
         $gridModel->resetProfilesValues();
         
         if ($values['is_restricted']) {
@@ -608,7 +618,7 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
             Mage::throwException($this->_getHelper()->__('A profile can not be copied to itself'));
         }
         
-        $gridModel->getResource()->copyProfileToExisting($gridModel->getId(), $profileId, $toProfileId, $values);
+        $this->getResource()->copyProfileToExisting($gridModel->getId(), $profileId, $toProfileId, $values);
         $gridModel->resetProfilesValues();
         
         return $this;
@@ -647,7 +657,7 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
             $values['remembered_session_params'] = null;
         }
         
-        $gridModel->getResource()->updateProfile($gridModel->getId(), $profileId, $values, !$this->getIsBulkSaveMode());
+        $this->getResource()->updateProfile($gridModel->getId(), $profileId, $values, !$this->getIsBulkSaveMode());
         $this->addData($values);
         
         return $this;
@@ -754,7 +764,7 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
             $defaultParams[$valueKey] = $this->_extractDefaultParamValue($paramKey, $valueKey, $appliable, $removable);
         }
         
-        $gridModel->getResource()->updateProfile($gridModel->getId(), $this->getId(), $defaultParams, true);
+        $this->getResource()->updateProfile($gridModel->getId(), $this->getId(), $defaultParams, true);
         $this->addData($defaultParams);
         
         return $this;
@@ -788,7 +798,7 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
             $values['assigned_to'] = null;
         }
         
-        $gridModel->getResource()->updateProfile($gridModel->getId(), $profileId, $values, !$this->getIsBulkSaveMode());
+        $this->getResource()->updateProfile($gridModel->getId(), $profileId, $values, !$this->getIsBulkSaveMode());
         $gridModel->resetProfilesValues();
         $gridModel->resetRolesConfigValues();
         $this->unsetData('assigned_to_role_ids');
@@ -814,7 +824,7 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
             Mage::throwException($this->_getHelper()->__('The base profile can not be deleted'));
         }
         
-        $gridModel->getResource()->deleteProfile($gridModel->getId(), $profileId);
+        $this->getResource()->deleteProfile($gridModel->getId(), $profileId);
         $gridModel->resetProfilesValues();
         $gridModel->resetUsersConfigValues();
         $gridModel->resetRolesConfigValues();
