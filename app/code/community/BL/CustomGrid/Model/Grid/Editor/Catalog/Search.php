@@ -95,16 +95,7 @@ class BL_CustomGrid_Model_Grid_Editor_Catalog_Search extends BL_CustomGrid_Model
         );
         
         if (!Mage::app()->isSingleStoreMode()) {
-            $fields['store_id'] = array(
-                'form_field' => array(
-                    'type'     => 'select',
-                    'values'   => $this->getEditorHelper()->getStoreValuesForForm(),
-                    'required' => true,
-                ),
-                'renderer'   => array(
-                    'block_type' => 'customgrid/widget_grid_editor_renderer_field_store',
-                ),
-            );
+            $fields['store_id'] = $this->getEditorHelper()->getStoreFieldBaseConfig(false);
         }
         
         return $fields;

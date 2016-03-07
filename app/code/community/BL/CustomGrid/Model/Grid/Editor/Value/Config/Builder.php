@@ -34,6 +34,19 @@ class BL_CustomGrid_Model_Grid_Editor_Value_Config_Builder extends BL_CustomGrid
         'renderer'   => array(),
     );
     
+    /**
+     * Base window config values
+     *
+     * @var array
+     */
+    static protected $_windowConfigValues = array(
+        'width'        => '80%',
+        'height'       => '80%',
+        'draggable'    => true,
+        'resizable'    => true,
+        'recenterAuto' => false,
+    );
+    
     public function getType()
     {
         return BL_CustomGrid_Model_Grid_Editor_Abstract::WORKER_TYPE_VALUE_CONFIG_BUILDER;
@@ -166,14 +179,8 @@ class BL_CustomGrid_Model_Grid_Editor_Value_Config_Builder extends BL_CustomGrid
         );
         
         if (!$config['form']['is_in_grid']) {
-            $config['window'] += array( 
-                'width'        => '80%',
-                'height'       => '80%',
-                'draggable'    => true,
-                'resizable'    => true,
-                'recenterAuto' => false,
-                'title'        => $this->getBaseHelper()->__('Edit Value'),
-            );
+            $config['window'] += self::$_windowConfigValues;
+            $config['window']['title'] = $this->getBaseHelper()->__('Edit Value');
         } else {
             unset($config['window']);
         }
@@ -311,14 +318,8 @@ class BL_CustomGrid_Model_Grid_Editor_Value_Config_Builder extends BL_CustomGrid
         $config['form_field'] += array('name' => $attribute->getAttributeCode());
         
         if (!$config['form']['is_in_grid']) {
-            $config['window'] += array( 
-                'width'        => '80%',
-                'height'       => '80%',
-                'draggable'    => true,
-                'resizable'    => true,
-                'recenterAuto' => false,
-                'title'        => $this->getBaseHelper()->__('Edit Value'),
-            );
+            $config['window'] += self::$_windowConfigValues;
+            $config['window']['title'] = $this->getBaseHelper()->__('Edit Value');
         } else {
             unset($config['window']);
         }

@@ -34,7 +34,7 @@
  * @method int getIsOnlyFilterable() Return whether this column should only be filterable
  */
 
-class BL_CustomGrid_Model_Grid_Column extends BL_CustomGrid_Object
+class BL_CustomGrid_Model_Grid_Column extends BL_CustomGrid_Model_Grid_Element
 {
     /**
      * Possible column alignments values
@@ -72,23 +72,7 @@ class BL_CustomGrid_Model_Grid_Column extends BL_CustomGrid_Object
      */
     public function getId()
     {
-        return $this->_getData('column_id');
-    }
-    
-    /**
-     * Return the grid model corresponding to this column
-     *
-     * @param bool $graceful Whether to throw an exception if the grid model is invalid, otherwise return null
-     * @return BL_CustomGrid_Model_Grid|null
-     */
-    public function getGridModel($graceful = false)
-    {
-        if (($gridModel = $this->_getData('grid_model')) instanceof BL_CustomGrid_Model_Grid) {
-            return $gridModel;
-        } elseif (!$graceful) {
-            Mage::throwException('Invalid grid model');
-        }
-        return null;
+        return (int) $this->_getData('column_id');
     }
     
     /**

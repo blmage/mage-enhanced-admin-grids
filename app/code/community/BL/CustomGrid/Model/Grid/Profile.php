@@ -23,7 +23,7 @@
  * @method int getIsRestricted() Return whether this profile is restricted to its assigned roles
  */
 
-class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
+class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Model_Grid_Element
 {
     /**
      * Session base keys
@@ -60,22 +60,6 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Object
     public function getId()
     {
         return (int) $this->_getData('profile_id');
-    }
-    
-    /**
-     * Return the grid model corresponding to this profile
-     *
-     * @param bool $graceful Whether to throw an exception if the grid model is invalid, otherwise return null
-     * @return BL_CustomGrid_Model_Grid|null
-     */
-    public function getGridModel($graceful = false)
-    {
-        if (($gridModel = $this->_getData('grid_model')) instanceof BL_CustomGrid_Model_Grid) {
-            return $gridModel;
-        } elseif (!$graceful) {
-            Mage::throwException('Invalid grid model');
-        }
-        return null;
     }
     
     /**

@@ -82,6 +82,19 @@ class BL_CustomGrid_Model_Grid_Editor_Product_Inventory extends BL_CustomGrid_Mo
     }
     
     /**
+     * Return whether the given field is editable for the given product
+     * in regards to the composite product limitations
+     * 
+     * @param Mage_Catalog_Model_Product $product Checked product
+     * @param string $fieldName Inventory field name
+     * @return bool
+     */
+    protected function _checkCompositeEditability(Mage_Catalog_Model_Product $product, $fieldName)
+    {
+        return (!$product->isComposite() || $this->_isFieldEditableForComposite($fieldName));
+    }
+    
+    /**
      * Return whether the given inventory field depends on the value of the "Manage Stock" field
      * 
      * @param string $fieldName Inventory field name
@@ -93,6 +106,20 @@ class BL_CustomGrid_Model_Grid_Editor_Product_Inventory extends BL_CustomGrid_Mo
             $fieldName,
             array('backorders', 'is_in_stock', 'min_qty', 'notify_stock_qty', 'qty', 'qty_increments')
         );
+    }
+    
+    /**
+     * Return whether the given field is editable for the given product
+     * in regards to the current value of the "Manage Stock" field
+     *
+     * @param Mage_Catalog_Model_Product $product Checked product
+     * @param string $fieldName Inventory field name
+     * @return bool
+     */
+    protected function _checkStockManagedEditability(Mage_Catalog_Model_Product $product, $fieldName)
+    {
+        return !$this->_isManageStockDependentField($fieldName)
+            || $this->getInventoryHelper()->getProductActualInventoryValue($product, 'manage_stock');
     }
     
     /**
@@ -115,10 +142,9 @@ class BL_CustomGrid_Model_Grid_Editor_Product_Inventory extends BL_CustomGrid_Mo
             $result = $baseHelper->__('The "Mage_CatalogInventory" module is disabled');
         } elseif ($product->getInventoryReadonly()) {
             $result = $baseHelper->__('The inventory fields are read-only for this product');
-        } elseif ($product->isComposite() && !$this->_isFieldEditableForComposite($fieldName)) {
+        } elseif (!$this->_checkCompositeEditability($product, $fieldName)) {
             $result = $baseHelper->__('This inventory field is not editable for composite products');
-        } elseif ($this->_isManageStockDependentField($fieldName)
-            && !$inventoryHelper->getProductActualInventoryValue($product, 'manage_stock')) {
+        } elseif (!$this->_checkStockManagedEditability($product, $fieldName)) {
             $result = $baseHelper->__('The stock is not managed for this product');
         } elseif (($fieldName == 'qty_increments')
             && !$inventoryHelper->getProductActualInventoryValue($product, 'enable_qty_increments')) {

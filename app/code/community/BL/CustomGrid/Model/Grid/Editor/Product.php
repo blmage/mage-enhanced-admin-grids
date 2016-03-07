@@ -358,6 +358,7 @@ class BL_CustomGrid_Model_Grid_Editor_Product extends BL_CustomGrid_Model_Grid_E
      * Return whether the given product, in its given state,
      * uses for the given attribute the corresponding default value
      *
+     * @see Mage_Adminhtml_Block_Catalog_Form_Renderer_Fieldset_Element::usedDefault()
      * @param Mage_Catalog_Model_Product $product Checked product
      * @param Mage_Eav_Model_Entity_Attribute $attribute Attribute model
      * @return bool
@@ -366,28 +367,22 @@ class BL_CustomGrid_Model_Grid_Editor_Product extends BL_CustomGrid_Model_Grid_E
         Mage_Catalog_Model_Product $product,
         Mage_Eav_Model_Entity_Attribute $attribute
     ) {
-        if ($this->_isProductStoreScopedForAttribute($product, $attribute)) {
-            $attributeCode = $attribute->getAttributeCode();
-            $defaultValue  = $product->getAttributeDefaultValue($attributeCode);
-            
-            /**
-             * @see Mage_Adminhtml_Block_Catalog_Form_Renderer_Fieldset_Element::usedDefault()
-             */
-            if (!$product->getExistsStoreValueFlag($attributeCode)) {
-                return true;
-            } elseif ($this->getBaseHelper()->isMageVersionGreaterThan(1, 4)
-                && ($product->getData($attributeCode) == $defaultValue)
-                && ($product->getStoreId() != $this->_getDefaultStoreId())) {
-                return false;
-            } elseif (($defaultValue === false)
-                && !$attribute->getIsRequired()
-                && $product->getData($attributeCode)) {
-                return false;
-            }
-            
-            return ($defaultValue === false);
+        $attributeCode = $attribute->getAttributeCode();
+        $defaultValue  = $product->getAttributeDefaultValue($attributeCode);
+        
+        if (!$product->getExistsStoreValueFlag($attributeCode)) {
+            return true;
+        } elseif ($this->getBaseHelper()->isMageVersionGreaterThan(1, 4)
+            && ($product->getData($attributeCode) == $defaultValue)
+            && ($product->getStoreId() != $this->_getDefaultStoreId())) {
+            return false;
+        } elseif (($defaultValue === false)
+            && !$attribute->getIsRequired()
+            && $product->getData($attributeCode)) {
+            return false;
         }
-        return false;
+        
+        return ($defaultValue === false);
     }
     
     /**
@@ -412,7 +407,8 @@ class BL_CustomGrid_Model_Grid_Editor_Product extends BL_CustomGrid_Model_Grid_E
             if ($attributeCode == $editedAttributeCode) {
                 continue;
             }
-            if ($this->_isProductDefaultValuedForAttribute($product, $attribute)) {
+            if ($this->_isProductStoreScopedForAttribute($product, $attribute)
+                && $this->_isProductDefaultValuedForAttribute($product, $attribute)) {
                 $product->setData($attributeCode, false);
             }
         }
