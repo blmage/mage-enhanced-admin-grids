@@ -48,7 +48,12 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Field_Default extends BL_C
     protected function _getRenderedValue($renderableValue)
     {
         $fieldType = $this->getValueConfig()->getFormFieldType();
-        $rendererType = (isset($_fieldTypeRendererTypes[$fieldType]) ? $_fieldTypeRendererTypes[$fieldType] : 'text');
+        
+        if (isset(self::$_fieldTypeRendererTypes[$fieldType])) {
+            $rendererType = self::$_fieldTypeRendererTypes[$fieldType];
+        } else {
+            $rendererType = 'text';
+        }
         
         if (is_string($rendererType)) {
             /** @var BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Abstract $rendererBlock */
