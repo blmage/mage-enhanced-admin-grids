@@ -15,12 +15,11 @@
 
 class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Attribute_Default extends BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Abstract
 {
-    protected function _getRenderedValue()
+    protected function _getRenderedValue($renderableValue)
     {
         $editedEntity    = $this->getEditedEntity();
         $editedAttribute = $this->getEditedAttribute();
         $entityValue     = $editedEntity->getData($editedAttribute->getAttributeCode());
-        $renderableValue = $this->getRenderableValue();
         $renderedValue   = '';
         
         if ($editedAttribute->getFrontendModel() == Mage_Eav_Model_Entity::DEFAULT_FRONTEND_MODEL) {

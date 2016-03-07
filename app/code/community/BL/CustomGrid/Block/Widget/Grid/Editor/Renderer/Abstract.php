@@ -23,15 +23,16 @@ abstract class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Abstract extends 
     
     protected function _toHtml()
     {
-        return $this->_getRenderedValue();
+        return $this->_getRenderedValue($this->getRenderableValue());
     }
     
     /**
      * Return the rendered value
      * 
+     * @param mixed $renderableValue Renderable value
      * @return string
      */
-    abstract protected function _getRenderedValue();
+    abstract protected function _getRenderedValue($renderableValue);
     
     /**
      * Return the editor context

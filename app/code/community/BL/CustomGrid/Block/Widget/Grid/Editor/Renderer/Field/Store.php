@@ -51,10 +51,9 @@ class BL_CustomGrid_Block_Widget_Grid_Editor_Renderer_Field_Store extends BL_Cus
         return $renderedStructure;
     }
     
-    protected function _getRenderedValue()
+    protected function _getRenderedValue($renderableValue)
     {
         $valueConfig = $this->getValueConfig();
-        $renderableValue = $this->getRenderableValue();
         $withoutAllStore = (bool) $valueConfig->getData('renderer/without_all_store');
         $withoutEmptyStore = (bool) $valueConfig->getData('renderer/without_empty_store');
         
