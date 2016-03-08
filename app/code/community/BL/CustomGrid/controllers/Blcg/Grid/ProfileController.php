@@ -20,37 +20,6 @@ class BL_CustomGrid_Blcg_Grid_ProfileController extends BL_CustomGrid_Controller
         return parent::_setActionSuccessJsonResponse(array('actions' => $actions));
     }
     
-    /**
-     * Initialize the current grid model and profile, check the given permissions,
-     * then prepare the layout for the given profile action
-     * 
-     * @param string $actionCode Profile action
-     * @param string|array $permissions Required user permission(s)
-     * @param bool $anyPermission Whether all the given permissions are required, or just one of them
-     * @return BL_CustomGrid_Blcg_Grid_ProfileController
-     */
-    protected function _prepareFormLayout($actionCode, $permissions = null, $anyPermission = true)
-    {
-        $this->_initWindowFormLayout(
-            'adminhtml_blcg_grid_profile_form_window_action',
-            'adminhtml_blcg_grid_profile_form_window_error',
-            'blcg.grid_profile.form_error',
-            $permissions,
-            $anyPermission
-        );
-    
-        if (($gridProfile = Mage::registry('blcg_grid_profile'))
-            && ($containerBlock = $this->getLayout()->getBlock('blcg.grid_profile.form_container'))) {
-            /**
-             * @var BL_CustomGrid_Model_Grid_Profile $gridProfile
-             * @var BL_CustomGrid_Block_Grid_Profile_Form_Container $containerBlock
-             */
-            $containerBlock->setProfileId($gridProfile->getId())->setActionCode($actionCode);
-        }
-        
-        return $this;
-    }
-    
     public function goToAction()
     {
         try {
@@ -67,7 +36,7 @@ class BL_CustomGrid_Blcg_Grid_ProfileController extends BL_CustomGrid_Controller
     
     public function defaultFormAction()
     {
-        $this->_prepareFormLayout(
+        $this->_prepareWindowProfileFormLayout(
             'default',
             array(
                 BL_CustomGrid_Model_Grid_Sentry::ACTION_CHOOSE_OWN_USER_DEFAULT_PROFILE,
@@ -106,7 +75,7 @@ class BL_CustomGrid_Blcg_Grid_ProfileController extends BL_CustomGrid_Controller
     
     public function copyToNewFormAction()
     {
-        $this->_prepareFormLayout('copy_new', BL_CustomGrid_Model_Grid_Sentry::ACTION_COPY_PROFILES_TO_NEW);
+        $this->_prepareWindowProfileFormLayout('copy_new', BL_CustomGrid_Model_Grid_Sentry::ACTION_COPY_PROFILES_TO_NEW);
         $this->renderLayout();
     }
     
@@ -149,7 +118,7 @@ class BL_CustomGrid_Blcg_Grid_ProfileController extends BL_CustomGrid_Controller
     
     public function copyToExistingFormAction()
     {
-        $this->_prepareFormLayout('copy_existing', BL_CustomGrid_Model_Grid_Sentry::ACTION_COPY_PROFILES_TO_EXISTING);
+        $this->_prepareWindowProfileFormLayout('copy_existing', BL_CustomGrid_Model_Grid_Sentry::ACTION_COPY_PROFILES_TO_EXISTING);
         $this->renderLayout();
     }
     
@@ -192,7 +161,7 @@ class BL_CustomGrid_Blcg_Grid_ProfileController extends BL_CustomGrid_Controller
     
     public function editFormAction()
     {
-        $this->_prepareFormLayout('edit', BL_CustomGrid_Model_Grid_Sentry::ACTION_EDIT_PROFILES);
+        $this->_prepareWindowProfileFormLayout('edit', BL_CustomGrid_Model_Grid_Sentry::ACTION_EDIT_PROFILES);
         $this->renderLayout();
     }
     
@@ -230,7 +199,7 @@ class BL_CustomGrid_Blcg_Grid_ProfileController extends BL_CustomGrid_Controller
     
     public function assignFormAction()
     {
-        $this->_prepareFormLayout('assign', BL_CustomGrid_Model_Grid_Sentry::ACTION_ASSIGN_PROFILES);
+        $this->_prepareWindowProfileFormLayout('assign', BL_CustomGrid_Model_Grid_Sentry::ACTION_ASSIGN_PROFILES);
         $this->renderLayout();
     }
     

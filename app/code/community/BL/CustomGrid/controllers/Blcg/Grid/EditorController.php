@@ -62,7 +62,7 @@ class BL_CustomGrid_Blcg_Grid_EditorController extends BL_CustomGrid_Controller_
         
         if (!$helper->isAjaxRequest()
             || ($formBlock instanceof Mage_Core_Block_Abstract)) {
-            $this->_prepareFormLayout($formBlock, $errorMessage);
+            $this->_prepareWindowProfileFormLayout($formBlock, $errorMessage);
         } elseif (!is_null($errorMessage)) {
             $this->_setActionErrorJsonResponse($errorMessage);
         } else {

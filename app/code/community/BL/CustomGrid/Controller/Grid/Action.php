@@ -250,6 +250,72 @@ class BL_CustomGrid_Controller_Grid_Action extends Mage_Adminhtml_Controller_Act
     }
     
     /**
+     * Initialize the current grid model and profile, check the given permissions,
+     * then prepare the layout for the given window grid form type
+     *
+     * @param string $formType Form type
+     * @param array $formData Form data
+     * @param string|array $permissions Required user permission(s)
+     * @param bool $anyPermission Whether all the given permissions are required, or just any of them
+     * @param array $handles Layout handles
+     * @return BL_CustomGrid_Blcg_GridController
+     */
+    protected function _prepareWindowGridFormLayout(
+        $formType,
+        array $formData,
+        $permissions = null,
+        $anyPermission = true,
+        array $handles = array('blcg_empty')
+    ) {
+        $this->_initWindowFormLayout(
+            'adminhtml_blcg_grid_form_window_action',
+            'adminhtml_blcg_grid_form_window_error',
+            'blcg.grid.form_error',
+            $permissions,
+            $anyPermission,
+            $handles
+        );
+        
+        if ($containerBlock = $this->getLayout()->getBlock('blcg.grid.form_container')) {
+            /** @var $containerBlock BL_CustomGrid_Block_Grid_Form_Container */
+            $containerBlock->setFormData($formData)->setFormType($formType);
+        }
+        
+        return $this;
+    }
+    
+    /**
+     * Initialize the current grid model and profile, check the given permissions,
+     * then prepare the layout for the given profile action
+     *
+     * @param string $actionCode Profile action
+     * @param string|array $permissions Required user permission(s)
+     * @param bool $anyPermission Whether all the given permissions are required, or just one of them
+     * @return BL_CustomGrid_Blcg_Grid_ProfileController
+     */
+    protected function _prepareWindowProfileFormLayout($actionCode, $permissions = null, $anyPermission = true)
+    {
+        $this->_initWindowFormLayout(
+            'adminhtml_blcg_grid_profile_form_window_action',
+            'adminhtml_blcg_grid_profile_form_window_error',
+            'blcg.grid_profile.form_error',
+            $permissions,
+            $anyPermission
+        );
+        
+        if (($gridProfile = Mage::registry('blcg_grid_profile'))
+            && ($containerBlock = $this->getLayout()->getBlock('blcg.grid_profile.form_container'))) {
+            /**
+             * @var BL_CustomGrid_Model_Grid_Profile $gridProfile
+             * @var BL_CustomGrid_Block_Grid_Profile_Form_Container $containerBlock
+             */
+            $containerBlock->setProfileId($gridProfile->getId())->setActionCode($actionCode);
+        }
+        
+        return $this;
+    }
+    
+    /**
      * Validate that one or more values were selected for a mass-action,
      * otherwise force a redirect to the index action
      *

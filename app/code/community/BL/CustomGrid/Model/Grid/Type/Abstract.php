@@ -314,13 +314,13 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
         return array(
             'csv' => new BL_CustomGrid_Object(
                 array(
-                    'route' => 'adminhtml/blcg_grid/exportCsv',
+                    'route' => 'adminhtml/blcg_grid_export/exportCsv',
                     'label' => $this->getBaseHelper()->__('CSV'),
                 )
             ),
             'xml' => new BL_CustomGrid_Object(
                 array(
-                    'route' => 'adminhtml/blcg_grid/exportExcel', 
+                    'route' => 'adminhtml/blcg_grid_export/exportExcel', 
                     'label' => $this->getBaseHelper()->__('Excel'),
                 )
             ),

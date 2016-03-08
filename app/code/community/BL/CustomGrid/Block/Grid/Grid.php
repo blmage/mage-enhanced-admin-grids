@@ -226,7 +226,7 @@ class BL_CustomGrid_Block_Grid_Grid extends Mage_Adminhtml_Block_Widget_Grid
                 'mass_enable',
                 array(
                     'label'   => $this->__('Enable'),
-                    'url'     => $this->getUrl('*/*/massEnable', array('_current' => true)),
+                    'url'     => $this->getUrl('*/blcg_grid_mass/massEnable', array('_current' => true)),
                     'confirm' => $this->__('Are you sure?'),
                 )
             )
@@ -234,7 +234,7 @@ class BL_CustomGrid_Block_Grid_Grid extends Mage_Adminhtml_Block_Widget_Grid
                 'mass_disable',
                 array(
                     'label'   => $this->__('Disable'),
-                    'url'     => $this->getUrl('*/*/massDisable', array('_current' => true)),
+                    'url'     => $this->getUrl('*/blcg_grid_mass/massDisable', array('_current' => true)),
                     'confirm' => $this->__('Are you sure?'),
                 )
             )
@@ -242,7 +242,7 @@ class BL_CustomGrid_Block_Grid_Grid extends Mage_Adminhtml_Block_Widget_Grid
                 'mass_delete',
                 array(
                     'label'   => $this->__('Delete'),
-                    'url'     => $this->getUrl('*/*/massDelete', array('_current' => true)),
+                    'url'     => $this->getUrl('*/blcg_grid_mass/massDelete', array('_current' => true)),
                     'confirm' => $this->__('Are you sure?'),
                 )
             );

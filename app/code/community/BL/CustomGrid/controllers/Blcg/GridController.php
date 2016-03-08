@@ -39,41 +39,6 @@ class BL_CustomGrid_Blcg_GridController extends BL_CustomGrid_Controller_Grid_Ac
         return $this;
     }
     
-    /**
-     * Initialize the current grid model and profile, check the given permissions,
-     * then prepare the layout for the given window form type
-     * 
-     * @param string $formType Form type
-     * @param array $formData Form data
-     * @param string|array $permissions Required user permission(s)
-     * @param bool $anyPermission Whether all the given permissions are required, or just any of them
-     * @param array $handles Layout handles
-     * @return BL_CustomGrid_Blcg_GridController
-     */
-    protected function _prepareWindowFormLayout(
-        $formType,
-        array $formData,
-        $permissions = null,
-        $anyPermission = true,
-        array $handles = array('blcg_empty')
-    ) {
-        $this->_initWindowFormLayout(
-            'adminhtml_blcg_grid_form_window_action',
-            'adminhtml_blcg_grid_form_window_error',
-            'blcg.grid.form_error',
-            $permissions,
-            $anyPermission,
-            $handles
-        );
-        
-        if ($containerBlock = $this->getLayout()->getBlock('blcg.grid.form_container')) {
-            /** @var $containerBlock BL_CustomGrid_Block_Grid_Form_Container */
-            $containerBlock->setFormData($formData)->setFormType($formType);
-        }
-        
-        return $this;
-    }
-    
     public function indexAction()
     {
         if ($this->getRequest()->getQuery('ajax')) {
@@ -120,7 +85,7 @@ class BL_CustomGrid_Blcg_GridController extends BL_CustomGrid_Controller_Grid_Ac
     
     public function columnsListFormAction()
     {
-        $this->_prepareWindowFormLayout(
+        $this->_prepareWindowGridFormLayout(
             'columns_list',
             array(),
             BL_CustomGrid_Model_Grid_Sentry::ACTION_CUSTOMIZE_COLUMNS,
@@ -174,7 +139,7 @@ class BL_CustomGrid_Blcg_GridController extends BL_CustomGrid_Controller_Grid_Ac
     
     public function customColumnsFormAction()
     {
-        $this->_prepareWindowFormLayout(
+        $this->_prepareWindowGridFormLayout(
             'custom_columns',
             array(),
             BL_CustomGrid_Model_Grid_Sentry::ACTION_CUSTOMIZE_COLUMNS
@@ -226,7 +191,7 @@ class BL_CustomGrid_Blcg_GridController extends BL_CustomGrid_Controller_Grid_Ac
             $defaultParams = array();
         }
         
-        $this->_prepareWindowFormLayout(
+        $this->_prepareWindowGridFormLayout(
             'default_params',
             array('default_params' => $defaultParams),
             BL_CustomGrid_Model_Grid_Sentry::ACTION_EDIT_DEFAULT_PARAMS
@@ -283,87 +248,9 @@ class BL_CustomGrid_Blcg_GridController extends BL_CustomGrid_Controller_Grid_Ac
         }
     }
     
-    public function exportFormAction()
-    {
-        $this->_prepareWindowFormLayout(
-            'export',
-            array(
-                'total_size'  => $this->getRequest()->getParam('total_size'),
-                'first_index' => $this->getRequest()->getParam('first_index'),
-                'additional_params' => $this->getRequest()->getParam('additional_params', array()),
-            ),
-            BL_CustomGrid_Model_Grid_Sentry::ACTION_EXPORT_RESULTS
-        );
-        $this->renderLayout();
-    }
-    
-    /**
-     * Restore in the request the additional parameters from the given export config
-     * 
-     * @param array $exportConfig Export config values
-     */
-    protected function _restoreExportAdditionalParams(array $exportConfig)
-    {
-        if (isset($exportConfig['additional_params']) && is_array($exportConfig['additional_params'])) {
-            foreach ($exportConfig['additional_params'] as $key => $value) {
-                if (!$this->getRequest()->has($key)) {
-                    $this->getRequest()->setParam($key, $value);
-                }
-            }
-        }
-    }
-    
-    /**
-     * Apply an export action for the given format and file name
-     * 
-     * @param string $format Export format
-     * @param string $fileName Exported file name
-     */
-    protected function _applyExportAction($format, $fileName)
-    {
-        try {
-            $gridModel = $this->_initGridModel();
-            $this->_initGridProfile();
-            
-            if (!is_array($config = $this->getRequest()->getParam('export'))) {
-                $config = null;
-            }
-            
-            $this->_restoreExportAdditionalParams($config);
-            
-            if ($format == 'csv') {
-                $exportOutput = $gridModel->getExporter()->exportToCsv($config);
-            } elseif ($format == 'xml') {
-                $exportOutput = $gridModel->getExporter()->exportToExcel($config);
-            } else {
-                $exportOutput = '';
-            }
-            
-            $this->_prepareDownloadResponse($fileName, $exportOutput);
-            
-        } catch (Mage_Core_Exception $e) {
-            $this->_getSession()->addError($e->getMessage());
-            $this->_redirectReferer();
-        } catch (Exception $e) {
-            Mage::logException($e);
-            $this->_getSession()->addError($this->__('An error occurred while exporting grid results'));
-            $this->_redirectReferer();
-        }
-    }
-    
-    public function exportCsvAction()
-    {
-        $this->_applyExportAction('csv', 'export.csv');
-    }
-    
-    public function exportExcelAction()
-    {
-        $this->_applyExportAction('xml', 'export.xml');
-    }
-    
     public function gridInfosAction()
     {
-        $this->_prepareWindowFormLayout(
+        $this->_prepareWindowGridFormLayout(
             'grid_infos',
             array(),
             array(
@@ -661,132 +548,13 @@ class BL_CustomGrid_Blcg_GridController extends BL_CustomGrid_Controller_Grid_Ac
         );
     }
     
-    /**
-     * Apply a mass-action action with the given callback that will be used for each selected grid ID
-     * 
-     * @param callback $callback Callback to use for each grid ID
-     * @param string $defaultErrorMessage Default error message to display if a non-Magento exception is caught
-     * @param string $successfulMessage Message that will be displayed with the number of successfully handled IDs
-     * @param string $permissionErrorsMessage Message that will be displayed with the number of IDs that could not be
-     *                                        handled due to permission errors
-     */
-    protected function _applyMassactionAction(
-        $callback,
-        $defaultErrorMessage,
-        $successfulMessage,
-        $permissionErrorsMessage
-    ) {
-        if (!$this->_validateMassActionValues('grid')) {
-            return;
-        }
-        
-        $gridsIds = $this->getRequest()->getParam('grid');
-        $successfulCount = 0;
-        $permissionErrorsCount = 0;
-        
-        try {
-            foreach ($gridsIds as $gridId) {
-                try {
-                    call_user_func($callback, $gridId);
-                    ++$successfulCount;
-                } catch (BL_CustomGrid_Grid_Permission_Exception $e) {
-                    ++$permissionErrorsCount;
-                }
-            }
-        } catch (Mage_Core_Exception $e) {
-            $this->_getSession()->addError($e->getMessage());
-        } catch (Exception $e) {
-            Mage::logException($e);
-            $this->_getSession()->addError($this->__($defaultErrorMessage));
-        }
-        
-        if ($successfulCount > 0) {
-            $this->_getSession()->addSuccess($this->__($successfulMessage, $successfulCount));
-        }
-        if ($permissionErrorsCount > 0) {
-            $this->_getSession()->addError($this->__($permissionErrorsMessage, $permissionErrorsCount));
-        }
-        $this->getResponse()->setRedirect($this->getUrl('*/*/'));
-    }
-    
-    /**
-     * Disable the grid model corresponding to the ID
-     * 
-     * @param int $gridId Grid model ID
-     */
-    protected function _massDisableGrid($gridId)
-    {
-        /** @var $gridModel BL_CustomGrid_Model_Grid */
-        $gridModel = Mage::getSingleton('customgrid/grid');
-        $gridModel->load($gridId)->setDisabled(true)->save();
-    }
-    
-    public function massDisableAction()
-    {
-        $this->_applyMassactionAction(
-            array($this, '_massDisableGrid'),
-            'An error occurred while disabling a grid',
-            'Total of %d grid(s) have been disabled',
-            'You were not allowed to disable %d of the chosen grids'
-        );
-    }
-    
-    /**
-     * Enable the grid model corresponding to the given ID
-     * 
-     * @param int $gridId Grid model ID
-     */
-    protected function _massEnableGrid($gridId)
-    {
-        /** @var $gridModel BL_CustomGrid_Model_Grid */
-        $gridModel = Mage::getSingleton('customgrid/grid');
-        $gridModel->load($gridId)->setDisabled(false)->save();
-    }
-    
-    public function massEnableAction()
-    {
-        $this->_applyMassactionAction(
-            array($this, '_massEnableGrid'),
-            'An error occurred while enabling a grid',
-            'Total of %d grid(s) have been enabled',
-            'You were not allowed to enable %d of the chosen grids'
-        );
-    }
-    
-    /**
-     * Delete the grid model corresponding to the given ID
-     * 
-     * @param int $gridId Grid model ID
-     */
-    protected function _massDeleteGrid($gridId)
-    {
-        /** @var $gridModel BL_CustomGrid_Model_Grid */
-        $gridModel = Mage::getSingleton('customgrid/grid');
-        $gridModel->load($gridId)->delete();
-    }
-    
-    public function massDeleteAction()
-    {
-        $this->_applyMassactionAction(
-            array($this, '_massDeleteGrid'),
-            'An error occurred while deleting a grid',
-            'Total of %d grid(s) have been deleted',
-            'You were not allowed to delete %d of the chosen grids'
-        );
-    }
-    
     protected function _isAllowed()
     {
         // Specific permissions are enforced by the models
         switch ($this->getRequest()->getActionName()) {
             case 'index':
             case 'grid':
-            case 'massDelete':
-            case 'massDisable':
-            case 'massEnable':
-                /** @var $session Mage_Admin_Model_Session */
-                $session = Mage::getSingleton('admin/session');
-                return $session->isAllowed('customgrid/administration/view_grids_list');
+                return $this->_getAdminSession()->isAllowed('customgrid/administration/view_grids_list');
         }
         return true;
     }

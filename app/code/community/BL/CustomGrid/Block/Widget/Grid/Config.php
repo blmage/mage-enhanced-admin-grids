@@ -158,7 +158,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
      */
     public function getExportFormUrl()
     {
-        return $this->getUrl('adminhtml/blcg_grid/exportForm', $this->getBaseUrlParams());
+        return $this->getUrl('adminhtml/blcg_grid_export/form', $this->getBaseUrlParams());
     }
     
     /**
