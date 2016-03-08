@@ -548,7 +548,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
             
             $profilesBar->setId($this->getId())
                 ->setGridModel($this->getGridModel())
-                ->getGridConfigButtonsHtml($this->getButtonsHtml())
+                ->setGridConfigButtonsHtml($this->getButtonsHtml())
                 ->setGridBlockJsObjectName($this->getGridBlockJsObjectName());
             
             $this->setChild('profiles_bar', $profilesBar);
@@ -561,7 +561,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
      *
      * @return string
      */
-    public function getProfilesBarBlockHtml()
+    public function getProfilesBarHtml()
     {
         return $this->getProfilesBarBlock()->toHtml(); 
     }
