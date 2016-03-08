@@ -105,7 +105,7 @@ $_gridModel  = $this->helper('customgrid/grid')->getGridModelFromBlock($this);;
 
             <?php if ($_gridModel): ?>
             <select name="<?php echo $this->getVarNameLimit() ?>" onchange="<?php echo $this->getJsObjectName() ?>.loadByElement(this)">
-                <?php foreach ($_gridModel->getAppliablePaginationValues() as $_value): ?>
+                <?php foreach ($_gridModel->getDefaultParamsHandler()->getAppliablePaginationValues() as $_value): ?>
                 <option value="<?php echo $_value ?>"<?php if($this->getCollection()->getPageSize()==$_value): ?> selected="selected"<?php endif; ?>><?php echo $_value ?></option>
                 <?php endforeach ?>
             </select>

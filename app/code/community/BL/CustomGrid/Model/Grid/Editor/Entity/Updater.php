@@ -108,7 +108,7 @@ class BL_CustomGrid_Model_Grid_Editor_Entity_Updater extends BL_CustomGrid_Model
         if ($filterType == 'date') {
             $transport->setData(
                 'filtered_value',
-                $this->_getEditorHelper()->filterDateValue($transport->getData('filtered_value'))
+                $this->getEditorHelper()->filterDateValue($transport->getData('filtered_value'))
             );
         }
     }

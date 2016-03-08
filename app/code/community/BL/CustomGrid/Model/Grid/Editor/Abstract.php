@@ -21,11 +21,11 @@ abstract class BL_CustomGrid_Model_Grid_Editor_Abstract extends BL_CustomGrid_Ob
     const EDITABLE_TYPE_CUSTOM_COLUMN   = 'custom_column';
     
     const WORKER_TYPE_CALLBACK_MANAGER     = 'callback_manager';
-    const WORKER_TYPE_VALUE_CONFIG_BUILDER = 'value_config_builder';
-    const WORKER_TYPE_KICKSTARTER          = 'kickstarter';
     const WORKER_TYPE_ENTITY_LOADER        = 'entity_loader';
     const WORKER_TYPE_ENTITY_UPDATER       = 'entity_updater';
+    const WORKER_TYPE_KICKSTARTER          = 'kickstarter';
     const WORKER_TYPE_SENTRY               = 'sentry';
+    const WORKER_TYPE_VALUE_CONFIG_BUILDER = 'value_config_builder';
     const WORKER_TYPE_VALUE_FORM_RENDERER  = 'value_form_renderer';
     const WORKER_TYPE_VALUE_RENDERER       = 'value_renderer';
     
@@ -36,11 +36,11 @@ abstract class BL_CustomGrid_Model_Grid_Editor_Abstract extends BL_CustomGrid_Ob
      */
     static protected $_workerTypes = array(
         self::WORKER_TYPE_CALLBACK_MANAGER,
-        self::WORKER_TYPE_VALUE_CONFIG_BUILDER,
-        self::WORKER_TYPE_KICKSTARTER,
         self::WORKER_TYPE_ENTITY_LOADER,
         self::WORKER_TYPE_ENTITY_UPDATER,
+        self::WORKER_TYPE_KICKSTARTER,
         self::WORKER_TYPE_SENTRY,
+        self::WORKER_TYPE_VALUE_CONFIG_BUILDER,
         self::WORKER_TYPE_VALUE_FORM_RENDERER,
         self::WORKER_TYPE_VALUE_RENDERER,
     );

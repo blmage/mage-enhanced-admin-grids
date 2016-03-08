@@ -18,7 +18,7 @@ class BL_CustomGrid_Block_Widget_Grid_Columns_Editor extends Mage_Adminhtml_Bloc
     protected function _construct()
     {
         parent::_construct();
-        $this->setId($this->_getCoreHelper()->uniqHash('blcgEditor'));
+        $this->setId($this->getCoreHelper()->uniqHash('blcgEditor'));
         $this->setTemplate('bl/customgrid/widget/grid/columns/editor.phtml');
     }
     
@@ -39,11 +39,11 @@ class BL_CustomGrid_Block_Widget_Grid_Columns_Editor extends Mage_Adminhtml_Bloc
     }
     
     /**
-     * Return core helper
+     * Return the core helper
      * 
      * @return Mage_Core_Helper_Data
      */
-    protected function _getCoreHelper()
+    public function getCoreHelper()
     {
         return $this->helper('core');
     }
@@ -128,7 +128,7 @@ class BL_CustomGrid_Block_Widget_Grid_Columns_Editor extends Mage_Adminhtml_Bloc
             }
         }
         
-        return $this->_getCoreHelper()->jsonEncode($config);
+        return $this->getCoreHelper()->jsonEncode($config);
     }
     
     /**
@@ -227,7 +227,7 @@ class BL_CustomGrid_Block_Widget_Grid_Columns_Editor extends Mage_Adminhtml_Bloc
             $config = array_fill(0, count($columns), false);
         }
         
-        return $this->_getCoreHelper()->jsonEncode($config);
+        return $this->getCoreHelper()->jsonEncode($config);
     }
     
     /**
@@ -237,7 +237,7 @@ class BL_CustomGrid_Block_Widget_Grid_Columns_Editor extends Mage_Adminhtml_Bloc
      */
     public function getGlobalParamsJson()
     {
-        return $this->_getCoreHelper()
+        return $this->getCoreHelper()
             ->jsonEncode(
                 array(
                     'grid_id' => $this->getGridModel()->getId(),
@@ -254,7 +254,7 @@ class BL_CustomGrid_Block_Widget_Grid_Columns_Editor extends Mage_Adminhtml_Bloc
      */
     public function getAdditionalParamsJson()
     {
-        return $this->_getCoreHelper()
+        return $this->getCoreHelper()
             ->jsonEncode(
                 $this->getGridModel()
                     ->getTypeModel()

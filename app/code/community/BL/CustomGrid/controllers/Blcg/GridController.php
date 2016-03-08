@@ -265,7 +265,7 @@ class BL_CustomGrid_Blcg_GridController extends BL_CustomGrid_Controller_Grid_Ac
                 $appliableParams = array();
             }
             
-            $gridProfile->updateDefaultParameters($appliableParams, $removableParams);
+            $gridProfile->updateDefaultParams($appliableParams, $removableParams);
             $isSuccess = true;
             
         } catch (Mage_Core_Exception $e) {
@@ -496,7 +496,7 @@ class BL_CustomGrid_Blcg_GridController extends BL_CustomGrid_Controller_Grid_Ac
             ),
             'default_params_behaviours' => array(
                 'type' => 'grid',
-                'callback' => array($gridModel, 'updateDefaultParametersBehaviours'),
+                'callback' => array($gridModel->getDefaultParamsHandler(), 'updateDefaultParamsBehaviours'),
             ),
             'roles_permissions' => array(
                 'type' => 'sentry',

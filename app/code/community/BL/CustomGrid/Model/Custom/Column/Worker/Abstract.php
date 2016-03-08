@@ -13,15 +13,8 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-abstract class BL_CustomGrid_Model_Custom_Column_Worker_Abstract extends BL_CustomGrid_Object
+abstract class BL_CustomGrid_Model_Custom_Column_Worker_Abstract extends BL_CustomGrid_Model_Worker_Abstract
 {
-    /**
-     * Return the type of this worker
-     *
-     * @return string
-     */
-    abstract public function getType();
-    
     /**
      * Set the current custom column model
      *

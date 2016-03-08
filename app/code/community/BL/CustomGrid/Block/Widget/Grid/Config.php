@@ -200,7 +200,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config extends Mage_Adminhtml_Block_Widget
         }
         
         $config = array_merge($additional, $config);
-        return $this->_getCoreHelper()->jsonEncode($config);
+        return $this->getCoreHelper()->jsonEncode($config);
     }
     
     /**

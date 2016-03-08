@@ -278,7 +278,11 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
         }
         
         if ($withEditableFlag) {
-            $editableAttributes = $this->getEditor()->getEditableAttributesConfigs($blockType);
+            $editableAttributes = $this->getEditor()
+                ->getEditableValuesConfigs(
+                    $blockType,
+                    BL_CustomGrid_Model_Grid_Editor_Abstract::EDITABLE_TYPE_ATTRIBUTE
+                );
             
             foreach ($attributes as $attribute) {
                 $attribute->setIsEditable(isset($editableAttributes[$attribute->getAttributeCode()]));
@@ -532,7 +536,7 @@ abstract class BL_CustomGrid_Model_Grid_Type_Abstract extends BL_CustomGrid_Obje
             }
             
             uasort($groups, 'strcmp');
-            $groups['g1'] = $this->_getBaseHelper()->__('Others');
+            $groups['g1'] = $this->getBaseHelper()->__('Others');
             $this->setData('custom_columns_groups', $groups);
         }
         return $this->_getData('custom_columns_groups');

@@ -15,7 +15,7 @@
 
 abstract class BL_CustomGrid_Model_Grid_Rewriter_Abstract extends BL_CustomGrid_Object
 {
-    const REWRITE_CODE_VERSION = 3; // bump this value when significant changes are made to the rewriting code
+    const REWRITE_CODE_VERSION = 4; // bump this value when significant changes are made to the rewriting code
     
     /**
      * Return the fixed base of the rewriting class names used by the extension
@@ -227,7 +227,7 @@ abstract class BL_CustomGrid_Model_Grid_Rewriter_Abstract extends BL_CustomGrid_
     {
         if (!$this->_blcg_holdPrepareCollection) {
             if (!is_null($this->_blcg_gridModel)) {
-                $data = $this->_blcg_gridModel->getApplier()->verifyGridBlockFilters($this, $data);
+                $data = $this->_blcg_gridModel->getFiltersHandler()->verifyGridBlockFilters($this, $data);
             }
             
             $this->_blcg_launchCollectionCallbacks(\'before_set_filters\', array($this, $this->_collection, $data));
@@ -358,7 +358,7 @@ abstract class BL_CustomGrid_Model_Grid_Rewriter_Abstract extends BL_CustomGrid_
     public function setDefaultPage($page)
     {
         if (!is_null($this->_blcg_gridModel)) {
-            $page = $this->_blcg_gridModel->getApplier()->getGridBlockDefaultParamValue(
+            $page = $this->_blcg_gridModel->getDefaultParamsHandler()->getGridBlockDefaultParamValue(
                 \'page\',
                 $page,
                 null,
@@ -373,7 +373,7 @@ abstract class BL_CustomGrid_Model_Grid_Rewriter_Abstract extends BL_CustomGrid_
     {
         if (!is_null($this->_blcg_gridModel)) {
             $default = $this->_defaultLimit;
-            $limit = $this->_blcg_gridModel->getApplier()
+            $limit = $this->_blcg_gridModel->getDefaultParamsHandler()
                 ->getGridBlockDefaultParamValue(\'limit\', $limit, null, false, $default);
         }
         return parent::setDefaultLimit($limit);
@@ -383,7 +383,7 @@ abstract class BL_CustomGrid_Model_Grid_Rewriter_Abstract extends BL_CustomGrid_
     {
         if (!is_null($this->_blcg_gridModel)) {
             $default = $this->_defaultSort;
-            $sort = $this->_blcg_gridModel->getApplier()
+            $sort = $this->_blcg_gridModel->getDefaultParamsHandler()
                 ->getGridBlockDefaultParamValue(\'sort\', $sort, null, false, $default);
         }
         return parent::setDefaultSort($sort);
@@ -393,7 +393,7 @@ abstract class BL_CustomGrid_Model_Grid_Rewriter_Abstract extends BL_CustomGrid_
     {
         if (!is_null($this->_blcg_gridModel)) {
             $default = $this->_defaultDir;
-            $dir = $this->_blcg_gridModel->getApplier()
+            $dir = $this->_blcg_gridModel->getDefaultParamsHandler()
                 ->getGridBlockDefaultParamValue(\'dir\', $dir, null, false, $default);
         }
         return parent::setDefaultDir($dir);
@@ -403,7 +403,7 @@ abstract class BL_CustomGrid_Model_Grid_Rewriter_Abstract extends BL_CustomGrid_
     {
         if (!is_null($this->_blcg_gridModel)) {
             $default = $this->_defaultFilter;
-            $filter = $this->_blcg_gridModel->getApplier()
+            $filter = $this->_blcg_gridModel->getDefaultParamsHandler()
                 ->getGridBlockDefaultParamValue(\'filter\', $filter, null, false, $default);
         }
         return parent::setDefaultFilter($filter);
@@ -413,7 +413,7 @@ abstract class BL_CustomGrid_Model_Grid_Rewriter_Abstract extends BL_CustomGrid_
     {
         if (!is_null($this->_blcg_gridModel)) {
             $default = $this->_defaultPage;
-            $page = $this->_blcg_gridModel->getApplier()
+            $page = $this->_blcg_gridModel->getDefaultParamsHandler()
                 ->getGridBlockDefaultParamValue(\'page\', $default, $page, true);
         }
         return parent::setDefaultPage($page);
@@ -423,7 +423,7 @@ abstract class BL_CustomGrid_Model_Grid_Rewriter_Abstract extends BL_CustomGrid_
     {
         if (!$forced && !is_null($this->_blcg_gridModel)) {
             $default = $this->_defaultLimit;
-            $limit = $this->_blcg_gridModel->getApplier()
+            $limit = $this->_blcg_gridModel->getDefaultParamsHandler()
                 ->getGridBlockDefaultParamValue(\'limit\', $default, $limit, true);
         }
         return parent::setDefaultLimit($limit);
@@ -433,7 +433,7 @@ abstract class BL_CustomGrid_Model_Grid_Rewriter_Abstract extends BL_CustomGrid_
     {
         if (!is_null($this->_blcg_gridModel)) {
             $default = $this->_defaultSort;
-            $sort = $this->_blcg_gridModel->getApplier()
+            $sort = $this->_blcg_gridModel->getDefaultParamsHandler()
                 ->getGridBlockDefaultParamValue(\'sort\', $default, $sort, true);
         }
         return parent::setDefaultSort($sort);
@@ -443,7 +443,7 @@ abstract class BL_CustomGrid_Model_Grid_Rewriter_Abstract extends BL_CustomGrid_
     {
         if (!is_null($this->_blcg_gridModel)) {
             $default = $this->_defaultDir;
-            $dir = $this->_blcg_gridModel->getApplier()
+            $dir = $this->_blcg_gridModel->getDefaultParamsHandler()
                 ->getGridBlockDefaultParamValue(\'dir\', $default, $dir, true);
         }
         return parent::setDefaultDir($dir);
@@ -453,7 +453,7 @@ abstract class BL_CustomGrid_Model_Grid_Rewriter_Abstract extends BL_CustomGrid_
     {
         if (!is_null($this->_blcg_gridModel)) {
             $default = $this->_defaultFilter;
-            $filter = $this->_blcg_gridModel->getApplier()
+            $filter = $this->_blcg_gridModel->getDefaultParamsHandler()
                 ->getGridBlockDefaultParamValue(\'filter\', $default, $filter, true);
         }
         return parent::setDefaultFilter($filter);

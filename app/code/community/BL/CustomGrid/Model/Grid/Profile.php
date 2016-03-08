@@ -703,7 +703,7 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Model_Grid_Element
     protected function _prepareDefaultFilterValue($value)
     {
         return $this->getGridModel()
-            ->getApplier()
+            ->getFiltersHandler()
             ->prepareDefaultFilterValue($value);
     }
     
@@ -736,7 +736,7 @@ class BL_CustomGrid_Model_Grid_Profile extends BL_CustomGrid_Model_Grid_Element
      * @param array $removable Removable values
      * @return BL_CustomGrid_Model_Grid_Profile
      */
-    public function updateDefaultParameters(array $appliable, array $removable)
+    public function updateDefaultParams(array $appliable, array $removable)
     {
         $gridModel = $this->getGridModel();
         $gridModel->checkUserActionPermission(BL_CustomGrid_Model_Grid_Sentry::ACTION_EDIT_DEFAULT_PARAMS, false);

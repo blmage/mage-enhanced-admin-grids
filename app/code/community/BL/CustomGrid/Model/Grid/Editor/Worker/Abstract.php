@@ -13,31 +13,14 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-abstract class BL_CustomGrid_Model_Grid_Editor_Worker_Abstract extends BL_CustomGrid_Object
+abstract class BL_CustomGrid_Model_Grid_Editor_Worker_Abstract extends BL_CustomGrid_Model_Worker_Abstract
 {
-    /**
-     * Return the type of this worker
-     * 
-     * @return string
-     */
-    abstract public function getType();
-    
-    /**
-     * Return the base helper
-     *
-     * @return BL_CustomGrid_Helper_Data
-     */
-    public function getBaseHelper()
-    {
-        return Mage::helper('customgrid');
-    }
-    
     /**
      * Return the editor helper
      *
      * @return BL_CustomGrid_Helper_Editor
      */
-    protected function _getEditorHelper()
+    public function getEditorHelper()
     {
         return Mage::helper('customgrid/editor');
     }

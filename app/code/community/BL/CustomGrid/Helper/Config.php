@@ -331,7 +331,7 @@ class BL_CustomGrid_Helper_Config extends Mage_Core_Helper_Abstract
      * @param string $type Config field key (can be : page, limit, sort, dir, filter)
      * @return string
      */
-    public function geDefaultParameterBehaviour($type)
+    public function geDefaultParamBehaviour($type)
     {
         return Mage::getStoreConfig(sprintf(self::CONFIG_PATH_DEFAULT_PARAMETER_BEHAVIOUR_BASE_KEY, $type));
     }

@@ -71,7 +71,11 @@ class BL_CustomGrid_Block_Grid_Form_Export extends BL_CustomGrid_Block_Grid_Form
             $exportSizes[$totalSize] = $this->__('Total (%s)', $totalSize);
         }
         
-        foreach ($this->getGridModel()->getAppliablePaginationValues() as $paginationValue) {
+        $appliablePaginationValues = $this->getGridModel()
+            ->getDefaultParamsHandler()
+            ->getAppliablePaginationValues();
+        
+        foreach ($appliablePaginationValues as $paginationValue) {
             $exportSizes[$paginationValue] = $paginationValue;
         }
         

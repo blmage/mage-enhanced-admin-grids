@@ -92,7 +92,9 @@ class BL_CustomGrid_Block_Grid_Form_Default_Params extends BL_CustomGrid_Block_G
     protected function _renderDefaultFilterValue($value, $isAppliable)
     {
         if ($isAppliable && !is_array($value)) {
-            $value = $this->getGridModel()->getApplier()->decodeGridFiltersString($value);
+            $value = $this->getGridModel()
+                ->getFiltersHandler()
+                ->decodeGridFiltersString($value);
         }
         
         if (is_array($value) || is_array($value = @unserialize($value))) {

@@ -36,11 +36,11 @@ class BL_CustomGrid_Block_Widget_Grid_Config_Columns_Helper_Attribute extends Ma
     }
     
     /**
-     * Return core helper
+     * Return the core helper
      * 
      * @return Mage_Core_Helper_Data
      */
-    protected function _getCoreHelper()
+    public function getCoreHelper()
     {
         return $this->helper('core');
     }
@@ -87,7 +87,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config_Columns_Helper_Attribute extends Ma
     public function getBaseHtmlId()
     {
         if (!$this->hasData('base_html_id')) {
-            $this->setData('base_html_id', $this->_getCoreHelper()->uniqHash('blcgARS'));
+            $this->setData('base_html_id', $this->getCoreHelper()->uniqHash('blcgARS'));
         }
         return $this->_getData('base_html_id');
     }
@@ -122,7 +122,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config_Columns_Helper_Attribute extends Ma
             );
         }
         
-        return $this->_getCoreHelper()->jsonEncode($config);
+        return $this->getCoreHelper()->jsonEncode($config);
     }
     
     /**
@@ -132,7 +132,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config_Columns_Helper_Attribute extends Ma
      */
     public function getEditableJsonConfig()
     {
-        return $this->_getCoreHelper()
+        return $this->getCoreHelper()
             ->jsonEncode(
                 array(
                     'editableContainerId' => $this->_getData('editable_container_html_id'),
@@ -229,7 +229,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config_Columns_Helper_Attribute extends Ma
             $config[] = $values;
         }
         
-        return $this->_getCoreHelper()->jsonEncode($config);
+        return $this->getCoreHelper()->jsonEncode($config);
     }
     
     /**
@@ -250,7 +250,7 @@ class BL_CustomGrid_Block_Widget_Grid_Config_Columns_Helper_Attribute extends Ma
     public function getSelectsManagerJsObjectName()
     {
         if (!$this->hasData('selects_manager_js_object_name')) {
-            $this->setData('selects_manager_js_object_name', $this->_getCoreHelper()->uniqHash('blcgASM'));
+            $this->setData('selects_manager_js_object_name', $this->getCoreHelper()->uniqHash('blcgASM'));
         }
         return $this->_getData('selects_manager_js_object_name');
     }
