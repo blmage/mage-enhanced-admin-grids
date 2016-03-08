@@ -637,4 +637,28 @@ abstract class BL_CustomGrid_Model_Grid_Rewriter_Abstract extends BL_CustomGrid_
     }
 }';
     }
+    
+    /**
+     * Return whether rewrite errors should be displayed depending on the given rewrite result
+     * 
+     * @param bool $isRewriteSuccess Whether the grid rewrite succeeded
+     * @return bool
+     */
+    public function shouldDisplayErrorsGivenRewriteResult($isRewriteSuccess)
+    {
+        return (!$isRewriteSuccess && $this->getDisplayErrors())
+            || ($isRewriteSuccess && $this->getDisplayErrorsIfSuccess());
+    }
+    
+    /**
+     * Return whether rewrite errors should be logged depending on the given rewrite result
+     *
+     * @param bool $isRewriteSuccess Whether the grid rewrite succeeded
+     * @return bool
+     */
+    public function shouldLogErrorsGivenRewriteResult($isRewriteSuccess)
+    {
+        return (!$isRewriteSuccess && $this->getLogErrors())
+            || ($isRewriteSuccess && $this->getLogErrorsIfSuccess());
+    }
 }

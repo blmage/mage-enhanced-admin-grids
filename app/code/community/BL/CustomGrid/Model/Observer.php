@@ -171,22 +171,18 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
     protected function _handleGridBlockRewriteErrors(array $rewriteErrors, $isSuccess)
     {
         foreach ($rewriteErrors as $error) {
-            if (isset($error['rewriter']) && isset($error['exception'])) {
-                /** @var $rewriter BL_CustomGrid_Model_Grid_Rewriter_Abstract */
-                $rewriter  = $error['rewriter'];
-                /** @var $exception Exception */
-                $exception = $error['exception'];
-                
-                if (($isSuccess && $rewriter->getDisplayErrorsIfSuccess())
-                    || (!$isSuccess && $rewriter->getDisplayErrors())) {
-                    /** @var $session BL_CustomGrid_Model_Session */
-                    $session = Mage::getSingleton('customgrid/session');
-                    $session->addError($exception->getMessage());
-                }
-                if (($isSuccess && $rewriter->getLogErrorsIfSuccess())
-                    || (!$isSuccess && $rewriter->getLogErrors())) {
-                    Mage::logException($exception);
-                }
+            /** @var $rewriter BL_CustomGrid_Model_Grid_Rewriter_Abstract */
+            $rewriter  = $error['rewriter'];
+            /** @var $exception Exception */
+            $exception = $error['exception'];
+            
+            if ($rewriter->shouldDisplayErrorsGivenRewriteResult($isSuccess)) {
+                /** @var $session BL_CustomGrid_Model_Session */
+                $session = Mage::getSingleton('customgrid/session');
+                $session->addError($exception->getMessage());
+            }
+            if ($rewriter->shouldLogErrorsGivenRewriteResult($isSuccess)) {
+                Mage::logException($exception);
             }
         }
     }
@@ -249,10 +245,11 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
     protected function _rewriteExportedGridBlock()
     {
         $request = Mage::app()->getRequest();
+        /** @var $gridModel BL_CustomGrid_Model_Grid */
+        $gridModel = Mage::getModel('customgrid/grid');
         
         if ((!$gridId = $request->getParam('grid_id', null))
-            /** @var $gridModel BL_CustomGrid_Model_Grid */
-            || (!$gridModel = Mage::getModel('customgrid/grid')->load($gridId))
+            || !$gridModel->load($gridId)
             || !$gridModel->getId()
             || $gridModel->getDisabled()
             || $this->isExcludedGridModel($gridModel)
