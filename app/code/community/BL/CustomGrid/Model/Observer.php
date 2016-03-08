@@ -249,8 +249,7 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
         $gridModel = Mage::getModel('customgrid/grid');
         
         if ((!$gridId = $request->getParam('grid_id', null))
-            || !$gridModel->load($gridId)
-            || !$gridModel->getId()
+            || !$gridModel->load($gridId)->getId()
             || $gridModel->getDisabled()
             || $this->isExcludedGridModel($gridModel)
             || !$gridModel->getExporter()->isExportRequest($request)
@@ -336,8 +335,9 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
      */
     public function beforeBlockPrepareLayout(Varien_Event_Observer $observer)
     {
-        if (($gridBlock = $observer->getEvent()->getBlock())
-            && ($gridBlock instanceof Mage_Adminhtml_Block_Widget_Grid)) {
+        $gridBlock = $observer->getEvent()->getBlock();
+        
+        if ($gridBlock instanceof Mage_Adminhtml_Block_Widget_Grid) {
             $blockType = $gridBlock->getType();
             $blockId   = $gridBlock->getId();
             
@@ -398,9 +398,10 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
      */
     public function beforeBlockToHtml(Varien_Event_Observer $observer)
     {
-        if (($gridBlock = $observer->getEvent()->getBlock())
-            && ($gridBlock instanceof Mage_Adminhtml_Block_Widget_Grid)
-            /** @var $gridBlock Mage_Adminhtml_Block_Widget_Grid */
+        /** @var $gridBlock Mage_Adminhtml_Block_Widget_Grid */
+        $gridBlock = $observer->getEvent()->getBlock();
+            
+        if (($gridBlock instanceof Mage_Adminhtml_Block_Widget_Grid)
             && ($gridBlock->getTemplate() == 'widget/grid.phtml')
             && $gridBlock->getType()) {
             $this->_handleOutputGridBlock($gridBlock);
@@ -417,12 +418,16 @@ class BL_CustomGrid_Model_Observer extends BL_CustomGrid_Object
      */
     public function afterBlockToHtml(Varien_Event_Observer $observer)
     {
+        /** @var $gridBlock Mage_Adminhtml_Block_Widget_Grid */
+        $gridBlock = $observer->getEvent()->getBlock();
+        /** @var $transport Varien_Object */
+        $transport = $observer->getEvent()->getTransport();
+        
         if ($this->getHelper()->isAjaxRequest()
             && !$this->hasData('has_output_ajax_messages_block')
-            && ($transport = $observer->getEvent()->getTransport())
-            && ($gridBlock = $observer->getEvent()->getBlock())
-            && ($gridBlock instanceof Mage_Adminhtml_Block_Widget_Grid)) {
-            /** @var $gridBlock Mage_Adminhtml_Block_Widget_Grid */
+            && ($gridBlock instanceof Mage_Adminhtml_Block_Widget_Grid)
+            && ($transport instanceof Varien_Object)) {
+            
             $layout = $gridBlock->getLayout();
             
             if (!$messagesBlock = $layout->getBlock('blcg.messages')) {
